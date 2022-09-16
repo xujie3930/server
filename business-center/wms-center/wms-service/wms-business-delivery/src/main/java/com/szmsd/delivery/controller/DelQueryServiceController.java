@@ -1,10 +1,15 @@
 package com.szmsd.delivery.controller;
+import com.github.pagehelper.PageInfo;
+import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.dto.DelQueryServiceDto;
 import com.szmsd.delivery.dto.DelQueryServiceImport;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.system.api.domain.SysUser;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
@@ -13,12 +18,19 @@ import com.szmsd.delivery.domain.DelQueryService;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.log.enums.BusinessType;
 import io.swagger.annotations.Api;
+
+import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.List;
 import java.io.IOException;
+import java.util.Locale;
+
 import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
 import com.szmsd.common.core.web.controller.BaseController;
@@ -50,27 +62,55 @@ public class DelQueryServiceController extends BaseController{
       @PreAuthorize("@ss.hasPermi('DelQueryService:DelQueryService:list')")
       @GetMapping("/list")
       @ApiOperation(value = "查询查件服务模块列表",notes = "查询查件服务模块列表")
-      public TableDataInfo list(DelQueryServiceDto delQueryService)
+      public R<PageInfo<DelQueryService>> list(DelQueryServiceDto delQueryService)
      {
-            startPage();
-            List<DelQueryService> list = delQueryServiceService.selectDelQueryServiceList(delQueryService);
-            return getDataTable(list);
+          return delQueryServiceService.selectDelQueryServiceListrs(delQueryService);
       }
 
 
     @PostMapping("/importTemplate")
     @ApiOperation(httpMethod = "POST", value = "导入模板")
     public void importTemplate(HttpServletResponse response) throws IOException {
-        ExcelUtil<DelQueryServiceImport> util = new ExcelUtil<DelQueryServiceImport>(DelQueryServiceImport.class);
-        util.importTemplateExcel(response, "DelQueryService");
+      String len=getLen().toLowerCase(Locale.ROOT);
+      if (len.equals("zh")){
+          commonExport(response, "DelQueryService");
+      }else if (len.equals("en")){
+          commonExport(response, "CombinedParcelOutboundTemplate");
+      }
+
+//        ExcelUtil<DelQueryServiceImport> util = new ExcelUtil<DelQueryServiceImport>(DelQueryServiceImport.class);
+//        util.importTemplateExcel(response, "DelQueryService");
+    }
+
+    private String getFileName(String fileName) {
+        return String.format("/template/%s_%s.xlsx", fileName, getLen().toLowerCase(Locale.ROOT));
+    }
+
+    private void commonExport(HttpServletResponse response, String fileName) {
+        //"/template/退费申请模板.xls"
+        ClassPathResource classPathResource = new ClassPathResource(getFileName(fileName));
+        try (InputStream inputStream = classPathResource.getInputStream();
+             ServletOutputStream outputStream = response.getOutputStream()) {
+
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setCharacterEncoding("UTF-8");
+            String excelName = URLEncoder.encode(fileName, "UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + excelName + ".xls");
+            IOUtils.copy(inputStream, outputStream);
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @PostMapping("/importData")
     @ApiOperation(httpMethod = "POST", value = "导入查件服务数据")
-    public R importData(MultipartFile file) throws Exception {
+    public R importData(MultipartFile file, HttpServletRequest httpServletRequest) throws Exception {
         ExcelUtil<DelQueryServiceImport> util = new ExcelUtil<DelQueryServiceImport>(DelQueryServiceImport.class);
         List<DelQueryServiceImport> list = util.importExcel(file.getInputStream());
-
+        list.forEach(x->{
+            x.setOperationType(Integer.parseInt(httpServletRequest.getParameter("operationType")));
+        });
         return delQueryServiceService.importData(list);
     }
 
@@ -103,11 +143,11 @@ public class DelQueryServiceController extends BaseController{
      * 根据订单号带出相关信息
      */
     @PreAuthorize("@ss.hasPermi('DelQueryService:DelQueryService:getOrderInfo')")
-    @GetMapping(value = "getOrderInfo/{orderNo}")
+    @GetMapping(value = "getOrderInfo/{orderNo}/{operationType}")
     @ApiOperation(value = "根据订单号带出相关信息",notes = "根据订单号带出相关信息")
-    public R getOrderInfo(@PathVariable("orderNo") String orderNo)
+    public R getOrderInfo(@PathVariable("orderNo") String orderNo,@PathVariable("operationType") Integer operationType)
     {
-        return R.ok(delQueryServiceService.getOrderInfo(orderNo));
+        return R.ok(delQueryServiceService.getOrderInfo(orderNo,operationType));
     }
 
     /**

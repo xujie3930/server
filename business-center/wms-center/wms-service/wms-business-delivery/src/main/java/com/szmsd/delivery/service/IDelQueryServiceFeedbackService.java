@@ -38,6 +38,9 @@ public interface IDelQueryServiceFeedbackService extends IService<DelQueryServic
         */
         int insertDelQueryServiceFeedback(DelQueryServiceFeedback delQueryServiceFeedback);
 
+        int insertDelQueryServiceFeedbacksu(DelQueryServiceFeedback delQueryServiceFeedback);
+
+
         /**
         * 修改查件服务反馈模块
         *

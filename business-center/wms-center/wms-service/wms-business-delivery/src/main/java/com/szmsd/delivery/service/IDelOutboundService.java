@@ -3,8 +3,10 @@ package com.szmsd.delivery.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundTarckOn;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.service.wrapper.ShipmentEnum;
 import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
@@ -37,7 +39,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
 
 
     //做查件的接口，因为和出库详情有冲突
-    DelOutboundVO selectDelOutboundByOrderNous(String orderNo);
+    DelOutboundVO selectDelOutboundByOrderNous(String orderNo,int operationType);
 
 
     DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo);
@@ -148,7 +150,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param orderType orderType
      * @return int
      */
-    int shipmentPacking(ShipmentPackingMaterialRequestDto dto, String orderType);
+    int shipmentPacking(ShipmentPackingMaterialRequestDto dto, String orderType, ShipmentEnum shipmentState);
 
     /**
      * 出库管理 - Open - 接收批量出库单类型装箱信息
@@ -446,5 +448,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     void manualTrackingYee(List<String> list);
 
     void labelSelfPick(HttpServletResponse response, DelOutboundLabelDto dto);
+
+    List<DelOutboundTarckOn> selectDelOutboundTarckList(DelOutboundTarckOn delOutboundTarckOn);
 }
 

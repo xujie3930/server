@@ -265,7 +265,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
             Map<String, List<String>> collect = basPackingAddList.stream().filter(x -> StringUtils.isNotBlank(x.getOrderNo())).collect(Collectors.groupingBy(RefundRequestDTO::getCusCode, Collectors.mapping(RefundRequestDTO::getOrderNo, Collectors.toList())));
             collect.forEach((cusCode, processNoList) -> {
                 processNoList = processNoList.stream().distinct().collect(Collectors.toList());
-                Map<Integer, List<String>> ck = processNoList.stream().collect(Collectors.groupingBy(x -> x.startsWith("CK") ? 1 : 0));
+                Map<Integer, List<String>> ck = processNoList.stream().collect(Collectors.groupingBy(x -> (x.startsWith("CK")||x.startsWith("RECK")) ? 1 : 0));
 
 
                 ck.forEach((type, list) -> {

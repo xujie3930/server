@@ -55,7 +55,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                 basMeteringConfigMapper.insertSelective(basMeteringConfig);
                 basMeteringConfig.setId(null);
                 basMeteringConfig.getBasMeteringConfigDataList().forEach(x->{
-                    x.setMeteringId(basMeteringConfig.getId());
+                    x.setMeteringId(basMeteringConfig.getDelId());
                     basMeteringConfigDataMapper.insertSelective(x);
                 });
             });
@@ -126,7 +126,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
             if (list.size()>0) {
                 list.forEach(x -> {
                     //0表示重量差，1表示百分比
-                    if (x.getWeightTypeNameOne().equals("计费重") && x.getWeightTypeNameTwo().equals("体积重")) {
+                    if (x.getWeightTypeNameOne().equals("计费重量") && x.getWeightTypeNameTwo().equals("体积重")) {
                         if (x.getDifferenceType() == 0) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -153,7 +153,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                         }
 
                     }
-                    if (x.getWeightTypeNameOne().equals("体积重") && x.getWeightTypeNameTwo().equals("计费重")) {
+                    if (x.getWeightTypeNameOne().equals("体积重") && x.getWeightTypeNameTwo().equals("计费重量")) {
                         if (x.getDifferenceType() == 0) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -179,7 +179,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
                         }
                     }
-                    if (x.getWeightTypeNameOne().equals("计费重") && x.getWeightTypeNameOne().equals("下单重量")) {
+                    if (x.getWeightTypeNameOne().equals("计费重量") && x.getWeightTypeNameTwo().equals("下单重量")) {
                         if (x.getDifferenceType() == 0) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -205,7 +205,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
                         }
                     }
-                    if (x.getWeightTypeNameOne().equals("下单重量") && x.getWeightTypeNameTwo().equals("计费重")) {
+                    if (x.getWeightTypeNameOne().equals("下单重量") && x.getWeightTypeNameTwo().equals("计费重量")) {
                         if (x.getDifferenceType() == 0) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -287,8 +287,28 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
             }
             return R.ok();
         }catch (Exception e){
+            String message=((CommonException) e).getCode();
             e.printStackTrace();
-            return R.failed();
+            return R.failed(message);
+        }
+
+    }
+
+
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED, readOnly = false)
+    @Override
+    public R deleteBasMeteringConfig(List<Integer> ids) {
+        try {
+           ids.forEach(x->{
+               basMeteringConfigMapper.deleteByPrimaryKey(x);
+               basMeteringConfigDataMapper.deleteByPrimaryKey(x);
+           });
+
+            return R.ok("删除成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return R.failed("删除失败");
         }
 
     }

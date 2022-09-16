@@ -19,4 +19,6 @@ public interface IBasMeteringConfigService {
     R selectById(Integer id);
 
     R intercept(BasMeteringConfigDto basMeteringConfigDto);
+
+    R  deleteBasMeteringConfig(List<Integer> ids);
 }

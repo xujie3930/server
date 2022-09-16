@@ -151,7 +151,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     logger.info("(1.1)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
                     return 0;
                 }*/
-                if (!DelOutboundStateEnum.COMPLETED.getCode().equals(delOutbound.getState())){
+                if (DelOutboundStateEnum.COMPLETED.getCode().equals(delOutbound.getState())){
                     logger.info("(1.1)单据状态不符合，不能执行，当前单据状态为：{}", delOutbound.getState());
                     return 0;
                 }
@@ -196,6 +196,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 logger.info("(2)初始化上下文信息，timer:{}", timer.intervalRestart());
                 if (context != null) {
                     context.setShipmentShipping(shipmentShipping);
+                    context.setExecShipmentShipping(true);
                 }
                 ShipmentEnum currentState;
                 String shipmentState = delOutbound.getShipmentState();
@@ -639,6 +640,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
 
     @Override
     public void cancelled(String orderNo) {
+        //蒋俊看财务解冻问题
         // 处理阶段
         // 1.取消冻结库存                                 UN_FREEZE
         // 2.1取消冻结费用                                UN_FEE

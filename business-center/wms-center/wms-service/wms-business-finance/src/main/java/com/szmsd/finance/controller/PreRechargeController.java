@@ -3,6 +3,7 @@ package com.szmsd.finance.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.finance.domain.PreRecharge;
 import com.szmsd.finance.dto.PreRechargeAuditDTO;
 import com.szmsd.finance.dto.PreRechargeDTO;
@@ -26,6 +27,8 @@ public class PreRechargeController extends BaseController {
     @Autowired
     IPreRechargeService preRechargeService;
 
+
+    @AutoValue
     @PreAuthorize("@ss.hasPermi('PreRecharge:listPage')")
     @ApiOperation(value = "分页查询汇款充值信息")
     @GetMapping("/listPage")

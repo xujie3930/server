@@ -158,6 +158,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
                     exportDto.setPostCode(exportVO.getPostCode());
                     exportDto.setPhoneNo(exportVO.getPhoneNo());
                     exportDto.setEmail(exportVO.getEmail());
+                    exportDto.setIoss(exportVO.getIoss());
                 }
             }
         }
@@ -356,6 +357,24 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             return this.baseMapper.update(null, updateWrapper);
         }
         return 0;
+    }
+
+    @Override
+    public List<ExceptionInfoDetailExportDto> selectExceptionInfoDetailExport(String orderNo) {
+        return baseMapper.selectExceptionInfoDetailExport(orderNo);
+    }
+
+    @Override
+    public void updateDelOutboundDetail(String orderNo, List<ExceptionInfoDetailExportDto> exceptionInfoDetailExportDtoList) {
+        exceptionInfoDetailExportDtoList.forEach(x->{
+            baseMapper.updateDelOutboundDetail(x);
+        });
+
+    }
+
+    @Override
+    public void updateDelOutboundIoss(ExceptionInfoExportDto dto) {
+        baseMapper.updateDelOutboundEx(dto);
     }
 
     private Date dealUTZTime(String time) {

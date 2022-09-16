@@ -29,11 +29,144 @@
                 remark,
             id, association_id, warehousing_no, create_by, update_by, version, del_flag, delivery_no, sku, declare_qty
     </sql>
+    <delete id="deletePurchaseStorageDetails" parameterType="java.lang.Integer">
+
+        DELETE from purchase_storage_details where association_id=#{id} and  import_flag='0'
+    </delete>
 
     <select id="selectPurchaseStorageDetailsListByAssId"
             resultType="com.szmsd.inventory.domain.vo.PurchaseStorageDetailsVO">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM purchase_storage_details WHERE association_id = #{assId} AND del_flag = 0
+        FROM purchase_storage_details WHERE association_id = #{assId} AND del_flag = 0 and import_flag='1'
     </select>
+    <select id="selectPurchaseStorageDetailsExcleListByAssId"
+            resultType="com.szmsd.inventory.domain.excel.PurchaseStorageDetailsExcle">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM purchase_storage_details WHERE association_id = #{assId} AND del_flag = 0 and sku=#{productName} and import_flag='1'
+    </select>
+    <select id="selectPurchaseStorageDetailsVO" resultType="com.szmsd.inventory.domain.vo.PurchaseStorageDetailsVO"
+            parameterType="com.szmsd.inventory.domain.excel.PurchaseStorageDetailsExcle">
+        SELECT * from purchase_storage_details WHERE association_id=#{associationId} AND sku=#{sku} AND delivery_no=#{deliveryNo}
+
+    </select>
+    <select id="selectPurchaseStorageDetailsExcleListByAssIds"
+            resultType="com.szmsd.inventory.domain.excel.PurchaseStorageDetailsExcle">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM purchase_storage_details WHERE association_id = #{assId} AND del_flag = 0 and sku=#{productName} and import_flag='0'
+    </select>
+
+    <insert id="insertSelectiveus" parameterType="com.szmsd.inventory.domain.PurchaseStorageDetails">
+        insert into purchase_storage_details
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="associationId != null">
+                association_id,
+            </if>
+            <if test="warehousingNo != null">
+                warehousing_no,
+            </if>
+            <if test="createBy != null">
+                create_by,
+            </if>
+            <if test="createByName != null">
+                create_by_name,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateBy != null">
+                update_by,
+            </if>
+            <if test="updateByName != null">
+                update_by_name,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="version != null">
+                version,
+            </if>
+            <if test="delFlag != null">
+                del_flag,
+            </if>
+            <if test="deliveryNo != null">
+                delivery_no,
+            </if>
+            <if test="sku != null">
+                sku,
+            </if>
+            <if test="declareQty != null">
+                declare_qty,
+            </if>
+            <if test="importFlag != null">
+                import_flag,
+            </if>
+            <if test="importRemark != null">
+                import_remark,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="associationId != null">
+                #{associationId,jdbcType=INTEGER},
+            </if>
+            <if test="warehousingNo != null">
+                #{warehousingNo,jdbcType=VARCHAR},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createByName != null">
+                #{createByName,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateByName != null">
+                #{updateByName,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="version != null">
+                #{version,jdbcType=INTEGER},
+            </if>
+            <if test="delFlag != null">
+                #{delFlag,jdbcType=VARCHAR},
+            </if>
+            <if test="deliveryNo != null">
+                #{deliveryNo,jdbcType=VARCHAR},
+            </if>
+            <if test="sku != null">
+                #{sku,jdbcType=VARCHAR},
+            </if>
+            <if test="declareQty != null">
+                #{declareQty,jdbcType=INTEGER},
+            </if>
+            <if test="importFlag != null">
+                #{importFlag,jdbcType=VARCHAR},
+            </if>
+            <if test="importRemark != null">
+                #{importRemark,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+
 </mapper>

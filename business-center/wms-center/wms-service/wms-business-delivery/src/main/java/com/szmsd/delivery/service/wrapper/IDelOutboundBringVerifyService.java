@@ -93,6 +93,8 @@ public interface IDelOutboundBringVerifyService {
      */
     void htpShipmentLabel(DelOutbound delOutbound);
 
+    String getBoxLabel(DelOutbound delOutbound);
+
     /**
      * 创建发货指令
      *

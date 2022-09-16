@@ -25,7 +25,7 @@ public class BasMeteringConfigController extends BaseController {
     @PostMapping("/page")
     @ApiOperation(value = "查询", notes = "计泡查询 - 分页查询")
     public TableDataInfo<BasMeteringConfig> page(@RequestBody BasMeteringConfigDto basMeteringConfigDto) {
-        startPage();
+        startPage(basMeteringConfigDto);
         List<BasMeteringConfig> list = iBasMeteringConfigService.selectList(basMeteringConfigDto);
         return getDataTable(list);
     }
@@ -57,6 +57,14 @@ public class BasMeteringConfigController extends BaseController {
     @ApiOperation(value = "计泡提供接口 做出库拦截", notes = "做出库拦截")
     public R intercept(@RequestBody BasMeteringConfigDto basMeteringConfigDto) {
         R r= iBasMeteringConfigService.intercept(basMeteringConfigDto);
+        return r;
+    }
+
+
+    @PostMapping ("/deleteBasMeteringConfig")
+    @ApiOperation(value = "计泡删除接口", notes = "计泡删除接口")
+    public R deleteBasMeteringConfig(@RequestBody List<Integer> ids) {
+        R r= iBasMeteringConfigService.deleteBasMeteringConfig(ids);
         return r;
     }
 

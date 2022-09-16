@@ -13,6 +13,12 @@ public enum LocalLanguageTypeEnum {
     /** 入库单状态 **/
     INBOUND_RECEIPT_STATUS,
 
+    /** 入库单日志状态 **/
+    INBOUND_RECEIPT_log_STATUS,
+
+    /** 入库单日志备注 **/
+    INBOUND_RECEIPT_log_REMARK,
+
     /** 库存日志类型 **/
     INVENTORY_RECORD_TYPE,
 

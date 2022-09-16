@@ -328,6 +328,7 @@ public class InboundApiController {
         String categoryCode = transportWarehousingAddRep.getWarehouseCategoryCode();
         this.checkCategoryCode(categoryCode);
 
+
         // 送货方式
         String deliveryWay = transportWarehousingAddRep.getDeliveryWay();
         checkDeliveryWayCode(deliveryWay);
@@ -378,6 +379,7 @@ public class InboundApiController {
 
         TransportWarehousingAddDTO transportWarehousingAddDTO = new TransportWarehousingAddDTO();
         BeanUtils.copyProperties(transportWarehousingAddRep, transportWarehousingAddDTO);
+        transportWarehousingAddDTO.setCustomCode(AuthenticationUtil.getSellerCode());
         transportWarehousingAddDTO.setWarehouseCode(warehouseCode);
         List<String> idList = rows.stream().map(DelOutboundListVO::getId).map(String::valueOf).collect(Collectors.toList());
         transportWarehousingAddDTO.setIdList(idList);

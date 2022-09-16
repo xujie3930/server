@@ -69,6 +69,12 @@ public class PurchaseStorageDetails extends BaseEntity {
     @Excel(name = "申报数量")
     private Integer declareQty;
 
+    @ApiModelProperty(value = "导入标识(0:表示导入失败，1表示导入成功)")
+    private String importFlag;
+
+    @ApiModelProperty(value = "失败原因")
+    private String importRemark;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

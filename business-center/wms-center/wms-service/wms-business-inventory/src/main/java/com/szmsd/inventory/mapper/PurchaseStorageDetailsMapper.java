@@ -2,7 +2,10 @@ package com.szmsd.inventory.mapper;
 
 import com.szmsd.inventory.domain.PurchaseStorageDetails;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.szmsd.inventory.domain.excel.PurchaseStorageDetailsExcle;
 import com.szmsd.inventory.domain.vo.PurchaseStorageDetailsVO;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
@@ -16,4 +19,15 @@ import java.util.List;
  */
 public interface PurchaseStorageDetailsMapper extends BaseMapper<PurchaseStorageDetails> {
     List<PurchaseStorageDetailsVO> selectPurchaseStorageDetailsListByAssId(Integer assId);
+
+    List<PurchaseStorageDetailsExcle> selectPurchaseStorageDetailsExcleListByAssId(@Param("productName") String productName,@Param("assId") Integer assId);
+
+    List<PurchaseStorageDetailsExcle> selectPurchaseStorageDetailsExcleListByAssIds(@Param("productName") String productName,@Param("assId") Integer assId);
+
+
+    List<PurchaseStorageDetailsVO>  selectPurchaseStorageDetailsVO(PurchaseStorageDetailsExcle purchaseStorageDetailsExcle);
+
+    int insertSelectiveus(PurchaseStorageDetails purchaseStorageDetails);
+
+    void  deletePurchaseStorageDetails(Integer id);
 }

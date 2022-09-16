@@ -6,6 +6,7 @@ import com.szmsd.bas.domain.BasePacking;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
+import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.http.dto.TaskConfigInfo;
 
@@ -31,15 +32,16 @@ public class DelOutboundWrapperContext implements ApplicationContext {
     // 临时传值字段
     private String prcProductCode;
 
-    //是否冻结时保存
-    private Boolean saveFlag;
+    // 是否执行更新发货指令接口调用
+    private boolean execShipmentShipping;
 
-    public Boolean getSaveFlag() {
-        return saveFlag;
+
+    public boolean getExecShipmentShipping() {
+        return execShipmentShipping;
     }
 
-    public void setSaveFlag(boolean saveFlag) {
-        this.saveFlag = saveFlag;
+    public void setExecShipmentShipping(boolean execShipmentShipping) {
+        this.execShipmentShipping = execShipmentShipping;
     }
 
     public DelOutboundWrapperContext() {
