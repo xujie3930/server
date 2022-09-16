@@ -251,6 +251,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (StringUtils.isNotEmpty(dto.getOrderType())) {
             queryWrapper.eq(AccountBalanceChange::getOrderType, dto.getOrderType());
         }
+
+        if(StringUtils.isNotEmpty(dto.getCurrencyCode())){
+            queryWrapper.eq(AccountBalanceChange::getCurrencyCode,dto.getCurrencyCode());
+        }
+
         queryWrapper.orderByDesc(AccountBalanceChange::getCreateTime);
         return accountBalanceChangeMapper.recordListPage(queryWrapper);
     }
