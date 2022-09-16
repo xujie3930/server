@@ -37,11 +37,12 @@ public class QuartzConfig {
 
     @Bean
     public Trigger DelQueryServiceJobTrigger() {
-        //cron方式，每天晚上凌晨1点刷0 0 1 ? * MON
+        //cron方式，每天晚上凌晨1点刷0 0 1 * * ?
+        //0 */1 * * * ?  一分钟
 
         return TriggerBuilder.newTrigger().forJob(DelQueryServiceJob())
                 .withIdentity("DelQueryServiceJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
                 .build();
     }
 

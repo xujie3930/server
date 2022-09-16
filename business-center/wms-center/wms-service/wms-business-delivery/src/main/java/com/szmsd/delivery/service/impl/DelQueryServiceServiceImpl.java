@@ -31,6 +31,7 @@ import com.szmsd.delivery.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.domain.AccountBalance;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -55,6 +56,7 @@ import java.util.Optional;
 * @since 2022-06-08
 */
 @Service
+@Slf4j
 public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMapper, DelQueryService> implements IDelQueryServiceService {
 
     @Resource
@@ -697,6 +699,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
     @Override
     public int insertDelQueryServiceList(List<DelQueryService> delQueryServiceList) {
+            log.info("定时任务参数：{}",delQueryServiceList);
             for (int i=0;i<delQueryServiceList.size();i++){
 
 
@@ -705,13 +708,14 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
             if (Optional.ofNullable(delOutboundVO.getCheckFlag()).isPresent()) {
                 if (delQueryServiceList.get(i).getOperationType() == 0 && delQueryServiceList.get(i).getCheckFlag() == 0) {
-                    throw new CommonException("400", "发货天数或者轨迹停留天数小于对应的查件配置天数！！！");
+                    continue;
+                    //throw new CommonException("400", "发货天数或者轨迹停留天数小于对应的查件配置天数！！！");
                 }
             }
                 delQueryServiceList.get(i).setReason("其他");
             DelOutbound delOutbound = delOutboundService.getByOrderNo(delQueryServiceList.get(i).getOrderNo());
             if (delOutbound == null) {
-                break;
+                continue;
                 //throw new CommonException("400", "无效订单");
             }
 
@@ -728,7 +732,8 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                     delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryServiceList.get(i).getShipmentRule());
                     dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
                     if (dataDelQuerySettingsList.size() == 0) {
-                        throw new CommonException("400", "此查件申请没有相关的匹配规则");
+                        continue;
+                        //throw new CommonException("400", "此查件申请没有相关的匹配规则");
                     }
                 }
                 DelQuerySettings delQuerySettings = dataDelQuerySettingsList.get(0);
@@ -749,7 +754,8 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                     }
                 }
                 if (!bool) {
-                    throw new CommonException("400", "此查件申请不满足查件条件");
+                    continue;
+                    //throw new CommonException("400", "此查件申请不满足查件条件");
 
                 }
             }
@@ -769,7 +775,6 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             delQueryServiceFeedback.setReason("Automatic push by the system");
             delQueryServiceFeedback.setCreateByName("admin");
             delQueryServiceFeedback.setCreateTime(new Date());
-
             List<DelQueryServiceFeedback> delQueryServiceFeedbackLists = baseMapper.selectDelQueryServiceFeedbackLists(delQueryServiceList.get(i).getId());
             if (delQueryServiceFeedbackLists.size() == 0) {
                 iDelQueryServiceFeedbackService.insertDelQueryServiceFeedbacksu(delQueryServiceFeedback);
