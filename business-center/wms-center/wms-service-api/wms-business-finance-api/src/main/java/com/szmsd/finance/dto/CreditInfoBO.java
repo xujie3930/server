@@ -120,8 +120,9 @@ public class CreditInfoBO {
                     if (amount.compareTo(canUseAmount) == 0) {
                         this.creditStatus = CreditConstant.CreditStatusEnum.ARREARAGE_DEACTIVATION.getValue();
                     }
-                    if (updateCredit)
+                    if (updateCredit) {
                         this.creditUseAmount = this.creditUseAmount.add(amount);
+                    }
                     return true;
                 }
             case TIME_LIMIT:

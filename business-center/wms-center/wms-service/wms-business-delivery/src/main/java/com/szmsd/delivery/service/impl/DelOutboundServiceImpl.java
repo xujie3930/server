@@ -1916,10 +1916,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     @Override
-    public void label(HttpServletResponse response, DelOutboundLabelDto dto) {
+    public R label(HttpServletResponse response, DelOutboundLabelDto dto) {
         DelOutbound delOutbound = this.getById(dto.getId());
         if (null == delOutbound) {
-            throw new CommonException("400", "单据不存在");
+            R r = R.ok();
+            r.setMsg("单据不存在");
+            return r;
         }
         if("0".equals(dto.getType())){
 
@@ -1949,16 +1951,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         IOUtils.copy(new ByteArrayInputStream(fb), outputStream);
                     } catch (IOException e) {
                         logger.error(e.getMessage(), e);
-                        throw new CommonException("200", "读取标签文件失败");
+                        R r = R.ok();
+                        r.setMsg("读取标签文件失败");
+                        return r;
                     } finally {
                         IoUtil.flush(outputStream);
                         IoUtil.close(outputStream);
                         IoUtil.close(inputStream);
                     }
-                    return;
+                    return null;
 
                 } catch (Exception e) {
-                    throw new CommonException("200", "标签文件不存在");
+                    R r = R.ok();
+                    r.setMsg("标签文件不存在");
+                    return r;
                 }
 
             }
@@ -1973,8 +1979,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 inputStream = new FileInputStream(labelFile);
                 IOUtils.copy(inputStream, outputStream);
             } catch (IOException e) {
-                logger.error(e.getMessage(), e);
-                throw new CommonException("200", "读取标签文件失败");
+                R r = R.ok();
+                r.setMsg("读取标签文件失败");
+                return r;
             } finally {
                 IoUtil.flush(outputStream);
                 IoUtil.close(outputStream);
@@ -1982,12 +1989,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
         }else{
             if (StringUtils.isEmpty(delOutbound.getShipmentOrderNumber())) {
-                throw new CommonException("200", "未获取承运商标签");
+                R r = R.ok();
+                r.setMsg("未获取承运商标签");
+                return r;
             }
             String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
             File labelFile = new File(pathname);
             if (!labelFile.exists()) {
-                throw new CommonException("200", "标签文件不存在");
+                R r = R.ok();
+                r.setMsg("标签文件不存在");
+                return r;
             }
             ServletOutputStream outputStream = null;
             InputStream inputStream = null;
@@ -2001,7 +2012,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 IOUtils.copy(inputStream, outputStream);
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
-                throw new CommonException("200", "读取标签文件失败");
+                R r = R.ok();
+                r.setMsg("读取标签文件失败");
+                return r;
             } finally {
                 IoUtil.flush(outputStream);
                 IoUtil.close(outputStream);
@@ -2009,7 +2022,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
         }
 
+        return null;
     }
+
 
     @Override
     public void labelSelfPick(HttpServletResponse response, DelOutboundLabelDto dto) {
