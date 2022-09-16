@@ -32,7 +32,7 @@ public class DelOutboundCharge extends BaseEntity {
     @ApiModelProperty(value = "ID")
     @TableId(value = "id", type = IdType.INPUT)
     @Excel(name = "ID")
-    private Long id;
+    private String id;
 
     @ApiModelProperty(value = "创建人编号")
     @Excel(name = "创建人编号")

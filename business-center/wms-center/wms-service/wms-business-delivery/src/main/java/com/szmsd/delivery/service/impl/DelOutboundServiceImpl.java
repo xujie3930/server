@@ -1916,10 +1916,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     @Override
-    public void label(HttpServletResponse response, DelOutboundLabelDto dto) {
+    public R label(HttpServletResponse response, DelOutboundLabelDto dto) {
         DelOutbound delOutbound = this.getById(dto.getId());
         if (null == delOutbound) {
-            throw new CommonException("400", "单据不存在");
+            return R.ok("单据不存在");
         }
         if("0".equals(dto.getType())){
 
@@ -1955,7 +1955,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         IoUtil.close(outputStream);
                         IoUtil.close(inputStream);
                     }
-                    return;
+                    return null;
 
                 } catch (Exception e) {
                     throw new CommonException("200", "标签文件不存在");
@@ -1982,12 +1982,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
         }else{
             if (StringUtils.isEmpty(delOutbound.getShipmentOrderNumber())) {
-                throw new CommonException("200", "未获取承运商标签");
+                return R.ok("未获取承运商标签");
             }
             String pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
             File labelFile = new File(pathname);
             if (!labelFile.exists()) {
-                throw new CommonException("200", "标签文件不存在");
+                return R.ok("标签文件不存在");
             }
             ServletOutputStream outputStream = null;
             InputStream inputStream = null;
@@ -2009,6 +2009,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
         }
 
+        return null;
     }
 
     @Override

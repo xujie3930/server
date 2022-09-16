@@ -1,6 +1,7 @@
 package com.szmsd.delivery.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundTarckOn;
@@ -299,7 +300,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      * @param response response
      * @param dto      dto
      */
-    void label(HttpServletResponse response, DelOutboundLabelDto dto);
+    R label(HttpServletResponse response, DelOutboundLabelDto dto);
 
     /**
      * 获取标签
