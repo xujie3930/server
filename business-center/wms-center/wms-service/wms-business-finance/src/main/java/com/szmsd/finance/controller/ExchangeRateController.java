@@ -13,6 +13,7 @@ import com.szmsd.finance.util.DownloadTemplateUtil;
 import com.szmsd.finance.util.ExcelFile;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Isolation;
@@ -33,6 +34,7 @@ import java.util.stream.Stream;
 @Api(tags = {"汇率管理"})
 @RestController
 @RequestMapping("/exchangeRate")
+@Slf4j
 public class ExchangeRateController extends FssBaseController {
 
     @Autowired
@@ -106,9 +108,10 @@ public class ExchangeRateController extends FssBaseController {
             R<Map<String, List<BasSubWrapperVO>>> maps=basSubFeignPluginService.getSub("008");
             List<BasSubWrapperVO>  baslist=maps.getData().get("008");
 
+            log.info("导入调用");
             //汇率专用
             List<Map> mapList = ExcelFile.getExcelDataFinance(file,addList);
-
+            log.info("导入参数：{}",mapList);
             for (int x=0;x<mapList.size();x++) {
 
                     if (String.valueOf(mapList.get(x).get("exchangeFrom")).equals("") || String.valueOf(mapList.get(x).get("exchangeTo")).equals("") || String.valueOf(mapList.get(x).get("rate")).equals("") || String.valueOf(mapList.get(x).get("expireTime")).equals("")) {
@@ -135,6 +138,7 @@ public class ExchangeRateController extends FssBaseController {
                     //throw new BaseException("第" + (x + 2) + "行的导入数据已存在数据库");
                 }
             }
+
             exchangeRateService.insertExchangeRate(mapList);
             return R.ok("导入成功");
         } catch (Exception e) {
