@@ -189,7 +189,9 @@ public abstract class AbstractPayFactory {
     }
 
     protected void addForCreditBillAsync(BigDecimal addMoney, String cusCode, String currencyCode) {
-        if (addMoney.compareTo(BigDecimal.ZERO) <= 0) return;
+        if (addMoney.compareTo(BigDecimal.ZERO) <= 0){
+            return;
+        }
         financeThreadTaskPool.submit(() -> iDeductionRecordService.addForCreditBill(addMoney, cusCode, currencyCode));
 
     }
