@@ -21,12 +21,27 @@ public class QuartzConfig {
     }
 
     @Bean
+    public JobDetail DelQueryServiceJob() {
+        return JobBuilder.newJob(DelQueryServiceJob.class).withIdentity("DelQueryServiceJob").storeDurably().build();
+    }
+
+    @Bean
     public Trigger DelOutboundJobTrigger() {
         //cron方式，每周一凌晨1点刷0 0 1 ? * MON
         //0/3 * * * * ? 3秒测试
         return TriggerBuilder.newTrigger().forJob(DelOutboundJob())
                 .withIdentity("DelOutboundJob")
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 ? * MON"))
+                .build();
+    }
+
+    @Bean
+    public Trigger DelQueryServiceJobTrigger() {
+        //cron方式，每天晚上凌晨1点刷0 0 1 ? * MON
+
+        return TriggerBuilder.newTrigger().forJob(DelQueryServiceJob())
+                .withIdentity("DelQueryServiceJob")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * * * ?"))
                 .build();
     }
 

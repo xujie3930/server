@@ -21,8 +21,11 @@ import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.DelQueryServiceDto;
+import com.szmsd.delivery.dto.DelQueryServiceExc;
+import com.szmsd.delivery.dto.DelQueryServiceFeedbackExc;
 import com.szmsd.delivery.dto.DelQueryServiceImport;
 import com.szmsd.delivery.enums.DelQueryServiceStateEnum;
+import com.szmsd.delivery.mapper.DelQueryServiceFeedbackMapper;
 import com.szmsd.delivery.mapper.DelQueryServiceMapper;
 import com.szmsd.delivery.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -37,6 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -71,6 +76,9 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
     @Autowired
     private IDelQueryServiceFeedbackService iDelQueryServiceFeedbackService;
+
+    @Autowired
+    private DelQueryServiceFeedbackMapper delQueryServiceFeedbackMapper;
 
 
 
@@ -222,6 +230,143 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         }
 
     @Override
+    public   List<DelQueryServiceExc> selectDelQueryServiceListex(DelQueryServiceDto delQueryService){
+
+        QueryWrapper<DelQueryService> queryWrapper = new QueryWrapper<DelQueryService>();
+
+        LambdaQueryWrapper<DelQueryService> where = queryWrapper.lambda();
+
+        String queryNo = delQueryService.getQueryNoOne();
+
+        if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(queryNo)) {
+            try {
+                queryNo = URLDecoder.decode(delQueryService.getQueryNoOne(),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            List<String> queryNoList = DelOutboundServiceImplUtil.splitToArray(queryNo, "[\n,]");
+
+            where.and(wrapper ->
+                    wrapper.in(DelQueryService::getOrderNo, queryNoList)
+                            .or().in(DelQueryService::getTraceId, queryNoList)
+                            .or().in(DelQueryService::getRefNo,queryNoList)
+            );
+//                where.in(DelQueryService::getOrderNo, queryNoList)
+//                        .or().in(DelQueryService::getTraceId, queryNoList)
+//                        .or().in(DelQueryService::getRefNo,queryNoList);
+        }
+
+        if(StringUtils.isNotEmpty(delQueryService.getOrderNo())){
+            where.in(DelQueryService::getOrderNo, StringToolkit.getCodeByArray(delQueryService.getOrderNo()));
+        }
+
+
+        if(StringUtils.isNotEmpty(delQueryService.getTraceId())){
+            where.in(DelQueryService::getTraceId, StringToolkit.getCodeByArray(delQueryService.getTraceId()));
+        }
+        if(StringUtils.isNotEmpty(delQueryService.getRefNo())){
+            where.in(DelQueryService::getRefNo, StringToolkit.getCodeByArray(delQueryService.getRefNo()));
+        }
+
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+
+        List<String> sellerCodeList=null;
+        if (null != loginUser && !loginUser.getUsername().equals("admin")) {
+            String username = loginUser.getUsername();
+            sellerCodeList=baseMapper.selectsellerCode(username);
+
+            if (sellerCodeList.size()>0){
+                where.in(DelQueryService::getSellerCode, sellerCodeList);
+
+            }
+            if (StringUtils.isNotEmpty(delQueryService.getCurrencyCode())) {
+                where.eq(DelQueryService::getSellerCode, delQueryService.getCurrencyCode());
+            }
+
+        }
+        if (null != loginUser && loginUser.getUsername().equals("admin")){
+            sellerCodeList=baseMapper.selectsellerCodes();
+
+        }
+
+
+
+        if(StringUtils.isNotEmpty(delQueryService.getServiceStaff())){
+            where.like(DelQueryService::getServiceStaff, delQueryService.getServiceStaff());
+        }
+        if(StringUtils.isNotEmpty(delQueryService.getServiceManager())){
+            where.like(DelQueryService::getServiceManager, delQueryService.getServiceManager());
+        }
+
+        if(StringUtils.isNotEmpty(delQueryService.getServiceStaffNickName())){
+            where.like(DelQueryService::getServiceStaffNickName, delQueryService.getServiceStaffNickName());
+        }
+
+
+        if(StringUtils.isNotEmpty(delQueryService.getShipmentRule())){
+            where.eq(DelQueryService::getShipmentRule, delQueryService.getShipmentRule());
+        }
+
+        if(StringUtils.isNotEmpty(delQueryService.getShipmentService())){
+            where.eq(DelQueryService::getShipmentService, delQueryService.getShipmentService());
+        }
+
+        if(StringUtils.isNotEmpty(delQueryService.getCountry())){
+            where.eq(DelQueryService::getCountry, delQueryService.getCountry());
+        }
+        if(StringUtils.isNotEmpty(delQueryService.getCountryCode())){
+            where.eq(DelQueryService::getCountryCode, delQueryService.getCountryCode());
+        }
+
+        if(StringUtils.isNotEmpty(delQueryService.getCreateBy())){
+            where.eq(DelQueryService::getCreateBy, delQueryService.getCreateBy());
+        }
+
+        if(StringUtils.isNotEmpty(delQueryService.getCreateByName())){
+            where.eq(DelQueryService::getCreateByName, delQueryService.getCreateByName());
+        }
+
+
+
+        if(StringUtils.isNotEmpty(delQueryService.getState())){
+            where.eq(DelQueryService::getState, delQueryService.getState());
+        }
+
+        if(StringUtils.isNotEmpty(delQueryService.getIds())){
+            where.in(DelQueryService::getId, delQueryService.getIds());
+        }
+
+        if(delQueryService.getFeedbacks() != null && delQueryService.getFeedbacks().length > 1){
+            where.apply("id in(SELECT main_id FROM del_query_service_feedback where create_time BETWEEN {0} and {1})",
+                    delQueryService.getFeedbacks()[0], delQueryService.getFeedbacks()[1]);
+        }
+        QueryWrapperUtil.filterDate(queryWrapper, "create_time", delQueryService.getCreateTimes());
+
+
+        where.orderByDesc(DelQueryService::getCreateTime);
+        List<DelQueryService> list=baseMapper.selectList(where);
+        List<DelQueryServiceExc> list1=new ArrayList<>();
+        list.forEach(x->{
+            DelQueryServiceExc delQueryServiceExc=new DelQueryServiceExc();
+            BeanUtils.copyProperties(x,delQueryServiceExc);
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            delQueryServiceExc.setCreateTime(format.format(x.getCreateTime()));
+            list1.add(delQueryServiceExc);
+
+        });
+
+        list1.forEach(s->{
+           List<DelQueryServiceFeedbackExc>  list2=delQueryServiceFeedbackMapper.selectLists(s.getId());
+           s.setDelQueryServiceFeedbackExcs(list2);
+        });
+
+
+        return list1;
+    }
+
+
+
+    @Override
     public R<PageInfo<DelQueryService>> selectDelQueryServiceListrs(DelQueryServiceDto delQueryService) {
         QueryWrapper<DelQueryService> queryWrapper = new QueryWrapper<DelQueryService>();
 
@@ -358,7 +503,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             DelOutboundVO delOutboundVO=iDelOutboundService.selectDelOutboundByOrderNous(delQueryService.getOrderNo(),delQueryService.getOperationType());
 
             if (Optional.ofNullable(delOutboundVO.getCheckFlag()).isPresent()){
-                    if (delQueryService.getOperationType()!=1&&delQueryService.getCheckFlag() == 0) {
+                    if (delQueryService.getOperationType() == 0&&delQueryService.getCheckFlag() == 0) {
                         throw new CommonException("400", "发货天数或者轨迹停留天数小于对应的查件配置天数！！！");
                     }
             }
@@ -371,18 +516,19 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             }
 
             LoginUser loginUser = SecurityUtils.getLoginUser();
-            if(loginUser != null){
+            if (loginUser != null) {
                 String sellerCode = loginUser.getSellerCode();
-                if(StringUtils.isNotEmpty(sellerCode) && !StringUtils.equals(sellerCode, delOutbound.getSellerCode())){
+                if (StringUtils.isNotEmpty(sellerCode) && !StringUtils.equals(sellerCode, delOutbound.getSellerCode())) {
                     throw new CommonException("400", "该订单无权限操作");
                 }
             }
+
 
             LambdaQueryWrapper<DelQuerySettings> delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getCountryCode, delQueryService.getCountryCode());
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryService.getShipmentRule());
             List<DelQuerySettings> dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
-            if (delQueryService.getOperationType()!=1) {
+            if (delQueryService.getOperationType() ==0) {
                 if (dataDelQuerySettingsList.size() == 0) {
                     delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
                     delQuerySettingsQueryWrapper.and(wrapper -> {
@@ -417,10 +563,11 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 }
             }
 
+
             delQueryService.setState(DelQueryServiceStateEnum.SUBMITTED.getCode());
             delQueryService.setStateName(DelQueryServiceStateEnum.SUBMITTED.getName());
             DelQueryServiceFeedback delQueryServiceFeedback=new DelQueryServiceFeedback();
-           int a= baseMapper.insert(delQueryService);
+            int a= baseMapper.insert(delQueryService);
             delQueryServiceFeedback.setMainId(delQueryService.getId());
             if (delQueryService.getReason()!=null&&!delQueryService.getReason().equals("")&&delQueryService.getReason().equals("其他")){
                 delQueryServiceFeedback.setReason(delQueryService.getRemark());
@@ -429,9 +576,9 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 delQueryServiceFeedback.setReason(delQueryService.getReason());
             }
 
-             if (delQueryService.getFeedReason()!=null&&!delQueryService.getFeedReason().equals("")){
-                 delQueryServiceFeedback.setReason(delQueryService.getFeedReason());
-             }
+            if (delQueryService.getFeedReason()!=null&&!delQueryService.getFeedReason().equals("")){
+                delQueryServiceFeedback.setReason(delQueryService.getFeedReason());
+            }
             iDelQueryServiceFeedbackService.insertDelQueryServiceFeedbacksu(delQueryServiceFeedback);
             return a;
         }
@@ -531,6 +678,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         for (DelQueryService delQueryService: dataList){
 
             String reason = delQueryService.getReason();
+            String remark = delQueryService.getRemark();
             BasSub basSub=new BasSub();
             basSub.setSubName(reason);
             R<List<BasSub>> r=basSubFeignService.getSub(basSub);
@@ -541,11 +689,99 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             DelQueryServiceDto dto = getOrderInfo(delQueryService.getOrderNo(),delQueryService.getOperationType());
             BeanUtils.copyProperties(dto, delQueryService);
             delQueryService.setReason(reason);
+            delQueryService.setRemark(remark);
             this.insertDelQueryService(delQueryService);
         }
         return R.ok();
     }
 
+    @Override
+    public int insertDelQueryServiceList(List<DelQueryService> delQueryServiceList) {
+            for (int i=0;i<delQueryServiceList.size();i++){
+
+
+                delQueryServiceList.get(i).setOperationType(0);
+            DelOutboundVO delOutboundVO = iDelOutboundService.selectDelOutboundByOrderNous(delQueryServiceList.get(i).getOrderNo(), delQueryServiceList.get(i).getOperationType());
+
+            if (Optional.ofNullable(delOutboundVO.getCheckFlag()).isPresent()) {
+                if (delQueryServiceList.get(i).getOperationType() == 0 && delQueryServiceList.get(i).getCheckFlag() == 0) {
+                    throw new CommonException("400", "发货天数或者轨迹停留天数小于对应的查件配置天数！！！");
+                }
+            }
+                delQueryServiceList.get(i).setReason("其他");
+            DelOutbound delOutbound = delOutboundService.getByOrderNo(delQueryServiceList.get(i).getOrderNo());
+            if (delOutbound == null) {
+                break;
+                //throw new CommonException("400", "无效订单");
+            }
+
+            LambdaQueryWrapper<DelQuerySettings> delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
+            delQuerySettingsQueryWrapper.eq(DelQuerySettings::getCountryCode, delQueryServiceList.get(i).getCountryCode());
+            delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryServiceList.get(i).getShipmentRule());
+            List<DelQuerySettings> dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
+            if (delQueryServiceList.get(i).getOperationType() == 0) {
+                if (dataDelQuerySettingsList.size() == 0) {
+                    delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
+                    delQuerySettingsQueryWrapper.and(wrapper -> {
+                        wrapper.isNull(DelQuerySettings::getCountryCode).or().eq(DelQuerySettings::getCountryCode, "");
+                    });
+                    delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryServiceList.get(i).getShipmentRule());
+                    dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
+                    if (dataDelQuerySettingsList.size() == 0) {
+                        throw new CommonException("400", "此查件申请没有相关的匹配规则");
+                    }
+                }
+                DelQuerySettings delQuerySettings = dataDelQuerySettingsList.get(0);
+
+                boolean bool = false;
+                if (StringUtils.equals(delOutbound.getState(), delQuerySettings.getState())) {
+                    bool = true;
+                } else if (delOutbound.getShipmentsTime() != null && (DateUtil.betweenDay(delOutbound.getShipmentsTime(), new Date(), true) >= delQuerySettings.getShipmentDays() || DateUtil.betweenDay(delOutbound.getTrackingTime(), new Date(), true) >= delQuerySettings.getTrackStayDays())) {
+                    bool = true;
+                } else {
+                    LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
+                    delTrackLambdaQueryWrapper.eq(DelTrack::getOrderNo, delQueryServiceList.get(i).getOrderNo());
+                    delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
+                    delTrackLambdaQueryWrapper.last("LIMIT 1");
+                    DelTrack dataDelTrack = delTrackService.getOne(delTrackLambdaQueryWrapper);
+                    if (dataDelTrack != null && dataDelTrack.getTrackingTime() != null && DateUtil.betweenDay(dataDelTrack.getTrackingTime(), new Date(), true) <= delQuerySettings.getTrackStayDays()) {
+                        bool = true;
+                    }
+                }
+                if (!bool) {
+                    throw new CommonException("400", "此查件申请不满足查件条件");
+
+                }
+            }
+
+                delQueryServiceList.get(i).setState(DelQueryServiceStateEnum.SUBMITTED.getCode());
+                delQueryServiceList.get(i).setStateName(DelQueryServiceStateEnum.SUBMITTED.getName());
+            DelQueryServiceFeedback delQueryServiceFeedback = new DelQueryServiceFeedback();
+            List<DelQueryService> delQueryServiceListus = baseMapper.selectListJobs(delQueryServiceList.get(i).getOrderNo());
+            if (delQueryServiceListus.size() == 0) {
+                delQueryServiceFeedback.setCreateByName("admin");
+                delQueryServiceFeedback.setCreateTime(new Date());
+                int a = baseMapper.insert(delQueryServiceList.get(i));
+            }
+
+            delQueryServiceFeedback.setMainId(delQueryServiceList.get(i).getId());
+
+            delQueryServiceFeedback.setReason("Automatic push by the system");
+            delQueryServiceFeedback.setCreateByName("admin");
+            delQueryServiceFeedback.setCreateTime(new Date());
+
+            List<DelQueryServiceFeedback> delQueryServiceFeedbackLists = baseMapper.selectDelQueryServiceFeedbackLists(delQueryServiceList.get(i).getId());
+            if (delQueryServiceFeedbackLists.size() == 0) {
+                iDelQueryServiceFeedbackService.insertDelQueryServiceFeedbacksu(delQueryServiceFeedback);
+
+            } else if (delQueryServiceFeedbackLists.size() > 0) {
+                iDelQueryServiceFeedbackService.insertDelQueryServiceFeedback(delQueryServiceFeedback);
+            }
+
+
+        }
+        return 1;
+    }
 
 }
 

@@ -5,6 +5,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.domain.DelQueryService;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.dto.DelQueryServiceDto;
+import com.szmsd.delivery.dto.DelQueryServiceExc;
 import com.szmsd.delivery.dto.DelQueryServiceImport;
 
 import java.io.UnsupportedEncodingException;
@@ -35,6 +36,9 @@ public interface IDelQueryServiceService extends IService<DelQueryService> {
         * @return 查件服务模块集合
         */
         List<DelQueryService> selectDelQueryServiceList(DelQueryServiceDto delQueryService);
+
+        List<DelQueryServiceExc> selectDelQueryServiceListex(DelQueryServiceDto delQueryService);
+
 
         R<PageInfo<DelQueryService>> selectDelQueryServiceListrs(DelQueryServiceDto delQueryService);
 
@@ -74,5 +78,7 @@ public interface IDelQueryServiceService extends IService<DelQueryService> {
         DelQueryServiceDto getOrderInfo(String orderNo,Integer operationType);
 
         R importData(List<DelQueryServiceImport> list);
+
+        int  insertDelQueryServiceList(List<DelQueryService> delQueryServiceList);
 }
 
