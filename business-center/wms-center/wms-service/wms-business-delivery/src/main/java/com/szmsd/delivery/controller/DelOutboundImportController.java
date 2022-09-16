@@ -52,6 +52,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -81,8 +82,17 @@ public class DelOutboundImportController extends BaseController {
     @GetMapping("/collectionExportTemplate")
     @ApiOperation(value = "出库管理 - 导入 - 集运出库 - SKU导入模板", position = 100)
     public void collectionExportTemplate(HttpServletResponse response) {
-        String filePath = "/template/Del_collection_sku_import.xls";
-        String fileName = "集运出库单SKU导入";
+        String len=getLen().toLowerCase(Locale.ROOT);
+        String filePath=null;
+        String fileName=null;
+        if (len.equals("zh")){
+             filePath = "/template/Del_collection_sku_import.xls";
+             fileName = "新增SKU导入模板";
+        }else if (len.equals("en")){
+            filePath = "/template/AddedSKUImportTemplate.xlsx";
+            fileName = "AddedSKUImportTemplate";
+        }
+
         this.downloadTemplate(response, filePath, fileName);
     }
 

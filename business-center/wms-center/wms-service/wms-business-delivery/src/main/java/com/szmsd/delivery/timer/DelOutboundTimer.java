@@ -185,11 +185,14 @@ public class DelOutboundTimer {
 
     @Resource(name = ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_DELOUTBOUND_REVIEWED)
     private ThreadPoolExecutor bringVerifyThreadExecutor;
+
     /**
      * 每分钟执行一次
+     *
+     *  job 调用controller  notifyBringVerify
+     *
      */
     @Async
-//    @Scheduled(cron = "0/5 * * * * ?")
     public void bringVerify() {
         logger.info("[port:{}][{}][创建出库单]bringVerify 提审步骤 开始执行", port, Thread.currentThread().getId());
         try {

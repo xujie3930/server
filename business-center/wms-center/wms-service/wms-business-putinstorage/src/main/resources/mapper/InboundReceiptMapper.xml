@@ -151,7 +151,9 @@
         SELECT <include refid="Column_List_VO"/>
         FROM inbound_receipt t left join  inbound_receipt_detail a on t.warehouse_no=a.warehouse_no
         <where><include refid="selectListWhere"/></where>
+        GROUP BY t.warehouse_no
         ORDER BY t.create_time DESC
+
     </select>
     <select id="selectInfo" resultMap="InboundReceiptInfoVO">
         SELECT <include refid="Column_List_INFO_VO"/>

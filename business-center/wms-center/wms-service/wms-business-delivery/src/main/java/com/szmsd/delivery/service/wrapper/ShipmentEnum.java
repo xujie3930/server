@@ -612,101 +612,103 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+
+            logger.info("计算包裹运费开始,单号：{}",delOutbound.getOrderNo());
             // 获取运费信息
             IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
             ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, PricingEnum.PACKAGE);
             if (null == responseObject) {
                 // 返回值是空的
                 throw new CommonException("400", MessageUtil.to("计算包裹费用失败", "Failed to calculate the package fee"));
-            } else {
-                // 判断返回值
-                if (responseObject.isSuccess()) {
-                    // 计算成功了
-                    ChargeWrapper chargeWrapper = responseObject.getObject();
-                    // 更新：计费重，金额
-                    ShipmentChargeInfo data = chargeWrapper.getData();
-                    PricingPackageInfo packageInfo = data.getPackageInfo();
-                    // 包裹信息
-                    Packing packing = packageInfo.getPacking();
-                    delOutbound.setLength(Utils.valueOf(packing.getLength()));
-                    delOutbound.setWidth(Utils.valueOf(packing.getWidth()));
-                    delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
-                    delOutbound.setSupplierCalcType(data.getSupplierCalcType());
-                    delOutbound.setSupplierCalcId(data.getSupplierCalcId());
-
-                    delOutbound.setShipmentService(data.getLogisticsRouteId());
-
-                    // 费用信息
-                    Weight calcWeight = packageInfo.getCalcWeight();
-                    delOutbound.setCalcWeight(calcWeight.getValue());
-                    delOutbound.setCalcWeightUnit(calcWeight.getUnit());
-                    List<ChargeItem> charges = chargeWrapper.getCharges();
-                    // 保存新的费用信息
-                    List<DelOutboundCharge> delOutboundCharges = new ArrayList<>();
-                    // 汇总费用
-                    BigDecimal totalAmount = BigDecimal.ZERO;
-                    String totalCurrencyCode = charges.get(0).getMoney().getCurrencyCode();
-                    for (ChargeItem charge : charges) {
-                        DelOutboundCharge delOutboundCharge = new DelOutboundCharge();
-                        ChargeCategory chargeCategory = charge.getChargeCategory();
-                        delOutboundCharge.setOrderNo(delOutbound.getOrderNo());
-                        delOutboundCharge.setBillingNo(chargeCategory.getBillingNo());
-                        delOutboundCharge.setChargeNameCn(chargeCategory.getChargeNameCN());
-                        delOutboundCharge.setChargeNameEn(chargeCategory.getChargeNameEN());
-                        delOutboundCharge.setParentBillingNo(chargeCategory.getParentBillingNo());
-                        Money money = charge.getMoney();
-                        BigDecimal amount = Utils.valueOf(money.getAmount());
-                        delOutboundCharge.setAmount(amount);
-                        delOutboundCharge.setCurrencyCode(money.getCurrencyCode());
-                        delOutboundCharge.setRemark(charge.getRemark());
-                        delOutboundCharges.add(delOutboundCharge);
-                        totalAmount = totalAmount.add(amount);
-                    }
-
-                    //判断计泡拦截
-                    BasMeteringConfigFeignService basMeteringConfigFeignService = SpringUtils.getBean(BasMeteringConfigFeignService.class);
-
-                    BasMeteringConfigDto dto = new BasMeteringConfigDto()
-                            .setCustomerCode(delOutbound.getSellerCode())
-                            .setLogisticsErvicesCode(chargeWrapper.getData().getProductCode())
-                            .setLogisticsErvicesName(chargeWrapper.getData().getProductName())
-                            .setCustomerCode(delOutbound.getSellerCode())
-                            .setWeight(delOutbound.getForecastWeight() != null ? new BigDecimal(delOutbound.getForecastWeight()) : BigDecimal.ZERO)
-                            .setCalcWeight(packageInfo.getCalcWeight().getValue())
-                            .setVolume(packageInfo.getVolumeWeight().getValue());
-
-                    if(delOutboundWrapperContext.getAddress() != null){
-                        dto.setCountryCode(delOutboundWrapperContext.getAddress().getCountryCode())
-                                .setCountryName(delOutboundWrapperContext.getAddress().getCountry());
-                    }
-                    logger.info("出库单{}计泡拦截参数{}", delOutbound.getOrderNo(), JSONUtil.toJsonStr(dto));
-                    R r = basMeteringConfigFeignService.intercept(dto);
-
-                    if(r.getCode() != 200){
-                        logger.error("计泡拦截异常："+delOutboundWrapperContext.isShipmentShipping());
-                        delOutboundWrapperContext.setShipmentShipping(true);
-                        throw new CommonException("400", MessageUtil.to("计泡拦截异常", "Abnormal bubble counting interception")+"："+r.getMsg());
-                    }
-
-
-                    IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
-                    try {
-                        logger.info("开始保存出库单费用明细，数据条数：{}", delOutboundCharges.size());
-                        delOutboundChargeService.saveCharges(delOutboundCharges);
-                        logger.info("保存出库单费用明细完成");
-                    } catch (Exception e) {
-                        logger.info("保存出库单费用明细失败，{}", e.getMessage());
-                        throw e;
-                    }
-                    delOutbound.setAmount(totalAmount);
-                    delOutbound.setCurrencyCode(totalCurrencyCode);
-                    DelOutboundOperationLogEnum.SMT_PRC_PRICING.listener(delOutbound);
-                } else {
-                    // 计算失败
-                    String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "计算包裹费用失败2");
-                    throw new CommonException("400", exceptionMessage);
-                }
             }
+
+            if (!responseObject.isSuccess()) {
+                // 计算失败
+                String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), "计算包裹费用失败2");
+                throw new CommonException("400", exceptionMessage);
+            }
+
+            // 计算成功了
+            ChargeWrapper chargeWrapper = responseObject.getObject();
+            // 更新：计费重，金额
+            ShipmentChargeInfo data = chargeWrapper.getData();
+            PricingPackageInfo packageInfo = data.getPackageInfo();
+            // 包裹信息
+            Packing packing = packageInfo.getPacking();
+            delOutbound.setLength(Utils.valueOf(packing.getLength()));
+            delOutbound.setWidth(Utils.valueOf(packing.getWidth()));
+            delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
+            delOutbound.setSupplierCalcType(data.getSupplierCalcType());
+            delOutbound.setSupplierCalcId(data.getSupplierCalcId());
+
+            delOutbound.setShipmentService(data.getLogisticsRouteId());
+            delOutbound.setPackingRule(data.getPackingRule());
+            delOutbound.setShipmentRule(data.getShipmentRule());
+
+            // 费用信息
+            Weight calcWeight = packageInfo.getCalcWeight();
+            delOutbound.setCalcWeight(calcWeight.getValue());
+            delOutbound.setCalcWeightUnit(calcWeight.getUnit());
+            List<ChargeItem> charges = chargeWrapper.getCharges();
+            // 保存新的费用信息
+            List<DelOutboundCharge> delOutboundCharges = new ArrayList<>();
+            // 汇总费用
+            BigDecimal totalAmount = BigDecimal.ZERO;
+            String totalCurrencyCode = charges.get(0).getMoney().getCurrencyCode();
+            for (ChargeItem charge : charges) {
+                DelOutboundCharge delOutboundCharge = new DelOutboundCharge();
+                ChargeCategory chargeCategory = charge.getChargeCategory();
+                delOutboundCharge.setOrderNo(delOutbound.getOrderNo());
+                delOutboundCharge.setBillingNo(chargeCategory.getBillingNo());
+                delOutboundCharge.setChargeNameCn(chargeCategory.getChargeNameCN());
+                delOutboundCharge.setChargeNameEn(chargeCategory.getChargeNameEN());
+                delOutboundCharge.setParentBillingNo(chargeCategory.getParentBillingNo());
+                Money money = charge.getMoney();
+                BigDecimal amount = Utils.valueOf(money.getAmount());
+                delOutboundCharge.setAmount(amount);
+                delOutboundCharge.setCurrencyCode(money.getCurrencyCode());
+                delOutboundCharge.setRemark(charge.getRemark());
+                delOutboundCharges.add(delOutboundCharge);
+                totalAmount = totalAmount.add(amount);
+            }
+
+            //判断计泡拦截
+            BasMeteringConfigFeignService basMeteringConfigFeignService = SpringUtils.getBean(BasMeteringConfigFeignService.class);
+
+            BasMeteringConfigDto dto = new BasMeteringConfigDto()
+                    .setCustomerCode(delOutbound.getSellerCode())
+                    .setLogisticsErvicesCode(chargeWrapper.getData().getProductCode())
+                    .setLogisticsErvicesName(chargeWrapper.getData().getProductName())
+                    .setCustomerCode(delOutbound.getSellerCode())
+                    .setWeight(delOutbound.getForecastWeight() != null ? new BigDecimal(delOutbound.getForecastWeight()) : BigDecimal.ZERO)
+                    .setCalcWeight(packageInfo.getCalcWeight().getValue())
+                    .setVolume(packageInfo.getVolumeWeight().getValue());
+
+            if(delOutboundWrapperContext.getAddress() != null){
+                dto.setCountryCode(delOutboundWrapperContext.getAddress().getCountryCode())
+                        .setCountryName(delOutboundWrapperContext.getAddress().getCountry());
+            }
+            logger.info("出库单{}计泡拦截参数{}", delOutbound.getOrderNo(), JSONUtil.toJsonStr(dto));
+            R r = basMeteringConfigFeignService.intercept(dto);
+
+            if(r.getCode() != 200){
+                logger.error("计泡拦截异常："+delOutboundWrapperContext.isShipmentShipping());
+                delOutboundWrapperContext.setShipmentShipping(true);
+                throw new CommonException("400", MessageUtil.to("计泡拦截异常", "Abnormal bubble counting interception")+"："+r.getMsg());
+            }
+
+            IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
+            try {
+                logger.info("开始保存出库单费用明细，数据条数：{}", delOutboundCharges.size());
+                delOutboundChargeService.saveCharges(delOutboundCharges);
+                logger.info("保存出库单费用明细完成");
+            } catch (Exception e) {
+                logger.info("保存出库单费用明细失败，{}", e.getMessage());
+                throw e;
+            }
+            delOutbound.setAmount(totalAmount);
+            delOutbound.setCurrencyCode(totalCurrencyCode);
+            DelOutboundOperationLogEnum.SMT_PRC_PRICING.listener(delOutbound);
         }
 
         @Override
@@ -739,7 +741,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.SMT_FREEZE_BALANCE.listener(delOutbound);
 
-
+            logger.info(">>>>>[发货后出库单{}]开始冻结费用, 数据:{}",delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
 
             /**
              *  获取要冻结的费用数据，并按货币分组冻结
@@ -750,39 +752,35 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             if(delOutboundChargeList.isEmpty()){
                 throw new CommonException("400", MessageUtil.to("冻结费用信息失败，没有要冻结的费用明细", "Failed to freeze expense information. No expense details to be frozen"));
             }
-            Map<String, List<DelOutboundCharge>> groupByCharge =
-                    delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+            Map<String, List<DelOutboundCharge>> groupByCharge = delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
             for (String currencyCode: groupByCharge.keySet()) {
-                BigDecimal bigDecimal = new BigDecimal(0);
-                for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
+                BigDecimal amount = BigDecimal.ZERO;
+                List<DelOutboundCharge> delOutboundCharges = groupByCharge.get(currencyCode);
+                for (DelOutboundCharge c : delOutboundCharges) {
                     if (c.getAmount() != null) {
-                        bigDecimal = bigDecimal.add(c.getAmount());
+                        amount = amount.add(c.getAmount());
                     }
                 }
                 // 冻结费用
                 CusFreezeBalanceDTO cusFreezeBalanceDTO2 = new CusFreezeBalanceDTO();
-                cusFreezeBalanceDTO2.setAmount(bigDecimal);
+                cusFreezeBalanceDTO2.setAmount(amount);
                 cusFreezeBalanceDTO2.setCurrencyCode(currencyCode);
                 cusFreezeBalanceDTO2.setCusCode(delOutbound.getSellerCode());
                 cusFreezeBalanceDTO2.setNo(delOutbound.getOrderNo());
                 cusFreezeBalanceDTO2.setOrderType("Freight");
                 R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO2);
 
-                logger.info(">>>>>[发货后出库单{}]冻结费用, 数据:{}",
-                        delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO2));
-
-
-                if (null != freezeBalanceR) {
-                    if (Constants.SUCCESS != freezeBalanceR.getCode()) {
-                        // 异常信息
-                        String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "");
-                        throw new CommonException("400", MessageUtil.to("冻结费用失败，", "Failed to freeze expenses,") + msg);
-                    }
-                } else {
-                    // 异常信息
+                if (null == freezeBalanceR) {
                     throw new CommonException("400", "冻结费用失败，请求无响应");
                 }
 
+                if (Constants.SUCCESS != freezeBalanceR.getCode()) {
+                    // 异常信息
+                    String msg = Utils.defaultValue(freezeBalanceR.getMsg(), "");
+                    throw new CommonException("400", MessageUtil.to("冻结费用失败，", "Failed to freeze expenses,") + msg);
+                }
+
+                logger.info(">>>>>[发货后出库单{}]冻结费用, 数据:{}",delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO2));
             }
 
 
@@ -881,28 +879,34 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            // 修改为异步执行
-            /*ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
-            shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
-            shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
-            if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
-                shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
-            } else {
-                shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+
+
+            if(delOutboundWrapperContext.getExecShipmentShipping()){
+                logger.info("核重更新发货指令{}", delOutbound.getOrderNo());
+                // 修改为异步执行
+                ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
+                shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+                shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
+                if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
+                    shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
+                } else {
+                    shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+                }
+                shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
+                shipmentUpdateRequestDto.setIsEx(false);
+                shipmentUpdateRequestDto.setExType(null);
+                shipmentUpdateRequestDto.setExRemark(null);
+                shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
+                IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
+                ResponseVO responseVO = htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
+                if (null == responseVO || null == responseVO.getSuccess()) {
+                    throw new CommonException("400", "更新发货指令失败");
+                }
+                if (!responseVO.getSuccess()) {
+                    throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新发货指令失败2"));
+                }
             }
-            shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
-            shipmentUpdateRequestDto.setIsEx(false);
-            shipmentUpdateRequestDto.setExType(null);
-            shipmentUpdateRequestDto.setExRemark(null);
-            shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
-            IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
-            ResponseVO responseVO = htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
-            if (null == responseVO || null == responseVO.getSuccess()) {
-                throw new CommonException("400", "更新发货指令失败");
-            }
-            if (!responseVO.getSuccess()) {
-                throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "更新发货指令失败2"));
-            }*/
+
             // 修改出库单相关信息
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
@@ -924,7 +928,14 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
-            updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+
+            if(delOutboundWrapperContext.getExecShipmentShipping()) {
+                updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+                updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
+                updateDelOutbound.setShipmentRule(delOutbound.getShipmentRule());
+            }
+
+
 
             delOutboundService.shipmentSuccess(updateDelOutbound);
             // 提交一个获取标签的任务

@@ -32,7 +32,17 @@ public class DelOutboundWrapperContext implements ApplicationContext {
     // 临时传值字段
     private String prcProductCode;
 
+    // 是否执行更新发货指令接口调用
+    private boolean execShipmentShipping;
 
+
+    public boolean getExecShipmentShipping() {
+        return execShipmentShipping;
+    }
+
+    public void setExecShipmentShipping(boolean execShipmentShipping) {
+        this.execShipmentShipping = execShipmentShipping;
+    }
 
     public DelOutboundWrapperContext() {
     }
