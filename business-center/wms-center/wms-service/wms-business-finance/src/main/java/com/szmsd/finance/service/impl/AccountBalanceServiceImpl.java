@@ -471,7 +471,12 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public R thawBalance(CusFreezeBalanceDTO cfbDTO) {
         CustPayDTO dto = new CustPayDTO();
         BeanUtils.copyProperties(cfbDTO, dto);
-        if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0) return R.ok();
+        if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0){
+            return R.ok();
+        }
+
+        log.info("开始解冻费用：{}",JSONObject.toJSONString(cfbDTO));
+
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
@@ -480,26 +485,19 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         setCurrencyName(dto);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         log.info(LogUtil.format(cfbDTO, "解冻金额"));
+
+        log.info("开始解冻费用updateBalance：{}",JSONObject.toJSONString(abstractPayFactory));
+
         Boolean flag = abstractPayFactory.updateBalance(dto);
-        if (Objects.isNull(flag)) return R.ok();
+        if (Objects.isNull(flag)){
+            return R.ok();
+        }
+
+        log.info("开始解冻费用updateBalance：{}",flag);
+
         if (flag)
         //冻结 解冻 需要把费用扣减加到 操作费用表
         {
-
-//            LambdaQueryWrapper<AccountSerialBill> wr = Wrappers.<AccountSerialBill>lambdaQuery()
-//                    .eq(AccountSerialBill::getNo, dto.getNo())
-//                    .orderByDesc(AccountSerialBill::getId);
-//            List<AccountSerialBill> accountSerialBills = accountSerialBillService.getBaseMapper().selectList(wr);
-//            String s = JSONObject.toJSONString(accountSerialBills);
-//            log.info(" 解冻数据-- {}",s);
-            //if (integer > 1) {
-            // 冻结解冻会产生多笔 物流基础费 实际只扣除一笔，在最外层吧物流基础费删除 物流基础费会先解冻，然后直接扣除
-//            int delete = accountSerialBillService.getBaseMapper().delete(Wrappers.<AccountSerialBill>lambdaUpdate()
-//                    .eq(AccountSerialBill::getNo, dto.getNo())
-//                    .eq(AccountSerialBill::getBusinessCategory, "物流基础费")
-//                    .orderByDesc(AccountSerialBill::getId));
-//            log.info("删除物流基础费 {}条", delete);
-            //}
             log.info(LogUtil.format(cfbDTO, "解冻金额", "操作费用表"));
             this.addOptLogAsync(dto);
         }
