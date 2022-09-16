@@ -1,6 +1,7 @@
 package com.szmsd.delivery.service.impl;
 
 import cn.hutool.core.lang.Snowflake;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -70,7 +71,7 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
      */
     @Override
     public int insertDelOutboundCharge(DelOutboundCharge delOutboundCharge) {
-        delOutboundCharge.setId(this.snowflake.nextId());
+        delOutboundCharge.setId(""+this.snowflake.nextId());
         return baseMapper.insert(delOutboundCharge);
     }
 
@@ -117,10 +118,11 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
         // 先根据单号删除
         this.clearCharges(delOutboundCharge.getOrderNo());
         // 设置ID
-        charges.forEach(value -> value.setId(this.snowflake.nextId()));
+        charges.forEach(value -> value.setId("" + this.snowflake.nextId()));
         // 批量保存
         this.saveBatch(charges);
     }
+
 
     @Override
     public List<DelOutboundCharge> listCharges(String orderNo) {
