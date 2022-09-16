@@ -58,7 +58,9 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 //蒋俊看财务
                 Boolean checkFlag = checkAndSetBalance(balance, dto);
                 log.info("【updateBalance】 3");
-                if (checkFlag == null) return null;
+                if (checkFlag == null){
+                    return null;
+                }
                 if (!checkFlag) {
                     return false;
                 }
@@ -139,8 +141,9 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
         }
         if (BillEnum.PayMethod.BALANCE_THAW == dto.getPayMethod()) {
-            log.info("解冻参数：{}", JSONObject.toJSONString(dto));
+            log.info("解冻参数20220916：{}", JSONObject.toJSONString(dto));
             List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
+            log.info("解冻参数查询返回数据：{}", JSONObject.toJSONString(accountBalanceChanges));
             if (accountBalanceChanges.size() > 0) {
                 //查询出此单冻结的金额
                 BigDecimal amountChange = accountBalanceChanges.stream().map(AccountBalanceChange::getAmountChange).reduce(BigDecimal.ZERO, BigDecimal::add);
