@@ -1,5 +1,6 @@
 package com.szmsd.finance.factory;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.common.core.utils.StringUtils;
@@ -50,6 +51,12 @@ public class PaymentPayFactory extends AbstractPayFactory {
                 BigDecimal changeAmount = dto.getAmount();
 
                 List<AccountBalanceChange> balanceChange = getBalanceChange(dto);
+
+                if (balanceChange.size() > 1) {
+                    log.info("该单存在多个冻结额，操作失败.{}", JSON.toJSONString(balanceChange));
+                    return false;
+                }
+
                 if (balanceChange.size() == 0) {
                     log.info("no freeze, customCode: {}, getCurrencyCode: {}, no: {}", dto.getCusCode(), dto.getCurrencyCode(), dto.getNo());
                     /*//余额不足
@@ -78,10 +85,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     }
                     setHasFreeze(dto);
                 }
-                if (balanceChange.size() > 1) {
-                    log.info("该单存在多个冻结额，操作失败。单号： {} 币种： {}", dto.getNo(), dto.getCurrencyCode());
-                    return false;
-                }
+
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance, true);
                 recordOpLogAsync(dto, oldBalance.getCurrentBalance());
                 recordDetailLogAsync(dto, oldBalance);
