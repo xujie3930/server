@@ -308,8 +308,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             logger.info(">>>>>[创建出库单{}]-开始执行Pricing", delOutbound.getOrderNo());
 
-
-
             PricingEnum pricingEnum;
             if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
                 // 核重逻辑处理
@@ -325,77 +323,76 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             if (null == responseObject) {
                 // 返回值是空的
                 throw new CommonException("400", MessageUtil.to("计算包裹费用失败", "Failed to calculate the package fee"));
-            } else {
-                // 判断返回值
-                if (responseObject.isSuccess()) {
-                    // 计算成功了
-                    ChargeWrapper chargeWrapper = responseObject.getObject();
-                    ShipmentChargeInfo data = chargeWrapper.getData();
-                    PricingPackageInfo packageInfo = data.getPackageInfo();
-                    // 挂号服务
-                    delOutbound.setShipmentService(data.getLogisticsRouteId());
-                    // 物流商code
-                    delOutbound.setLogisticsProviderCode(data.getLogisticsProviderCode());
-                    // 发货规则，装箱规则
-                    delOutbound.setProductShipmentRule(data.getShipmentRule());
-                    delOutbound.setPackingRule(data.getPackingRule());
-
-                    // 临时传值
-                    delOutboundWrapperContext.setPrcProductCode(data.getProductCode());
-                    logger.info("记录临时传值字段，prcProductCode：{}", data.getProductCode());
-                    // 包裹信息
-                    Packing packing = packageInfo.getPacking();
-                    delOutbound.setLength(Utils.valueOf(packing.getLength()));
-                    delOutbound.setWidth(Utils.valueOf(packing.getWidth()));
-                    delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
-                    delOutbound.setSupplierCalcType(data.getSupplierCalcType());
-                    delOutbound.setSupplierCalcId(data.getSupplierCalcId());
-
-                    if(StringUtils.isNotBlank(data.getAmazonLogisticsRouteId())){
-                        delOutbound.setAmazonLogisticsRouteId(data.getAmazonLogisticsRouteId());
-                    }
-                    // 计费重信息
-                    Weight calcWeight = packageInfo.getCalcWeight();
-                    delOutbound.setCalcWeight(calcWeight.getValue());
-                    delOutbound.setCalcWeightUnit(calcWeight.getUnit());
-                    List<ChargeItem> charges = chargeWrapper.getCharges();
-                    // 保存费用信息
-                    List<DelOutboundCharge> delOutboundCharges = new ArrayList<>();
-                    // 汇总费用
-                    BigDecimal totalAmount = BigDecimal.ZERO;
-                    String totalCurrencyCode = charges.get(0).getMoney().getCurrencyCode();
-                    for (ChargeItem charge : charges) {
-                        DelOutboundCharge delOutboundCharge = new DelOutboundCharge();
-                        ChargeCategory chargeCategory = charge.getChargeCategory();
-                        delOutboundCharge.setOrderNo(delOutbound.getOrderNo());
-                        delOutboundCharge.setBillingNo(chargeCategory.getBillingNo());
-                        delOutboundCharge.setChargeNameCn(chargeCategory.getChargeNameCN());
-                        delOutboundCharge.setChargeNameEn(chargeCategory.getChargeNameEN());
-                        delOutboundCharge.setParentBillingNo(chargeCategory.getParentBillingNo());
-                        Money money = charge.getMoney();
-                        BigDecimal amount = Utils.valueOf(money.getAmount());
-                        delOutboundCharge.setAmount(amount);
-                        delOutboundCharge.setCurrencyCode(money.getCurrencyCode());
-                        delOutboundCharge.setRemark(charge.getRemark());
-                        delOutboundCharges.add(delOutboundCharge);
-                        totalAmount = totalAmount.add(amount);
-                    }
-                    // 保存出库单费用信息
-                    IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
-                    stopWatch.start();
-                    delOutboundChargeService.saveCharges(delOutboundCharges);
-                    stopWatch.stop();
-                    logger.info(">>>>>[创建出库单{}]-Pricing保存出库单费用信息：耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
-                    // 更新值
-                    delOutbound.setAmount(totalAmount);
-                    delOutbound.setCurrencyCode(totalCurrencyCode);
-                    DelOutboundOperationLogEnum.BRV_PRC_PRICING.listener(delOutbound);
-                } else {
-                    // 计算失败
-                    String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), MessageUtil.to("计算包裹费用失败", "Failed to calculate the package fee")+ "2");
-                    throw new CommonException("400", exceptionMessage);
-                }
             }
+
+            if (!responseObject.isSuccess()) {
+                // 计算失败
+                String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObject.getError()), MessageUtil.to("计算包裹费用失败", "Failed to calculate the package fee")+ "2");
+                throw new CommonException("400", exceptionMessage);
+            }
+
+            // 计算成功了
+            ChargeWrapper chargeWrapper = responseObject.getObject();
+            ShipmentChargeInfo data = chargeWrapper.getData();
+            PricingPackageInfo packageInfo = data.getPackageInfo();
+            // 挂号服务
+            delOutbound.setShipmentService(data.getLogisticsRouteId());
+            // 物流商code
+            delOutbound.setLogisticsProviderCode(data.getLogisticsProviderCode());
+            // 发货规则，装箱规则
+            delOutbound.setProductShipmentRule(data.getShipmentRule());
+            delOutbound.setPackingRule(data.getPackingRule());
+
+            // 临时传值
+            delOutboundWrapperContext.setPrcProductCode(data.getProductCode());
+            logger.info("记录临时传值字段，prcProductCode：{}", data.getProductCode());
+            // 包裹信息
+            Packing packing = packageInfo.getPacking();
+            delOutbound.setLength(Utils.valueOf(packing.getLength()));
+            delOutbound.setWidth(Utils.valueOf(packing.getWidth()));
+            delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
+            delOutbound.setSupplierCalcType(data.getSupplierCalcType());
+            delOutbound.setSupplierCalcId(data.getSupplierCalcId());
+
+            if(StringUtils.isNotBlank(data.getAmazonLogisticsRouteId())){
+                delOutbound.setAmazonLogisticsRouteId(data.getAmazonLogisticsRouteId());
+            }
+            // 计费重信息
+            Weight calcWeight = packageInfo.getCalcWeight();
+            delOutbound.setCalcWeight(calcWeight.getValue());
+            delOutbound.setCalcWeightUnit(calcWeight.getUnit());
+            List<ChargeItem> charges = chargeWrapper.getCharges();
+            // 保存费用信息
+            List<DelOutboundCharge> delOutboundCharges = new ArrayList<>();
+            // 汇总费用
+            BigDecimal totalAmount = BigDecimal.ZERO;
+            String totalCurrencyCode = charges.get(0).getMoney().getCurrencyCode();
+            for (ChargeItem charge : charges) {
+                DelOutboundCharge delOutboundCharge = new DelOutboundCharge();
+                ChargeCategory chargeCategory = charge.getChargeCategory();
+                delOutboundCharge.setOrderNo(delOutbound.getOrderNo());
+                delOutboundCharge.setBillingNo(chargeCategory.getBillingNo());
+                delOutboundCharge.setChargeNameCn(chargeCategory.getChargeNameCN());
+                delOutboundCharge.setChargeNameEn(chargeCategory.getChargeNameEN());
+                delOutboundCharge.setParentBillingNo(chargeCategory.getParentBillingNo());
+                Money money = charge.getMoney();
+                BigDecimal amount = Utils.valueOf(money.getAmount());
+                delOutboundCharge.setAmount(amount);
+                delOutboundCharge.setCurrencyCode(money.getCurrencyCode());
+                delOutboundCharge.setRemark(charge.getRemark());
+                delOutboundCharges.add(delOutboundCharge);
+                totalAmount = totalAmount.add(amount);
+            }
+            // 保存出库单费用信息
+            IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
+            stopWatch.start();
+            delOutboundChargeService.saveCharges(delOutboundCharges);
+            stopWatch.stop();
+            logger.info(">>>>>[创建出库单{}]-Pricing保存出库单费用信息：耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
+            // 更新值
+            delOutbound.setAmount(totalAmount);
+            delOutbound.setCurrencyCode(totalCurrencyCode);
+            DelOutboundOperationLogEnum.BRV_PRC_PRICING.listener(delOutbound);
         }
 
         @Override
@@ -425,8 +422,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setShipmentOrderLabelUrl("");
             // 推单WMS
             updateDelOutbound.setRefOrderNo("");
-
-
 
             // 提审失败
             updateDelOutbound.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode());
@@ -480,7 +475,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             Map<String, List<DelOutboundCharge>> groupByCharge =
                     delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
             for (String currencyCode: groupByCharge.keySet()){
-                BigDecimal bigDecimal = new BigDecimal(0);
+                BigDecimal bigDecimal = BigDecimal.ZERO;
                 for (DelOutboundCharge c:groupByCharge.get(currencyCode)) {
                     if(c.getAmount() != null){
                         bigDecimal = bigDecimal.add(c.getAmount());
@@ -497,22 +492,19 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 stopWatch.start();
                 R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);
                 stopWatch.stop();
-                logger.info(">>>>>[创建出库单{}]结束冻结费用, 数据:{} ,耗时{}",
-                        delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO), stopWatch.getLastTaskInfo().getTimeMillis());
-                if (null != freezeBalanceR) {
-                    if (Constants.SUCCESS != freezeBalanceR.getCode()) {
-                        // 异常信息
-                        String msg = Utils.defaultValue(freezeBalanceR.getMsg(), MessageUtil.to("冻结费用信息失败", "Failed to freeze expense information")+ "2");
-                        throw new CommonException("400", msg);
-                    }
-                } else {
-                    // 异常信息
+
+                if (null == freezeBalanceR) {
                     throw new CommonException("400", MessageUtil.to("冻结费用信息失败", "Failed to freeze expense information"));
                 }
 
+                if (Constants.SUCCESS != freezeBalanceR.getCode()) {
+                    // 异常信息
+                    String msg = Utils.defaultValue(freezeBalanceR.getMsg(), MessageUtil.to("冻结费用信息失败", "Failed to freeze expense information")+ "2");
+                    throw new CommonException("400", msg);
+                }
+
+                logger.info(">>>>>[创建出库单{}]结束冻结费用, 数据:{} ,耗时{}", delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO), stopWatch.getLastTaskInfo().getTimeMillis());
             }
-
-
 
         }
 
@@ -600,19 +592,18 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             stopWatch.stop();
 
             logger.info(">>>>>[创建出库单{}]获取产品信息 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
-            if (null != pricedProductInfo) {
-                // 从PRC返回进行取值，这里作废
-                // delOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
-                delOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
-                // 这两个字段从PRC返回赋值了
-                // delOutbound.setProductShipmentRule(pricedProductInfo.getShipmentRule());
-                // delOutbound.setPackingRule(pricedProductInfo.getPackingRule());
-                delOutbound.setPrcProductCode(prcProductCode);
-                DelOutboundOperationLogEnum.BRV_PRODUCT_INFO.listener(delOutbound);
-            } else {
-                // 异常信息
+            if (null == pricedProductInfo) {
                 throw new CommonException("400", MessageUtil.to("查询产品[" + productCode + "]信息失败","Failed to query product ["+productCode+"] information" ));
             }
+
+            // 从PRC返回进行取值，这里作废
+            // delOutbound.setShipmentService(pricedProductInfo.getLogisticsRouteId());
+            delOutbound.setTrackingAcquireType(pricedProductInfo.getTrackingAcquireType());
+            // 这两个字段从PRC返回赋值了
+            // delOutbound.setProductShipmentRule(pricedProductInfo.getShipmentRule());
+            // delOutbound.setPackingRule(pricedProductInfo.getPackingRule());
+            delOutbound.setPrcProductCode(prcProductCode);
+            DelOutboundOperationLogEnum.BRV_PRODUCT_INFO.listener(delOutbound);
         }
 
         @Override
@@ -656,7 +647,6 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             logger.info("{}-新增发货规则：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
-
 
             stopWatch.start();
             delOutboundBringVerifyService.shipmentRule(delOutbound);
