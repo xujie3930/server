@@ -342,14 +342,21 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Transactional
     @Override
     public R feeDeductions(CustPayDTO dto) {
-        if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0) return R.ok();
+        if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0){
+            return R.ok();
+        }
         // 校验
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }
 
         boolean b = checkForDuplicateCharges(dto);
-        if (b) return R.ok();
+
+        log.info("feeDeductions 幂等校验 校验重复扣费:{},{}",dto.getNo(),b);
+
+        if (b){
+            return R.ok();
+        }
 
         setCurrencyName(dto);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS);
@@ -357,7 +364,13 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         log.info(LogUtil.format(dto, "费用扣除"));
         Boolean flag = abstractPayFactory.updateBalance(dto);
-        if (Objects.isNull(flag)) return R.ok();
+
+        if (Objects.isNull(flag)){
+            return R.ok();
+        }
+
+        log.info("feeDeductions 费用扣除:{},{}",dto.getNo(),flag);
+
         if (flag) {
             log.info(LogUtil.format(dto, "费用扣除", "添加操作费用表"));
             this.addOptLogAsync(dto);
