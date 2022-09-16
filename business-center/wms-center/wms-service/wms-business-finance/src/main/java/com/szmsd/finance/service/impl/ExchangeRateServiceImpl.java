@@ -11,6 +11,7 @@ import com.szmsd.finance.domain.ExchangeRate;
 import com.szmsd.finance.dto.ExchangeRateDTO;
 import com.szmsd.finance.mapper.ExchangeRateMapper;
 import com.szmsd.finance.service.IExchangeRateService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
  * @author liulei
  */
 @Service
+@Slf4j
 public class ExchangeRateServiceImpl implements IExchangeRateService {
 
     @Autowired
@@ -119,16 +121,22 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
 
     @Override
     public int insertExchangeRate(List<Map> mapList) {
+        log.info("传入参数：{}",mapList);
         JSONArray jsonArray = new JSONArray();
+        log.info("放入jsonArray：{}");
         jsonArray.addAll(mapList);
+        log.info("转换jsonArray：{}",jsonArray);
         List<ExchangeRate> list = jsonArray.toJavaList(ExchangeRate.class);
+        log.info("转换list：{}",list);
         Set<ExchangeRate> set=new HashSet<ExchangeRate>();
+        log.info("开始转换set：{}",set);
         set.addAll(list);
+        log.info("转换后set：{}",set);
         set.forEach(x->{
              exchangeRateMapper.insert(x);
 
         });
-       return 0;
+       return 1;
     }
 
     @Override
