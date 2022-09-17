@@ -23,7 +23,9 @@ import com.szmsd.inventory.domain.PurchaseDetails;
 import com.szmsd.inventory.domain.PurchaseStorageDetails;
 import com.szmsd.inventory.domain.dto.*;
 import com.szmsd.inventory.domain.excel.PurchaseInfoDetailExcle;
+import com.szmsd.inventory.domain.excel.PurchaseInfoDetailExcleep;
 import com.szmsd.inventory.domain.excel.PurchaseStorageDetailsExcle;
+import com.szmsd.inventory.domain.excel.PurchaseStorageDetailsExclesp;
 import com.szmsd.inventory.domain.vo.PurchaseInfoDetailVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
@@ -522,11 +524,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseMapper, Purchase> i
 
 
     @Override
-    public List<PurchaseInfoDetailExcle> exportusAbnormal(Integer id) {
-        List<PurchaseInfoDetailExcle> list=purchaseDetailsMapper.selectPurchaseInfoDetailExcleListByAssId(id);
+    public List<PurchaseInfoDetailExcleep> exportusAbnormal(Integer id) {
+        List<PurchaseInfoDetailExcleep> list=purchaseDetailsMapper.selectPurchaseInfoDetailExcleListByAssIdep(id);
         list.forEach(x->{
-            List<PurchaseStorageDetailsExcle> list1= purchaseStorageDetailsMapper.selectPurchaseStorageDetailsExcleListByAssIds(x.getSku(),id);
-            x.setPurchaseStorageDetailsExcles(list1);
+            List<PurchaseStorageDetailsExclesp> list1= purchaseStorageDetailsMapper.selectPurchaseStorageDetailsExcleListByAssIdsp(x.getSku(),id);
+            x.setPurchaseStorageDetailsExclesp(list1);
         });
         return list;
     }
