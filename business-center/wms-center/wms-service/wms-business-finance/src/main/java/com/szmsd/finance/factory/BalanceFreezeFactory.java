@@ -44,7 +44,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     @Resource
     private ISysDictDataService sysDictDataService;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public synchronized Boolean updateBalance(final CustPayDTO dto) {
 
@@ -63,7 +63,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 //蒋俊看财务
                 final Boolean checkFlag = checkAndSetBalance(balance, dto);
                 log.info("【updateBalance】 2.1 {} 校验后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
-                log.info("【updateBalance】 3");
+                log.info("【updateBalance】 3 checkFlag {}",checkFlag);
                 if (checkFlag == null){
                     return null;
                 }
@@ -135,8 +135,14 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
      * @return
      */
     private Boolean checkAndSetBalance(BalanceDTO balance, CustPayDTO dto) {
+
+        log.info("checkAndSetBalance ========= S");
+
         BigDecimal changeAmount = dto.getAmount();
         if (BillEnum.PayMethod.BALANCE_FREEZE == dto.getPayMethod()) {
+
+            log.info("checkAndSetBalance ========= BALANCE_FREEZE");
+
             List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
             if (accountBalanceChanges.size() > 0) {
                 log.info("该单已存在冻结额，单号:{}", dto.getNo());
@@ -162,6 +168,9 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
         }
         if (BillEnum.PayMethod.BALANCE_THAW == dto.getPayMethod()) {
+
+            log.info("checkAndSetBalance ========= BALANCE_THAW");
+
             log.info("解冻参数20220916：{}", JSONObject.toJSONString(dto));
             List<AccountBalanceChange> accountBalanceChanges = getRecordList(dto);
             log.info("解冻参数查询返回数据：{}", JSONObject.toJSONString(accountBalanceChanges));
@@ -179,6 +188,9 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 throw new CommonException("999", "解冻金额不足 单号: " + dto.getNo() + " 金额：" + amountChange);
             }
         }
+
+        log.info("checkAndSetBalance ========= E");
+
         return null;
     }
 
