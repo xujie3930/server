@@ -57,10 +57,10 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
                 log.info("【updateBalance】 1 开始查询该用户对应币别的{}余额",currencyCode);
                 BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
-                log.info("【updateBalance】 2 {} 余额剩余：{} ",currencyCode,JSONObject.toJSONString(balance));
+                log.info("【updateBalance】 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 //蒋俊看财务
                 Boolean checkFlag = checkAndSetBalance(balance, dto);
-                log.info("【updateBalance】 2 {} 校验后余额剩余：{} ",currencyCode,JSONObject.toJSONString(balance));
+                log.info("【updateBalance】 2.1 {} 校验后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 log.info("【updateBalance】 3");
                 if (checkFlag == null){
                     return null;
@@ -70,9 +70,11 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 }
                 log.info("【updateBalance】 4");
                 setBalance(dto.getCusCode(), currencyCode, balance);
+                log.info("【updateBalance】 4.1 {} setBalance后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 log.info("【updateBalance】 5");
                 recordOpLogAsync(dto, balance.getCurrentBalance());
                 recordDetailLogAsync(dto, balance);
+                log.info("【updateBalance】 5.1 {} recordOpLogAsync,recordDetailLogAsync后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 log.info("【updateBalance】 6");
                 return true;
             } else {
