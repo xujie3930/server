@@ -42,21 +42,25 @@ public class DelOutboundCollectionImportContainer extends DelOutboundCollectionI
         for (DelOutboundCollectionImportDto dto : dataList) {
             DelOutboundDto outboundDto = new DelOutboundDto();
             outboundDto.setCustomCode(this.sellerCode);
-            outboundDto.setWarehouseCode(dto.getWarehouseCode());
             outboundDto.setOrderType(DelOutboundOrderTypeEnum.COLLECTION.getCode());
             outboundDto.setSellerCode(this.sellerCode);
+            outboundDto.setSourceType(DelOutboundConstant.SOURCE_TYPE_IMP);
+
+
+            outboundDto.setWarehouseCode(dto.getWarehouseCode());
             outboundDto.setShipmentRule(dto.getShipmentRule());
+            outboundDto.setIoss(dto.getIoss());
+            outboundDto.setCodAmount(dto.getCodAmount());
+
             outboundDto.setWeight(dto.getWeight());
             outboundDto.setLength(dto.getLength());
             outboundDto.setWidth(dto.getWidth());
             outboundDto.setHeight(dto.getHeight());
             outboundDto.setAddress(this.buildAddress(dto));
             outboundDto.setDetails(this.buildDetails(dto));
-            outboundDto.setSourceType(DelOutboundConstant.SOURCE_TYPE_IMP);
             outboundDto.setRefNo(dto.getRefNo());
             outboundDto.setRemark(dto.getRemark());
-            outboundDto.setCodAmount(dto.getCodAmount());
-            outboundDto.setIoss(dto.getIoss());
+
             outboundDtoList.add(outboundDto);
         }
         return outboundDtoList;
@@ -85,14 +89,14 @@ public class DelOutboundCollectionImportContainer extends DelOutboundCollectionI
         }
         for (DelOutboundCollectionDetailImportDto2 dto2 : list) {
             DelOutboundDetailDto detail = new DelOutboundDetailDto();
-            detail.setProductName(dto2.getProductName());
-            detail.setProductNameChinese(dto2.getProductNameChinese());
-            detail.setDeclaredValue(dto2.getDeclaredValue());
+//            detail.setProductName(dto2.getProductName());
+//            detail.setProductNameChinese(dto2.getProductNameChinese());
+//            detail.setDeclaredValue(dto2.getDeclaredValue());
             detail.setQty(Long.valueOf(dto2.getQty()));
-            detail.setProductAttribute(dto2.getProductAttribute());
-            detail.setElectrifiedMode(dto2.getElectrifiedMode());
-            detail.setBatteryPackaging(dto2.getBatteryPackaging());
-            detail.setHsCode(dto2.getHsCode());
+//            detail.setProductAttribute(dto2.getProductAttribute());
+//            detail.setElectrifiedMode(dto2.getElectrifiedMode());
+//            detail.setBatteryPackaging(dto2.getBatteryPackaging());
+//            detail.setHsCode(dto2.getHsCode());
             details.add(detail);
         }
         return details;

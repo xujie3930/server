@@ -44,11 +44,11 @@ public class DelOutboundCollectionDetailImportValidation implements ImportValida
             }
         }
         if (!noDetailSet.isEmpty()) {
-            this.importContext.addMessage(new ImportMessage(1, 1, null, "订单顺序" + noDetailSet.toString() + "没有明细"));
+            this.importContext.addMessage(new ImportMessage(1, 1, null, "订单序号" + noDetailSet.toString() + "没有明细"));
         }
         detailKeySet.removeAll(outerKeySet);
         if (!detailKeySet.isEmpty()) {
-            this.importContext.addMessage(new ImportMessage(1, 1, null, "订单顺序" + detailKeySet.toString() + "没有单据"));
+            this.importContext.addMessage(new ImportMessage(1, 1, null, "订单序号" + detailKeySet.toString() + "没有单据"));
         }
         return CollectionUtils.isEmpty(this.importContext.getMessageList());
     }
@@ -56,14 +56,17 @@ public class DelOutboundCollectionDetailImportValidation implements ImportValida
     @Override
     public void valid(int rowIndex, DelOutboundCollectionDetailImportDto2 object) {
         Integer sort = object.getSort();
-        if (this.importContext.isNull(sort, rowIndex, 1, null, "订单顺序不能为空")) {
+        if (this.importContext.isNull(sort, rowIndex, 1, null, "订单序号不能为空")) {
             return;
         }
-        this.importContext.isEmpty(object.getProductName(), rowIndex, 2, null, "英文申报品名不能为空");
-        this.importContext.isEmpty(object.getProductNameChinese(), rowIndex, 3, null, "中文申报品名不能为空");
-        this.importContext.isNull(object.getDeclaredValue(), rowIndex, 4, null, "申报价值不能为空");
-        this.importContext.isNull(object.getQty(), rowIndex, 5, null, "出库数量不能为空");
-        String productAttributeName = object.getProductAttributeName();
+//        this.importContext.isEmpty(object.getProductName(), rowIndex, 2, null, "英文申报品名不能为空");
+//        this.importContext.isEmpty(object.getProductNameChinese(), rowIndex, 3, null, "中文申报品名不能为空");
+//        this.importContext.isNull(object.getDeclaredValue(), rowIndex, 4, null, "申报价值不能为空");
+
+        this.importContext.isEmpty(object.getCode(), rowIndex, 2, null, "产品编码不能为空");
+
+        this.importContext.isNull(object.getQty(), rowIndex, 3, null, "数量不能为空");
+        /*String productAttributeName = object.getProductAttributeName();
         if (this.importContext.isEmpty(productAttributeName, rowIndex, 6, null, "产品属性不能为空")) {
             return;
         } else {
@@ -85,7 +88,7 @@ public class DelOutboundCollectionDetailImportValidation implements ImportValida
             if (!this.importContext.isEmpty(batteryPackaging, rowIndex, 8, batteryPackagingName, "电池包装不存在")) {
                 object.setBatteryPackaging(batteryPackaging);
             }
-        }
+        }*/
     }
 
     @Override

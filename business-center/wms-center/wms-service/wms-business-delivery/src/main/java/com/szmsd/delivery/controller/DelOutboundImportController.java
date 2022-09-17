@@ -144,8 +144,20 @@ public class DelOutboundImportController extends BaseController {
     @GetMapping("/collectionImportTemplate")
     @ApiOperation(value = "出库管理 - 导入 - 集运出库导入模板", position = 300)
     public void collectionImportTemplate(HttpServletResponse response) {
-        String filePath = "/template/DM-CentralizedTransportation.xls";
-        String fileName = "集运出库模板";
+
+        String len=getLen().toLowerCase(Locale.ROOT);
+        String filePath=null;
+        String fileName=null;
+        if (len.equals("zh")){
+            filePath = "/template/DM-CentralizedTransportation.xlsx";
+            fileName = "集运出库模板";
+        }else if (len.equals("en")){
+            filePath = "/template/DM-CentralizedTransportation-en.xls";
+            fileName = "AddedSKUImportTemplate";
+        }
+
+
+
         this.downloadTemplate(response, filePath, fileName);
     }
 

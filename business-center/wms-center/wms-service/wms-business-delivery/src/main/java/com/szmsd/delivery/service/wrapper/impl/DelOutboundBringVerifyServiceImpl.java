@@ -1352,6 +1352,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
         shipmentUpdateRequestDto.setIsEx(true);
         shipmentUpdateRequestDto.setExType("OutboundGetTrackingFailed");
+        exRemark = ProblemDetails.getErrorMessageOrNullFormat(exRemark);
+        logger.info("单号{}，shipmentShipping异常信息{}", delOutbound.getOrderNo(), exRemark);
         shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(exRemark, MessageUtil.to("操作失败", "operation failed")));
         shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
         htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
