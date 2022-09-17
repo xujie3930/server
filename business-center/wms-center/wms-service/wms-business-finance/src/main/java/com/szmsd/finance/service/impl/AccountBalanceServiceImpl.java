@@ -176,7 +176,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             return R.ok(pageInfo);
         }catch (Exception e){
             e.printStackTrace();
-           return R.failed("查询失败");
+           return R.failed("Query failed");
         }
 
 
@@ -276,7 +276,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public R preOnlineIncome(CustPayDTO dto) {
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
-            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+            return R.failed("Customer Code/currency Cannot be blank and the amount must be greater than 0.01");
         }
         RechargesRequestDTO rechargesRequestDTO = new RechargesRequestDTO();
         //填充rechargesRequestDTO的信息
@@ -304,7 +304,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         //更新第三方接口调用记录
         ThirdRechargeRecord thirdRechargeRecord = thirdRechargeRecordService.updateRecordIfSuccess(requestDTO);
         if (thirdRechargeRecord == null) {
-            return R.failed("没有找到对应的充值记录");
+            return R.failed("No corresponding recharge record found");
         }
         String rechargeStatus = HttpRechargeConstants.RechargeStatusCode.Successed.name();
         //如果充值成功进行充值
@@ -313,7 +313,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             dto.setAmount(thirdRechargeRecord.getActualAmount());
             dto.setCurrencyCode(thirdRechargeRecord.getActualCurrency());
             dto.setCusCode(thirdRechargeRecord.getCusCode());
-            dto.setRemark("手续费为: ".concat(thirdRechargeRecord.getTransactionAmount().toString().concat(thirdRechargeRecord.getTransactionCurrency())));
+            dto.setRemark("The service charge is: ".concat(thirdRechargeRecord.getTransactionAmount().toString().concat(thirdRechargeRecord.getTransactionCurrency())));
             dto.setNo(thirdRechargeRecord.getRechargeNo());
             return onlineIncome(dto);
         }
@@ -324,10 +324,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public R warehouseFeeDeductions(CustPayDTO dto) {
         if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0) return R.ok();
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
-            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+            return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
         }
         if (dto.getPayType() == null) {
-            return R.failed("支付类型为空");
+            return R.failed("Payment type is empty");
         }
         setCurrencyName(dto);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
@@ -338,7 +338,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             log.info(LogUtil.format(dto, "仓储费扣除", "添加操作费用表"));
             this.addOptLogAsync(dto);
         }
-        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "Insufficient account balance");
     }
 
     /**
@@ -359,7 +359,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         }
         // 校验
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
-            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+            return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
         }
 
         boolean b = checkForDuplicateCharges(dto);
@@ -387,7 +387,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             log.info(LogUtil.format(dto, "费用扣除", "添加操作费用表"));
             this.addOptLogAsync(dto);
         }
-        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "Insufficient account balance");
     }
 
     /**
@@ -455,7 +455,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         BeanUtils.copyProperties(cfbDTO, dto);
         if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0) return R.ok();
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
-            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+            return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
         }
         setCurrencyName(dto);
         dto.setPayType(BillEnum.PayType.FREEZE);
@@ -470,7 +470,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             log.info(LogUtil.format(cfbDTO, "费用冻结", "操作费用表"));
             this.addOptLogAsync(dto);
         }
-        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户可用余额不足以冻结");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "The available balance of the account is insufficient for freezing");
     }
 
     @Transactional
@@ -485,7 +485,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         log.info("开始解冻费用：{}",JSONObject.toJSONString(cfbDTO));
 
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
-            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+            return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
         }
         dto.setPayType(BillEnum.PayType.FREEZE);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_THAW);
@@ -508,7 +508,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             log.info(LogUtil.format(cfbDTO, "解冻金额", "操作费用表"));
             this.addOptLogAsync(dto);
         }
-        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getNo()) + "账户冻结金额不足以解冻");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getNo()) + "The account frozen amount is not enough to unfreeze");
     }
 
     /**
@@ -629,7 +629,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public R onlineIncome(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
-            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+            return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
         }
         setCurrencyName(dto);
         dto.setPayType(BillEnum.PayType.INCOME);
@@ -670,7 +670,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public R offlineIncome(CustPayDTO dto) {
 //        fillCustInfo(loginUser,dto);
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
-            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+            return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
         }
         setCurrencyName(dto);
         dto.setPayType(BillEnum.PayType.INCOME);
@@ -691,16 +691,16 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public R balanceExchange(CustPayDTO dto) {
         AssertUtil.notNull(dto.getRate(), "汇率不能为空");
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
-            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+            return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
         }
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode2(), dto.getAmount())) {
-            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+            return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
         }
         dto.setPayType(BillEnum.PayType.EXCHANGE);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         Boolean flag = abstractPayFactory.updateBalance(dto);
         if (Objects.isNull(flag)) return R.ok();
-        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "Insufficient account balance");
     }
 
     /**
@@ -751,14 +751,14 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public R withdraw(CustPayDTO dto) {
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
-            return R.failed("客户编码/币种不能为空且金额必须大于0.01");
+            return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
         }
 //        fillCustInfo(loginUser,dto);
         dto.setPayType(BillEnum.PayType.PAYMENT_NO_FREEZE);
         dto.setPayMethod(BillEnum.PayMethod.WITHDRAW_PAYMENT);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         boolean flag = abstractPayFactory.updateBalance(dto);
-        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "Insufficient account balance");
     }
 
     private String getCurrencyName(String currencyCode) {

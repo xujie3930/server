@@ -64,12 +64,12 @@ public class RedirectUriController {
     })
     public R<Object> tokenClear(@RequestParam(value = "domain") String domain) {
         if (StringUtils.isEmpty(domain)) {
-            return R.failed("domain不能为空");
+            return R.failed("domain Cannot be empty");
         }
         this.logger.info("请求参数：{}", domain);
         DomainTokenValue domainTokenValue = domainTokenConfig.getToken(domain);
         if (null == domainTokenValue) {
-            return R.failed("没有配置，" + domain);
+            return R.failed("No configuration，" + domain);
         }
         String domainToken = domainTokenValue.getDomainToken();
         try {
@@ -92,7 +92,7 @@ public class RedirectUriController {
             map.put("refreshTokenKey", aBoolean1);
             return R.ok(map);
         } catch (Exception e) {
-            return R.failed("执行失败，错误信息：" + e.getMessage());
+            return R.failed("Execution failed，error message：" + e.getMessage());
         }
     }
 
@@ -104,12 +104,12 @@ public class RedirectUriController {
     public R<Object> setRefreshToken(@RequestParam(value = "domain") String domain,
                                      @RequestParam(value = "refreshToken") String refreshToken) {
         if (StringUtils.isEmpty(domain)) {
-            return R.failed("domain不能为空");
+            return R.failed("domain Cannot be empty");
         }
         this.logger.info("请求参数：{}", domain);
         DomainTokenValue domainTokenValue = domainTokenConfig.getToken(domain);
         if (null == domainTokenValue) {
-            return R.failed("没有配置，" + domain);
+            return R.failed("No configuration，" + domain);
         }
         String domainToken = domainTokenValue.getDomainToken();
         try {
@@ -126,7 +126,7 @@ public class RedirectUriController {
             map.put("wrapRefreshTokenKey", wrapRefreshTokenKey);
             return R.ok(map);
         } catch (Exception e) {
-            return R.failed("执行失败，错误信息：" + e.getMessage());
+            return R.failed("Execution failed，error message：" + e.getMessage());
         }
     }
 
@@ -137,12 +137,12 @@ public class RedirectUriController {
     })
     public R<Object> getTokenInfo(@RequestParam(value = "domain") String domain) {
         if (StringUtils.isEmpty(domain)) {
-            return R.failed("domain不能为空");
+            return R.failed("domain Cannot be empty");
         }
         this.logger.info("请求参数：{}", domain);
         DomainTokenValue domainTokenValue = domainTokenConfig.getToken(domain);
         if (null == domainTokenValue) {
-            return R.failed("没有配置，" + domain);
+            return R.failed("No configuration，" + domain);
         }
         String domainToken = domainTokenValue.getDomainToken();
         try {
@@ -159,7 +159,7 @@ public class RedirectUriController {
             map.put("tokenValue", tokenValue);
             return R.ok(map);
         } catch (Exception e) {
-            return R.failed("执行失败，错误信息：" + e.getMessage());
+            return R.failed("Execution failed，error message：" + e.getMessage());
         }
     }
 }

@@ -47,10 +47,10 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
     @Override
     public R save(ExchangeRateDTO dto) {
         if(dto.getRate()==null){
-            return R.failed("汇率不能为空");
+            return R.failed("Exchange rate cannot be blank");
         }
         if(!checkExchangeRateIsExists(dto,0)){
-            return R.failed("币种为空或者该汇率已维护");
+            return R.failed("Currency is blank or the exchange rate has been maintained");
         }
         ExchangeRate domain= new ExchangeRate();
         BeanUtils.copyProperties(dto,domain);
@@ -58,7 +58,7 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
         if(insert>0){
             return R.ok();
         }
-        return R.failed("保存异常");
+        return R.failed("Save Exception");
     }
 
     private boolean checkExchangeRateIsExists(ExchangeRateDTO dto, int count) {
@@ -74,7 +74,7 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
     @Override
     public R update(ExchangeRateDTO dto) {
         if(!checkExchangeRateIsExists(dto,1)){
-            return R.failed("币种为空或者该汇率已维护");
+            return R.failed("Currency is blank or the exchange rate has been maintained");
         }
         ExchangeRate fer=new ExchangeRate();
         BeanUtils.copyProperties(dto,fer);
@@ -111,7 +111,7 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
         if(fromToRate!=null){
             return R.ok(fromToRate);
         }*/
-        return R.failed("未查询到对应币种的汇率交换");
+        return R.failed("Exchange rate exchange of corresponding currency is not found");
     }
 
     @Override

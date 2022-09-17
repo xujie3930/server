@@ -128,12 +128,12 @@ public class BaseProductController extends BaseController {
 
         List<BaseProductImportDto> userList = EasyExcel.read(file.getInputStream(), BaseProductImportDto.class, new SyncReadListener()).sheet().doReadSync();
         if (CollectionUtils.isEmpty(userList)) {
-            throw new BaseException("导入内容为空");
+            throw new BaseException("The import content is empty");
         }
 
         for (int x=0;x<userList.size();x++) {
             if (userList.get(x).getCode().getBytes().length != userList.get(x).getCode().length()) {
-                throw new BaseException("第"+(x+2)+"行的sku存在中文");
+                throw new BaseException("In the "+(x+2)+" Sku of line exists in Chinese");
 
             }
         }
@@ -315,12 +315,12 @@ public class BaseProductController extends BaseController {
             if (lock.tryLock(BaseConstant.LOCK_TIME, BaseConstant.LOCK_TIME_UNIT)) {
                 return toOk(baseProductService.insertBaseProduct(baseProductDto));
             } else {
-                return R.failed(BaseConstant.genErrorMsg("新增SKU"));
+                return R.failed(BaseConstant.genErrorMsg("New SKU"));
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
-            log.error(BaseConstant.genErrorMsg("新增SKU"), e);
-            return R.failed(BaseConstant.genErrorMsg("新增SKU"));
+            log.error(BaseConstant.genErrorMsg("New SKU"), e);
+            return R.failed(BaseConstant.genErrorMsg("New SKU"));
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
@@ -338,12 +338,12 @@ public class BaseProductController extends BaseController {
             if (lock.tryLock(BaseConstant.LOCK_TIME, BaseConstant.LOCK_TIME_UNIT)) {
                 return R.ok(baseProductService.BatchInsertBaseProduct(baseProductDtos));
             } else {
-                return R.failed(BaseConstant.genErrorMsg("新增SKU"));
+                return R.failed(BaseConstant.genErrorMsg("New SKU"));
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
-            log.error(BaseConstant.genErrorMsg("新增SKU"), e);
-            return R.failed(BaseConstant.genErrorMsg("新增SKU"));
+            log.error(BaseConstant.genErrorMsg("New SKU"), e);
+            return R.failed(BaseConstant.genErrorMsg("New SKU"));
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();

@@ -115,7 +115,7 @@ public class BasCarrierKeywordController extends BaseController {
     public R changeStatus(@RequestParam Integer id, @RequestParam String status){
         BasCarrierKeyword keyword = basCarrierKeywordService.getById(id);
         if (keyword == null) {
-            return R.failed("关键词不存在");
+            return R.failed("Keyword does not exist");
         }
         keyword.setStatus(status);
         basCarrierKeywordService.updateById(keyword);

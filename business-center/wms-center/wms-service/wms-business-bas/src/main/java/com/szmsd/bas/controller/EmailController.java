@@ -52,7 +52,7 @@ public class EmailController extends BaseController {
         queryWrapperEmail.eq("init_email",email);
         int count = basSellerService.count(queryWrapperEmail);
         if(count!=0){
-           throw new BaseException("邮箱重复，请更换邮箱");
+           throw new BaseException("Duplicate mailbox，Please change the mailbox");
         }
         EmailEnum varCode = EmailEnum.VAR_CODE;
         String key = varCode.name().concat("-").concat(email);

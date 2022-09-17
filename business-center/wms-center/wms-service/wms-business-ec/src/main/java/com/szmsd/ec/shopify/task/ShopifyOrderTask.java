@@ -102,7 +102,7 @@ public class ShopifyOrderTask {
         permission.setShop(shopName);
         R<List<BasSellerShopifyPermission>> listR = basSellerShopifyPermissionFeignService.list(permission);
         if (listR == null || listR.getCode() != 200 || CollectionUtils.isEmpty(listR.getData())) {
-            throw new BaseException("该店铺信息异常，无法拉取订单");
+            throw new BaseException("The store information is abnormal, unable to pull the order");
         }
         List<BasSellerShopifyPermission> shopifyPermissionList = listR.getData();
         pullShopifyOrder(shopifyPermissionList);
@@ -207,7 +207,7 @@ public class ShopifyOrderTask {
                 log.info("【Shopify】店铺{}获取订单返回结果无返回数据",shop.getShop());
                 // 手动拉不到单的情况下  因为手动拉单只能选择一个店铺进行操作 所以这里判断 shopNum 为了防止影响自动拉单情况
                 if (i == 0 && shopNum == 1){
-                    throw new BaseException("没有最新的订单");
+                    throw new BaseException("No latest orders");
                 }
             }
 

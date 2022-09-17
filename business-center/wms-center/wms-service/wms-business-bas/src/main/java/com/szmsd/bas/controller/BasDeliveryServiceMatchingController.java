@@ -88,10 +88,10 @@ public class BasDeliveryServiceMatchingController extends BaseController{
 
 
         if(StringUtils.isEmpty(dto.getSellerCode())){
-            throw new CommonException("400", "sellerCode 不能空");
+            throw new CommonException("400", "sellerCode Cannot be empty");
         }
         if(StringUtils.isEmpty(dto.getSkuList())){
-            throw new CommonException("400", "skuList 不能空");
+            throw new CommonException("400", "skuList Cannot be empty");
         }
         return R.ok(basDeliveryServiceMatchingService.getList(dto));
     }

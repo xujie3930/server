@@ -102,13 +102,13 @@ public class BasProductTypeController extends BaseController {
         basProductType2.setPrefixNumber(basProductType.getPrefixNumber());
         List<BasProductType> list = basProductTypeService.selectBasProductTypeList(basProductType);
         if (list.size()!=0){
-            return R.failed("单号前缀重复");
+            return R.failed("Order number with duplicate prefix");
         }
         BasProductType basProductTypes =new BasProductType();
         basProductTypes.setProductTypeCode(basProductType.getProductTypeCode());
         List<BasProductType> lists = basProductTypeService.selectBasProductTypeList(basProductTypes);
         if (lists.size()!=0){
-            return R.failed("产品类型编号重复");
+            return R.failed("Duplicate product type number");
         }
 //        String uid = UUID.randomUUID().toString().substring(0, 10);
 //        basProductType.setProductTypeCode(uid);

@@ -288,7 +288,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", etSkuAttributeRequest.getSku());
         if (super.count(queryWrapper) < 1) {
-            throw new BaseException("sku不存在");
+            throw new BaseException("Sku does not exist");
         }
         String operationOn = etSkuAttributeRequest.getOperateOn();
         BaseProduct baseProduct = new BaseProduct();
@@ -305,7 +305,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         baseProduct.setOperator(etSkuAttributeRequest.getOperator());
 
         if(!map059.containsKey(etSkuAttributeRequest.getSkuAttribute())){
-            throw new BaseException("sku属性不存在"+etSkuAttributeRequest.getSkuAttribute());
+            throw new BaseException("Sku attribute does not exist"+etSkuAttributeRequest.getSkuAttribute());
         }
         baseProduct.setProductAttribute(etSkuAttributeRequest.getSkuAttribute());
         baseProduct.setProductAttributeName(map059.get(etSkuAttributeRequest.getSkuAttribute()));
@@ -323,7 +323,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         queryWrapper.eq("code", request.getCode());
         //queryWrapper.eq("category", ProductConstant.SKU_NAME);
         if (super.count(queryWrapper) < 1) {
-            throw new BaseException("sku不存在");
+            throw new BaseException("Sku does not exist");
         }
         BigDecimal volume = new BigDecimal(request.getHeight()).multiply(new BigDecimal(request.getWidth()))
                 .multiply(new BigDecimal(request.getLength()))
@@ -369,7 +369,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             queryWrapper.eq("code", baseProduct.getCode());
             queryWrapper.eq("is_active", true);
         } else {
-            return R.failed("有效sku编码为空");
+            return R.failed("Valid sku Number is empty");
         }
         return R.ok(super.getOne(queryWrapper));
     }
@@ -415,7 +415,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             }
         } else {
             if (baseProductDto.getCode().length() < 2) {
-                throw new CommonException("400", baseProductDto.getCode() + "编码长度不能小于两个字符");
+                throw new CommonException("400", baseProductDto.getCode() + "The encoding length cannot be less than two characters");
             }
         }
         //验证 填写信息
@@ -423,7 +423,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("code", baseProductDto.getCode());
         if (super.count(queryWrapper) == 1) {
-            throw new CommonException("400", baseProductDto.getCode() + "编码重复");
+            throw new CommonException("400", baseProductDto.getCode() + "Duplicate encoding");
         }
         //默认激活
         baseProductDto.setIsActive(true);
@@ -536,7 +536,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 }
             } else {
                 if (o.getCode().length() < 2) {
-                    throw new CommonException("400", o.getCategory() + "编码长度不能小于两个字符");
+                    throw new CommonException("400", o.getCategory() + "The encoding length cannot be less than two characters");
                 }
             }
             //验证 填写信息
@@ -544,7 +544,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             QueryWrapper<BaseProduct> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("code", o.getCode());
             if (super.count(queryWrapper) == 1) {
-                throw new BaseException(o.getCategory() + "编码重复");
+                throw new BaseException(o.getCategory() + "Duplicate encoding");
             }
             //默认激活
             o.setIsActive(true);
@@ -679,7 +679,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         } else {
             r.setData(false);
             r.setCode(-200);
-            r.setMsg("SKU不存在");
+            r.setMsg("SKU does not exist");
         }
         return r;
     }
@@ -718,14 +718,14 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             ExcelUtil<BasProductMultipleTicketDTO> util = new ExcelUtil<>(BasProductMultipleTicketDTO.class);
             List<BasProductMultipleTicketDTO> basSellerMultipleTicketDTOS = util.importExcel(inputStream);
             if (CollectionUtils.isEmpty(basSellerMultipleTicketDTOS))
-                return "导入数据为空";
+                return "The import data is empty";
             List<BasProductMultipleTicketDTO> updateList = basSellerMultipleTicketDTOS.parallelStream()
                     .filter(x -> StringUtils.isNotBlank(x.getSellerCode()) && StringUtils.isNotBlank(x.getMultipleTicketFlagStr()))
                     .collect(Collectors.toList());
             List<String> sellerCodeList = updateList.parallelStream().map(BasProductMultipleTicketDTO::getSellerCode).distinct().collect(Collectors.toList());
             List<String> skuList = updateList.parallelStream().map(BasProductMultipleTicketDTO::getSku).distinct().collect(Collectors.toList());
             if (CollectionUtils.isEmpty(sellerCodeList) || CollectionUtils.isEmpty(skuList))
-                return "导入数据内容异常";
+                return "Exception in importing data content";
 
             List<BaseProduct> canUpdateSellerCodeList = baseMapper.selectList(Wrappers.<BaseProduct>lambdaQuery()
                     .in(BaseProduct::getSellerCode, sellerCodeList)
@@ -742,7 +742,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             updateInfoMap.forEach((sellerCode, infoList) -> {
                 List<BaseProduct> baseProducts = canUpdateSellerCodeMap.get(sellerCode);
                 if (CollectionUtils.isEmpty(baseProducts)) {
-                    errorMsg.add("用户不存在：" + sellerCode);
+                    errorMsg.add("user does not exist：" + sellerCode);
                     return;
                 }
 
@@ -755,7 +755,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                         baseProduct1.setMultipleTicketFlag(x.getMultipleTicketFlag());
                         updateResultList.add(baseProduct1);
                     } else {
-                        errorMsg.add("用户" + sellerCode + "不存在SKU：" + x.getSku());
+                        errorMsg.add("user " + sellerCode + " No SKU exists ：" + x.getSku());
                     }
                 });
             });
@@ -764,7 +764,7 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             return StringUtils.join(errorMsg, ";");
         } catch (Exception e) {
             log.error("", e);
-            return "导入数据异常";
+            return "Exception in importing data";
         }
     }
 
@@ -785,21 +785,21 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
             if (StringUtils.isNotEmpty(baseProductDto.getProductAttribute())) {
                 if ("Battery".equals(baseProductDto.getProductAttribute())) {
                     if (StringUtils.isEmpty(baseProductDto.getElectrifiedMode()) || StringUtils.isEmpty(baseProductDto.getBatteryPackaging())) {
-                        throw new BaseException("未填写带电信息");
+                        throw new BaseException("Not filled in electric information");
                     }
                 } else {
                     if (StringUtils.isNotEmpty(baseProductDto.getElectrifiedMode()) || StringUtils.isNotEmpty(baseProductDto.getBatteryPackaging())) {
-                        throw new BaseException("请勿填写带电信息");
+                        throw new BaseException("Please do not fill in electric information");
                     }
                 }
 
                 if (baseProductDto.getHavePackingMaterial() == true) {
                     if (StringUtils.isEmpty(baseProductDto.getBindCode())) {
-                        throw new BaseException("未填写附带包材");
+                        throw new BaseException("Not filled in Attached Packaging materials");
                     }
                 } else {
                     if (StringUtils.isNotEmpty(baseProductDto.getBindCode())) {
-                        throw new BaseException("请勿填写附带包材");
+                        throw new BaseException("Please do not fill in  Attached Packaging material");
                     }
                 }
             }
@@ -978,18 +978,18 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
 
     private void toWms(R<ResponseVO> r) {
         if (r == null) {
-            throw new RuntimeException("wms服务调用失败");
+            throw new RuntimeException("Wms service call failed");
         }
         if (r.getData() == null) {
             //throw new BaseException("wms服务调用失败");
         } else {
             if (r.getData().getSuccess() == null) {
                 if (r.getData().getErrors() != null) {
-                    throw new RuntimeException("传wms失败" + r.getData().getErrors());
+                    throw new RuntimeException("Failed to transmit wms" + r.getData().getErrors());
                 }
             } else {
                 if (!r.getData().getSuccess()) {
-                    throw new RuntimeException("传wms失败" + r.getData().getMessage());
+                    throw new RuntimeException("Failed to transmit wms" + r.getData().getMessage());
                 }
             }
         }
