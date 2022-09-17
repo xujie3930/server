@@ -156,13 +156,24 @@ public class ReturnExpressClientController extends BaseController {
     @Log(title = "退货服务模块", businessType = BusinessType.UPDATE)
     @ApiOperation(value = "导出模板")
     public void exportTemplate(HttpServletResponse response) {
-        ClassPathResource classPathResource = new ClassPathResource("/template/退货处理模板.xlsx");
+        String le=getLen();
+        ClassPathResource classPathResource=null;
+        String excelNames="";
+        if (le.equals("zh")){
+             classPathResource = new ClassPathResource("/template/退货处理模板.xlsx");
+            excelNames="退货处理模板";
+        }else if (le.equals("en")){
+            classPathResource = new ClassPathResource("/template/Return_Processing_Template.xlsx");
+            excelNames="ReturnProcessingTemplate";
+        }
+
         try (InputStream inputStream = classPathResource.getInputStream();
              ServletOutputStream outputStream = response.getOutputStream()) {
 
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             response.setCharacterEncoding("UTF-8");
-            String excelName = URLEncoder.encode("退货处理模板", "UTF-8");
+
+            String excelName = URLEncoder.encode(excelNames, "UTF-8");
             response.setHeader("Content-Disposition", "attachment;filename=" + excelName + ".xls");
             IOUtils.copy(inputStream, outputStream);
             outputStream.flush();
