@@ -63,7 +63,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         int updCount = 0;
 
         try {
-            if (lock.tryLock(time, unit)) {
+            if (lock.tryLock(1,time, unit)) {
 
                 final String currencyCode = dto.getCurrencyCode();
 
