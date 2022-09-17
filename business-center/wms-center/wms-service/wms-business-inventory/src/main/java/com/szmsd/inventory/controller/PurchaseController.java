@@ -15,6 +15,7 @@ import com.szmsd.inventory.domain.dto.PurchaseAddDTO;
 import com.szmsd.inventory.domain.dto.PurchaseQueryDTO;
 import com.szmsd.inventory.domain.dto.TransportWarehousingAddDTO;
 import com.szmsd.inventory.domain.excel.PurchaseInfoDetailExcle;
+import com.szmsd.inventory.domain.excel.PurchaseInfoDetailExcleep;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
 import io.swagger.annotations.ApiImplicitParam;
@@ -251,7 +252,7 @@ public class PurchaseController extends BaseController {
         }
 
         //导出的异常数据
-        List<PurchaseInfoDetailExcle> list=purchaseService.exportusAbnormal(id);
+        List<PurchaseInfoDetailExcleep> list=purchaseService.exportusAbnormal(id);
 
 
 
@@ -267,7 +268,7 @@ public class PurchaseController extends BaseController {
 
 
 
-        Workbook workbook = ExcelExportUtil.exportExcel(params, PurchaseInfoDetailExcle.class, list);
+        Workbook workbook = ExcelExportUtil.exportExcel(params, PurchaseInfoDetailExcleep.class, list);
 
 
         Sheet sheet= workbook.getSheet("sheet0");
@@ -304,7 +305,7 @@ public class PurchaseController extends BaseController {
 
         //获取第二行数据
         Row row3 =sheet.getRow(1);
-        for (int x=4;x<6;x++) {
+        for (int x=4;x<7;x++) {
             Cell deliveryTimeCell1 = row3.getCell(x);
             CellStyle styleMain1 = workbook.createCellStyle();
             styleMain1.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());

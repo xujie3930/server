@@ -103,7 +103,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     private InboundReceiptFeignService inboundReceiptFeignService;
 
     @Override
-    public R<PageInfo<AccountBalance>> listPage(AccountBalanceDTO dto) {
+    public R<PageInfo<AccountBalance>> listPage(AccountBalanceDTO dto,String len) {
         try {
             LambdaQueryWrapper<AccountBalance> queryWrapper = Wrappers.lambdaQuery();
             if (StringUtils.isNotEmpty(dto.getCusCode())) {
@@ -163,6 +163,13 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             });
             accountBalances.forEach(AccountBalance::showCredit);
 
+            accountBalances.forEach(x-> {
+                        if (len.equals("en")) {
+                            x.setCurrencyName(x.getCurrencyCode());
+                        } else if (len.equals("zh")) {
+                            x.setCurrencyName(x.getCurrencyName());
+                        }
+                    });
 
             //获取分页信息
             PageInfo<AccountBalance> pageInfo=new PageInfo<>(accountBalances);

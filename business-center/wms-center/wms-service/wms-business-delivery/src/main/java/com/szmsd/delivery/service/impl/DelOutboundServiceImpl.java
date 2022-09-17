@@ -1357,6 +1357,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 resultList.add(result);
                 continue;
             }
+            //更新业务明细对应出库单的挂号
+            baseMapper.updateFssAccountSerial(list.get(i));
+
             //导入挂号记录表
             DelOutbound delOutbound=baseMapper.selectTrackingNo(updateTrackingNoDto.getOrderNo());
             DelOutboundTarckOn delOutboundTarckOn=new DelOutboundTarckOn();

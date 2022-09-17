@@ -2,8 +2,10 @@ package com.szmsd.returnex.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.common.datascope.annotation.DataScope;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
 import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
+import com.szmsd.returnex.vo.ReturnBasRetreatPiece;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import org.apache.ibatis.annotations.Param;
 
@@ -19,4 +21,10 @@ public interface ReturnExpressMapper extends BaseMapper<ReturnExpressDetail> {
 
     @DataScope("seller_code")
     List<ReturnExpressListVO> selectPageList(@Param(value = "cm") ReturnExpressListQueryDTO queryDto);
+
+    List<ReturnBasRetreatPiece>  selectRetunBasRet();
+
+    List<DelOutbound>  selectRetunDleoutbound(@Param("sn") String sn);
+
+    void updateReturnBasRetreat(Integer id);
 }
