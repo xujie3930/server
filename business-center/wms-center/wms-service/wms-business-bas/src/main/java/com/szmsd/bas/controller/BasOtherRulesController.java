@@ -50,7 +50,7 @@ public class BasOtherRulesController extends BaseController{
     {
 
         if(StringUtils.isEmpty(sellerCode)){
-            throw new CommonException("400", "sellerCode 不能空");
+            throw new CommonException("400", "sellerCode Cannot be empty");
         }
 
         BasOtherRules vo = basOtherRulesService.selectBasOtherRulesById(sellerCode);

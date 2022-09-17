@@ -120,7 +120,7 @@ public class BasMesController extends BaseController {
                 BasCustomer basCustomer = new BasCustomer();
                 List<BasCustomer> list = basCustomerService.selectBasCustomerList(basCustomer);
                 if (list.size() == 0) {
-                    return R.failed("找不到该客户信息");
+                    return R.failed("The customer information cannot be found");
                 }
                 if (StringUtils.isNotEmpty(list.get(0).getCusTle())){
                     basMes.setIphone(list.get(0).getCusTle());

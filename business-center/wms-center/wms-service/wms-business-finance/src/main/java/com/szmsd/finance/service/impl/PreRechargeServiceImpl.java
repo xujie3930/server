@@ -64,7 +64,7 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
     @Override
     public R save(PreRechargeDTO dto) {
         if(StringUtils.isEmpty(dto.getCusCode())){
-            return R.failed("客户编码不能为空");
+            return R.failed("Customer code cannot be empty");
         }
         dto.setSerialNo(SnowflakeId.getNextId12());
         PreRecharge domain= new PreRecharge();
@@ -73,7 +73,7 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
         if(insert>0){
             return R.ok();
         }
-        return R.failed("保存异常");
+        return R.failed("Save Exception");
     }
 
     @Override

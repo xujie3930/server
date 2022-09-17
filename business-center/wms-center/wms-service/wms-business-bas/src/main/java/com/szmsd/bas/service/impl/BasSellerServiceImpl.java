@@ -270,26 +270,26 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             if(result==null){
                 //删除表中用户
                 remoteUserService.removeByemail(user);
-                throw new BaseException("wms服务调用失败");
+                throw new BaseException("wms service call failed");
             }
             if(result.getData()==null){
                 //删除表中用户
                 remoteUserService.removeByemail(user);
-                throw new BaseException("传wms失败" + result.getData().getErrors());
+                throw new BaseException("Failed to transmit wms" + result.getData().getErrors());
             }else{
                 if(result.getData().getSuccess()==null){
                     if(result.getData().getErrors()!=null)
                     {
                         //删除表中用户
                         remoteUserService.removeByemail(user);
-                        throw new BaseException("传wms失败" + result.getData().getErrors());
+                        throw new BaseException("Failed to transmit wms" + result.getData().getErrors());
                     }
                 }else{
                     if(!result.getData().getSuccess())
                     {
                         //删除表中用户
                         remoteUserService.removeByemail(user);
-                        throw new BaseException("传wms失败" + result.getData().getMessage());
+                        throw new BaseException("Failed to transmit wms" + result.getData().getMessage());
                     }
                 }
             }
@@ -616,20 +616,20 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
     private void toWms(R<ResponseVO> r){
         if(r==null){
-            throw new BaseException("wms服务调用失败");
+            throw new BaseException("Wms service call failed");
         }
         if(r.getData()==null){
-            throw new BaseException("wms服务调用失败");
+            throw new BaseException("Wms service call failed");
         }else{
             if(r.getData().getSuccess()==null){
                 if(r.getData().getErrors()!=null)
                 {
-                    throw new BaseException("传wms失败" + r.getData().getErrors());
+                    throw new BaseException("Failed to transmit wms" + r.getData().getErrors());
                 }
             }else{
                 if(!r.getData().getSuccess())
                 {
-                    throw new BaseException("传wms失败" + r.getData().getMessage());
+                    throw new BaseException("Failed to transmit wms" + r.getData().getMessage());
                 }
             }
         }

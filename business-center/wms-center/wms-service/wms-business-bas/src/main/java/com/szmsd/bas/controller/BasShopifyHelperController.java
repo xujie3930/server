@@ -212,7 +212,7 @@ public class BasShopifyHelperController extends BaseController {
             cacheState = "-";
         }
         if (!cacheState.equals(state)) {
-            throw new CommonException("500", "校验失败，state错误");
+            throw new CommonException("500", "Verification failed，state error");
         }
         Object cacheScope = this.redisTemplate.opsForHash().get(key, "scope");
         String encryptHex = ShopifyUtil.encryptParameter(parameterMap, this.shopifyAppConfig.getClientSecret());

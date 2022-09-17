@@ -81,13 +81,13 @@ public class BasRouteController extends BaseController {
         basRoute2.setStartStationCode(basRoute.getStartStationCode());
         List<BasRoute> list2 = basRouteService.selectBasRouteList(basRoute2);
         if (list2.size() != 0) {
-            return R.failed("起始，结束站重复");
+            return R.failed("start，Repeat at end station");
         }
         BasRoute basRoute1 = new BasRoute();
         basRoute1.setRouteCode(basRoute.getRouteCode());
         List<BasRoute> list1 = basRouteService.selectBasRouteList(basRoute1);
         if (list1.size() != 0) {
-            return R.failed("路由编号重复");
+            return R.failed("Duplicate route number");
         }
         basRoute.setCreateTime(new Date());
         return toOk(basRouteService.insertBasRoute(basRoute));
@@ -104,14 +104,14 @@ public class BasRouteController extends BaseController {
         basRoute1.setRouteCode(basRoute.getRouteCode());
         List<BasRoute> list1 = basRouteService.selectBasRouteList(basRoute1);
         if (list1.size() != 0) {
-            return R.failed("路由编号重复");
+            return R.failed("Duplicate route number");
         }
         BasRoute basRoute2 = new BasRoute();
         basRoute2.setStartStationCode(basRoute.getStartStationCode());
         basRoute2.setEndStationCode(basRoute.getEndStationCode());
         List<BasRoute> list2 = basRouteService.selectBasRouteList(basRoute2);
         if (list2.size() != 0) {
-            return R.failed("起始，结束站重复");
+            return R.failed("start，Repeat at end station");
         }
         basRoute.setUpdateTime(new Date());
         return toOk(basRouteService.updateBasRoute(basRoute));

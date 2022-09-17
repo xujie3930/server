@@ -94,7 +94,7 @@ public class BasEmployeesController extends BaseController {
         basEmployees1.setEmpCode(basEmployees.getEmpCode());
         List<BasEmployees> list = basEmployeesService.selectBasEmployeesList(basEmployees1);
         if (list.size() != 0) {
-            return R.failed("员工编号重复");
+            return R.failed("Duplicate employee number");
         }
 //        BasEmployees basEmployees2 = new BasEmployees();
 //        basEmployees2.setEmpTel(basEmployees.getEmpTel());
@@ -177,7 +177,7 @@ public class BasEmployeesController extends BaseController {
 //        sysUserDto.setRoleIds(l);
         R rs = remoteUserService.baseCopyUserEdit(sysUserDto);
         if (rs.equals(null)) {
-            return R.failed("修改失败");
+            return R.failed("Modification failed");
         }
         basEmployees.setUpdateTime(new Date());
         return toOk(basEmployeesService.updateBasEmployees(basEmployees));

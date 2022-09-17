@@ -35,7 +35,7 @@ public class SubController {
     @GetMapping("getSubList")
     public R getSubList(@RequestParam(required = false, value = "mainCode") String mainCode, @RequestParam(required = false, value = "mainName") String mainName){
         if (StringUtils.isEmpty(mainCode) && StringUtils.isEmpty(mainName)) {
-            return R.failed("参数不能为空");
+            return R.failed("Parameter cannot be empty");
         }
         List<BasSub> subList = subClientService.listByMain(mainCode, mainName);
         if(subList != null) {
