@@ -77,8 +77,8 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 setBalance(dto.getCusCode(), currencyCode, balance);
                 log.info("【updateBalance】 4.1 {} setBalance后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 log.info("【updateBalance】 5");
-                recordOpLogAsync(dto, balance.getCurrentBalance());
-                recordDetailLogAsync(dto, balance);
+                //recordOpLogAsync(dto, balance.getCurrentBalance());
+                //recordDetailLogAsync(dto, balance);
                 log.info("【updateBalance】 5.1 {} recordOpLogAsync,recordDetailLogAsync后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 log.info("【updateBalance】 6");
                 return true;
