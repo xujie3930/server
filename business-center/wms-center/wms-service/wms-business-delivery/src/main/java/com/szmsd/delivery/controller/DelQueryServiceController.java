@@ -1,13 +1,22 @@
 package com.szmsd.delivery.controller;
+import cn.afterturn.easypoi.excel.ExcelExportUtil;
+import cn.afterturn.easypoi.excel.ExcelImportUtil;
+import cn.afterturn.easypoi.excel.entity.ExportParams;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.event.SyncReadListener;
 import com.github.pagehelper.PageInfo;
+import com.szmsd.bas.dto.BaseProductImportDto;
 import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.dto.DelQueryServiceDto;
+import com.szmsd.delivery.dto.DelQueryServiceExc;
 import com.szmsd.delivery.dto.DelQueryServiceImport;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.exception.dto.ExceptionInfoExportDto;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.system.api.domain.SysUser;
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -108,6 +117,8 @@ public class DelQueryServiceController extends BaseController{
     public R importData(MultipartFile file, HttpServletRequest httpServletRequest) throws Exception {
         ExcelUtil<DelQueryServiceImport> util = new ExcelUtil<DelQueryServiceImport>(DelQueryServiceImport.class);
         List<DelQueryServiceImport> list = util.importExcel(file.getInputStream());
+
+
         list.forEach(x->{
             x.setOperationType(Integer.parseInt(httpServletRequest.getParameter("operationType")));
         });
@@ -122,9 +133,90 @@ public class DelQueryServiceController extends BaseController{
      @GetMapping("/export")
      @ApiOperation(value = "导出查件服务模块列表",notes = "导出查件服务模块列表")
      public void export(HttpServletResponse response, DelQueryServiceDto delQueryService) throws IOException {
-     List<DelQueryService> list = delQueryServiceService.selectDelQueryServiceList(delQueryService);
-     ExcelUtil<DelQueryService> util = new ExcelUtil<DelQueryService>(DelQueryService.class);
-        util.exportExcel(response,list, "DelQueryService");
+     List<DelQueryServiceExc> list = delQueryServiceService.selectDelQueryServiceListex(delQueryService);
+         ExportParams params = new ExportParams();
+        //params.setTitle("查件服务");
+
+
+
+
+         Workbook workbook = ExcelExportUtil.exportExcel(params, DelQueryServiceExc.class, list);
+
+
+         Sheet sheet= workbook.getSheet("sheet0");
+
+         //获取第一行数据
+         Row row2 =sheet.getRow(0);
+
+         for (int i=0;i<12;i++){
+             Cell deliveryTimeCell = row2.getCell(i);
+
+             CellStyle styleMain = workbook.createCellStyle();
+//             if (i==18){
+//                 styleMain.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex());
+//             }else {
+//                 styleMain.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+//
+//             }
+             styleMain.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+             Font font = workbook.createFont();
+             //true为加粗，默认为不加粗
+             font.setBold(true);
+             //设置字体颜色，颜色和上述的颜色对照表是一样的
+             font.setColor(IndexedColors.WHITE.getIndex());
+             //将字体样式设置到单元格样式中
+             styleMain.setFont(font);
+
+             styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+             styleMain.setAlignment(HorizontalAlignment.CENTER);
+             styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+//        CellStyle style =  workbook.createCellStyle();
+//        style.setFillPattern(HSSFColor.HSSFColorPredefined.valueOf(""));
+//        style.setFillForegroundColor(IndexedColors.RED.getIndex());
+             deliveryTimeCell.setCellStyle(styleMain);
+         }
+
+         //获取第二行数据
+         Row row3 =sheet.getRow(1);
+         for (int x=11;x<14;x++) {
+             Cell deliveryTimeCell1 = row3.getCell(x);
+             CellStyle styleMain1 = workbook.createCellStyle();
+             styleMain1.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex());
+             Font font1 = workbook.createFont();
+             //true为加粗，默认为不加粗
+             font1.setBold(true);
+             //设置字体颜色，颜色和上述的颜色对照表是一样的
+             font1.setColor(IndexedColors.WHITE.getIndex());
+             //将字体样式设置到单元格样式中
+             styleMain1.setFont(font1);
+
+             styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+             styleMain1.setAlignment(HorizontalAlignment.CENTER);
+             styleMain1.setVerticalAlignment(VerticalAlignment.CENTER);
+             deliveryTimeCell1.setCellStyle(styleMain1);
+         }
+
+         try {
+             String fileName="查件服务导出"+System.currentTimeMillis();
+             URLEncoder.encode(fileName, "UTF-8");
+             //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
+             response.setContentType("application/vnd.ms-excel");
+             response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+
+             response.addHeader("Pargam", "no-cache");
+             response.addHeader("Cache-Control", "no-cache");
+
+             ServletOutputStream outStream = null;
+             try {
+                 outStream = response.getOutputStream();
+                 workbook.write(outStream);
+                 outStream.flush();
+             } finally {
+                 outStream.close();
+             }
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
 
      }
 

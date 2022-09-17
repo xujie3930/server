@@ -87,4 +87,6 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     Map  selectQuerySettings(@Param("shipmentRule") String shipmentRule);
 
     DelOutbound  selectTrackingNo(@Param("orderNo") String orderNo);
+
+    void  updateFssAccountSerial(DelOutboundBatchUpdateTrackingNoDto delOutboundBatchUpdateTrackingNoDto);
 }

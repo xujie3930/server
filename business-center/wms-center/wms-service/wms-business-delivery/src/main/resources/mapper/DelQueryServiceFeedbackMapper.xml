@@ -28,6 +28,10 @@
                 remark,
             id, create_by, update_by, version, del_flag, main_id, type, reason
         </sql>
+    <select id="selectLists" resultType="com.szmsd.delivery.dto.DelQueryServiceFeedbackExc"
+            parameterType="java.lang.Integer">
+        SELECT * from del_query_service_feedback where main_id=#{id}
+    </select>
 
 
 </mapper>
