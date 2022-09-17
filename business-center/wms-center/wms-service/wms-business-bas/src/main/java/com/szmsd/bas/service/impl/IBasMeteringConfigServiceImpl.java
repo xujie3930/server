@@ -31,7 +31,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
 
     @Override
     public List<BasMeteringConfig> selectList(BasMeteringConfigDto basMeteringConfigDto) {
-        if (basMeteringConfigDto.getCustomerCode()!=null){
+        if (basMeteringConfigDto.getCustomerCode()!=null && !basMeteringConfigDto.getCustomerCode().equals("")){
             basMeteringConfigDto.setCustomerCode(new StringBuilder("%").append(basMeteringConfigDto.getCustomerCode()).append("%").toString());
         }
         return basMeteringConfigMapper.selectList(basMeteringConfigDto);
