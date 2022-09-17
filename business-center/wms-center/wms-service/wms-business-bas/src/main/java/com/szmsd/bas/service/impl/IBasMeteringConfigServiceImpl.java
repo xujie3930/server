@@ -132,7 +132,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
-                                throw new CommonException("超出设置的范围，拦截");
+                                throw new CommonException("Exceeding the set range, intercept");
                             }
                         } else if (x.getDifferenceType() == 1) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
@@ -148,7 +148,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal d = (bigDecimal.divide(max, 2, BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
                             int a = d.compareTo(bigDecimal1);
                             if (a == 1) {
-                                throw new CommonException("超出设置的范围，拦截");
+                                throw new CommonException("Exceeding the set range, intercept");
                             }
                         }
 
@@ -159,7 +159,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
-                                throw new CommonException("超出设置的范围，拦截");
+                                throw new CommonException("Exceeding the set range, intercept");
                             }
                         } else if (x.getDifferenceType() == 1) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
@@ -175,7 +175,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal d = (bigDecimal.divide(max, 2, BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
                             int a = d.compareTo(bigDecimal1);
                             if (a == 1) {
-                                throw new CommonException("超出设置的范围，拦截");
+                                throw new CommonException("Exceeding the set range, intercept");
                             }
                         }
                     }
@@ -185,7 +185,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
-                                throw new CommonException("超出设置的范围，拦截");
+                                throw new CommonException("Exceeding the set range, intercept");
                             }
                         } else if (x.getDifferenceType() == 1) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
@@ -201,7 +201,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal d = (bigDecimal.divide(max, 2, BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
                             int a = d.compareTo(bigDecimal1);
                             if (a == 1) {
-                                throw new CommonException("超出设置的范围，拦截");
+                                throw new CommonException("Exceeding the set range, intercept");
                             }
                         }
                     }
@@ -211,7 +211,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
-                                throw new CommonException("超出设置的范围，拦截");
+                                throw new CommonException("Exceeding the set range, intercept");
                             }
                         } else if (x.getDifferenceType() == 1) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
@@ -227,7 +227,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal d = (bigDecimal.divide(max, 2, BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
                             int a = d.compareTo(bigDecimal1);
                             if (a == 1) {
-                                    throw new CommonException("超出设置的范围，拦截");
+                                    throw new CommonException("Exceeding the set range, intercept");
                             }
                         }
                     }
@@ -237,7 +237,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
-                                throw new CommonException("超出设置的范围，拦截");
+                                throw new CommonException("Exceeding the set range, intercept");
                             }
                         } else if (x.getDifferenceType() == 1) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
@@ -253,7 +253,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal d = (bigDecimal.divide(max, 2, BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
                             int a = d.compareTo(bigDecimal1);
                             if (a == 1) {
-                                throw new CommonException("超出设置的范围，拦截");
+                                throw new CommonException("Exceeding the set range, intercept");
                             }
                         }
                     }
@@ -263,7 +263,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
-                                throw new CommonException("超出设置的范围，拦截");
+                                throw new CommonException("Exceeding the set range, intercept");
                             }
                         } else if (x.getDifferenceType() == 1) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
@@ -279,7 +279,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             BigDecimal d = (bigDecimal.divide(max, 2, BigDecimal.ROUND_HALF_UP)).multiply(BigDecimal.valueOf(100));
                             int a = d.compareTo(bigDecimal1);
                             if (a == 1) {
-                                throw new CommonException("超出设置的范围，拦截");
+                                throw new CommonException("Exceeding the set range, intercept");
                             }
                         }
                     }
