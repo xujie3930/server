@@ -17,15 +17,15 @@ public class DelOutboundCollectionSkuImportValidation implements ImportValidatio
 
     @Override
     public void valid(int rowIndex, DelOutboundCollectionDetailImportDto object) {
-        this.importContext.isEmpty(object.getProductName(), rowIndex, 2, null, "英文申报品名不能为空");
-        this.importContext.isEmpty(object.getProductNameChinese(), rowIndex, 3, null, "中文申报品名不能为空");
-        this.importContext.isNull(object.getDeclaredValue(), rowIndex, 4, null, "申报价值不能为空");
+        this.importContext.isEmpty(object.getProductName(), rowIndex, 2, null, "English declaration name cannot be blank");
+        this.importContext.isEmpty(object.getProductNameChinese(), rowIndex, 3, null, "Chinese declaration product name cannot be empty");
+        this.importContext.isNull(object.getDeclaredValue(), rowIndex, 4, null, "The declared value cannot be empty");
         String productAttributeName = object.getProductAttributeName();
-        if (this.importContext.isEmpty(productAttributeName, rowIndex, 5, null, "产品属性不能为空")) {
+        if (this.importContext.isEmpty(productAttributeName, rowIndex, 5, null, "Product attribute cannot be empty")) {
             return;
         } else {
             String productAttribute = this.importContext.getProductAttributeCache().get(productAttributeName);
-            if (!this.importContext.isEmpty(productAttribute, rowIndex, 5, productAttributeName, "产品属性不存在")) {
+            if (!this.importContext.isEmpty(productAttribute, rowIndex, 5, productAttributeName, "Product attribute does not exist")) {
                 object.setProductAttribute(productAttribute);
             }
         }
