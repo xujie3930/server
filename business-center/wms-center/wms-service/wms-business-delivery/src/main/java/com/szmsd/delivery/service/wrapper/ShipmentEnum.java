@@ -217,7 +217,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
                 shipmentUpdateRequestDto.setIsEx(true);
                 shipmentUpdateRequestDto.setExType(exType);
-                shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(throwable.getMessage(), "操作失败"));
+
+                String  exRemark = throwable.getMessage();
+                exRemark = ProblemDetails.getErrorMessageOrNullFormat(exRemark);
+                logger.info("单号{}，shipmentShipping异常信息{}", delOutbound.getOrderNo(), exRemark);
+
+                shipmentUpdateRequestDto.setExRemark(Utils.defaultValue(exRemark, "操作失败"));
                 shipmentUpdateRequestDto.setIsNeedShipmentLabel(false);
                 IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
                 htpOutboundClientService.shipmentShipping(shipmentUpdateRequestDto);
