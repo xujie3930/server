@@ -25,9 +25,10 @@ public class QuartzReturnexConfig {
     public Trigger BasRetreatPieceJobTrigger() {
         //cron方式，每周一凌晨1点刷0 0 1 ? * MON
         //0/3 * * * * ? 3秒测试
+        //0 0 1 * * ? 每天凌晨一点
         return TriggerBuilder.newTrigger().forJob(BasRetreatPieceJob())
                 .withIdentity("BasRetreatPieceJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
                 .build();
     }
 
