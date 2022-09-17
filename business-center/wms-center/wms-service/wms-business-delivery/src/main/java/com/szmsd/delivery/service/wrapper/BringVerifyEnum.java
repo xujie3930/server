@@ -50,6 +50,8 @@ import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.util.StopWatch;
 
 import java.io.File;
@@ -62,6 +64,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -453,6 +456,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             return super.batchSelfPick(context, currentState);
         }
 
+        public static final TimeUnit unit = TimeUnit.SECONDS;
+
+        public static final long time = 180L;
+
         @Override
         public void handle(ApplicationContext context) {
 
@@ -463,47 +470,72 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             logger.info("出库单{}-开始冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             DelOutboundOperationLogEnum.BRV_FREEZE_BALANCE.listener(delOutbound);
 
-            /**
-            *  获取要冻结的费用数据，并按货币分组冻结
-            */
-            IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
-            RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
-            List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
-            if(delOutboundChargeList.isEmpty()){
-                throw new CommonException("400", MessageUtil.to("冻结费用信息失败，没有要冻结的费用明细", "Failed to freeze expense information. No expense details to be frozen"));
-            }
-            Map<String, List<DelOutboundCharge>> groupByCharge =
-                    delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
-            for (String currencyCode: groupByCharge.keySet()){
-                BigDecimal bigDecimal = BigDecimal.ZERO;
-                for (DelOutboundCharge c:groupByCharge.get(currencyCode)) {
-                    if(c.getAmount() != null){
-                        bigDecimal = bigDecimal.add(c.getAmount());
+            RedissonClient redissonClient = SpringUtils.getBean(RedissonClient.class);
+
+            String key = "bringVerify-fss-freeze-balance" + delOutbound.getCustomCode() + ":" + delOutbound.getOrderNo();
+
+            RLock lock = redissonClient.getLock(key);
+
+            try {
+
+                lock.tryLock(time, unit);
+
+                /**
+                 *  获取要冻结的费用数据，并按货币分组冻结
+                 */
+                IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
+                RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
+                List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
+                if (delOutboundChargeList.isEmpty()) {
+                    throw new CommonException("400", MessageUtil.to("冻结费用信息失败，没有要冻结的费用明细", "Failed to freeze expense information. No expense details to be frozen"));
+                }
+                Map<String, List<DelOutboundCharge>> groupByCharge =
+                        delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+
+                logger.info(">>>>>[创建出库单{}]冻结费用map, 数据:{}",delOutbound.getOrderNo(), JSONObject.toJSONString(groupByCharge));
+
+                for (String currencyCode : groupByCharge.keySet()) {
+                    BigDecimal bigDecimal = BigDecimal.ZERO;
+                    for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
+                        if (c.getAmount() != null) {
+                            bigDecimal = bigDecimal.add(c.getAmount());
+                        }
                     }
+                    // 调用冻结费用接口
+                    CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                    cusFreezeBalanceDTO.setAmount(bigDecimal);
+                    cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
+                    cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                    cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                    cusFreezeBalanceDTO.setOrderType("Freight");
+
+                    //logger.info(">>>>>[创建出库单{}]冻结费用freezeBalance, 数据:{}",delOutbound.getOrderNo(), JSONObject.toJSONString(groupByCharge));
+
+                    stopWatch.start();
+                    R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);
+                    stopWatch.stop();
+
+                    if (null == freezeBalanceR) {
+                        throw new CommonException("400", MessageUtil.to("冻结费用信息失败", "Failed to freeze expense information"));
+                    }
+
+                    if (Constants.SUCCESS != freezeBalanceR.getCode()) {
+                        // 异常信息
+                        String msg = Utils.defaultValue(freezeBalanceR.getMsg(), MessageUtil.to("冻结费用信息失败", "Failed to freeze expense information") + "2");
+                        throw new CommonException("400", msg);
+                    }
+
+                    logger.info(">>>>>[创建出库单{}]结束冻结费用, 数据:{} ,耗时{}", delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO), stopWatch.getLastTaskInfo().getTimeMillis());
                 }
-                // 调用冻结费用接口
-                CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
-                cusFreezeBalanceDTO.setAmount(bigDecimal);
-                cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
-                cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
-                cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
-                cusFreezeBalanceDTO.setOrderType("Freight");
 
-                stopWatch.start();
-                R<?> freezeBalanceR = rechargesFeignService.freezeBalance(cusFreezeBalanceDTO);
-                stopWatch.stop();
-
-                if (null == freezeBalanceR) {
-                    throw new CommonException("400", MessageUtil.to("冻结费用信息失败", "Failed to freeze expense information"));
+            }catch (Exception e){
+                logger.info("冻结费用异常，加锁失败");
+                logger.info("异常信息:" + e.getMessage());
+                throw new RuntimeException(e);
+            }finally {
+                if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                    lock.unlock();
                 }
-
-                if (Constants.SUCCESS != freezeBalanceR.getCode()) {
-                    // 异常信息
-                    String msg = Utils.defaultValue(freezeBalanceR.getMsg(), MessageUtil.to("冻结费用信息失败", "Failed to freeze expense information")+ "2");
-                    throw new CommonException("400", msg);
-                }
-
-                logger.info(">>>>>[创建出库单{}]结束冻结费用, 数据:{} ,耗时{}", delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO), stopWatch.getLastTaskInfo().getTimeMillis());
             }
 
         }
