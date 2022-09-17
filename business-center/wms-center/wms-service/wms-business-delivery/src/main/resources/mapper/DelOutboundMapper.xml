@@ -209,6 +209,11 @@
     <update id="updateTrackingNo">
         update del_outbound set tracking_no = #{trackingNo} where order_no = #{orderNo}
     </update>
+    <update id="updateFssAccountSerial"
+            parameterType="com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto">
+
+        UPDATE fss_account_serial_bill SET tracking_no=#{trackingNo}  WHERE `no` =#{orderNo}
+    </update>
 
     <select id="exceptionMessageList" resultType="com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO">
         select id, order_no, exception_message from del_outbound where order_no in

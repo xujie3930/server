@@ -27,7 +27,7 @@
                 update_by_name,
                 update_time,
                 remark,
-            id, association_id, warehousing_no, create_by, update_by, version, del_flag, delivery_no, sku, declare_qty
+            id, association_id, warehousing_no, create_by, update_by, version, del_flag, delivery_no, sku, declare_qty,import_remark
     </sql>
     <delete id="deletePurchaseStorageDetails" parameterType="java.lang.Integer">
 

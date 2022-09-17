@@ -1,49 +1,27 @@
-package com.szmsd.delivery.domain;
+package com.szmsd.delivery.dto;
 
 import cn.afterturn.easypoi.excel.annotation.Excel;
+import cn.afterturn.easypoi.excel.annotation.ExcelCollection;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.szmsd.common.core.web.domain.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.Date;
+import java.util.List;
 
-/**
-* <p>
-    * 查件服务
-    * </p>
-*
-* @author Administrator
-* @since 2022-06-08
-*/
 @Data
-@EqualsAndHashCode(callSuper = true)
-@Accessors(chain = true)
-@ApiModel(value="查件服务", description="DelQueryService对象")
-public class DelQueryService extends BaseEntity {
+@ApiModel(value="查件服务导出对象", description="DelQueryService对象")
+public class DelQueryServiceExc {
 
-    private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
-
-    @ApiModelProperty(value = "创建人编号")
-    private String createBy;
-
-    @ApiModelProperty(value = "修改人编号")
-    private String updateBy;
-
-    @ApiModelProperty(value = "版本号")
-    private Integer version;
-
-    @ApiModelProperty(value = "逻辑删除标识；2-已删除，0-未删除")
-    private String delFlag;
-
 
     @ApiModelProperty(value = "订单号")
     @Excel(name="订单号",width = 30,needMerge = true)
@@ -98,51 +76,20 @@ public class DelQueryService extends BaseEntity {
     @Excel(name="查件原因",width = 30,needMerge = true)
     private String reason;
 
+    @ApiModelProperty(value = "备注")
+    @Excel(name="备注",width = 30,needMerge = true)
+    private String remark;
 
+    @ApiModelProperty(value = "创建时间")
+    @JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss", timezone = "GMT+8")
+    @Excel(name="创建时间",width = 30,needMerge = true)
+    private String createTime;
 
-
-    @ApiModelProperty(value = "国家代码")
-    private String countryCode;
-
-
-
-
-
-
-    @ApiModelProperty(value = "状态")
-    private String state;
-
-    @ApiModelProperty(value = "状态名称")
-    @Excel(name = "状态名称")
-    private String stateName;
-
-    @ApiModelProperty(value = "发货天数")
-    private Long delDays;
-
-    @ApiModelProperty(value = "轨迹停留天数")
-    private Long trackingDays;
-
-    @ApiModelProperty(value = "查件标识(0是红色,1是绿色)")
-    private Long checkFlag;
-
-    @ApiModelProperty(value = "允查发货天数")
-    private Long queryseShipmentDays;
-
-    @ApiModelProperty(value = "允查轨迹停留天数")
-    private Long querysetrackStayDays;
-
-    @ApiModelProperty(value = "反馈类容描述")
-    @TableField(exist = false)
-    private String feedReason;
-
-    @ApiModelProperty(value = "操作类型(0表示管理端,1表示客户端)")
-    @TableField(exist = false)
-    private int operationType=0;
-
-
-//    @ApiModelProperty(value = "查件标识(0是红色,1是绿色)")
-//    //@TableField(exist = false)
-//    private Long checkFlag;
+    /**
+     集合
+     **/
+    @ExcelCollection(name = "反馈明细")
+    private List<DelQueryServiceFeedbackExc> delQueryServiceFeedbackExcs;
 
 
 }
