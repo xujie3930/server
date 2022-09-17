@@ -27,6 +27,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 退费
@@ -40,17 +41,18 @@ public class RefundPayFactory extends AbstractPayFactory {
 
     @Resource
     private IAccountSerialBillService accountSerialBillService;
-    @Resource
-    private IAccountBalanceService iAccountBalanceService;
     @Autowired
     private AccountSerialBillMapper accountSerialBillMapper;
 
+    private ReentrantLock reentrantLock = new ReentrantLock();
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Boolean updateBalance(CustPayDTO dto) {
+    public Boolean updateBalance(final CustPayDTO dto) {
         log.info("RefundPayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
+        reentrantLock.lock();
         try {
             boolean success = false;
             if (lock.tryLock(time, unit)) {
@@ -65,7 +67,9 @@ public class RefundPayFactory extends AbstractPayFactory {
                     // 退费强制扣钱
                     success = oldBalance.payAnyWay(changeAmount.negate());
                 }
-                if (!success) return false;
+                if (!success){
+                    return false;
+                }
                 BalanceDTO result = oldBalance;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), result, true);
                 recordOpLogAsync(dto, result.getCurrentBalance());
@@ -85,6 +89,7 @@ public class RefundPayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("退费业务处理超时,请稍候重试!");
         } finally {
+            reentrantLock.unlock();
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
                 log.info("【退费】RefundPayFactory 解锁结束--");

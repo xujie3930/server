@@ -59,7 +59,7 @@ public abstract class AbstractPayFactory {
     public abstract Boolean updateBalance(CustPayDTO dto);
 
 
-    public void recordOpLogAsync(CustPayDTO dto, BigDecimal result) {
+    public void recordOpLogAsync(final CustPayDTO dto, final BigDecimal result) {
         financeThreadTaskPool.execute(()-> this.recordOpLog(dto, result));
     }
 
@@ -86,7 +86,7 @@ public abstract class AbstractPayFactory {
      * @param custPayDTO
      * @param balanceDTO
      */
-    public void recordDetailLogAsync(CustPayDTO custPayDTO, BalanceDTO balanceDTO) {
+    public void recordDetailLogAsync(final CustPayDTO custPayDTO, final BalanceDTO balanceDTO) {
         financeThreadTaskPool.execute(() -> {
             log.info("添加详细使用记录传参custPayDTO: {} {}", JSONObject.toJSONString(custPayDTO), JSONObject.toJSONString(balanceDTO));
             FssDeductionRecord fssDeductionRecord = new FssDeductionRecord();
@@ -144,7 +144,7 @@ public abstract class AbstractPayFactory {
         iAccountBalanceService.setBalance(cusCode, currencyCode, result, needUpdateCredit);
     }
 
-    protected void setBalance(String cusCode, String currencyCode, BalanceDTO result) {
+    protected void setBalance(final String cusCode, final String currencyCode, final BalanceDTO result) {
         iAccountBalanceService.setBalance(cusCode, currencyCode, result, false);
     }
 
