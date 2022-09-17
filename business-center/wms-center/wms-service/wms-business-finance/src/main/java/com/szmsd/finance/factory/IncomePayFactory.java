@@ -20,6 +20,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 充值
@@ -33,15 +34,16 @@ public class IncomePayFactory extends AbstractPayFactory {
 
     @Resource
     private IAccountSerialBillService accountSerialBillService;
-    @Resource
-    private IAccountBalanceService iAccountBalanceService;
+
+    private ReentrantLock reentrantLock = new ReentrantLock();
 
     @Override
     @Transactional
-    public synchronized Boolean updateBalance(final CustPayDTO dto) {
+    public Boolean updateBalance(final CustPayDTO dto) {
         log.info("IncomePayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
+        reentrantLock.lock();
         try {
             if (lock.tryLock(time, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
@@ -71,6 +73,7 @@ public class IncomePayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("充值操作超时,请稍候重试!");
         } finally {
+            reentrantLock.unlock();
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }

@@ -17,6 +17,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 直接扣费不涉及冻结
@@ -31,12 +32,15 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
     @Resource
     private RedissonClient redissonClient;
 
+    private ReentrantLock reentrantLock = new ReentrantLock();
+
     @Transactional
     @Override
-    public synchronized Boolean updateBalance(final CustPayDTO dto) {
+    public Boolean updateBalance(final CustPayDTO dto) {
         log.info("PaymentNoFreezePayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-paymentNoFreezePay" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
+        reentrantLock.unlock();
         try {
             if (lock.tryLock(time, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
@@ -67,6 +71,7 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("支付操作超时,请稍候重试!");
         } finally {
+            reentrantLock.unlock();
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }

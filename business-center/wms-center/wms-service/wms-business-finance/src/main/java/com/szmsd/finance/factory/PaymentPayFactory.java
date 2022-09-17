@@ -22,6 +22,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 付款
@@ -39,12 +40,15 @@ public class PaymentPayFactory extends AbstractPayFactory {
     @Resource
     private IAccountBalanceService accountBalanceService;
 
+    private ReentrantLock reentrantLock = new ReentrantLock();
+
     @Transactional
     @Override
-    public synchronized Boolean updateBalance(final CustPayDTO dto) {
+    public Boolean updateBalance(final CustPayDTO dto) {
         log.info("PaymentPayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-paymentPay" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
+        reentrantLock.lock();
         try {
             if (lock.tryLock(time, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
@@ -103,6 +107,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("支付异常:" + e.getMessage());
         } finally {
+            reentrantLock.unlock();
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }

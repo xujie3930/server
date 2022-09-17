@@ -26,6 +26,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 冻结
@@ -43,24 +44,27 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     @Resource
     private ISysDictDataService sysDictDataService;
 
+    private ReentrantLock reentrantLock = new ReentrantLock();
+
     @Transactional
     @Override
-    public synchronized Boolean updateBalance(final CustPayDTO dto) {
+    public Boolean updateBalance(final CustPayDTO dto) {
 
         log.info("BalanceFreezeFactory {}", JSONObject.toJSONString(dto));
         log.info(LogUtil.format(dto, "冻结/解冻"));
         String key = "cky-fss-freeze-balance-all:" + dto.getCusId();
         RLock lock = redissonClient.getLock(key);
+        reentrantLock.lock();
         try {
             if (lock.tryLock(time, unit)) {
 
-                String currencyCode = dto.getCurrencyCode();
+                final String currencyCode = dto.getCurrencyCode();
 
                 log.info("【updateBalance】 1 开始查询该用户对应币别的{}余额",currencyCode);
-                BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
+                final BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 log.info("【updateBalance】 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 //蒋俊看财务
-                Boolean checkFlag = checkAndSetBalance(balance, dto);
+                final Boolean checkFlag = checkAndSetBalance(balance, dto);
                 log.info("【updateBalance】 2.1 {} 校验后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 log.info("【updateBalance】 3");
                 if (checkFlag == null){
@@ -88,6 +92,9 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             log.error("获取余额异常，加锁失败 BalanceFreezeFactory异常：", e);
             throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
         } finally {
+
+            reentrantLock.unlock();
+
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
