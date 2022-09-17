@@ -48,13 +48,16 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     public Boolean updateBalance(CustPayDTO dto) {
         log.info("BalanceFreezeFactory {}", JSONObject.toJSONString(dto));
         log.info(LogUtil.format(dto, "冻结/解冻"));
-        String key = "cky-fss-freeze-balance-all:" + dto.getCusId();
+        String key = "cky-fss-freeze-balance-all:" + dto.getCusId() + ":"+dto.getNo();
         RLock lock = redissonClient.getLock(key);
         try {
             if (lock.tryLock(time, unit)) {
-                log.info("【updateBalance】 1");
+
+                String currencyCode = dto.getCurrencyCode();
+
+                log.info("【updateBalance】 1 开始查询该用户对应币别的{}余额",currencyCode);
                 BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
-                log.info("【updateBalance】 2");
+                log.info("【updateBalance】 2 {} 余额剩余：{} ",currencyCode,JSONObject.toJSONString(balance));
                 //蒋俊看财务
                 Boolean checkFlag = checkAndSetBalance(balance, dto);
                 log.info("【updateBalance】 3");
@@ -65,7 +68,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                     return false;
                 }
                 log.info("【updateBalance】 4");
-                setBalance(dto.getCusCode(), dto.getCurrencyCode(), balance);
+                setBalance(dto.getCusCode(), currencyCode, balance);
                 log.info("【updateBalance】 5");
                 recordOpLogAsync(dto, balance.getCurrentBalance());
                 recordDetailLogAsync(dto, balance);
