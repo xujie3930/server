@@ -36,15 +36,12 @@ public class ExchangePayFactory extends AbstractPayFactory {
     @Resource
     private IAccountBalanceService iAccountBalanceService;
 
-    private ReentrantLock reentrantLock = new ReentrantLock();
-
     @Transactional
     @Override
     public synchronized Boolean updateBalance(final CustPayDTO dto) {
         log.info("ExchangePayFactory {}", JSONObject.toJSONString(dto));
-        String key = "cky-test-fss-balance-all:" + dto.getCusId();
+        String key = "cky-test-fss-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
-        reentrantLock.lock();
         try {
             if (lock.tryLock(time, unit)) {
                 BigDecimal substractAmount = dto.getAmount();
@@ -92,7 +89,6 @@ public class ExchangePayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("汇率转换,请稍候重试!");
         } finally {
-            reentrantLock.unlock();
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
