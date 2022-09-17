@@ -1,7 +1,9 @@
 package com.szmsd.delivery.controller;
 
 import cn.hutool.core.io.IoUtil;
+import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
@@ -105,19 +107,21 @@ public class DelOutboundImportController extends BaseController {
     public R<ImportResultData<?>> collectionImportDetail(HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
         MultipartFile file = multipartHttpServletRequest.getFile("file");
-        AssertUtil.notNull(file, "上传文件不存在");
+        AssertUtil.notNull(file, "The uploaded file does not exist");
         String originalFilename = file.getOriginalFilename();
-        AssertUtil.notNull(originalFilename, "导入文件名称不存在");
+        AssertUtil.notNull(originalFilename, "The import file name does not exist");
         int lastIndexOf = originalFilename.lastIndexOf(".");
         String suffix = originalFilename.substring(lastIndexOf + 1);
         if (!"xls".equals(suffix) && !"xlsx".equals(suffix)) {
-            throw new CommonException("999", "只能上传xls,xlsx文件");
+            throw new CommonException("999", "Only upload xls,xlsx file");
         }
         try {
-            ExcelReaderSheetBuilder excelReaderSheetBuilder = EasyExcelFactory.read(file.getInputStream(), DelOutboundCollectionDetailImportDto.class, null).sheet(0);
-            List<DelOutboundCollectionDetailImportDto> dtoList = excelReaderSheetBuilder.doReadSync();
+            List<DelOutboundCollectionDetailImportDto> dtoList = EasyExcel.read(file.getInputStream(), DelOutboundCollectionDetailImportDto.class, new SyncReadListener()).sheet().doReadSync();
+
+//            ExcelReaderSheetBuilder excelReaderSheetBuilder = EasyExcelFactory.read(file.getInputStream(), DelOutboundCollectionDetailImportDto.class, null).sheet(0);
+//            List<DelOutboundCollectionDetailImportDto> dtoList = excelReaderSheetBuilder.doReadSync();
             if (CollectionUtils.isEmpty(dtoList)) {
-                return R.ok(ImportResultData.buildFailData(ImportMessage.build("导入数据不能为空")));
+                return R.ok(ImportResultData.buildFailData(ImportMessage.build("Import data cannot be empty")));
             }
             // 产品属性，带电信息，电池包装
             Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("059,060,061");
@@ -288,9 +292,22 @@ public class DelOutboundImportController extends BaseController {
     @GetMapping("/packageTransferImportTemplate")
     @ApiOperation(value = "出库管理 - 导入 - 转运出库导入模板", position = 500)
     public void packageTransferImportTemplate(HttpServletResponse response) {
-        String filePath = "/template/DM_packageTransfer.xls";
-        String fileName = "转运出库模板";
+
+        String len=getLen().toLowerCase(Locale.ROOT);
+        String filePath=null;
+        String fileName=null;
+        if (len.equals("zh")){
+            filePath = "/template/DM_packageTransfer.xlsx";
+            fileName = "转运出库模板";
+        }else if (len.equals("en")){
+            filePath = "/template/DM_packageTransfer-en.xlsx";
+            fileName = "AddedSKUImportTemplate";
+        }
+
+
+
         this.downloadTemplate(response, filePath, fileName);
+
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundImport:packageTransferImport')")
