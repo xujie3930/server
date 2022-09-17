@@ -4,6 +4,7 @@ import com.szmsd.finance.enums.CreditConstant;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.function.BiFunction;
 
@@ -31,6 +32,9 @@ public class BalanceDTO {
 
     @ApiModelProperty(value = "授信信息")
     private CreditInfoBO creditInfoBO;
+
+    @ApiModelProperty(value = "单号")
+    private String orderNo;
 
     private BalanceDTO() {
     }
