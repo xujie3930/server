@@ -600,7 +600,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             lambdaUpdateWrapper.set(AccountBalance::getCreditEndTime, result.getCreditInfoBO().getCreditEndTime());
             lambdaUpdateWrapper.set(AccountBalance::getCreditBufferTime, result.getCreditInfoBO().getCreditBufferTime());
         }
-        accountBalanceMapper.update(null, lambdaUpdateWrapper);
+        int updCount = accountBalanceMapper.update(null, lambdaUpdateWrapper);
+
+        log.info("更新余额总条数:{},单号：{}",updCount,result.getOrderNo());
     }
 
     @Override
