@@ -183,14 +183,14 @@ public class ShopifyOrderServiceImpl extends ServiceImpl<ShopifyOrderMapper, Sho
                 ShopifyOrder shopifyOrder = baseMapper.selectOne(queryWrapper);
                 if (shopifyOrder == null) {
                     log.info("Shopify订单未找到");
-                    throw new BaseException("订单未找到");
+                    throw new BaseException("Order not found");
                 }
                 BasSellerShopifyPermission permission = new BasSellerShopifyPermission();
                 permission.setShop(shopifyOrder.getShopName());
                 R<List<BasSellerShopifyPermission>> listR = basSellerShopifyPermissionFeignService.list(permission);
                 if (listR == null || listR.getCode() != 200 || CollectionUtils.isEmpty(listR.getData())) {
                     log.info("{}店铺信息异常，无法操作接口", shopifyOrder.getShopName());
-                    throw new BaseException(shopifyOrder.getShopName()+"店铺信息异常，无法操作接口");
+                    throw new BaseException(shopifyOrder.getShopName()+"Abnormal store information，Unable to operate Interface");
                 }
                 List<BasSellerShopifyPermission> listRData = listR.getData();
                 BasSellerShopifyPermission shopifyPermission = listRData.get(0);
@@ -227,7 +227,7 @@ public class ShopifyOrderServiceImpl extends ServiceImpl<ShopifyOrderMapper, Sho
         R<List<BasSellerShopifyPermission>> listR = basSellerShopifyPermissionFeignService.list(permission);
         if (listR == null || listR.getCode() != 200 || CollectionUtils.isEmpty(listR.getData())) {
             log.info("{}店铺信息异常，无法操作接口", shopName);
-            throw new BaseException(shopName+"店铺信息异常，无法操作接口");
+            throw new BaseException(shopName+" Abnormal store information, unable to operate the interface");
         }
         List<BasSellerShopifyPermission> listRData = listR.getData();
         BasSellerShopifyPermission shopifyPermission = listRData.get(0);
@@ -262,7 +262,7 @@ public class ShopifyOrderServiceImpl extends ServiceImpl<ShopifyOrderMapper, Sho
                 .eq(ShopifyOrder::getShopifyId, orderDTO.getShopifyId());
         ShopifyOrder ao = this.baseMapper.selectOne(updateWrapper);
         if (!ShopifyConfig.UNSHIPPED.equals(ao.getOrderStatus())) {
-            throw new BaseException("订单处理中,请确认");
+            throw new BaseException("Order processing, please confirm");
         }
 //        Map<String, Object> resultMap = toShopifyOrderList(orderDTO);
 //        if(!CollectionUtils.isEmpty(resultMap) && resultMap.containsKey("error")){

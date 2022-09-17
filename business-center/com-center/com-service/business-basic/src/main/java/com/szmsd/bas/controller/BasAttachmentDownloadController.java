@@ -66,7 +66,7 @@ public class BasAttachmentDownloadController extends BaseController {
     @ApiOperation(value = "下载 - bas:attachment:downloadByParam", notes = "下载")
     public void downloadByParam(@RequestBody List<String> url, HttpServletResponse response) throws IOException {
         if(url.size() == 0 || StringUtils.isEmpty(url.get(0))){
-            throw new CommonException("999", "数据异常，附件信息不能为空");
+            throw new CommonException("999", "Data exception，Attachment information cannot be empty");
         }
 
         response.setContentType("application/pdf");

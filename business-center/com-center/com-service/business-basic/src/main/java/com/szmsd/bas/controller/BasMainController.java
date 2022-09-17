@@ -101,7 +101,7 @@ public class BasMainController extends BaseController {
             basMain1.setMainName(basMain.getMainName());
             List<BasMain> list = basMainService.selectBasMainList(basMain1);
             if (list.size() != 0) {
-                return R.failed("主类别名称重复");
+                return R.failed("Duplicate main category name");
             }
             basMain.setCreateTime(new Date());
             basMainService.insertBasMain(basMain);

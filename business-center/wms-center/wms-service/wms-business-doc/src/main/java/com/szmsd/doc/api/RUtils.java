@@ -21,7 +21,7 @@ public final class RUtils {
                 throw new CommonException("400", r.getMsg());
             }
         }
-        throw new CommonException("400", "网络异常");
+        throw new CommonException("400", "Network anomaly");
     }
 
 }

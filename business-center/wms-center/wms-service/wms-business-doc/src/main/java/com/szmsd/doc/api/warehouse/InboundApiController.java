@@ -285,7 +285,7 @@ public class InboundApiController {
     public R cancel(@PathVariable("warehouseNo") String warehouseNo) {
         R<InboundReceiptInfoVO> info = inboundReceiptFeignService.info(warehouseNo);
         if (info.getCode() != HttpStatus.SUCCESS || info.getData() == null || !info.getData().getCusCode().equals(AuthenticationUtil.getSellerCode())) {
-            throw new CommonException("400", "入库单不存在");
+            throw new CommonException("400", "The receipt order does not exist");
         }
 
         R cancel = null;

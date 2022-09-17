@@ -48,7 +48,7 @@ public class BasShopifyWebhooksController extends BaseController {
         this.saveLog(type, payload, request);
         boolean verified = verifyWebhook(map, hmac);
         if (!verified) {
-            throw new UnauthorizedException("签名验证失败");
+            throw new UnauthorizedException("Signature verification failed");
         }
         return R.ok();
     }
@@ -67,7 +67,7 @@ public class BasShopifyWebhooksController extends BaseController {
         this.saveLog(type, payload, request);
         boolean verified = verifyWebhook(map, hmac);
         if (!verified) {
-            throw new UnauthorizedException("签名验证失败");
+            throw new UnauthorizedException("Signature verification failed");
         }
         return R.ok();
     }
@@ -107,7 +107,7 @@ public class BasShopifyWebhooksController extends BaseController {
         this.saveLog(type, payload, request);
         boolean verified = verifyWebhook(map, hmac);
         if (!verified) {
-            throw new UnauthorizedException("签名验证失败");
+            throw new UnauthorizedException("Signature verification failed");
         }
         /*
         {

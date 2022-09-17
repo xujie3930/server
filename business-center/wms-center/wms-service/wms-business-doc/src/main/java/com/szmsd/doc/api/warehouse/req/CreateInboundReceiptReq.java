@@ -48,7 +48,7 @@ public class CreateInboundReceiptReq extends InboundReceiptReq {
     public CreateInboundReceiptReq checkOtherInfo() {
         // 不允许访问的对象
         if (!"Normal".equals(super.getOrderType())) {
-            throw new CommonException("400", "订单类型不存在!");
+            throw new CommonException("400", "Order type does not exist!");
         }
         //055005 055006 055007
         String warehouseMethodCode = super.getWarehouseMethodCode();
@@ -59,7 +59,7 @@ public class CreateInboundReceiptReq extends InboundReceiptReq {
         warCodeList.add("055004");
         warCodeList.add("055008");
         boolean contains = warCodeList.contains(warehouseMethodCode);
-        AssertUtil400.isTrue(contains, "入库方式不存在");
+        AssertUtil400.isTrue(contains, "Form of arrival non-existent");
 
         //类别
         String categoryCode = super.getWarehouseCategoryCode();
@@ -67,7 +67,7 @@ public class CreateInboundReceiptReq extends InboundReceiptReq {
         categoryCodeList.add("056001");
         categoryCodeList.add("056002");
         boolean containsCate = categoryCodeList.contains(categoryCode);
-        AssertUtil400.isTrue(containsCate, "类别不存在");
+        AssertUtil400.isTrue(containsCate, "Category does not exist");
 
         // 送货方式
         String deliveryWayCode = super.getDeliveryWayCode();
@@ -76,12 +76,12 @@ public class CreateInboundReceiptReq extends InboundReceiptReq {
         deliveryWayCodeList.add("053002");
         deliveryWayCodeList.add("053003");
         boolean containsDeliveryWayCode = deliveryWayCodeList.contains(deliveryWayCode);
-        AssertUtil400.isTrue(containsDeliveryWayCode, "送货方式不存在");
+        AssertUtil400.isTrue(containsDeliveryWayCode, "Delivery method does not exist");
 
         //产品货源地
         String goodsSourceCode = super.getGoodsSourceCode();
         if (StringUtils.isNotBlank(goodsSourceCode)){
-            AssertUtil400.isTrue("0".equals(goodsSourceCode) || "1".equals(goodsSourceCode), "产品货源地不存在");
+            AssertUtil400.isTrue("0".equals(goodsSourceCode) || "1".equals(goodsSourceCode), "The product origin does not exist");
         }
         // 裸货上架 过滤图片 TODO
         if ("055003".equals(super.getOrderType())){

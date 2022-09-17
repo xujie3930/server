@@ -62,7 +62,7 @@ public class BasSkuRuleMatchingController extends BaseController{
 
          LoginUser loginUser = SecurityUtils.getLoginUser();
          if (null == loginUser) {
-             throw new CommonException("500", "非法的操作");
+             throw new CommonException("500", "IllegalOperation");
          }
          // 获取登录用户的客户编码
          String sellerCode = loginUser.getSellerCode();
@@ -84,10 +84,10 @@ public class BasSkuRuleMatchingController extends BaseController{
     {
 
         if(StringUtils.isEmpty(dto.getSellerCode())){
-            throw new CommonException("400", "sellerCode 不能空");
+            throw new CommonException("400", "sellerCode Cannot be empty");
         }
         if(StringUtils.isEmpty(dto.getSourceSkuList())){
-            throw new CommonException("400", "sourceSkuList 不能空");
+            throw new CommonException("400", "sourceSkuList Cannot be empty");
         }
         return R.ok(basSkuRuleMatchingService.getList(dto));
     }
@@ -126,11 +126,11 @@ public class BasSkuRuleMatchingController extends BaseController{
 
         List<BasSkuRuleMatchingImportDto> userList = EasyExcel.read(file.getInputStream(), BasSkuRuleMatchingImportDto.class, new SyncReadListener()).sheet().doReadSync();
         if (CollectionUtils.isEmpty(userList)) {
-            throw new BaseException("导入内容为空");
+            throw new BaseException("The import content is empty");
         }
         LoginUser loginUser = SecurityUtils.getLoginUser();
         if (null == loginUser) {
-            throw new CommonException("500", "非法的操作");
+            throw new CommonException("500", "Illegal operation");
         }
         // 获取登录用户的客户编码
         String sellerCode = loginUser.getSellerCode();

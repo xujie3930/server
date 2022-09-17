@@ -136,7 +136,7 @@ public class DelOutboundImportController extends BaseController {
             return R.ok(ImportResultData.buildSuccessData(dtoList));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            return R.failed("文件解析异常");
+            return R.failed("File parsing exception");
         }
     }
 

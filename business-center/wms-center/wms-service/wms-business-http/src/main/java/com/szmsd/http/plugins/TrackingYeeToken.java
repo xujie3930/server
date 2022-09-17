@@ -54,7 +54,7 @@ public class TrackingYeeToken extends AbstractDomainToken {
         } else if (HttpMethod.POST.equals(authorizeHttpMethod)) {
             authorizeHttpResponseBody = HttpClientHelper.httpPost(authorizeUrl, authorizeRequestBody, domainTokenValue.getAuthorizeRequestHeaders());
         } else {
-            throw new CommonException("999", "不支持的请求方式，" + authorizeHttpMethod);
+            throw new CommonException("999", " Unsupported request mode ，" + authorizeHttpMethod);
         }
         super.logger.info("请求获取授权码响应结果：{}", JSON.toJSONString(authorizeHttpResponseBody));
         int authorizeStatus = authorizeHttpResponseBody.getStatus();

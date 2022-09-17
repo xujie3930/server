@@ -80,7 +80,7 @@ public class CommonOrderController extends BaseController {
     public R transferCallback(@RequestBody @Valid TransferCallbackDTO callbackDTO){
         CommonOrder order = this.ecCommonOrderService.getOne(new LambdaQueryWrapper<CommonOrder>().eq(CommonOrder::getOrderNo, callbackDTO.getOrderNo()).last("limit 1"));
         if (order == null) {
-            return R.failed("电商单不存在");
+            return R.failed("E-commerce bill does not exist");
         }
         order.setTransferNumber(callbackDTO.getTransferNumber());
         order.setLogisticsRouteId(callbackDTO.getLogisticsRouteId());
@@ -148,7 +148,7 @@ public class CommonOrderController extends BaseController {
         List<CommonOrder> commonOrders = ecCommonOrderService.list(new LambdaQueryWrapper<CommonOrder>().in(CommonOrder::getId, bindWarehouseRequestDTO.getIds()).isNotNull(CommonOrder::getTransferNumber));
         if (CollectionUtils.isNotEmpty(commonOrders)) {
             List<String> collect = commonOrders.stream().map(CommonOrder::getOrderNo).collect(Collectors.toList());
-            return R.failed("订单号："+String.join(",", collect)+"已有跟踪号，不允许修改");
+            return R.failed("order number："+String.join(",", collect)+"Existing tracking number，Modification not allowed");
         }
         ecCommonOrderService.update(new LambdaUpdateWrapper<CommonOrder>()
                 .set(CommonOrder::getShippingWarehouseId, bindWarehouseRequestDTO.getWarehouseId())
@@ -163,7 +163,7 @@ public class CommonOrderController extends BaseController {
         List<CommonOrder> commonOrders = ecCommonOrderService.list(new LambdaQueryWrapper<CommonOrder>().in(CommonOrder::getId, bindShippingMethodRequestDTO.getIds()).isNotNull(CommonOrder::getTransferNumber));
         if (CollectionUtils.isNotEmpty(commonOrders)) {
             List<String> collect = commonOrders.stream().map(CommonOrder::getOrderNo).collect(Collectors.toList());
-            return R.failed("订单号："+String.join(",", collect)+"已有跟踪号，不允许修改");
+            return R.failed("order number："+String.join(",", collect)+"Existing tracking number，Modification not allowed");
         }
         commonOrders.forEach(order -> {
             // 已下单
@@ -171,7 +171,7 @@ public class CommonOrderController extends BaseController {
                 R<DelOutboundVO> statusByOrderNoR = delOutboundFeignService.getStatusByOrderNo(order.getOmsOrderNo());
                 if (Constants.SUCCESS.equals(statusByOrderNoR) && statusByOrderNoR.getData() != null
                         && DelOutboundStateEnum.REVIEWED_DOING.getCode().equalsIgnoreCase(statusByOrderNoR.getData().getState())){
-                    throw new BaseException("订单提审中，无法修改");
+                    throw new BaseException("The order is being reviewed and cannot be modified");
                 }
             }
         });
@@ -189,7 +189,7 @@ public class CommonOrderController extends BaseController {
         List<CommonOrder> commonOrders = ecCommonOrderService.list(new LambdaQueryWrapper<CommonOrder>().in(CommonOrder::getId, requestDTO.getIds()).isNotNull(CommonOrder::getTransferNumber));
         if (CollectionUtils.isNotEmpty(commonOrders)) {
             List<String> collect = commonOrders.stream().map(CommonOrder::getOrderNo).collect(Collectors.toList());
-            return R.failed("订单号："+String.join(",", collect)+"已有跟踪号，不允许修改");
+            return R.failed("order number："+String.join(",", collect)+"Existing tracking number，Modification not allowed");
         }
         ecCommonOrderService.update(new LambdaUpdateWrapper<CommonOrder>()
                 .set(CommonOrder::getWarehouseCode, requestDTO.getWarehouseCode())

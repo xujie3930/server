@@ -120,7 +120,7 @@ public class BasePackingServiceImpl extends ServiceImpl<BasePackingMapper, BaseP
                         if (basePacking.getCurrency().equals(map.get("currency"))) {
                             return baseMapper.updateById(basePacking);
                         } else {
-                            throw new BaseException("该仓库该物料货币唯一，请勿添加其他货币");
+                            throw new BaseException("The material currency of the warehouse is unique，Do not add other currencies");
                         }
                     }
                 }

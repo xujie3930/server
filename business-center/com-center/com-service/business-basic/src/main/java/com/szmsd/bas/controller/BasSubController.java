@@ -281,7 +281,7 @@ public class BasSubController extends BaseController {
             BasSub basSub2 = new BasSub();
             String mainSub = basSub.getMainCode();
             if (StringUtils.isEmpty(mainSub)) {
-                return R.failed(String.format("主类别不能为空:%s", mainSub));
+                return R.failed(String.format("The main category cannot be empty:%s", mainSub));
             }
             basSub2.setMainCode(mainSub);
 
