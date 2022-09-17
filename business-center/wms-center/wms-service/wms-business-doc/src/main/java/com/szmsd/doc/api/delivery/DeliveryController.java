@@ -114,7 +114,7 @@ public class DeliveryController {
     public R<List<DelOutboundPackageTransferResponse>> packageTransfer(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) DelOutboundPackageTransferListRequest request) {
         List<DelOutboundPackageTransferRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
-            throw new CommonException("400", "请求对象不能为空");
+            throw new CommonException("400", "The request object cannot be empty");
         }
         String sellerCode = AuthenticationUtil.getSellerCode();
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
@@ -139,7 +139,7 @@ public class DeliveryController {
         }
         String country = CountryCache.getCountry(countryCode);
         if (null == country) {
-            throw new CommonException("400", "国家编码[" + countryCode + "]不存在");
+            throw new CommonException("400", "Country code [" + countryCode + "] non-existent");
         }
         address.setCountry(country);
     }
@@ -151,7 +151,7 @@ public class DeliveryController {
     public R<List<DelOutboundLabelResponse>> packageTransferLabel(@RequestBody @Validated DelOutboundLabelRequest request) {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
-            throw new CommonException("400", "订单号不能为空");
+            throw new CommonException("400", "Order No. cannot be empty");
         }
         DelOutboundLabelDto labelDto = new DelOutboundLabelDto();
         labelDto.setOrderNos(orderNos);
@@ -175,7 +175,7 @@ public class DeliveryController {
     public R<Integer> cancelPackageTransfer(@RequestBody @Validated DelOutboundCanceledRequest request) {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
-            throw new CommonException("400", "订单号不能为空");
+            throw new CommonException("400", "Order No. cannot be empty");
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
@@ -201,7 +201,7 @@ public class DeliveryController {
     public R<List<DelOutboundShipmentResponse>> shipment(@RequestBody @Validated(DelOutboundGroup.Normal.class) DelOutboundShipmentListRequest request) {
         List<DelOutboundShipmentRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
-            throw new CommonException("400", "请求对象不能为空");
+            throw new CommonException("400", "The request object cannot be empty");
         }
         String sellerCode = AuthenticationUtil.getSellerCode();
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
@@ -222,7 +222,7 @@ public class DeliveryController {
     public R<Integer> cancelShipment(@RequestBody @Validated DelOutboundCanceledRequest request) {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
-            throw new CommonException("400", "订单号不能为空");
+            throw new CommonException("400", "Order No. cannot be empty");
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
         canceledDto.setOrderNos(orderNos);
@@ -239,7 +239,7 @@ public class DeliveryController {
     public R<List<DelOutboundCollectionResponse>> collection(@RequestBody @Validated(DelOutboundGroup.Collection.class) DelOutboundCollectionListRequest request) {
         List<DelOutboundCollectionRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
-            throw new CommonException("400", "请求对象不能为空");
+            throw new CommonException("400", "The request object cannot be empty");
         }
         String sellerCode = AuthenticationUtil.getSellerCode();
         List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
@@ -260,11 +260,11 @@ public class DeliveryController {
     public R<Integer> cancelCollection(@RequestBody @Validated DelOutboundCanceledRequest request) {
         List<String> orderNos = request.getOrderNos();
         if (CollectionUtils.isEmpty(orderNos)) {
-            throw new CommonException("400", "订单号不能为空");
+            throw new CommonException("400", "Order No. cannot be empty");
         }
         for (String orderNo : orderNos) {
             if (StringUtils.isEmpty(orderNo)) {
-                throw new CommonException("400", "订单号值不能为空");
+                throw new CommonException("400", "Order No. cannot be empty");
             }
         }
         DelOutboundCanceledDto canceledDto = new DelOutboundCanceledDto();
@@ -285,7 +285,7 @@ public class DeliveryController {
     public R<List<DelOutboundBatchResponse>> batch(@RequestBody @Validated(DelOutboundGroup.Batch.class) DelOutboundBatchListRequest request) {
         List<DelOutboundBatchRequest> requestList = request.getRequestList();
         if (CollectionUtils.isEmpty(requestList)) {
-            throw new CommonException("400", "请求对象不能为空");
+            throw new CommonException("400", "The request object cannot be empty");
         }
         AtomicInteger lineNum = new AtomicInteger(1);
         request.getRequestList().forEach(dto -> {

@@ -150,7 +150,7 @@ public class BasSerialNumberServiceImpl extends ServiceImpl<BasSerialNumberMappe
         queryWrapper.eq("code", code);
         BasSerialNumber serialNumber = super.getOne(queryWrapper);
         if (null == serialNumber) {
-            throw new CommonException("999", "业务编码[" + code + "]未配置");
+            throw new CommonException("999", "Business Code[" + code + "]not configured");
         }
         // 修改流水号相关信息
         BasSerialNumber updateSerialNumber = new BasSerialNumber();

@@ -41,15 +41,15 @@ public class ProtocolController {
         String path = buildDefaultPath(request);
         File dirFile = new File(path);
         if (!dirFile.exists()) {
-            throw new CommonException("999", "文件夹不存在");
+            throw new CommonException("999", "Folder does not exist");
         }
         String[] list = dirFile.list();
         if (null == list || list.length == 0) {
-            throw new CommonException("999", "文件不存在");
+            throw new CommonException("999", "Folder does not exist");
         }
         File file = getDownloadFile(path);
         if (null == file) {
-            throw new CommonException("999", "文件不存在");
+            throw new CommonException("999", "Folder does not exist");
         }
         InputStream inputStream = null;
         ServletOutputStream outputStream = null;
@@ -67,10 +67,10 @@ public class ProtocolController {
             IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
-            throw new CommonException("999", "文件不存在，" + e.getMessage());
+            throw new CommonException("999", "Folder does not exist，" + e.getMessage());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-            throw new CommonException("999", "文件流处理失败，" + e.getMessage());
+            throw new CommonException("999", "File stream processing failed，" + e.getMessage());
         } finally {
             IoUtil.flush(outputStream);
             IoUtil.close(outputStream);
@@ -100,7 +100,7 @@ public class ProtocolController {
         File dirFile = new File(path);
         if (!dirFile.exists()) {
             if (!dirFile.mkdirs()) {
-                throw new CommonException("999", "创建文件夹失败");
+                throw new CommonException("999", "Failed to create folder");
             }
         }
         // 获取上传文件的名称（下载的时候名字）
@@ -113,7 +113,7 @@ public class ProtocolController {
         // 文档 (3).doc
         String fileName = file.getOriginalFilename();
         if (null == fileName || "".equals(fileName.trim())) {
-            throw new CommonException("999", "源文件名不能为空");
+            throw new CommonException("999", "Source file name cannot be empty");
         }
         fileName = getFileName(path, fileName);
         String filePath = path + "/" + fileName;
@@ -121,7 +121,7 @@ public class ProtocolController {
             writeFile(filePath, file.getBytes());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-            throw new CommonException("999", "保存文件失败，" + e.getMessage());
+            throw new CommonException("999", "Failed to save file，" + e.getMessage());
         }
         return R.ok(filePath);
     }
@@ -137,7 +137,7 @@ public class ProtocolController {
         // gei file name
         File dirFile = new File(path);
         if (!dirFile.exists()) {
-            return R.failed("文件夹不存在");
+            return R.failed("Folder does not exist");
         }
         return R.ok(dirFile.list());
     }
@@ -253,7 +253,7 @@ public class ProtocolController {
             stream.write(bytes);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new CommonException("999", "保存文件异常，" + e.getMessage());
+            throw new CommonException("999", "Save file exception，" + e.getMessage());
         } finally {
             if (null != stream) {
                 try {

@@ -115,7 +115,7 @@ public class BasCustomerController extends BaseController {
             basCustomer1.setCusCode(basCustomer.getCusCode());
             List<BasCustomer> list = basCustomerService.selectBasCustomerList(basCustomer1);
             if (list.size() != 0) {
-                return R.failed("客户编号重复");
+                return R.failed("Duplicate customer number");
             }
         }
         basCustomer.setCusName(basCustomer.getCusAbbverviation());

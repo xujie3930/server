@@ -71,7 +71,7 @@ public class BasLocationController extends BaseController {
         basLocations.setWarehouseCode(basLocation.getWarehouseCode());
         List<BasLocation> list = basLocationService.selectBasLocationList(basLocations);
         if (list.size()!=0){
-            return R.failed("库位编号重复");
+            return R.failed("Warehouse location number is duplicate");
         }
         basLocation.setCreateTime(new Date());
         return toOk(basLocationService.insertBasLocation(basLocation));

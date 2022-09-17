@@ -132,7 +132,7 @@ public class BasAttachmentController extends BaseController {
         List<BasAttachmentDataDTO> filesUrl = new ArrayList<>();
         List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
         if (CollectionUtils.isEmpty(multipartFiles)) {
-            throw new CommonException("999", "附件不能为空！");
+            throw new CommonException("999", "Attachment cannot be empty！");
         }
         multipartFiles.forEach(myFile -> {
             Files files = FileUtil.getFileUrl(new FileDTO()
@@ -186,7 +186,7 @@ public class BasAttachmentController extends BaseController {
             List<BasMultiplePiecesDataDTO> filesUrl = new ArrayList<>();
             List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
             if (CollectionUtils.isEmpty(multipartFiles)) {
-                throw new CommonException("999", "附件不能为空！");
+                throw new CommonException("999", "Attachment cannot be empty！");
             }
             multipartFiles.forEach(myFile -> {
                 Files files = FileUtil.getFileUrl(new FileDTO()
@@ -207,7 +207,7 @@ public class BasAttachmentController extends BaseController {
             List<BasMultiplePiecesDataDTO> filesUrl = new ArrayList<>();
             List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
             if (CollectionUtils.isEmpty(multipartFiles)) {
-                throw new CommonException("999", "附件不能为空！");
+                throw new CommonException("999", "Attachment cannot be empty！");
             }
             multipartFiles.forEach(myFile -> {
                 Files files = FileUtil.getFileUrl(new FileDTO()
@@ -234,7 +234,7 @@ public class BasAttachmentController extends BaseController {
         List<BasAttachmentExcelDTO> filesUrl = new ArrayList<>();
         List<MultipartFile> multipartFiles = Arrays.asList(myFiles);
         if (CollectionUtils.isEmpty(multipartFiles)) {
-            throw new CommonException("999", "附件不能为空！");
+            throw new CommonException("999", "Attachment cannot be empty！");
         }
         multipartFiles.forEach(myFile -> {
             List<BasAttachmentDataDTO> list = this.processBoxMark(myFile, attachmentTypeEnum);
@@ -262,7 +262,7 @@ public class BasAttachmentController extends BaseController {
                 filesUrl.add(dto1);
                 BasAttachment dataBasAttachment = map.get(dto1.getBusinessNo());
                 if(dataBasAttachment != null){
-                    throw new CommonException("999", dto1.getBusinessNo()+"箱标已导入,请勿重复操作");
+                    throw new CommonException("999", dto1.getBusinessNo()+"The box label has been imported,Do not repeat the operation");
                 }
                 basAttachmentService.insert(dto.getRemark(), ""+(i+1), Arrays.asList(dto.getAttachmentUrl()), attachmentTypeEnum, "");
 
