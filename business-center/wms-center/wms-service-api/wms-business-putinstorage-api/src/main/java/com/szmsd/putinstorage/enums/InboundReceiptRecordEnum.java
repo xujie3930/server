@@ -108,7 +108,7 @@ public enum InboundReceiptRecordEnum implements RecordEnum {
 
         @Override
         public String getContent() {
-            return "SKU[{0}]，Quantity put on shelves [{1}]";
+            return "SKU[{0}]，上架数量 [{1}]";
         }
 
         @Override
