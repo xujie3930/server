@@ -29,13 +29,13 @@ import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.mapper.AccountBalanceMapper;
+import com.szmsd.finance.mapper.ExchangeRateMapper;
 import com.szmsd.finance.service.*;
 import com.szmsd.finance.util.LogUtil;
 import com.szmsd.finance.util.SnowflakeId;
 import com.szmsd.finance.vo.CreditUseInfo;
 import com.szmsd.finance.vo.PreOnlineIncomeVo;
 import com.szmsd.finance.vo.UserCreditInfoVO;
-import com.szmsd.finance.ws.WebSocketServer;
 import com.szmsd.http.api.feign.HttpRechargeFeignService;
 import com.szmsd.http.dto.recharges.RechargesRequestAmountDTO;
 import com.szmsd.http.dto.recharges.RechargesRequestDTO;
@@ -87,8 +87,8 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Autowired
     ISysDictDataService sysDictDataService;
 
-    @Resource
-    private WebSocketServer webSocketServer;
+    @Autowired
+    ExchangeRateMapper exchangeRateMapper;
     @Resource
     private IAccountSerialBillService accountSerialBillService;
     @Resource
@@ -453,7 +453,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public R freezeBalance(CusFreezeBalanceDTO cfbDTO) {
         CustPayDTO dto = new CustPayDTO();
         BeanUtils.copyProperties(cfbDTO, dto);
-        if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0) return R.ok();
+        if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0){
+            return R.ok();
+        }
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
         }
@@ -463,7 +465,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         log.info(LogUtil.format(cfbDTO, "费用冻结"));
         Boolean flag = abstractPayFactory.updateBalance(dto);
-        if (Objects.isNull(flag)) return R.ok();
+        if (Objects.isNull(flag)){
+            return R.ok();
+        }
         if (flag && "Freight".equals(dto.getOrderType()))
         // 冻结 解冻 需要把费用扣减加到 操作费用表
         {
