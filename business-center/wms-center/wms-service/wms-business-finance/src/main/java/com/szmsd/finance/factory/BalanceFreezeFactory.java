@@ -2,16 +2,19 @@ package com.szmsd.finance.factory;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
+import com.szmsd.finance.mapper.AccountBalanceMapper;
 import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.util.LogUtil;
 import com.szmsd.finance.util.SnowflakeId;
@@ -19,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -44,6 +48,9 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     @Resource
     private ISysDictDataService sysDictDataService;
 
+    @Autowired
+    AccountBalanceMapper accountBalanceMapper;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public synchronized Boolean updateBalance(final CustPayDTO dto) {
@@ -52,6 +59,9 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         log.info(LogUtil.format(dto, "冻结/解冻"));
         final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
+
+        int updCount = 0;
+
         try {
             if (lock.tryLock(time, unit)) {
 
@@ -72,9 +82,24 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 }
                 log.info("【updateBalance】 4");
                 balance.setOrderNo(dto.getNo());
-                setBalance(dto.getCusCode(), currencyCode, balance);
+                //setBalance(dto.getCusCode(), currencyCode, balance);
 
-                TransactionAspectSupport.currentTransactionStatus().isCompleted();
+                LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+                lambdaUpdateWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
+                lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode, currencyCode);
+                lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance, balance.getCurrentBalance());
+                lambdaUpdateWrapper.set(AccountBalance::getFreezeBalance, balance.getFreezeBalance());
+                lambdaUpdateWrapper.set(AccountBalance::getTotalBalance, balance.getTotalBalance());
+                if (null != balance.getCreditInfoBO()) {
+                    lambdaUpdateWrapper.set(AccountBalance::getCreditUseAmount, balance.getCreditInfoBO().getCreditUseAmount());
+                    lambdaUpdateWrapper.set(AccountBalance::getCreditStatus, balance.getCreditInfoBO().getCreditStatus());
+                    lambdaUpdateWrapper.set(AccountBalance::getCreditBeginTime, balance.getCreditInfoBO().getCreditBeginTime());
+                    lambdaUpdateWrapper.set(AccountBalance::getCreditEndTime, balance.getCreditInfoBO().getCreditEndTime());
+                    lambdaUpdateWrapper.set(AccountBalance::getCreditBufferTime, balance.getCreditInfoBO().getCreditBufferTime());
+                }
+                updCount = accountBalanceMapper.update(null, lambdaUpdateWrapper);
+
+                log.info("移除setBalance");
 
                 final BalanceDTO balancesel = getBalance(dto.getCusCode(), dto.getCurrencyCode());
 
@@ -84,8 +109,6 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 recordDetailLogAsync(dto, balance);
                 log.info("【updateBalance】 5.1 {} recordOpLogAsync,recordDetailLogAsync后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 log.info("【updateBalance】 6");
-
-
 
                 //Thread.sleep(1000);
 
@@ -101,12 +124,8 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
         } finally {
 
-            log.info("释放reentrantLock锁 {}",dto.getNo());
-
-            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-
+            if (lock.isLocked() && lock.isHeldByCurrentThread() && updCount == 1) {
                 log.info("释放redis锁 {}",dto.getNo());
-
                 lock.unlock();
             }
         }
