@@ -15,72 +15,104 @@ import java.math.BigDecimal;
 @ApiModel(value = "DelOutboundPackageTransferImportDto", description = "DelOutboundPackageTransferImportDto对象")
 public class DelOutboundPackageTransferImportDto implements Serializable {
 
-    @ApiModelProperty(value = "订单顺序")
+    @ApiModelProperty(value = "订单序号\n" +
+            "（必填）")
     private Integer sort;
 
-    @ApiModelProperty(value = "仓库代码")
+    @ApiModelProperty(value = "交货仓库\n" +
+            "（必填）")
     private String warehouseCode;
 
-    @ApiModelProperty(value = "物流服务")
+    @ApiModelProperty(value = "物流服务\n" +
+            "（必填）")
     private String shipmentRule;
 
-    @ApiModelProperty(value = "收件人名称")
+
+    @ApiModelProperty(value = "收件人姓名\n" +
+            "（必填）")
     private String consignee;
 
-    @ApiModelProperty(value = "街道1")
+    @ApiModelProperty(value = "街道1\n" +
+            "（必填）")
     private String street1;
 
-    @ApiModelProperty(value = "街道2")
+    @ApiModelProperty(value = "街道2\n" +
+            "（非必填）")
     private String street2;
 
-    @ApiModelProperty(value = "城镇/城市")
+    @ApiModelProperty(value = "城镇/城市\n" +
+            "（必填）")
     private String city;
 
-    @ApiModelProperty(value = "州/省")
+    @ApiModelProperty(value = "州/省\n" +
+            "（必填）")
     private String stateOrProvince;
 
-    @ApiModelProperty(value = "邮编")
-    private String postCode;
 
-    @ApiModelProperty(value = "国家")
+    @ApiModelProperty(value = "国家\n" +
+            "（必填）")
     private String country;
 
-    @ApiModelProperty(value = "电子邮箱")
-    private String email;
+    @ApiModelProperty(value = "邮编\n" +
+            "（必填）")
+    private String postCode;
 
-    @ApiModelProperty(value = "联系方式")
+
+    @ApiModelProperty(value = "联系电话\n" +
+            "（非必填）")
     private String phoneNo;
 
-    @ApiModelProperty(value = "收件人税号")
+
+    @ApiModelProperty(value = "电子邮箱\n" +
+            "（非必填）")
+    private String email;
+
+
+    @ApiModelProperty(value = "包裹重量（g）\n" +
+            "（必填）")
+    private Double weight;
+
+    @ApiModelProperty(value = "包裹尺寸（长/cm）\n" +
+            "（必填）")
+    private Double length;
+
+    @ApiModelProperty(value = "包裹尺寸（宽/cm）\n" +
+            "（必填）")
+    private Double width;
+
+    @ApiModelProperty(value = "包裹尺寸（高/cm）\n" +
+            "（必填）")
+    private Double height;
+
+
+    @ApiModelProperty(value = "重量信息确认\n" +
+            "（必填）")
+    private String packageConfirmName;
+
+    @ApiModelProperty(value = "误差范围（g）\n" +
+            "（非必填）")
+    private Integer packageWeightDeviation;
+
+    @ApiModelProperty(value = "增值税号\n" +
+            "（非必填）")
     private String ioss;
 
-    @ApiModelProperty(value = "COD金额")
+
+    @ApiModelProperty(value = "COD\n" +
+            "（非必填）")
     private BigDecimal codAmount;
 
 
-    @ApiModelProperty(value = "重量 g")
-    private Double weight;
-
-    @ApiModelProperty(value = "长 CM")
-    private Double length;
-
-    @ApiModelProperty(value = "宽 CM")
-    private Double width;
-
-    @ApiModelProperty(value = "高 CM")
-    private Double height;
-
-    @ApiModelProperty(value = "包裹重量尺寸确认")
-    private String packageConfirmName;
-
-    @ApiModelProperty(value = "包裹重量误差")
-    private Integer packageWeightDeviation;
-
-    @ApiModelProperty(value = "refno")
+    @ApiModelProperty(value = "RefNo\n" +
+            "（非必填）")
     private String refNo;
 
-    @ApiModelProperty(value = "备注")
+
+    @ApiModelProperty(value = "备注\n" +
+            "（非必填）")
     private String remark;
+
+
 
 
 }
