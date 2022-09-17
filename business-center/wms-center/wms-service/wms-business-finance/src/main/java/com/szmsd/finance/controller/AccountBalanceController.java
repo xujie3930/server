@@ -37,8 +37,9 @@ public class AccountBalanceController extends FssBaseController {
     @GetMapping("/listPage")
     @AutoValue
     public R<PageInfo<AccountBalance>> listPage(AccountBalanceDTO dto) {
+         String len=getLen();
 
-        return accountBalanceService.listPage(dto);
+        return  accountBalanceService.listPage(dto,len);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:list')")
@@ -53,7 +54,15 @@ public class AccountBalanceController extends FssBaseController {
     @GetMapping("/recordListPage")
     public TableDataInfo recordListPage(AccountBalanceChangeDTO dto) {
         startPage();
+        String len=getLen();
         List<AccountBalanceChange> list = accountBalanceService.recordListPage(dto);
+        list.forEach(x-> {
+            if (len.equals("en")) {
+                x.setCurrencyName(x.getCurrencyCode());
+            } else if (len.equals("zh")) {
+                x.setCurrencyName(x.getCurrencyName());
+            }
+        });
         return getDataTable(list);
     }
 
