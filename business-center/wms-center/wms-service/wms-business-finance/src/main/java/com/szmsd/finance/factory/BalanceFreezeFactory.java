@@ -79,6 +79,9 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 recordDetailLogAsync(dto, balance);
                 log.info("【updateBalance】 5.1 {} recordOpLogAsync,recordDetailLogAsync后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 log.info("【updateBalance】 6");
+
+                Thread.sleep(1000);
+
                 return true;
             } else {
                 log.error("冻结/解冻操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
