@@ -2,6 +2,7 @@ package com.szmsd.finance.factory;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
@@ -30,7 +31,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 冻结
@@ -101,9 +101,14 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
                 log.info("移除setBalance");
 
-                final BalanceDTO balancesel = getBalance(dto.getCusCode(), dto.getCurrencyCode());
+                //final BalanceDTO balancesel = getBalance(dto.getCusCode(), dto.getCurrencyCode());
 
-                log.info("【updateBalance】 4.1 {} setBalance后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balancesel.getCurrentBalance(),balancesel.getFreezeBalance(),balancesel.getTotalBalance(),JSONObject.toJSONString(balancesel));
+                QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("cus_code", dto.getCusCode());
+                queryWrapper.eq("currency_code", currencyCode);
+                AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
+
+                log.info("【updateBalance】 4.1 {} setBalance后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,accountBalance.getCurrentBalance(),accountBalance.getFreezeBalance(),accountBalance.getTotalBalance(),JSONObject.toJSONString(accountBalance));
                 log.info("【updateBalance】 5");
                 recordOpLogAsync(dto, balance.getCurrentBalance());
                 recordDetailLogAsync(dto, balance);
