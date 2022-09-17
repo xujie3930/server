@@ -15,26 +15,32 @@ import java.io.Serializable;
 @ApiModel(value = "DelOutboundPackageTransferDetailImportDto", description = "DelOutboundPackageTransferDetailImportDto对象")
 public class DelOutboundPackageTransferDetailImportDto implements Serializable {
 
-    @ApiModelProperty(value = "订单顺序")
+    @ApiModelProperty(value = "订单序号\n" +
+            "（必填）")
     private Integer sort;
 
-    @ApiModelProperty(value = "英文申报品名")
+    @ApiModelProperty(value = "英文申报品名\n" +
+            "（必填）")
     private String productName;
 
-    @ApiModelProperty(value = "中文申报品名")
+    @ApiModelProperty(value = "中午申报品名\n" +
+            "（必填）")
     private String productNameChinese;
 
-    @ApiModelProperty(value = "申报价值（美元）")
+    @ApiModelProperty(value = "申报价值（美元）\n" +
+            "（必填）")
     private Double declaredValue;
 
-    @ApiModelProperty(value = "出库数量")
+    @ApiModelProperty(value = "出库数量\n" +
+            "（必填）")
     private Integer qty;
 
     @ApiModelProperty(value = "产品属性编号")
     @ExcelIgnore
     private String productAttribute;
 
-    @ApiModelProperty(value = "产品属性")
+    @ApiModelProperty(value = "产品属性\n" +
+            "（必填）")
     private String productAttributeName;
 
     @ApiModelProperty(value = "带电信息编号")
@@ -48,12 +54,14 @@ public class DelOutboundPackageTransferDetailImportDto implements Serializable {
     @ExcelIgnore
     private String batteryPackaging;
 
-    @ApiModelProperty(value = "电池包装")
+    @ApiModelProperty(value = "电池包装\n" +
+            "（非必填）")
     private String batteryPackagingName;
 
-    @ApiModelProperty(value = "海关编码")
+    @ApiModelProperty(value = "海关编码\n" +
+            "（非必填）")
     private String hsCode;
-
+/*
     @ApiModelProperty(value = "产品描述")
-    private String productDescription;
+    private String productDescription;*/
 }
