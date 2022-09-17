@@ -6,6 +6,7 @@ import com.szmsd.inventory.domain.dto.PurchaseAddDTO;
 import com.szmsd.inventory.domain.dto.PurchaseQueryDTO;
 import com.szmsd.inventory.domain.dto.TransportWarehousingAddDTO;
 import com.szmsd.inventory.domain.excel.PurchaseInfoDetailExcle;
+import com.szmsd.inventory.domain.excel.PurchaseInfoDetailExcleep;
 import com.szmsd.inventory.domain.vo.PurchaseInfoDetailVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoListVO;
 import com.szmsd.inventory.domain.vo.PurchaseInfoVO;
@@ -62,7 +63,7 @@ public interface IPurchaseService extends IService<Purchase> {
 
     Map  importPurchaseInfoDetailExcle(List<PurchaseInfoDetailExcle> list,String associationId,String purchaseNo);
 
-    List<PurchaseInfoDetailExcle> exportusAbnormal(Integer id);
+    List<PurchaseInfoDetailExcleep> exportusAbnormal(Integer id);
 
     void deletePurchaseStorageDetails(Integer id);
 }
