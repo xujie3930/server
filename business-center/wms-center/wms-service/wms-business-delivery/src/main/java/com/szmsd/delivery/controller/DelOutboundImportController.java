@@ -288,9 +288,22 @@ public class DelOutboundImportController extends BaseController {
     @GetMapping("/packageTransferImportTemplate")
     @ApiOperation(value = "出库管理 - 导入 - 转运出库导入模板", position = 500)
     public void packageTransferImportTemplate(HttpServletResponse response) {
-        String filePath = "/template/DM_packageTransfer.xls";
-        String fileName = "转运出库模板";
+
+        String len=getLen().toLowerCase(Locale.ROOT);
+        String filePath=null;
+        String fileName=null;
+        if (len.equals("zh")){
+            filePath = "/template/DM_packageTransfer.xlsx";
+            fileName = "转运出库模板";
+        }else if (len.equals("en")){
+            filePath = "/template/DM_packageTransfer-en.xlsx";
+            fileName = "AddedSKUImportTemplate";
+        }
+
+
+
         this.downloadTemplate(response, filePath, fileName);
+
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundImport:packageTransferImport')")

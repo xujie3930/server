@@ -50,25 +50,32 @@ public class DelOutboundPackageTransferImportValidation implements ImportValidat
         this.importContext.stringLength(object.getStreet2(), 500, rowIndex, 6, "街道2不能超过500个字符");
         this.importContext.stringLength(object.getCity(), 50, rowIndex, 7, "城镇/城市不能超过50个字符");
         this.importContext.stringLength(object.getStateOrProvince(), 50, rowIndex, 8, "州/省不能超过50个字符");
-        // 邮编
-        String postCode = object.getPostCode();
-        if (!this.importContext.isEmpty(postCode, rowIndex, 9, null, "邮编不能为空")) {
-            this.importContext.stringLength(postCode, 50, rowIndex, 9, "邮编不能超过50个字符");
-        }
+
         // 国家不能为空
         String country = object.getCountry();
-        if (this.importContext.isEmpty(country, rowIndex, 10, null, "国家不能为空")) {
+        if (this.importContext.isEmpty(country, rowIndex, 9, null, "国家不能为空")) {
             return;
         }
         String countryCode = this.getCountryCode(country);
-        this.importContext.isEmpty(countryCode, rowIndex, 10, country, "国家不存在");
+        this.importContext.isEmpty(countryCode, rowIndex, 9, country, "国家不存在");
+        // 邮编
+        String postCode = object.getPostCode();
+        if (!this.importContext.isEmpty(postCode, rowIndex, 10, null, "邮编不能为空")) {
+            this.importContext.stringLength(postCode, 50, rowIndex, 10, "邮编不能超过50个字符");
+        }
+        this.importContext.isNull(object.getWeight(), rowIndex, 13, country, "包裹重量（g）不能为空");
+        this.importContext.isNull(object.getWeight(), rowIndex, 14, country, "包裹尺寸（长/cm）不能为空");
+        this.importContext.isNull(object.getWeight(), rowIndex, 15, country, "包裹尺寸（宽/cm）不能为空");
+        this.importContext.isNull(object.getWeight(), rowIndex, 16, country, "包裹尺寸（高/cm）不能为空");
+
+
         // 重量信息确认
         String packageConfirmName = object.getPackageConfirmName();
-        if (this.importContext.isEmpty(packageConfirmName, rowIndex, 16, null, "重量信息确认不能为空")) {
+        if (this.importContext.isEmpty(packageConfirmName, rowIndex, 17, null, "重量信息确认不能为空")) {
             return;
         }
         String packageConfirm = this.importContext.packageConfirmCache.get(packageConfirmName);
-        this.importContext.isEmpty(packageConfirm, rowIndex, 16, packageConfirmName, "重量信息确认不存在");
+        this.importContext.isEmpty(packageConfirm, rowIndex, 17, packageConfirmName, "重量信息确认不存在");
     }
 
     public String getCountryCode(String country) {
