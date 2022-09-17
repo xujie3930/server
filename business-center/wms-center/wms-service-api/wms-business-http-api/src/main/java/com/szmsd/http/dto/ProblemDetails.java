@@ -44,12 +44,19 @@ public class ProblemDetails implements Serializable {
 
             if(str != null && removeEscape){
 
-                str = str.replaceAll("\\\\","").replaceAll("\\{","").replaceAll("\\}","").replaceAll("\"","");
-
+                return getErrorMessageOrNullFormat(str);
             }
             return str;
         }
         return null;
+    }
+
+    public static String getErrorMessageOrNullFormat(String str){
+        if(str != null){
+            return str.replaceAll("\\\\","").replaceAll("\\{","").replaceAll("\\}","").replaceAll("\"","");
+
+        }
+        return str;
     }
 
     /**

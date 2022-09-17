@@ -1,6 +1,7 @@
 package com.szmsd.delivery.imported;
 
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.dto.DelOutboundCollectionImportDto;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -21,6 +22,17 @@ public class DelOutboundCollectionImportContext extends ImportContext<DelOutboun
         super(dataList);
          this.countryCache = new MapCacheContext<>();
          this.countryEnCache = new MapCacheContext<>();        this.countryCodeCache = new MapCacheContext<>();
+
+
+         //导入模板是 SZ-深圳仓 这种格式，需要转换为SZ这种
+        if (CollectionUtils.isNotEmpty(dataList)) {
+            for (DelOutboundCollectionImportDto importDto : dataList) {
+                if(StringUtils.contains(importDto.getWarehouseCode(), "-")){
+                    importDto.setWarehouseCode(StringUtils.split(importDto.getWarehouseCode(), "-")[0]);
+                }
+            }
+        }
+
         if (CollectionUtils.isNotEmpty(countryList)) {
             for (BasRegionSelectListVO country : countryList) {
                 this.countryCache.put(country.getName(), country.getAddressCode());
