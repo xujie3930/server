@@ -450,7 +450,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Transactional
     @Override
-    public R freezeBalance(CusFreezeBalanceDTO cfbDTO) {
+    public synchronized R freezeBalance(final CusFreezeBalanceDTO cfbDTO) {
         CustPayDTO dto = new CustPayDTO();
         BeanUtils.copyProperties(cfbDTO, dto);
         if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0){
