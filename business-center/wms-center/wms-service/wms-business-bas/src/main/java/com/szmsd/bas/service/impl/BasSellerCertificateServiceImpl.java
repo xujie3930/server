@@ -123,7 +123,7 @@ public class BasSellerCertificateServiceImpl extends ServiceImpl<BasSellerCertif
         for(BasSellerCertificateDto b:basSellerCertificateList) {
             //判断是否有相同的vat
             if(map.containsKey(b.getVat())){
-                throw new BaseException("vat填写重复");
+                throw new BaseException("vat Duplicate filling");
             }else{
                 map.put(b.getVat(),b.getVat());
             }

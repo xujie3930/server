@@ -86,7 +86,7 @@ public class BasDestinationController extends BaseController {
         basDestination1.setRegionCode(basDestination.getRegionCode());
         List<BasDestination> list = basDestinationService.selectBasDestinationList(basDestination);
         if (list.size() != 0) {
-            return R.failed("目的地编号重复");
+            return R.failed("Duplicate destination number");
         }
         basDestination.setBusinesSiteCode(basDestination.getDisSiteCode());
         basDestination.setCreateTime(new Date());

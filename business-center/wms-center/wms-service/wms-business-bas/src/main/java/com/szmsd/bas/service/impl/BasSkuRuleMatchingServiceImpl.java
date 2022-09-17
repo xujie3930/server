@@ -95,7 +95,7 @@ public class BasSkuRuleMatchingServiceImpl extends ServiceImpl<BasSkuRuleMatchin
             List<String> checkData = new ArrayList<String>();
             for(String omsSku: StringUtils.split(basSkuRuleMatching.getOmsSku(), ",")){
                 if(checkData.contains(omsSku)){
-                    throw new RuntimeException("OMS SKU重复"+omsSku+",");
+                    throw new RuntimeException("OMS SKU Repeat"+omsSku+",");
                 }
                 checkData.add(omsSku);
             }

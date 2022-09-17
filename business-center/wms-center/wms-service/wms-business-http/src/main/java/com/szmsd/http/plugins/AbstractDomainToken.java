@@ -77,13 +77,13 @@ public abstract class AbstractDomainToken implements DomainToken {
             }
         } catch (Exception e) {
             this.logger.error(">>>[获取Token]，8.获取Token失败，" + e.getMessage(), e);
-            throw new CommonException("999", "获取Token失败，" + e.getMessage());
+            throw new CommonException("999", " Failed to get Token，" + e.getMessage());
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
-        throw new CommonException("999", "获取Token失败");
+        throw new CommonException("999", "Failed to get Token");
     }
 
     private void setTokenValue(TokenValue tokenValue) {

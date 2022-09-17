@@ -39,18 +39,18 @@ public class BasCodeServiceImpl implements BasCodeService {
     @Override
     public R createCode(BasCodeDto basCodeDto) {
         if (StringUtils.isBlank(basCodeDto.getAppId())) {
-            return R.failed("appId不能为空!");
+            return R.failed("appId Cannot be empty!");
         }
         if (StringUtils.isBlank(basCodeDto.getCode())) {
-            return R.failed("code不能为空!");
+            return R.failed("code Cannot be empty!");
         }
         basCodeDto.setStatus(1);
         List<BasCode> basCodes = this.basCodeMapper.list(basCodeDto);
         if (CollectionUtils.isEmpty(basCodes)) {
-            return R.failed("请先维护编码生成规则!");
+            return R.failed("Please maintain the code generation rules first!");
         }
         if (basCodes.size() > 1) {
-            return R.failed("查询到多条编码生成规则!");
+            return R.failed("Multiple code generation rules found!");
         }
         //获取锁
         BasCode basCode = this.basCodeMapper.getLock(basCodes.get(0).getId());
@@ -87,7 +87,7 @@ public class BasCodeServiceImpl implements BasCodeService {
         //判断最大值
         long max = list.get(count - 1);
         if (max > basCode.getMaxValue()) {
-            return R.failed("已超出最大值范围，请重新维护!");
+            return R.failed("The maximum range has been exceeded, Please re maintain!");
         }
         //修改最大值
         basCode.setLastNumber(max);

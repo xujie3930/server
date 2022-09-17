@@ -31,7 +31,7 @@ public class BasPartnerServiceImpl extends ServiceImpl<BasPartnerMapper, BasPart
             queryWrapper.ne(BasPartner::getId, entity.getId());
         }
         if (super.count(queryWrapper) > 0) {
-            throw new CommonException("编码已存在：" + entity.getPartnerCode());
+            throw new CommonException("Code already exists：" + entity.getPartnerCode());
         }
     }
 

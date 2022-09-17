@@ -59,10 +59,10 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
     @Override
     public R save(PreWithdrawDTO dto) {
         if(StringUtils.isEmpty(dto.getCusCode())){
-            return R.failed("客户编码不能为空");
+            return R.failed("Customer code cannot be empty");
         }
         if(!accountBalanceService.withDrawBalanceCheck(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
-            return R.failed("余额不足");
+            return R.failed("Sorry, your credit is running low");
         }
         dto.setSerialNo(SnowflakeId.getNextId12());
         PreWithdraw domain= new PreWithdraw();
@@ -71,7 +71,7 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
         if(insert>0){
             return R.ok();
         }
-        return R.failed("保存异常");
+        return R.failed("Save Exception");
     }
 
     @Override

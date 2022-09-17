@@ -102,7 +102,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
     public void transferWarehouseOrder(CommonOrderDTO commonOrderDTO) {
         CommonOrder order = this.baseMapper.selectById(commonOrderDTO.getId());
         if (order == null) {
-            throw new BaseException("订单不存在");
+            throw new BaseException("Order does not exist");
         }
         order.setCommonOrderItemList(commonOrderItemMapper.selectList(new LambdaQueryWrapper<CommonOrderItem>().eq(CommonOrderItem::getOrderId, order.getId())));
 //        OrdOrderBufferDto bufferDto = new OrdOrderBufferDto();
@@ -117,28 +117,28 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
     public void orderShipping(List<Long> ids) {
         List<CommonOrder> commonOrderList = this.listByIds(ids);
         if (CollectionUtils.isEmpty(commonOrderList)) {
-            throw new RuntimeException("未查询出订单数据");
+            throw new RuntimeException("No order data found");
         }
 
         // verify param
         List<String> warehouseList = commonOrderList.stream().filter(v -> StringUtils.isBlank(v.getWarehouseCode())).map(CommonOrder::getOrderNo).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(warehouseList)) {
-            throw new RuntimeException("订单："+String.join(",", warehouseList)+"请完善发货仓库");
+            throw new RuntimeException("order："+String.join(",", warehouseList)+"Please improve the delivery warehouse");
         }
 
         List<String> shipWarehouseList = commonOrderList.stream().filter(v -> v.getShippingWarehouseId() == null).map(CommonOrder::getOrderNo).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(shipWarehouseList)) {
-            throw new RuntimeException("订单："+String.join(",", shipWarehouseList)+"请完善Shopify发货仓库");
+            throw new RuntimeException("order："+String.join(",", shipWarehouseList)+"Please improve Shopify Delivery warehouse");
         }
 
         List<String> shippingMethodList = commonOrderList.stream().filter(v -> StringUtils.isBlank(v.getShippingMethod())).map(CommonOrder::getOrderNo).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(shippingMethodList)) {
-            throw new RuntimeException("订单："+String.join(",", shippingMethodList)+"请完善发货方式");
+            throw new RuntimeException("order："+String.join(",", shippingMethodList)+"Please improve the delivery method");
         }
 
         List<String> shippingSerivceList = commonOrderList.stream().filter(v -> StringUtils.isBlank(v.getShippingService())).map(CommonOrder::getOrderNo).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(shippingSerivceList)) {
-            throw new RuntimeException("订单："+String.join(",", shippingSerivceList)+"请完善发货服务");
+            throw new RuntimeException("order："+String.join(",", shippingSerivceList)+"Please improve the delivery service");
         }
 
         commonOrderList.forEach(order -> {
@@ -221,7 +221,7 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
     //                        detailDto.setQty(item.getQuantity().longValue());
     //                        detailDto.setRemark(item.getPlatformSku());
     //                        details.add(detailDto);
-                            throw new RuntimeException(order.getOrderNo() + " 未进行SKU匹配");
+                            throw new RuntimeException(order.getOrderNo() + " No SKU matching");
                         }
                     }
                 }
@@ -231,9 +231,9 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             R<DelOutboundAddResponse> outboundAddResponseR = delOutboundFeignService.addShopify(dto);
             log.info("电商单发货响应结果：{}", JSON.toJSONString(outboundAddResponseR));
             if (Constants.SUCCESS != outboundAddResponseR.getCode() || outboundAddResponseR.getData() == null) {
-                throw new RuntimeException("订单号："+order.getOrderNo()+"发货异常："+outboundAddResponseR.getMsg());
+                throw new RuntimeException("order number："+order.getOrderNo()+"deliver goods abnormal："+outboundAddResponseR.getMsg());
             }else if (outboundAddResponseR.getData() != null && !outboundAddResponseR.getData().getStatus()) {
-                throw new RuntimeException("订单号："+order.getOrderNo()+"发货异常："+outboundAddResponseR.getData().getMessage());
+                throw new RuntimeException("order number："+order.getOrderNo()+"deliver goods abnormal："+outboundAddResponseR.getData().getMessage());
             }
             // 更新订单状态为已发货
             order.setOmsOrderNo(outboundAddResponseR.getData().getOrderNo());
