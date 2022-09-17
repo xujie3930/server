@@ -46,11 +46,11 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
     @Transactional
     @Override
-    public Boolean updateBalance(final CustPayDTO dto) {
+    public synchronized Boolean updateBalance(final CustPayDTO dto) {
 
         log.info("BalanceFreezeFactory {}", JSONObject.toJSONString(dto));
         log.info(LogUtil.format(dto, "冻结/解冻"));
-        String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         try {
             if (lock.tryLock(time, unit)) {
