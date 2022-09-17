@@ -94,9 +94,14 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
         } finally {
 
+            log.info("释放reentrantLock锁 {}",dto.getNo());
+
             reentrantLock.unlock();
 
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+
+                log.info("释放redis锁 {}",dto.getNo());
+
                 lock.unlock();
             }
         }
