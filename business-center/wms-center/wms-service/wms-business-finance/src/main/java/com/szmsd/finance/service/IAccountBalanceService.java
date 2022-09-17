@@ -15,7 +15,7 @@ import java.util.List;
  * @author liulei
  */
 public interface IAccountBalanceService {
-    R<PageInfo<AccountBalance>> listPage(AccountBalanceDTO dto);
+    R<PageInfo<AccountBalance>> listPage(AccountBalanceDTO dto,String len);
 
     List<AccountBalance> listPages(AccountBalanceDTO dto);
 

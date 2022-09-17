@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface IInboundReceiptRecordService extends IService<InboundReceiptRecord> {
 
-    List<InboundReceiptRecord> selectList(InboundReceiptRecordQueryDTO queryDTO);
+    List<InboundReceiptRecord> selectList(InboundReceiptRecordQueryDTO queryDTO,String le);
 
 }
 
