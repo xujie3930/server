@@ -51,6 +51,7 @@ public interface IAccountBalanceService {
 
     void setBalance(String cusCode, String currencyCode, BalanceDTO result, boolean needUpdateCredit);
 
+
     boolean withDrawBalanceCheck(String cusCode, String currencyCode, BigDecimal amount);
 
     int updateAccountBalanceChange(AccountBalanceChangeDTO dto);

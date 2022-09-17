@@ -584,7 +584,6 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     }
 
     @Override
-    @Transactional
     public void setBalance(String cusCode, String currencyCode, BalanceDTO result, boolean needUpdateCredit) {
         log.info("更新余额：{}，{}，{}，{}", cusCode, currencyCode, JSONObject.toJSONString(result), needUpdateCredit);
         LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
