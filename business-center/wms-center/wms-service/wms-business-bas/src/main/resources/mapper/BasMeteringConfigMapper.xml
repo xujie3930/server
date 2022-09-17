@@ -43,7 +43,7 @@
         and
         FIND_IN_SET(country_code,#{countryCode})
       </if>
-      <if test="customerCode != null" >
+      <if test="customerCode != null and customerCode!=''" >
         and
         customer_code like #{customerCode}
       </if>
