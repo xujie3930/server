@@ -45,7 +45,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
     @Transactional
     @Override
-    public synchronized Boolean updateBalance(CustPayDTO dto) {
+    public synchronized Boolean updateBalance(final CustPayDTO dto) {
 
         log.info("BalanceFreezeFactory {}", JSONObject.toJSONString(dto));
         log.info(LogUtil.format(dto, "冻结/解冻"));

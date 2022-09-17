@@ -40,14 +40,12 @@ public class RefundPayFactory extends AbstractPayFactory {
 
     @Resource
     private IAccountSerialBillService accountSerialBillService;
-    @Resource
-    private IAccountBalanceService iAccountBalanceService;
     @Autowired
     private AccountSerialBillMapper accountSerialBillMapper;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Boolean updateBalance(CustPayDTO dto) {
+    public synchronized Boolean updateBalance(final CustPayDTO dto) {
         log.info("RefundPayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
@@ -65,7 +63,9 @@ public class RefundPayFactory extends AbstractPayFactory {
                     // 退费强制扣钱
                     success = oldBalance.payAnyWay(changeAmount.negate());
                 }
-                if (!success) return false;
+                if (!success){
+                    return false;
+                }
                 BalanceDTO result = oldBalance;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), result, true);
                 recordOpLogAsync(dto, result.getCurrentBalance());

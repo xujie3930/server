@@ -33,7 +33,7 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
 
     @Transactional
     @Override
-    public Boolean updateBalance(CustPayDTO dto) {
+    public synchronized Boolean updateBalance(final CustPayDTO dto) {
         log.info("PaymentNoFreezePayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-paymentNoFreezePay" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
