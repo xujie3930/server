@@ -506,7 +506,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
             if (Optional.ofNullable(delOutboundVO.getCheckFlag()).isPresent()){
                     if (delQueryService.getOperationType() == 0&&delQueryService.getCheckFlag() == 0) {
-                        throw new CommonException("400", "发货天数或者轨迹停留天数小于对应的查件配置天数！！！");
+                        throw new CommonException("400", "The number of delivery days or track stay days is less than the corresponding number of days configured for document checking ！！！");
                     }
             }
             if(StringUtils.isEmpty(delQueryService.getReason())){
@@ -539,7 +539,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                     delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryService.getShipmentRule());
                     dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
                     if (dataDelQuerySettingsList.size() == 0) {
-                        throw new CommonException("400", "此查件申请没有相关的匹配规则");
+                        throw new CommonException("400", "There is no matching rule for this document search application");
                     }
                 }
                 DelQuerySettings delQuerySettings = dataDelQuerySettingsList.get(0);
@@ -560,7 +560,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                     }
                 }
                 if (!bool) {
-                    throw new CommonException("400", "此查件申请不满足查件条件");
+                    throw new CommonException("400", "This document search application does not meet the document search conditions");
 
                 }
             }
@@ -626,17 +626,17 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
     public DelQueryServiceDto getOrderInfo(String orderNo,Integer operationType) {
         LoginUser loginUser = SecurityUtils.getLoginUser();
         if(StringUtils.isEmpty(orderNo)){
-            throw new CommonException("400", "空订单号");
+            throw new CommonException("400", "Blank order No");
         }
         DelOutboundVO delOutbound = delOutboundService.selectDelOutboundByOrderNous(orderNo,operationType);
         if(delOutbound == null){
-            throw new CommonException("400", "单据不存在");
+            throw new CommonException("400", "Order No. conditions are not met");
         }
 
         if(loginUser != null){
             String sellerCode = loginUser.getSellerCode();
             if(StringUtils.isNotEmpty(sellerCode) && !StringUtils.equals(sellerCode, delOutbound.getSellerCode())){
-                throw new CommonException("400", "该订单无权限查看");
+                throw new CommonException("400", "This order has no permission to view");
             }
         }
 
@@ -673,7 +673,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
     @Override
     public R importData(List<DelQueryServiceImport> list) {
         if (list.isEmpty()) {
-            throw new CommonException("400", "空Excel数据");
+            throw new CommonException("400", "Empty Excel data");
         }
 
         List<DelQueryService> dataList = BeanMapperUtil.mapList(list, DelQueryService.class);
@@ -686,7 +686,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             R<List<BasSub>> r=basSubFeignService.getSub(basSub);
             List<BasSub> list1=r.getData();
             if (list1.size()==0){
-                throw new CommonException("400", "查件原因和数据字典不匹配");
+                throw new CommonException("400", "Checking documents Reason and data dictionary do not match");
             }
             DelQueryServiceDto dto = getOrderInfo(delQueryService.getOrderNo(),delQueryService.getOperationType());
             BeanUtils.copyProperties(dto, delQueryService);

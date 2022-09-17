@@ -700,16 +700,11 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode2(), dto.getAmount())) {
             return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
         }
-
-        //exchangeRateMapper.selectList();
-
         dto.setPayType(BillEnum.PayType.EXCHANGE);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         Boolean flag = abstractPayFactory.updateBalance(dto);
-        if (Objects.isNull(flag)){
-            return R.ok();
-        }
-        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "账户余额不足");
+        if (Objects.isNull(flag)) return R.ok();
+        return flag ? R.ok() : R.failed(Strings.nullToEmpty(dto.getCurrencyName()) + "Insufficient account balance");
     }
 
     /**
