@@ -19,6 +19,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -33,12 +34,12 @@ public class ExchangePayFactory extends AbstractPayFactory {
 
     @Resource
     private IAccountSerialBillService accountSerialBillService;
-    @Resource
-    private IAccountBalanceService iAccountBalanceService;
+
+    private ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap<>();
 
     @Transactional
     @Override
-    public synchronized Boolean updateBalance(final CustPayDTO dto) {
+    public Boolean updateBalance(final CustPayDTO dto) {
         log.info("ExchangePayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
@@ -51,6 +52,18 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 if (beforeSubtract.getCurrentBalance().compareTo(substractAmount) < 0) {
                     return false;
                 }
+
+                String mKey = key + beforeSubtract.getVersion();
+
+                if(concurrentHashMap.get(mKey) != null){
+                    concurrentHashMap.remove(mKey);
+                    log.info("ExchangePayFactory balance 重新执行 {}",mKey);
+
+                    Thread.sleep(100);
+
+                    return updateBalance(dto);
+                }
+
                 BalanceDTO afterSubtract = calculateBalance(beforeSubtract, substractAmount.negate());
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), afterSubtract);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_PAYMENT);
@@ -76,6 +89,9 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 setSerialBillLogAsync(dto, afterBalanceChange);
                 recordDetailLogAsync(dto, beforeSubtract);
                 //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
+
+                concurrentHashMap.put(mKey,beforeSubtract.getVersion());
+
                 return true;
             } else {
                 log.error("汇率转换,请稍候重试{}", JSONObject.toJSONString(dto));

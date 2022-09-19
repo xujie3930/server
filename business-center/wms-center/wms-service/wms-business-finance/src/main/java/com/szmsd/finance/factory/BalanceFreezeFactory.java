@@ -78,7 +78,8 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
                 if(concurrentHashMap.get(mKey) != null){
                     concurrentHashMap.remove(mKey);
-                    Thread.sleep(1000);
+
+                    Thread.sleep(100);
 
                     log.info("balance 重新执行 {}",mKey);
                     return updateBalance(dto);
@@ -102,15 +103,13 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
                 log.info("balance update version {}",balance.getVersion());
 
-                concurrentHashMap.put(mKey,balance.getVersion());
-
                 log.info("【updateBalance】 5");
                 recordOpLogAsync(dto, balance.getCurrentBalance());
                 recordDetailLogAsync(dto, balance);
                 log.info("【updateBalance】 5.1 {} recordOpLogAsync,recordDetailLogAsync后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 log.info("【updateBalance】 6");
 
-                //Thread.sleep(1000);
+                concurrentHashMap.put(mKey,balance.getVersion());
 
                 return true;
             } else {
