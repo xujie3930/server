@@ -80,10 +80,6 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                     concurrentHashMap.remove(mKey);
                     Thread.sleep(1000);
 
-                    concurrentHashMap.remove(mKey);
-
-                    Thread.sleep(3000);
-
                     log.info("balance 重新执行 {}",mKey);
                     return updateBalance(dto);
                 }
