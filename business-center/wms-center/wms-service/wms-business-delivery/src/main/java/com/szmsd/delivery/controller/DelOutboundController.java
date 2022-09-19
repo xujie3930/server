@@ -1,5 +1,6 @@
 package com.szmsd.delivery.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.EasyExcelFactory;
@@ -41,51 +42,19 @@ import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.exported.DelOutboundExportContext;
 import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
 import com.szmsd.delivery.exported.DelOutboundExportQueryPage;
-import com.szmsd.delivery.imported.DefaultAnalysisEventListener;
-import com.szmsd.delivery.imported.DelOutboundBatchUpdateTrackingNoAnalysisEventListener;
-import com.szmsd.delivery.imported.DelOutboundDetailImportContext;
-import com.szmsd.delivery.imported.DelOutboundDetailImportValidation;
-import com.szmsd.delivery.imported.DelOutboundDetailImportValidationData;
-import com.szmsd.delivery.imported.DelOutboundImportContainer;
-import com.szmsd.delivery.imported.DelOutboundImportContext;
-import com.szmsd.delivery.imported.DelOutboundImportValidation;
-import com.szmsd.delivery.imported.DelOutboundOuterContext;
-import com.szmsd.delivery.imported.DelOutboundSkuImportContainer;
-import com.szmsd.delivery.imported.DelOutboundSkuImportContext;
-import com.szmsd.delivery.imported.DelOutboundSkuImportValidation;
-import com.szmsd.delivery.imported.EasyExcelFactoryUtil;
-import com.szmsd.delivery.imported.ImportMessage;
-import com.szmsd.delivery.imported.ImportResult;
-import com.szmsd.delivery.imported.ImportResultData;
-import com.szmsd.delivery.imported.ImportValidation;
-import com.szmsd.delivery.imported.ImportValidationContainer;
+import com.szmsd.delivery.imported.*;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
-import com.szmsd.delivery.vo.DelOutboundAddResponse;
-import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
-import com.szmsd.delivery.vo.DelOutboundDetailListVO;
-import com.szmsd.delivery.vo.DelOutboundDetailVO;
-import com.szmsd.delivery.vo.DelOutboundExportItemListVO;
-import com.szmsd.delivery.vo.DelOutboundExportListVO;
-import com.szmsd.delivery.vo.DelOutboundLabelResponse;
-import com.szmsd.delivery.vo.DelOutboundListExceptionMessageExportVO;
-import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
-import com.szmsd.delivery.vo.DelOutboundListVO;
-import com.szmsd.delivery.vo.DelOutboundThirdPartyVO;
-import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.delivery.util.ZipFileUtils;
+import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
-import com.szmsd.http.api.feign.HtpOutboundFeignService;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
 import com.szmsd.inventory.domain.vo.QueryFinishListVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiSort;
+import io.swagger.annotations.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -97,32 +66,20 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 出库管理
@@ -432,19 +389,19 @@ public class DelOutboundController extends BaseController {
     public void delOutboundImportTemplate(HttpServletRequest request, HttpServletResponse response) {
         if(StringUtils.isNotEmpty(request.getParameter("len"))){
             if (request.getParameter("len").equals("zh")) {
-                String filePath = "/template/DM-cn.xls";
+                String filePath = "/template/DM.zip";
                 String fileName = "DM出库（正常，自提，销毁）模板";
-                this.downloadTemplate(response, filePath, fileName);
+                ZipFileUtils.downloadZip(response, filePath, fileName);
             }else{
-                String filePath = "/template/DM-en.xls";
+                String filePath = "/template/DM-en.zip";
                 String fileName = "DM delivery (normal, self delivery, destruction) template";
-                this.downloadTemplate(response, filePath, fileName);
+                ZipFileUtils.downloadZip(response, filePath, fileName);
             }
 
         }else{
-            String filePath = "/template/DM.xls";
+            String filePath = "/template/DM.zip";
             String fileName = "DM出库（正常，自提，销毁）模板";
-            this.downloadTemplate(response, filePath, fileName);
+            ZipFileUtils.downloadZip(response, filePath, fileName);
         }
 
 
@@ -551,58 +508,51 @@ public class DelOutboundController extends BaseController {
 
             List<DelOutboundImportDto> dataList = null;
             List<DelOutboundDetailImportDto2> detailList = null;
-            if("en".equals(len)){
-                DefaultAnalysisEventListener<DelOutboundEnImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundEnImportDto.class, 0, 1);
-                if (defaultAnalysisEventListener.isError()) {
-                    return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
-                }
-                List<DelOutboundEnImportDto> oldDataList = defaultAnalysisEventListener.getList();
-                if (CollectionUtils.isEmpty(oldDataList)) {
-                    return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
-                }
-                dataList = new ArrayList();
-                for(int i = 0 ; i < oldDataList.size(); i++){
-                    DelOutboundEnImportDto enDto = oldDataList.get(i);
-                    DelOutboundImportDto dto  =new DelOutboundImportDto();
-                    BeanUtils.copyProperties(enDto, dto);
-                    dataList.add(dto);
-                    oldDataList.set(i, null);
-                }
 
-                // 初始化读取第二个sheet页的数据
-                DefaultAnalysisEventListener<DelOutboundDetailEnImportDto2> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundDetailEnImportDto2.class, 1, 1);
-                if (defaultAnalysisEventListener1.isError()) {
-                    return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
-                }
-                List<DelOutboundDetailEnImportDto2> oldDetailList = defaultAnalysisEventListener1.getList();
-
-
-                detailList = new ArrayList<>();
-                for(int i = 0 ; i < oldDetailList.size(); i++){
-                    DelOutboundDetailEnImportDto2 enDto = oldDetailList.get(i);
-                    DelOutboundDetailImportDto2 dto  =new DelOutboundDetailImportDto2();
-                    BeanUtils.copyProperties(enDto, dto);
-                    detailList.add(dto);
-                    oldDetailList.set(i, null);
-                }
-
-            }else{
-                DefaultAnalysisEventListener<DelOutboundImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundImportDto.class, 0, 1);
-                if (defaultAnalysisEventListener.isError()) {
-                    return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
-                }
-                dataList = defaultAnalysisEventListener.getList();
-                if (CollectionUtils.isEmpty(dataList)) {
-                    return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
-                }
-
-                // 初始化读取第二个sheet页的数据
-                DefaultAnalysisEventListener<DelOutboundDetailImportDto2> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundDetailImportDto2.class, 1, 1);
-                if (defaultAnalysisEventListener1.isError()) {
-                    return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
-                }
-                detailList = defaultAnalysisEventListener1.getList();
+            DefaultAnalysisEventListener<DelOutboundImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundImportDto.class, 0, 1);
+            if (defaultAnalysisEventListener.isError()) {
+                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
             }
+            defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundImportDto.class, 0, 1);
+            if (defaultAnalysisEventListener.isError()) {
+                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
+            }
+            dataList = defaultAnalysisEventListener.getList();
+            if (CollectionUtils.isEmpty(dataList)) {
+                return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
+            }
+            if("自提出库".equals(dataList.get(0).getOrderTypeName()) || "Pick Up".equals(dataList.get(0).getOrderTypeName())){
+                DefaultAnalysisEventListener<DelOutboundPickUpImportDto> defaultAnalysisEventListener2 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundPickUpImportDto.class, 0, 1);
+                if (defaultAnalysisEventListener2.isError()) {
+                    return R.ok(ImportResult.buildFail(defaultAnalysisEventListener2.getMessageList()));
+                }
+
+                dataList = defaultAnalysisEventListener2.getList().stream().map(info -> {
+                    DelOutboundImportDto teach = new DelOutboundImportDto();
+                    BeanUtils.copyProperties(info, teach);
+                    return teach;
+                }).collect(Collectors.toList());
+
+
+            }else if("销毁出库".equals(dataList.get(0).getOrderTypeName()) || "Disposal Order".equals(dataList.get(0).getOrderTypeName())){
+                DefaultAnalysisEventListener<DelOutboundDisposalImportDto> defaultAnalysisEventListener2 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundDisposalImportDto.class, 0, 1);
+                if (defaultAnalysisEventListener2.isError()) {
+                    return R.ok(ImportResult.buildFail(defaultAnalysisEventListener2.getMessageList()));
+                }
+                dataList = defaultAnalysisEventListener2.getList().stream().map(info -> {
+                    DelOutboundImportDto teach = new DelOutboundImportDto();
+                    BeanUtils.copyProperties(info, teach);
+                    return teach;
+                }).collect(Collectors.toList());
+            }
+
+
+            // 初始化读取第二个sheet页的数据
+            DefaultAnalysisEventListener<DelOutboundDetailImportDto2> defaultAnalysisEventListener1 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundDetailImportDto2.class, 1, 1);
+            if (defaultAnalysisEventListener1.isError()) {
+                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener1.getMessageList()));
+            }
+            detailList = defaultAnalysisEventListener1.getList();
 
 
             // 查询出库类型数据

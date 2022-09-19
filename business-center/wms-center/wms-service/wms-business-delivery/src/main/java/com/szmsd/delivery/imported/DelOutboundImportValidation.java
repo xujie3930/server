@@ -49,16 +49,37 @@ public class DelOutboundImportValidation implements ImportValidation<DelOutbound
         }
         if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(orderType)) {
             this.normalImportValidation.valid(rowIndex, object);
+
+            // 备注长度限制
+            String remark = object.getRemark();
+            if (StringUtils.isNotEmpty(remark)) {
+                if (remark.length() > 255) {
+                    this.importContext.addMessage(new ImportMessage(rowIndex, 17, null, "备注不能超过255个字符"));
+                }
+            }
+
         } else if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(orderType)) {
             this.selfPickImportValidation.valid(rowIndex, object);
-        }
-        // 备注长度限制
-        String remark = object.getRemark();
-        if (StringUtils.isNotEmpty(remark)) {
-            if (remark.length() > 255) {
-                this.importContext.addMessage(new ImportMessage(rowIndex, 15, null, "备注不能超过255个字符"));
+
+            // 备注长度限制
+            String remark = object.getRemark();
+            if (StringUtils.isNotEmpty(remark)) {
+                if (remark.length() > 255) {
+                    this.importContext.addMessage(new ImportMessage(rowIndex, 11, null, "备注不能超过255个字符"));
+                }
+            }
+
+
+        }else if(DelOutboundOrderTypeEnum.DESTROY.getCode().equals(orderType)){
+            // 备注长度限制
+            String remark = object.getRemark();
+            if (StringUtils.isNotEmpty(remark)) {
+                if (remark.length() > 255) {
+                    this.importContext.addMessage(new ImportMessage(rowIndex, 6, null, "备注不能超过255个字符"));
+                }
             }
         }
+
     }
 
     public String getOrderType(String orderTypeName) {
@@ -79,34 +100,36 @@ public class DelOutboundImportValidation implements ImportValidation<DelOutbound
                 this.importContext.stringLength(object.getShipmentRule(), 50, rowIndex, 4, "物流服务不能超过50个字符");
             }
             // 收件人姓名不能为空
-            if (!this.importContext.isEmpty(object.getConsignee(), rowIndex, 5, null, "收件人姓名不能为空")) {
-                this.importContext.stringLength(object.getConsignee(), 50, rowIndex, 5, "收件人姓名不能超过50个字符");
+            if (!this.importContext.isEmpty(object.getConsignee(), rowIndex, 7, null, "收件人姓名不能为空")) {
+                this.importContext.stringLength(object.getConsignee(), 50, rowIndex, 7, "收件人姓名不能超过50个字符");
             }
             // 街道1不能为空
-            if (!this.importContext.isEmpty(object.getStreet1(), rowIndex, 6, null, "街道1不能为空")) {
-                this.importContext.stringLength(object.getStreet1(), 500, rowIndex, 6, "街道1不能超过500个字符");
+            if (!this.importContext.isEmpty(object.getStreet1(), rowIndex, 8, null, "街道1不能为空")) {
+                this.importContext.stringLength(object.getStreet1(), 500, rowIndex, 8, "街道1不能超过500个字符");
             }
-            this.importContext.stringLength(object.getStreet2(), 500, rowIndex, 7, "街道2不能超过500个字符");
+            this.importContext.stringLength(object.getStreet2(), 500, rowIndex, 9, "街道2不能超过500个字符");
             // 城镇/城市不能为空
-            if (!this.importContext.isEmpty(object.getCity(), rowIndex, 8, null, "城镇/城市不能为空")) {
-                this.importContext.stringLength(object.getCity(), 50, rowIndex, 8, "城镇/城市不能超过50个字符");
+            if (!this.importContext.isEmpty(object.getCity(), rowIndex, 10, null, "城镇/城市不能为空")) {
+                this.importContext.stringLength(object.getCity(), 50, rowIndex, 10, "城镇/城市不能超过50个字符");
             }
             // 州/省不能为空
-            if (!this.importContext.isEmpty(object.getStateOrProvince(), rowIndex, 9, null, "州/省不能为空")) {
-                this.importContext.stringLength(object.getStateOrProvince(), 50, rowIndex, 9, "州/省不能超过50个字符");
-            }
-            // 邮编不能为空
-            if (!this.importContext.isEmpty(object.getPostCode(), rowIndex, 10, null, "邮编不能为空")) {
-                this.importContext.stringLength(object.getPostCode(), 50, rowIndex, 10, "邮编不能超过50个字符");
+            if (!this.importContext.isEmpty(object.getStateOrProvince(), rowIndex, 11, null, "州/省不能为空")) {
+                this.importContext.stringLength(object.getStateOrProvince(), 50, rowIndex, 11, "州/省不能超过50个字符");
             }
             // 国家不能为空
             String country = object.getCountry();
-            if (this.importContext.isEmpty(country, rowIndex, 11, null, "国家不能为空")) {
+            if (this.importContext.isEmpty(country, rowIndex, 12, null, "国家不能为空")) {
                 return;
             }
             String countryCode = this.getCountryCode(country);
-            this.importContext.isEmpty(countryCode, rowIndex, 11, country, "国家不存在");
-            this.importContext.stringLength(object.getPhoneNo(), 50, rowIndex, 12, "联系方式不能超过50个字符");
+            this.importContext.isEmpty(countryCode, rowIndex, 12, country, "国家不存在");
+
+            // 邮编不能为空
+            if (!this.importContext.isEmpty(object.getPostCode(), rowIndex, 13, null, "邮编不能为空")) {
+                this.importContext.stringLength(object.getPostCode(), 50, rowIndex, 13, "邮编不能超过50个字符");
+            }
+
+            this.importContext.stringLength(object.getPhoneNo(), 50, rowIndex, 14, "联系方式不能超过50个字符");
         }
 
         public String getCountryCode(String country) {
@@ -132,20 +155,20 @@ public class DelOutboundImportValidation implements ImportValidation<DelOutbound
         public void valid(int rowIndex, DelOutboundImportDto object) {
             // 提货方式不能为空
             String deliveryMethodName = object.getDeliveryMethodName();
-            if (this.importContext.isEmpty(deliveryMethodName, rowIndex, 13, null, "提货方式不能为空")) {
+            if (this.importContext.isEmpty(deliveryMethodName, rowIndex, 4, null, "提货方式不能为空")) {
                 return;
             }
             String deliveryMethod = this.getDeliveryMethod(deliveryMethodName);
-            this.importContext.isEmpty(deliveryMethod, rowIndex, 13, deliveryMethodName, "提货方式不存在");
+            this.importContext.isEmpty(deliveryMethod, rowIndex, 4, deliveryMethodName, "提货方式不存在");
             // 提货日期不能为空
-            this.importContext.isNull(object.getDeliveryTime(), rowIndex, 14, null, "预计提货时间不能为空");
+            this.importContext.isNull(object.getDeliveryTime(), rowIndex, 5, null, "预计提货时间不能为空");
             // 自提人不能为空
-            if (!this.importContext.isEmpty(object.getDeliveryAgent(), rowIndex, 13, null, "自提人不能为空")) {
-                this.importContext.stringLength(object.getDeliveryAgent(), 200, rowIndex, 13, "自提人不能超过50个字符");
+            if (!this.importContext.isEmpty(object.getDeliveryAgent(), rowIndex, 6, null, "自提人不能为空")) {
+                this.importContext.stringLength(object.getDeliveryAgent(), 200, rowIndex, 6, "自提人不能超过50个字符");
             }
             // 提货人联系方式/快递单号不能为空
-            if (!this.importContext.isEmpty(object.getDeliveryInfo(), rowIndex, 14, null, "提货人联系方式/快递单号不能为空")) {
-                this.importContext.stringLength(object.getDeliveryInfo(), 200, rowIndex, 14, "提货人联系方式/快递单号不能超过50个字符");
+            if (!this.importContext.isEmpty(object.getDeliveryInfo(), rowIndex, 7, null, "提货人联系方式/快递单号不能为空")) {
+                this.importContext.stringLength(object.getDeliveryInfo(), 200, rowIndex, 7, "提货人联系方式/快递单号不能超过50个字符");
             }
         }
 
