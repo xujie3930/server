@@ -505,7 +505,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             DelOutboundVO delOutboundVO=iDelOutboundService.selectDelOutboundByOrderNous(delQueryService.getOrderNo(),delQueryService.getOperationType());
 
             if (Optional.ofNullable(delOutboundVO.getCheckFlag()).isPresent()){
-                    if (delQueryService.getOperationType() == 0&&delQueryService.getCheckFlag() == 0) {
+                    if (delQueryService.getOperationType() == 1&&delQueryService.getCheckFlag() == 0) {
                         throw new CommonException("400", "The number of delivery days or track stay days is less than the corresponding number of days configured for document checking ！！！");
                     }
             }
@@ -530,7 +530,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getCountryCode, delQueryService.getCountryCode());
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryService.getShipmentRule());
             List<DelQuerySettings> dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
-            if (delQueryService.getOperationType() ==0) {
+            if (delQueryService.getOperationType() ==1) {
                 if (dataDelQuerySettingsList.size() == 0) {
                     delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
                     delQuerySettingsQueryWrapper.and(wrapper -> {
