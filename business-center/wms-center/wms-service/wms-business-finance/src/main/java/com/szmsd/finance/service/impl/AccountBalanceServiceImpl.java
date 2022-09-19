@@ -607,20 +607,39 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public void setBalance(String cusCode, String currencyCode, BalanceDTO result, boolean needUpdateCredit) {
         log.info("更新余额：{}，{}，{}，{}", cusCode, currencyCode, JSONObject.toJSONString(result), needUpdateCredit);
-        LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.eq(AccountBalance::getCusCode, cusCode);
-        lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode, currencyCode);
-        lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance, result.getCurrentBalance());
-        lambdaUpdateWrapper.set(AccountBalance::getFreezeBalance, result.getFreezeBalance());
-        lambdaUpdateWrapper.set(AccountBalance::getTotalBalance, result.getTotalBalance());
+
+
+//        LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+//        lambdaUpdateWrapper.eq(AccountBalance::getCusCode, cusCode);
+//        lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode, currencyCode);
+//        lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance, result.getCurrentBalance());
+//        lambdaUpdateWrapper.set(AccountBalance::getFreezeBalance, result.getFreezeBalance());
+//        lambdaUpdateWrapper.set(AccountBalance::getTotalBalance, result.getTotalBalance());
+//        if (needUpdateCredit && null != result.getCreditInfoBO()) {
+//            lambdaUpdateWrapper.set(AccountBalance::getCreditUseAmount, result.getCreditInfoBO().getCreditUseAmount());
+//            lambdaUpdateWrapper.set(AccountBalance::getCreditStatus, result.getCreditInfoBO().getCreditStatus());
+//            lambdaUpdateWrapper.set(AccountBalance::getCreditBeginTime, result.getCreditInfoBO().getCreditBeginTime());
+//            lambdaUpdateWrapper.set(AccountBalance::getCreditEndTime, result.getCreditInfoBO().getCreditEndTime());
+//            lambdaUpdateWrapper.set(AccountBalance::getCreditBufferTime, result.getCreditInfoBO().getCreditBufferTime());
+//        }
+
+        //int updCount = accountBalanceMapper.update(null, lambdaUpdateWrapper);
+        AccountBalanceUpdateDTO accountBalance = new AccountBalanceUpdateDTO();
+        accountBalance.setCusCode(cusCode);
+        accountBalance.setCurrencyCode(currencyCode);
+        accountBalance.setCurrentBalance(result.getCurrentBalance());
+        accountBalance.setFreezeBalance(result.getFreezeBalance());
+        accountBalance.setTotalBalance(result.getTotalBalance());
+        accountBalance.setVersion(result.getVersion());
         if (needUpdateCredit && null != result.getCreditInfoBO()) {
-            lambdaUpdateWrapper.set(AccountBalance::getCreditUseAmount, result.getCreditInfoBO().getCreditUseAmount());
-            lambdaUpdateWrapper.set(AccountBalance::getCreditStatus, result.getCreditInfoBO().getCreditStatus());
-            lambdaUpdateWrapper.set(AccountBalance::getCreditBeginTime, result.getCreditInfoBO().getCreditBeginTime());
-            lambdaUpdateWrapper.set(AccountBalance::getCreditEndTime, result.getCreditInfoBO().getCreditEndTime());
-            lambdaUpdateWrapper.set(AccountBalance::getCreditBufferTime, result.getCreditInfoBO().getCreditBufferTime());
+            accountBalance.setCreditUseAmount(result.getCreditInfoBO().getCreditUseAmount());
+            accountBalance.setCreditStatus(result.getCreditInfoBO().getCreditStatus());
+            accountBalance.setCreditBeginTime(result.getCreditInfoBO().getCreditBeginTime());
+            accountBalance.setCreditEndTime(result.getCreditInfoBO().getCreditEndTime());
+            accountBalance.setCreditBufferTime(result.getCreditInfoBO().getCreditBufferTime());
         }
-        int updCount = accountBalanceMapper.update(null, lambdaUpdateWrapper);
+
+        int updCount = accountBalanceMapper.setBalance(accountBalance);
 
         log.info("更新余额总条数:{},单号：{}",updCount,result.getOrderNo());
     }

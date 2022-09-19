@@ -1,9 +1,6 @@
 package com.szmsd.finance.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.plugin.annotation.AutoFieldI18n;
 import io.swagger.annotations.ApiModel;
@@ -14,7 +11,6 @@ import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -112,6 +108,10 @@ public class AccountBalance extends FssBaseEntity {
     @ApiModelProperty(value = "缓冲时间使用额度")
     @Excel(name = "缓冲时间使用额度")
     private Boolean creditTimeFlag;
+
+    @ApiModelProperty(value = "版本号")
+    @Version
+    private Long version;
 
     public AccountBalance() {
     }
