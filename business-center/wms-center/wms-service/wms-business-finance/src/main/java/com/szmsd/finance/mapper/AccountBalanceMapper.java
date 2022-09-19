@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.finance.domain.AccountBalance;
+import com.szmsd.finance.dto.AccountBalanceUpdateDTO;
 import com.szmsd.finance.dto.UserCreditDetailDTO;
 import org.apache.ibatis.annotations.Param;
 
@@ -37,4 +38,6 @@ public interface AccountBalanceMapper extends BaseMapper<AccountBalance> {
     List<String> selectsellerCodes();
 
     List<String>  selectsellerCodeus(@Param("username")String username);
+
+    int setBalance(AccountBalanceUpdateDTO accountBalance);
 }
