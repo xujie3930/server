@@ -60,25 +60,17 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
 
-        int updCount = 0;
-
         try {
-            if (lock.tryLock(1,time, unit)) {
+            if (lock.tryLock(time, unit)) {
 
                 final String currencyCode = dto.getCurrencyCode();
 
                 log.info("【updateBalance】 1 开始查询该用户对应币别的{}余额,客户ID：{}",currencyCode,dto.getCusCode());
-                //final BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
-
-                QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
-                queryWrapper.eq("cus_code", dto.getCusCode());
-                queryWrapper.eq("currency_code", currencyCode);
-                AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
-                BalanceDTO balance = new BalanceDTO(accountBalance.getCurrentBalance(), accountBalance.getFreezeBalance(), accountBalance.getTotalBalance());
+                BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
 
                 log.info("【updateBalance】 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 //蒋俊看财务
-                final Boolean checkFlag = checkAndSetBalance(balance, dto);
+                Boolean checkFlag = checkAndSetBalance(balance, dto);
                 log.info("【updateBalance】 2.1 {} 校验后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 log.info("【updateBalance】 3 checkFlag {}",checkFlag);
                 if (checkFlag == null){
@@ -89,24 +81,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 }
                 log.info("【updateBalance】 4");
                 balance.setOrderNo(dto.getNo());
-                //setBalance(dto.getCusCode(), currencyCode, balance);
-
-                LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-                lambdaUpdateWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
-                lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode, currencyCode);
-                lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance, balance.getCurrentBalance());
-                lambdaUpdateWrapper.set(AccountBalance::getFreezeBalance, balance.getFreezeBalance());
-                lambdaUpdateWrapper.set(AccountBalance::getTotalBalance, balance.getTotalBalance());
-                if (null != balance.getCreditInfoBO()) {
-                    lambdaUpdateWrapper.set(AccountBalance::getCreditUseAmount, balance.getCreditInfoBO().getCreditUseAmount());
-                    lambdaUpdateWrapper.set(AccountBalance::getCreditStatus, balance.getCreditInfoBO().getCreditStatus());
-                    lambdaUpdateWrapper.set(AccountBalance::getCreditBeginTime, balance.getCreditInfoBO().getCreditBeginTime());
-                    lambdaUpdateWrapper.set(AccountBalance::getCreditEndTime, balance.getCreditInfoBO().getCreditEndTime());
-                    lambdaUpdateWrapper.set(AccountBalance::getCreditBufferTime, balance.getCreditInfoBO().getCreditBufferTime());
-                }
-                updCount = accountBalanceMapper.update(null, lambdaUpdateWrapper);
-
-                log.info("移除setBalance");
+                setBalance(dto.getCusCode(), currencyCode, balance);
 
                 //final BalanceDTO balancesel = getBalance(dto.getCusCode(), dto.getCurrencyCode());
 
@@ -136,7 +111,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
         } finally {
 
-            if (lock.isLocked() && lock.isHeldByCurrentThread() && updCount == 1) {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 log.info("释放redis锁 {}",dto.getNo());
                 lock.unlock();
             }
