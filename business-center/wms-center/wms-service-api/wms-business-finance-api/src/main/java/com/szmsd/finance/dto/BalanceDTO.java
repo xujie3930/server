@@ -36,6 +36,8 @@ public class BalanceDTO {
     @ApiModelProperty(value = "单号")
     private String orderNo;
 
+    private Long version;
+
     private BalanceDTO() {
     }
 

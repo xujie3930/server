@@ -37,7 +37,11 @@ public class FreezeBalanceConsumer implements Callable<Boolean> {
             return flag;
 
         } catch (InterruptedException e) {
+
+            log.info("FreezeBalanceConsumer 执行失败");
+
             throw new RuntimeException(e);
+
         }
     }
 }

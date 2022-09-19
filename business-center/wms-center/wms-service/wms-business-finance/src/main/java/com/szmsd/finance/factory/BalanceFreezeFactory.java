@@ -81,6 +81,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 }
                 log.info("【updateBalance】 4");
                 balance.setOrderNo(dto.getNo());
+                log.info("balance version {}",balance.getVersion());
                 setBalance(dto.getCusCode(), currencyCode, balance);
 
                 //final BalanceDTO balancesel = getBalance(dto.getCusCode(), dto.getCurrencyCode());
