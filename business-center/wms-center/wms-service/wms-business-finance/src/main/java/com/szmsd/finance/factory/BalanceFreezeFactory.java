@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.plugin.HandlerContext;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.BalanceDTO;
@@ -31,6 +32,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 冻结
@@ -51,9 +53,11 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     @Autowired
     AccountBalanceMapper accountBalanceMapper;
 
+    private ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap<>();
+
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public synchronized Boolean updateBalance(final CustPayDTO dto) {
+    public Boolean updateBalance(final CustPayDTO dto) {
 
         log.info("BalanceFreezeFactory {}", JSONObject.toJSONString(dto));
         log.info(LogUtil.format(dto, "冻结/解冻"));
@@ -68,7 +72,17 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 log.info("【updateBalance】 1 开始查询该用户对应币别的{}余额,客户ID：{}",currencyCode,dto.getCusCode());
                 BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
 
-                log.info("balance select version {}",balance.getVersion());
+                String mKey = key + balance.getVersion();
+
+                log.info("balance mKey version {}",mKey);
+
+                if(concurrentHashMap.get(mKey) != null){
+
+                    log.info("balance 重新执行 {}",mKey);
+                    Thread.sleep(1000);
+                    updateBalance(dto);
+                }
+
                 log.info("【updateBalance】 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 //蒋俊看财务
                 Boolean checkFlag = checkAndSetBalance(balance, dto);
@@ -82,8 +96,12 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 }
                 log.info("【updateBalance】 4");
                 balance.setOrderNo(dto.getNo());
-                log.info("balance update version {}",balance.getVersion());
+
                 setBalance(dto.getCusCode(), currencyCode, balance);
+
+                log.info("balance update version {}",balance.getVersion());
+
+                concurrentHashMap.put(mKey,balance.getVersion());
 
                 //final BalanceDTO balancesel = getBalance(dto.getCusCode(), dto.getCurrencyCode());
 
@@ -110,6 +128,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
             log.error("获取余额异常，加锁失败 BalanceFreezeFactory异常：", e);
+            concurrentHashMap.clear();
             throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
         } finally {
 
