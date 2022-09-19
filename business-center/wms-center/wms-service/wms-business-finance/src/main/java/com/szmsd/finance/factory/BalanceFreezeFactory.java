@@ -81,6 +81,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                     log.info("balance 重新执行 {}",mKey);
                     Thread.sleep(1000);
                     updateBalance(dto);
+                    return true;
                 }
 
                 log.info("【updateBalance】 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
@@ -128,7 +129,6 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
             log.error("获取余额异常，加锁失败 BalanceFreezeFactory异常：", e);
-            concurrentHashMap.clear();
             throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
         } finally {
 
