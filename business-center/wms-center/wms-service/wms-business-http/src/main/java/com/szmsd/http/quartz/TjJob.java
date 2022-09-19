@@ -45,6 +45,8 @@ public class TjJob extends QuartzJobBean {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
+        //前一天的开始时间
+        cal.add(Calendar.DAY_OF_MONTH, -1);
         tpieceDto.setFrom(cal.getTime());
         //结束时间 就是定时任务刷的当前时间
         Date dt = new Date();
@@ -82,6 +84,15 @@ public class TjJob extends QuartzJobBean {
 //        Date dt1=rightNow.getTime();
 //
 //        System.out.println(dt1);
+//
+//        //前一天的开始时间
+//        Calendar cal = new GregorianCalendar();
+//        cal.set(Calendar.HOUR_OF_DAY, 0);
+//        cal.set(Calendar.MINUTE, 0);
+//        cal.set(Calendar.SECOND, 0);
+//        cal.set(Calendar.MILLISECOND, 0);
+//        cal.add(Calendar.DAY_OF_MONTH, -1);
+//        System.out.println(cal.getTime());
 //
 //    }
 
