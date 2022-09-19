@@ -22,7 +22,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 付款
@@ -40,7 +40,8 @@ public class PaymentPayFactory extends AbstractPayFactory {
     @Resource
     private IAccountBalanceService accountBalanceService;
 
-    private ReentrantLock reentrantLock = new ReentrantLock();
+    private ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap<>();
+
 
     @Transactional
     @Override
@@ -48,11 +49,23 @@ public class PaymentPayFactory extends AbstractPayFactory {
         log.info("PaymentPayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-paymentPay" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
-        reentrantLock.lock();
         try {
             if (lock.tryLock(time, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 BigDecimal changeAmount = dto.getAmount();
+
+                String mKey = key + oldBalance.getVersion();
+
+                log.info("balance mKey version {}",mKey);
+
+                if(concurrentHashMap.get(mKey) != null){
+                    concurrentHashMap.remove(mKey);
+
+                    Thread.sleep(100);
+
+                    log.info("balance 重新执行 {}",mKey);
+                    return updateBalance(dto);
+                }
 
                 List<AccountBalanceChange> balanceChange = getBalanceChange(dto);
 
@@ -94,6 +107,9 @@ public class PaymentPayFactory extends AbstractPayFactory {
                 recordOpLogAsync(dto, oldBalance.getCurrentBalance());
                 recordDetailLogAsync(dto, oldBalance);
                 setSerialBillLog(dto);
+
+                concurrentHashMap.put(mKey,oldBalance.getVersion());
+
                 return true;
             } else {
                 log.error("支付超时,请稍候重试{}", JSONObject.toJSONString(dto));
@@ -107,7 +123,6 @@ public class PaymentPayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("支付异常:" + e.getMessage());
         } finally {
-            reentrantLock.unlock();
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }

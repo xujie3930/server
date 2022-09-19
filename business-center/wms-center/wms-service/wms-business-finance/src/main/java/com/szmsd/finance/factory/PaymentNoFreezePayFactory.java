@@ -17,6 +17,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -32,7 +33,8 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
     @Resource
     private RedissonClient redissonClient;
 
-    private ReentrantLock reentrantLock = new ReentrantLock();
+    private ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap<>();
+
 
     @Transactional
     @Override
@@ -40,7 +42,6 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
         log.info("PaymentNoFreezePayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-paymentNoFreezePay" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
-        reentrantLock.unlock();
         try {
             if (lock.tryLock(time, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
@@ -54,10 +55,24 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
                     return false;
                 }
 
+                String mKey = key + oldBalance.getVersion();
+
+                if(concurrentHashMap.get(mKey) != null){
+                    concurrentHashMap.remove(mKey);
+
+                    Thread.sleep(100);
+
+                    log.info("balance 重新执行 {}",mKey);
+                    return updateBalance(dto);
+                }
+
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance, true);
                 recordOpLogAsync(dto, oldBalance.getCurrentBalance());
                 recordDetailLogAsync(dto, oldBalance);
                 setSerialBillLog(dto);
+
+                concurrentHashMap.put(mKey,oldBalance.getVersion());
+
                 return true;
             } else {
                 log.error("支付操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
@@ -71,7 +86,6 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("支付操作超时,请稍候重试!");
         } finally {
-            reentrantLock.unlock();
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
