@@ -1,11 +1,14 @@
 package com.szmsd.bas.service.impl;
 
+import com.alibaba.nacos.api.naming.pojo.healthcheck.impl.Http;
+import com.szmsd.bas.api.feign.BasTranslateFeignService;
 import com.szmsd.bas.domain.BasMeteringConfig;
 import com.szmsd.bas.domain.BasMeteringConfigData;
 import com.szmsd.bas.dto.BasMeteringConfigDto;
 import com.szmsd.bas.mapper.BasMeteringConfigDataMapper;
 import com.szmsd.bas.mapper.BasMeteringConfigMapper;
 import com.szmsd.bas.service.IBasMeteringConfigService;
+import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,8 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
     private BasMeteringConfigMapper basMeteringConfigMapper;
     @Autowired
     private BasMeteringConfigDataMapper basMeteringConfigDataMapper;
+    @Autowired
+    private BasTranslateFeignService basTranslateFeignService;
 
     @Override
     public List<BasMeteringConfig> selectList(BasMeteringConfigDto basMeteringConfigDto) {
@@ -44,12 +49,17 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
 
             List<String> list= Arrays.asList(basMeteringConfig.getLogisticsErvicesCode().split(","));
             list.forEach(s->{
+                String mag="产品code,国家code,客户代码三个条件查出有此规则";
                 //新增时查询是否有此规则（三个条件，客户代码，产品code，国家code）
                 basMeteringConfig.setLogisticsErvicesCode(s);
                 basMeteringConfig.setCreateTime(new Date());
                 BasMeteringConfig basMeteringConfig1=basMeteringConfigMapper.selectPrimary(basMeteringConfig);
                 if (basMeteringConfig1!=null){
-                    throw new CommonException("产品code,国家code,客户代码三个条件查出有此规则");
+                    R<String> r=  basTranslateFeignService.Translate(mag);
+                    if (r.getCode()== HttpStatus.SUCCESS){
+                         mag=r.getData();
+                    }
+                    throw new CommonException(mag);
                 }
                 basMeteringConfig.setLogisticsErvicesCode(s);
                 basMeteringConfigMapper.insertSelective(basMeteringConfig);
@@ -77,13 +87,19 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
     @Override
     public R UpdateBasMeteringConfig(BasMeteringConfig basMeteringConfig) {
         try {
+
             List<String> list= Arrays.asList(basMeteringConfig.getLogisticsErvicesCode().split(","));
             list.forEach(s->{
+                String mag="产品code,国家code,客户代码三个条件查出有此规则";
                 basMeteringConfig.setLogisticsErvicesCode(s);
                 //修改时查询是否有此规则（三个条件，客户代码，产品code，国家code）
                 BasMeteringConfig basMeteringConfig1=basMeteringConfigMapper.selectUptePrimary(basMeteringConfig);
                 if (basMeteringConfig1!=null){
-                    throw new CommonException("产品code,国家code,客户代码三个条件查出有此规则");
+                    R<String> r=  basTranslateFeignService.Translate(mag);
+                    if (r.getCode()== HttpStatus.SUCCESS){
+                        mag=r.getData();
+                    }
+                    throw new CommonException(mag);
                 }
                 basMeteringConfig.setUpdateTime(new Date());
                 basMeteringConfigMapper.updateByPrimaryKeySelective(basMeteringConfig);
@@ -119,7 +135,13 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
         try {
             log.info("出库拦截传递的参数: {}", basMeteringConfigDto);
             if (basMeteringConfigDto.getLogisticsErvicesCode()==null||basMeteringConfigDto.getCountryCode()==null||basMeteringConfigDto.getCustomerCode()==null){
-                return R.ok("产品code,国家code,客户代码存在空值，不符合规则匹配，不用拦截");
+                String mag="产品code,国家code,客户代码存在空值，不符合规则匹配，不用拦截";
+                R<String> r=  basTranslateFeignService.Translate(mag);
+                if (r.getCode()== HttpStatus.SUCCESS){
+                    mag=r.getData();
+                }
+
+                return R.ok(mag);
             }
          //根据传来的值去查询有无规则
           List<BasMeteringConfigData> list=basMeteringConfigMapper.selectjblj(basMeteringConfigDto);

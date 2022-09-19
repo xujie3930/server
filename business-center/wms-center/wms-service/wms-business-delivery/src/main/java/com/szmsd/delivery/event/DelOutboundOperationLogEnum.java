@@ -3,6 +3,8 @@ package com.szmsd.delivery.event;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.dto.DelOutboundChargeData;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
@@ -441,6 +443,8 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
     },
     SMT_PRC_PRICING {
+        final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},长宽高:{2}*{3}*{4},计费重:{5} {6},费用:{7},发货规则:{8}");
+
         @Override
         public String getType() {
             return "发货指令-PRC计费";
@@ -448,7 +452,28 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
 
         @Override
         public String format(DelOutbound delOutbound) {
-            return BRV_PRC_PRICING.format(delOutbound);
+
+            if(delOutbound instanceof DelOutboundChargeData){
+                DelOutboundChargeData data = (DelOutboundChargeData) delOutbound;
+                StringBuffer stringBuffer = new StringBuffer(",");
+
+                if(data.getDelOutboundCharges() != null){
+                    for(DelOutboundCharge charge: data.getDelOutboundCharges()){
+                        stringBuffer.append(charge.getAmount()).append(" ").append(charge.getCurrencyCode()).append(",");
+                    }
+                }
+
+                Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
+                        delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight(),
+                        delOutbound.getCalcWeight(), delOutbound.getCalcWeightUnit(),
+                        stringBuffer.substring(0, stringBuffer.length() - 1),
+                        delOutbound.getProductShipmentRule()};
+                return format.format(arguments);
+
+            }else{
+                return BRV_PRC_PRICING.format(delOutbound);
+            }
+
         }
     },
     SMT_FREEZE_BALANCE {
