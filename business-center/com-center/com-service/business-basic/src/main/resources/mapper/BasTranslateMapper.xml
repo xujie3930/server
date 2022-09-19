@@ -13,7 +13,7 @@
     select 
     <include refid="Base_Column_List" />
     from bas_translate
-    where zh_name = #{query,jdbcType=VARCHAR}
+    where zh_name = #{query,jdbcType=VARCHAR} LIMIT 0,1
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from bas_translate
