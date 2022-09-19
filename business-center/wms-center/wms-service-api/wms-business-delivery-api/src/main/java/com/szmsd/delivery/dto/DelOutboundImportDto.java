@@ -28,6 +28,14 @@ public class DelOutboundImportDto implements Serializable {
     @ApiModelProperty(value = "物流服务")
     private String shipmentRule;
 
+    @ApiModelProperty(value = "增值税号\n" +
+            "（非必填）")
+    private String ioss;
+
+
+    @ApiModelProperty(value = "COD")
+    private BigDecimal codAmount;
+
     @ApiModelProperty(value = "收件人名称")
     private String consignee;
 
@@ -43,11 +51,12 @@ public class DelOutboundImportDto implements Serializable {
     @ApiModelProperty(value = "州/省")
     private String stateOrProvince;
 
-    @ApiModelProperty(value = "邮编")
-    private String postCode;
 
     @ApiModelProperty(value = "国家")
     private String country;
+
+    @ApiModelProperty(value = "邮编")
+    private String postCode;
 
     @ApiModelProperty(value = "联系方式")
     private String phoneNo;
@@ -55,23 +64,26 @@ public class DelOutboundImportDto implements Serializable {
     @ApiModelProperty(value = "邮箱")
     private String email;
 
+
+    @ApiModelProperty(value = "RefNo")
+    private String refNo;
+
+
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
+
+
     @ApiModelProperty(value = "提货方式")
     private String deliveryMethodName;
 
     @ApiModelProperty(value = "提货时间")
     private Date deliveryTime;
 
-    @ApiModelProperty(value = "自提人")
+    @ApiModelProperty(value = "提货商/快递商")
     private String deliveryAgent;
 
     @ApiModelProperty(value = "提货人联系方式/快递单号")
     private String deliveryInfo;
-
-    @ApiModelProperty(value = "备注")
-    private String remark;
-
-    @ApiModelProperty(value = "COD")
-    private BigDecimal codAmount;
-
 
 }
