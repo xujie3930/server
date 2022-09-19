@@ -469,29 +469,15 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         dto.setPayType(BillEnum.PayType.FREEZE);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE);
 
-        FreezeBalanceProducer freezeBalanceProducer = new FreezeBalanceProducer(dto,blockingQueue);
-
-        FreezeBalanceConsumer freezeBalanceConsumer = new FreezeBalanceConsumer(payFactoryBuilder,blockingQueue);
-
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-
-        executorService.execute(freezeBalanceProducer);
-        Future<Boolean> future = executorService.submit(freezeBalanceConsumer);
-
-
-        Boolean flag = null;
-        try {
-            flag = future.get();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+        AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
+        log.info(LogUtil.format(cfbDTO, "费用冻结"));
+        Boolean flag = abstractPayFactory.updateBalance(dto);
         if (Objects.isNull(flag)){
             return R.ok();
         }
+        if (flag && "Freight".equals(dto.getOrderType()))
         // 冻结 解冻 需要把费用扣减加到 操作费用表
-        if (flag && "Freight".equals(dto.getOrderType())){
+        {
             log.info(LogUtil.format(cfbDTO, "费用冻结", "操作费用表"));
             this.addOptLogAsync(dto);
         }
@@ -596,6 +582,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             BeanUtils.copyProperties(accountBalance, creditInfoBO);
             balanceDTO.setCreditInfoBO(creditInfoBO);
             balanceDTO.getCreditInfoBO().setCreditUseAmount(creditUseAmount);
+            balanceDTO.setVersion(accountBalance.getVersion());
             return balanceDTO;
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();

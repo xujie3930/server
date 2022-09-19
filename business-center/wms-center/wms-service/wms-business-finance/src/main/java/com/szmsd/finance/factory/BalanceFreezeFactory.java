@@ -68,6 +68,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 log.info("【updateBalance】 1 开始查询该用户对应币别的{}余额,客户ID：{}",currencyCode,dto.getCusCode());
                 BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
 
+                log.info("balance select version {}",balance.getVersion());
                 log.info("【updateBalance】 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 //蒋俊看财务
                 Boolean checkFlag = checkAndSetBalance(balance, dto);
@@ -81,7 +82,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 }
                 log.info("【updateBalance】 4");
                 balance.setOrderNo(dto.getNo());
-                log.info("balance version {}",balance.getVersion());
+                log.info("balance update version {}",balance.getVersion());
                 setBalance(dto.getCusCode(), currencyCode, balance);
 
                 //final BalanceDTO balancesel = getBalance(dto.getCusCode(), dto.getCurrencyCode());
