@@ -59,7 +59,7 @@ public class IncomePayFactory extends AbstractPayFactory {
                 if(concurrentHashMap.get(mKey) != null){
                     concurrentHashMap.remove(mKey);
 
-                    Thread.sleep(100);
+                    //Thread.sleep(100);
 
                     log.info("balance 重新执行 {}",mKey);
                     return updateBalance(dto);
