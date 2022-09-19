@@ -59,7 +59,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
                     concurrentHashMap.remove(mKey);
                     log.info("ExchangePayFactory balance 重新执行 {}",mKey);
 
-                    //Thread.sleep(100);
+                    Thread.sleep(100);
 
                     return updateBalance(dto);
                 }
