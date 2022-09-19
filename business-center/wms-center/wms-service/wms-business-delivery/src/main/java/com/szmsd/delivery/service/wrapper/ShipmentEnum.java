@@ -1,17 +1,21 @@
 package com.szmsd.delivery.service.wrapper;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.feign.BasMeteringConfigFeignService;
 import com.szmsd.bas.dto.BasMeteringConfigDto;
+import com.szmsd.chargerules.vo.OperationRuleVO;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.MessageUtil;
 import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.dto.DelOutboundChargeData;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
@@ -719,7 +723,14 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             }
             delOutbound.setAmount(totalAmount);
             delOutbound.setCurrencyCode(totalCurrencyCode);
-            DelOutboundOperationLogEnum.SMT_PRC_PRICING.listener(delOutbound);
+
+            /**
+             * 特殊化日志记录，分币别
+             */
+            DelOutboundChargeData delOutboundChargeData = new DelOutboundChargeData();
+            BeanUtil.copyProperties(delOutbound, delOutboundChargeData);
+            delOutboundChargeData.setDelOutboundCharges(delOutboundCharges);
+            DelOutboundOperationLogEnum.SMT_PRC_PRICING.listener(delOutboundChargeData);
         }
 
         @Override
@@ -968,8 +979,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
             if(delOutboundWrapperContext.getExecShipmentShipping()) {
                 updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
-                updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
-                updateDelOutbound.setShipmentRule(delOutbound.getShipmentRule());
+//                updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
+//                updateDelOutbound.setShipmentRule(delOutbound.getShipmentRule());
             }
 
 

@@ -157,7 +157,7 @@ public class DelOutboundImportController extends BaseController {
             fileName = "集运出库模板";
         }else if (len.equals("en")){
             filePath = "/template/DM-CentralizedTransportation-en.xls";
-            fileName = "AddedSKUImportTemplate";
+            fileName = "CentralizedTransportationTemplate";
         }
 
 
@@ -301,7 +301,7 @@ public class DelOutboundImportController extends BaseController {
             fileName = "转运出库模板";
         }else if (len.equals("en")){
             filePath = "/template/DM_packageTransfer-en.xlsx";
-            fileName = "AddedSKUImportTemplate";
+            fileName = "PackageTransferTemplate";
         }
 
 
@@ -405,6 +405,23 @@ public class DelOutboundImportController extends BaseController {
     @GetMapping("/batchImportTemplate")
     @ApiOperation(value = "出库管理 - 导入 - 批量出库导入模板", position = 600)
     public void batchImportTemplate(HttpServletResponse response) {
+/*
+        String len=getLen().toLowerCase(Locale.ROOT);
+        String filePath=null;
+        String fileName=null;
+        if (len.equals("zh")){
+            filePath = "/template/DM_batch.xlsx";
+            fileName = "批量出库模板";
+        }else if (len.equals("en")){
+            filePath = "/template/DM_batch-en.xlsx";
+            fileName = "BatchIssueTemplate";
+        }
+
+
+
+        this.downloadTemplate(response, filePath, fileName);*/
+
+
         String filePath = "/template/DM_batch.xlsx";
         String fileName = "批量出库模板";
         this.downloadTemplate(response, filePath, fileName);
