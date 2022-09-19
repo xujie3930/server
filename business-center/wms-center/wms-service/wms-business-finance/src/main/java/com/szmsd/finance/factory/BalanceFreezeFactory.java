@@ -77,10 +77,8 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 log.info("balance mKey version {}",mKey);
 
                 if(concurrentHashMap.get(mKey) != null){
-
                     concurrentHashMap.remove(mKey);
-
-                    Thread.sleep(3000);
+                    Thread.sleep(1000);
 
                     log.info("balance 重新执行 {}",mKey);
                     return updateBalance(dto);
@@ -106,14 +104,6 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
                 concurrentHashMap.put(mKey,balance.getVersion());
 
-                //final BalanceDTO balancesel = getBalance(dto.getCusCode(), dto.getCurrencyCode());
-
-                QueryWrapper<AccountBalance> queryWrapper1 = new QueryWrapper<>();
-                queryWrapper1.eq("cus_code", dto.getCusCode());
-                queryWrapper1.eq("currency_code", currencyCode);
-                AccountBalance accountBalance3 = accountBalanceMapper.selectOne(queryWrapper1);
-
-                log.info("【updateBalance】 4.1 {} setBalance后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,accountBalance3.getCurrentBalance(),accountBalance3.getFreezeBalance(),accountBalance3.getTotalBalance(),JSONObject.toJSONString(accountBalance3));
                 log.info("【updateBalance】 5");
                 recordOpLogAsync(dto, balance.getCurrentBalance());
                 recordDetailLogAsync(dto, balance);
