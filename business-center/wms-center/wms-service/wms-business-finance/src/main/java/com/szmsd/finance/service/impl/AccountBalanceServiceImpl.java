@@ -27,6 +27,8 @@ import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.enums.CreditConstant;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.factory.abstractFactory.PayFactoryBuilder;
+import com.szmsd.finance.handler.FreezeBalanceConsumer;
+import com.szmsd.finance.handler.FreezeBalanceProducer;
 import com.szmsd.finance.mapper.AccountBalanceChangeMapper;
 import com.szmsd.finance.mapper.AccountBalanceMapper;
 import com.szmsd.finance.mapper.ExchangeRateMapper;
@@ -58,8 +60,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -448,9 +449,14 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         });
     }
 
+    private BlockingQueue<CustPayDTO> blockingQueue = new LinkedBlockingDeque();
+
+
+
     @Transactional
     @Override
-    public R freezeBalance(CusFreezeBalanceDTO cfbDTO) {
+    public R freezeBalance(final CusFreezeBalanceDTO cfbDTO) {
+
         CustPayDTO dto = new CustPayDTO();
         BeanUtils.copyProperties(cfbDTO, dto);
         if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0){
@@ -462,15 +468,30 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         setCurrencyName(dto);
         dto.setPayType(BillEnum.PayType.FREEZE);
         dto.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE);
-        AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
-        log.info(LogUtil.format(cfbDTO, "费用冻结"));
-        Boolean flag = abstractPayFactory.updateBalance(dto);
+
+        FreezeBalanceProducer freezeBalanceProducer = new FreezeBalanceProducer(dto,blockingQueue);
+
+        FreezeBalanceConsumer freezeBalanceConsumer = new FreezeBalanceConsumer(payFactoryBuilder,blockingQueue);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        executorService.execute(freezeBalanceProducer);
+        Future<Boolean> future = executorService.submit(freezeBalanceConsumer);
+
+
+        Boolean flag = null;
+        try {
+            flag = future.get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         if (Objects.isNull(flag)){
             return R.ok();
         }
-        if (flag && "Freight".equals(dto.getOrderType()))
         // 冻结 解冻 需要把费用扣减加到 操作费用表
-        {
+        if (flag && "Freight".equals(dto.getOrderType())){
             log.info(LogUtil.format(cfbDTO, "费用冻结", "操作费用表"));
             this.addOptLogAsync(dto);
         }
@@ -584,7 +605,6 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     }
 
     @Override
-    @Transactional
     public void setBalance(String cusCode, String currencyCode, BalanceDTO result, boolean needUpdateCredit) {
         log.info("更新余额：{}，{}，{}，{}", cusCode, currencyCode, JSONObject.toJSONString(result), needUpdateCredit);
         LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
