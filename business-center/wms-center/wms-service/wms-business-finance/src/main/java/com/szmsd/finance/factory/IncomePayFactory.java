@@ -20,6 +20,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -35,7 +36,8 @@ public class IncomePayFactory extends AbstractPayFactory {
     @Resource
     private IAccountSerialBillService accountSerialBillService;
 
-    private ReentrantLock reentrantLock = new ReentrantLock();
+    private ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap<>();
+
 
     @Override
     @Transactional
@@ -43,7 +45,6 @@ public class IncomePayFactory extends AbstractPayFactory {
         log.info("IncomePayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
-        reentrantLock.lock();
         try {
             if (lock.tryLock(time, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
@@ -52,6 +53,18 @@ public class IncomePayFactory extends AbstractPayFactory {
                 if (dto.getPayType() == BillEnum.PayType.PAYMENT && oldBalance.getCurrentBalance().compareTo(changeAmount) < 0) {
                     return false;
                 }
+
+                String mKey = key + oldBalance.getVersion();
+
+                if(concurrentHashMap.get(mKey) != null){
+                    concurrentHashMap.remove(mKey);
+
+                    Thread.sleep(100);
+
+                    log.info("balance 重新执行 {}",mKey);
+                    return updateBalance(dto);
+                }
+
                 // BalanceDTO result = calculateBalance(oldBalance, changeAmount);
                 oldBalance.rechargeAndSetAmount(changeAmount);
                 super.addForCreditBillAsync(oldBalance.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
@@ -59,6 +72,9 @@ public class IncomePayFactory extends AbstractPayFactory {
                 recordOpLogAsync(dto, oldBalance.getCurrentBalance());
                 setSerialBillLog(dto);
                 recordDetailLogAsync(dto, oldBalance);
+
+                concurrentHashMap.put(mKey,oldBalance.getVersion());
+
                 //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 return true;
             } else {
@@ -73,7 +89,6 @@ public class IncomePayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("充值操作超时,请稍候重试!");
         } finally {
-            reentrantLock.unlock();
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }

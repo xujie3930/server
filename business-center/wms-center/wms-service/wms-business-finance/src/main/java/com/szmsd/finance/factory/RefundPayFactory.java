@@ -1,6 +1,5 @@
 package com.szmsd.finance.factory;
 
-import cn.hutool.core.date.StopWatch;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -11,7 +10,6 @@ import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
-import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -27,7 +25,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 退费
@@ -44,7 +42,7 @@ public class RefundPayFactory extends AbstractPayFactory {
     @Autowired
     private AccountSerialBillMapper accountSerialBillMapper;
 
-    private ReentrantLock reentrantLock = new ReentrantLock();
+    private ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap<>();
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -52,11 +50,24 @@ public class RefundPayFactory extends AbstractPayFactory {
         log.info("RefundPayFactory {}", JSONObject.toJSONString(dto));
         String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
-        reentrantLock.lock();
         try {
             boolean success = false;
             if (lock.tryLock(time, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
+
+                String mKey = key + oldBalance.getVersion();
+
+                log.info("balance mKey version {}",mKey);
+
+                if(concurrentHashMap.get(mKey) != null){
+                    concurrentHashMap.remove(mKey);
+
+                    Thread.sleep(100);
+
+                    log.info("balance 重新执行 {}",mKey);
+                    return updateBalance(dto);
+                }
+
                 log.info("【退费】RefundPayFactory-- {}",JSONObject.toJSONString(oldBalance));
                 BigDecimal changeAmount = dto.getAmount();
                 if (changeAmount.compareTo(BigDecimal.ZERO) >= 0) {
@@ -75,7 +86,9 @@ public class RefundPayFactory extends AbstractPayFactory {
                 recordOpLogAsync(dto, result.getCurrentBalance());
                 recordDetailLogAsync(dto, oldBalance);
                 setSerialBillLog(dto);
-                //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
+
+                concurrentHashMap.put(mKey,oldBalance.getVersion());
+
                 return true;
             } else {
                 log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(dto));
@@ -89,7 +102,6 @@ public class RefundPayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("退费业务处理超时,请稍候重试!");
         } finally {
-            reentrantLock.unlock();
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
                 log.info("【退费】RefundPayFactory 解锁结束--");
