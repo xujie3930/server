@@ -22,4 +22,6 @@ public interface InboundReceiptDetailMapper extends BaseMapper<InboundReceiptDet
     int checkPackageTransfer(String deliveryNo);
 
     InboundReceiptDetail selectReceiptDeta(ReceiptRequest receiptRequest);
+
+    int  updateReceiptDeta(InboundReceiptDetail inboundReceiptDetail);
 }

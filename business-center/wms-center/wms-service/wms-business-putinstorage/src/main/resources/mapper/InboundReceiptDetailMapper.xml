@@ -26,6 +26,10 @@
         t.delivery_no,
         t.remark
     </sql>
+    <update id="updateReceiptDeta" parameterType="com.szmsd.putinstorage.domain.InboundReceiptDetail">
+        UPDATE inbound_receipt_detail SET put_qty=#{putQty} ,warehouse_to_time=#{warehouseToTime}
+        where id=#{id}
+    </update>
     <delete id="deleteByWarehouseNo">
         DELETE
         FROM inbound_receipt_detail

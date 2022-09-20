@@ -79,6 +79,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -1051,7 +1052,11 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         if (inboundReceiptDetail!=null){
             //每次请求都是数量1
             inboundReceiptDetail.setPutQty(inboundReceiptDetail.getPutQty()+1);
-            //inboundReceiptDetail.setWarehouseToTime(receiptRequest.getOperateOn());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date warehouseToTime =sdf.parse(receiptRequest.getOperateOn());
+            inboundReceiptDetail.setWarehouseToTime(warehouseToTime);
+            //修改到仓时间和数量
+          int a=  inboundReceiptDetailMapper.updateReceiptDeta(inboundReceiptDetail);
         }
 
         }catch (Exception e){
