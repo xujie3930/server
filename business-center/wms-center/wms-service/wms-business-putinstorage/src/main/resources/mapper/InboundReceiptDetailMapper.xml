@@ -91,6 +91,6 @@
                 ) temp ON temp.warehouse_no = ir.warehouse_no  WHERE ir.`status`  != 0
     </select>
     <select id="selectReceiptDeta" resultType="com.szmsd.putinstorage.domain.InboundReceiptDetail" parameterType="com.szmsd.putinstorage.domain.dto.ReceiptRequest">
-        SELECT * from  inbound_receipt_detail
+        SELECT * from  inbound_receipt_detail WHERE delivery_no=#{packageOrderNo} and warehouse_no=#{orderNo}
     </select>
 </mapper>

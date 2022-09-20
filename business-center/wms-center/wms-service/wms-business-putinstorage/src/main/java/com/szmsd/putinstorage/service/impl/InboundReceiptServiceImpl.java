@@ -1048,6 +1048,11 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     public void receipt(ReceiptRequest receiptRequest) {
         try {
         InboundReceiptDetail inboundReceiptDetail =inboundReceiptDetailMapper.selectReceiptDeta(receiptRequest);
+        if (inboundReceiptDetail!=null){
+            //每次请求都是数量1
+            inboundReceiptDetail.setPutQty(inboundReceiptDetail.getPutQty()+1);
+            //inboundReceiptDetail.setWarehouseToTime(receiptRequest.getOperateOn());
+        }
 
         }catch (Exception e){
             e.printStackTrace();
