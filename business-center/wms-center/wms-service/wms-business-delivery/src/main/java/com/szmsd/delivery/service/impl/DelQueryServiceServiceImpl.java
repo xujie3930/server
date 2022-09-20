@@ -792,7 +792,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 int a = baseMapper.insert(delQueryServiceList.get(i));
             }
 
-            delQueryServiceFeedback.setMainId(delQueryServiceList.get(i).getId());
+            delQueryServiceFeedback.setMainId(delQueryServiceListus.get(0).getId());
 
             delQueryServiceFeedback.setReason("Automatic push by the system");
             delQueryServiceFeedback.setCreateByName("admin");
