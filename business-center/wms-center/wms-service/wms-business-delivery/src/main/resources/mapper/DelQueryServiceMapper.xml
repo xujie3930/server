@@ -53,7 +53,7 @@
     </select>
     <select id="selectListJobs" resultType="com.szmsd.delivery.domain.DelQueryService"
             parameterType="java.lang.String">
-        SELECT * from del_query_service where order_no=#{orderNo}
+        SELECT * from del_query_service where order_no=#{orderNo}  LIMIT 0,1
     </select>
     <select id="selectDelQueryServiceFeedbackLists" resultType="com.szmsd.delivery.domain.DelQueryServiceFeedback"
             parameterType="java.lang.Integer">
