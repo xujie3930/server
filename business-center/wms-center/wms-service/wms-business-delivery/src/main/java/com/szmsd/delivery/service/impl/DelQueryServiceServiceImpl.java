@@ -415,9 +415,11 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             String username = loginUser.getUsername();
             sellerCodeList=baseMapper.selectsellerCode(username);
 
-            if (sellerCodeList.size()>0){
-                where.in(DelQueryService::getSellerCode, sellerCodeList);
+            if(StringUtils.isEmpty(delQueryService.getSellerCode())) {
+                if (sellerCodeList.size() > 0) {
+                    where.in(DelQueryService::getSellerCode, sellerCodeList);
 
+                }
             }
             if (StringUtils.isNotEmpty(delQueryService.getCurrencyCode())) {
                 where.eq(DelQueryService::getSellerCode, delQueryService.getCurrencyCode());
@@ -429,7 +431,10 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
         }
         if (null != loginUser && loginUser.getUsername().equals("admin")){
-            sellerCodeList=baseMapper.selectsellerCodes();
+            //sellerCodeList=baseMapper.selectsellerCodes();
+            if(StringUtils.isNotEmpty(delQueryService.getSellerCode())){
+                where.like(DelQueryService::getSellerCode, delQueryService.getSellerCode());
+            }
 
         }
 
@@ -738,75 +743,81 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 //throw new CommonException("400", "无效订单");
             }
 
-            LambdaQueryWrapper<DelQuerySettings> delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
-            delQuerySettingsQueryWrapper.eq(DelQuerySettings::getCountryCode, delQueryServiceList.get(i).getCountryCode());
-            delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryServiceList.get(i).getShipmentRule());
-            List<DelQuerySettings> dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
-                log.info("自动查件参数dataDelQuerySettingsList：{}",dataDelQuerySettingsList);
-            if (delQueryServiceList.get(i).getOperationType() == 0) {
-                if (dataDelQuerySettingsList.size() == 0) {
-                    delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
-                    delQuerySettingsQueryWrapper.and(wrapper -> {
-                        wrapper.isNull(DelQuerySettings::getCountryCode).or().eq(DelQuerySettings::getCountryCode, "");
-                    });
-                    delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryServiceList.get(i).getShipmentRule());
-                    dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
-                    if (dataDelQuerySettingsList.size() == 0) {
-                        continue;
-                        //throw new CommonException("400", "此查件申请没有相关的匹配规则");
-                    }
-                }
-                DelQuerySettings delQuerySettings = dataDelQuerySettingsList.get(0);
-
-                boolean bool = false;
-                if (StringUtils.equals(delOutbound.getState(), delQuerySettings.getState())) {
-                    bool = true;
-                } else if (delOutbound.getShipmentsTime() != null && (DateUtil.betweenDay(delOutbound.getShipmentsTime(), new Date(), true) >= delQuerySettings.getShipmentDays() || DateUtil.betweenDay(delOutbound.getTrackingTime(), new Date(), true) >= delQuerySettings.getTrackStayDays())) {
-                    bool = true;
-                } else {
-                    LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
-                    delTrackLambdaQueryWrapper.eq(DelTrack::getOrderNo, delQueryServiceList.get(i).getOrderNo());
-                    delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
-                    delTrackLambdaQueryWrapper.last("LIMIT 1");
-                    DelTrack dataDelTrack = delTrackService.getOne(delTrackLambdaQueryWrapper);
-                    if (dataDelTrack != null && dataDelTrack.getTrackingTime() != null && DateUtil.betweenDay(dataDelTrack.getTrackingTime(), new Date(), true) <= delQuerySettings.getTrackStayDays()) {
-                        bool = true;
-                    }
-                }
-                log.info("自动查件参数bool：{}",bool);
-                if (!bool) {
-                    continue;
-                    //throw new CommonException("400", "此查件申请不满足查件条件");
-
-                }
-            }
+//            LambdaQueryWrapper<DelQuerySettings> delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
+//            delQuerySettingsQueryWrapper.eq(DelQuerySettings::getCountryCode, delQueryServiceList.get(i).getCountryCode());
+//            delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryServiceList.get(i).getShipmentRule());
+//            List<DelQuerySettings> dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
+//                log.info("自动查件参数dataDelQuerySettingsList：{}",dataDelQuerySettingsList);
+//            if (delQueryServiceList.get(i).getOperationType() == 0) {
+//                if (dataDelQuerySettingsList.size() == 0) {
+//                    delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
+//                    delQuerySettingsQueryWrapper.and(wrapper -> {
+//                        wrapper.isNull(DelQuerySettings::getCountryCode).or().eq(DelQuerySettings::getCountryCode, "");
+//                    });
+//                    delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryServiceList.get(i).getShipmentRule());
+//                    dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
+//                    if (dataDelQuerySettingsList.size() == 0) {
+//                        continue;
+//                        //throw new CommonException("400", "此查件申请没有相关的匹配规则");
+//                    }
+//                }
+//                DelQuerySettings delQuerySettings = dataDelQuerySettingsList.get(0);
+//
+//                boolean bool = false;
+//                if (StringUtils.equals(delOutbound.getState(), delQuerySettings.getState())) {
+//                    bool = true;
+//                } else if (delOutbound.getShipmentsTime() != null && (DateUtil.betweenDay(delOutbound.getShipmentsTime(), new Date(), true) >= delQuerySettings.getShipmentDays() || DateUtil.betweenDay(delOutbound.getTrackingTime(), new Date(), true) >= delQuerySettings.getTrackStayDays())) {
+//                    bool = true;
+//                } else {
+//                    LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
+//                    delTrackLambdaQueryWrapper.eq(DelTrack::getOrderNo, delQueryServiceList.get(i).getOrderNo());
+//                    delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
+//                    delTrackLambdaQueryWrapper.last("LIMIT 1");
+//                    DelTrack dataDelTrack = delTrackService.getOne(delTrackLambdaQueryWrapper);
+//                    if (dataDelTrack != null && dataDelTrack.getTrackingTime() != null && DateUtil.betweenDay(dataDelTrack.getTrackingTime(), new Date(), true) <= delQuerySettings.getTrackStayDays()) {
+//                        bool = true;
+//                    }
+//                }
+//                log.info("自动查件参数bool：{}",bool);
+//                if (!bool) {
+//                    continue;
+//                    //throw new CommonException("400", "此查件申请不满足查件条件");
+//
+//                }
+//            }
 
                 delQueryServiceList.get(i).setState(DelQueryServiceStateEnum.SUBMITTED.getCode());
                 delQueryServiceList.get(i).setStateName(DelQueryServiceStateEnum.SUBMITTED.getName());
             DelQueryServiceFeedback delQueryServiceFeedback = new DelQueryServiceFeedback();
             List<DelQueryService> delQueryServiceListus = baseMapper.selectListJobs(delQueryServiceList.get(i).getOrderNo());
                 log.info("自动查件参数delQueryServiceListus：{}",delQueryServiceListus);
+
             if (delQueryServiceListus.size() == 0) {
+                DelQueryService delQueryService=new DelQueryService();
+
                 delQueryServiceFeedback.setCreateByName("admin");
                 delQueryServiceFeedback.setCreateTime(new Date());
-                int a = baseMapper.insert(delQueryServiceList.get(i));
-            }
+                BeanUtils.copyProperties(delQueryServiceList.get(i),delQueryService);
+                int a = baseMapper.insert(delQueryService);
+                delQueryServiceFeedback.setMainId(delQueryService.getId());
 
-            delQueryServiceFeedback.setMainId(delQueryServiceListus.get(0).getId());
-
-            delQueryServiceFeedback.setReason("Automatic push by the system");
-            delQueryServiceFeedback.setCreateByName("admin");
-            delQueryServiceFeedback.setCreateTime(new Date());
-            List<DelQueryServiceFeedback> delQueryServiceFeedbackLists = baseMapper.selectDelQueryServiceFeedbackLists(delQueryServiceListus.get(0).getId());
+                delQueryServiceFeedback.setReason("Automatic push by the system");
+                delQueryServiceFeedback.setCreateByName("admin");
+                delQueryServiceFeedback.setCreateTime(new Date());
+                List<DelQueryServiceFeedback> delQueryServiceFeedbackLists = baseMapper.selectDelQueryServiceFeedbackLists(delQueryServiceList.get(i).getId());
+                log.info("自动查件参数delQueryServiceFeedbackListsut：{}",delQueryServiceList.get(i));
                 log.info("自动查件参数delQueryServiceFeedbackLists：{}",delQueryServiceFeedbackLists);
-            if (delQueryServiceFeedbackLists.size() == 0) {
-                log.info("自动查件参数delQueryServiceFeedback：{}",delQueryServiceFeedback);
-                iDelQueryServiceFeedbackService.insertDelQueryServiceFeedbacksu(delQueryServiceFeedback);
+                if (delQueryServiceFeedbackLists.size() == 0) {
+                    log.info("自动查件参数delQueryServiceFeedback：{}",delQueryServiceFeedback);
+                    iDelQueryServiceFeedbackService.insertDelQueryServiceFeedbacksu(delQueryServiceFeedback);
 
-            } else if (delQueryServiceFeedbackLists.size() > 0) {
-                log.info("自动查件参数delQueryServiceFeedback：{}",delQueryServiceFeedback);
-                iDelQueryServiceFeedbackService.insertDelQueryServiceFeedback(delQueryServiceFeedback);
+                } else if (delQueryServiceFeedbackLists.size() > 0) {
+                    log.info("自动查件参数delQueryServiceFeedback：{}",delQueryServiceFeedback);
+                    iDelQueryServiceFeedbackService.insertDelQueryServiceFeedback(delQueryServiceFeedback);
+                }
             }
+
+
 
 
         }
