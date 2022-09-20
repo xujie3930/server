@@ -731,7 +731,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             DelOutboundVO delOutboundVO = iDelOutboundService.selectDelOutboundByOrderNous(delQueryServiceList.get(i).getOrderNo(), delQueryServiceList.get(i).getOperationType());
                 log.info("自动查件参数delOutboundVO：{}",delOutboundVO);
             if (Optional.ofNullable(delOutboundVO.getCheckFlag()).isPresent()) {
-                if (delQueryServiceList.get(i).getOperationType() == 0 && delQueryServiceList.get(i).getCheckFlag() == 0) {
+                if (delQueryServiceList.get(i).getOperationType() == 0 && delOutboundVO.getCheckFlag() == 0) {
                     continue;
                     //throw new CommonException("400", "发货天数或者轨迹停留天数小于对应的查件配置天数！！！");
                 }
