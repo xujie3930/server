@@ -4,12 +4,15 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import java.util.Date;
 
 
 /**
@@ -60,4 +63,10 @@ public class InboundReceiptDetail extends BaseEntity {
 
     @ApiModelProperty(value = "采购-运单号/出库-出库单号作为该单号")
     private String deliveryNo;
+
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ApiModelProperty(value = "到仓时间")
+    private Date warehouseToTime;
+
 }
