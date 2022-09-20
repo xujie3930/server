@@ -1043,5 +1043,15 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         log.info("创建揽收入库单信息：{}", JSONObject.toJSONString(createInboundReceiptDTO));
         return saveOrUpdate(createInboundReceiptDTO);
     }
+
+    @Override
+    public void receipt(ReceiptRequest receiptRequest) {
+        try {
+        InboundReceiptDetail inboundReceiptDetail =inboundReceiptDetailMapper.selectReceiptDeta(receiptRequest);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 }
 
