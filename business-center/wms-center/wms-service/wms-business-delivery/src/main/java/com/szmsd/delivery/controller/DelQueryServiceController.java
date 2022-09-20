@@ -5,8 +5,11 @@ import cn.afterturn.easypoi.excel.entity.ExportParams;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.event.SyncReadListener;
 import com.github.pagehelper.PageInfo;
+import com.szmsd.bas.api.feign.BasTranslateFeignService;
 import com.szmsd.bas.dto.BasSkuRuleMatchingImportDto;
 import com.szmsd.bas.dto.BaseProductImportDto;
+import com.szmsd.common.core.constant.HttpStatus;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -66,6 +69,8 @@ public class DelQueryServiceController extends BaseController{
 
      @Resource
      private IDelQueryServiceService delQueryServiceService;
+
+
 
 
      /**
@@ -130,6 +135,7 @@ public class DelQueryServiceController extends BaseController{
 
         list.forEach(x->{
             x.setOperationType(Integer.parseInt(httpServletRequest.getParameter("operationType")));
+
         });
         return delQueryServiceService.importData(list);
     }

@@ -1,12 +1,15 @@
 package com.szmsd.putinstorage.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
+
+import java.util.Date;
 
 @Data
 @ApiModel(value = "InboundReceiptDetailVO", description = "InboundReceiptDetailVO入库明细视图")
@@ -49,5 +52,9 @@ public class InboundReceiptDetailVO {
     @ApiModelProperty(value = "备注")
     @Excel(name = "备注")
     private String remark;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ApiModelProperty(value = "到仓时间")
+    private Date warehouseToTime;
 
 }

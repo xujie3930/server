@@ -51,4 +51,8 @@ public class DelOutboundThirdPartyVO implements Serializable {
     @ApiModelProperty(value = "跟踪号")
     private String trackingNo;
 
+
+    @ApiModelProperty(value = "亚马逊物流服务id")
+    private String amazonLogisticsRouteId;
+
 }

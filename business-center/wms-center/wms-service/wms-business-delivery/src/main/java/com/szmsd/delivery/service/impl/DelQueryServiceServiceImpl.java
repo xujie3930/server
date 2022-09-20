@@ -1,16 +1,16 @@
 package com.szmsd.delivery.service.impl;
 
-import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.szmsd.bas.api.domain.BasSub;
-import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.api.feign.BasSubFeignService;
+import com.szmsd.bas.api.feign.BasTranslateFeignService;
 import com.szmsd.bas.vo.BasSellerInfoVO;
+import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
@@ -81,6 +81,8 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
     @Autowired
     private DelQueryServiceFeedbackMapper delQueryServiceFeedbackMapper;
+    @Autowired
+    private BasTranslateFeignService basTranslateFeignService;
 
 
 
@@ -675,6 +677,19 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         if (list.isEmpty()) {
             throw new CommonException("400", "Empty Excel data");
         }
+        list.forEach(x->{
+            if (x.getReason().equals("其他")){
+                if (x.getRemark()==null){
+                    String mag="查件原因为其他,备注不能为空";
+                    R<String> r=  basTranslateFeignService.Translate(mag);
+                    if (r.getCode()== HttpStatus.SUCCESS){
+                        mag=r.getData();
+                    }
+                    throw new CommonException("400", mag);
+                }
+            }
+        });
+
 
         List<DelQueryService> dataList = BeanMapperUtil.mapList(list, DelQueryService.class);
         for (DelQueryService delQueryService: dataList){
