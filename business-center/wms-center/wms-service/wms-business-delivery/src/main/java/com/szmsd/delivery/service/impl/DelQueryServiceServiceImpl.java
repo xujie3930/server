@@ -720,7 +720,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
                 delQueryServiceList.get(i).setOperationType(0);
             DelOutboundVO delOutboundVO = iDelOutboundService.selectDelOutboundByOrderNous(delQueryServiceList.get(i).getOrderNo(), delQueryServiceList.get(i).getOperationType());
-
+                log.info("自动查件参数delOutboundVO：{}",delOutboundVO);
             if (Optional.ofNullable(delOutboundVO.getCheckFlag()).isPresent()) {
                 if (delQueryServiceList.get(i).getOperationType() == 0 && delQueryServiceList.get(i).getCheckFlag() == 0) {
                     continue;
@@ -738,6 +738,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getCountryCode, delQueryServiceList.get(i).getCountryCode());
             delQuerySettingsQueryWrapper.eq(DelQuerySettings::getShipmentRule, delQueryServiceList.get(i).getShipmentRule());
             List<DelQuerySettings> dataDelQuerySettingsList = delQuerySettingsService.list(delQuerySettingsQueryWrapper);
+                log.info("自动查件参数dataDelQuerySettingsList：{}",dataDelQuerySettingsList);
             if (delQueryServiceList.get(i).getOperationType() == 0) {
                 if (dataDelQuerySettingsList.size() == 0) {
                     delQuerySettingsQueryWrapper = new LambdaQueryWrapper();
@@ -768,6 +769,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                         bool = true;
                     }
                 }
+                log.info("自动查件参数bool：{}",bool);
                 if (!bool) {
                     continue;
                     //throw new CommonException("400", "此查件申请不满足查件条件");
@@ -779,6 +781,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 delQueryServiceList.get(i).setStateName(DelQueryServiceStateEnum.SUBMITTED.getName());
             DelQueryServiceFeedback delQueryServiceFeedback = new DelQueryServiceFeedback();
             List<DelQueryService> delQueryServiceListus = baseMapper.selectListJobs(delQueryServiceList.get(i).getOrderNo());
+                log.info("自动查件参数delQueryServiceListus：{}",delQueryServiceListus);
             if (delQueryServiceListus.size() == 0) {
                 delQueryServiceFeedback.setCreateByName("admin");
                 delQueryServiceFeedback.setCreateTime(new Date());
@@ -791,6 +794,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             delQueryServiceFeedback.setCreateByName("admin");
             delQueryServiceFeedback.setCreateTime(new Date());
             List<DelQueryServiceFeedback> delQueryServiceFeedbackLists = baseMapper.selectDelQueryServiceFeedbackLists(delQueryServiceList.get(i).getId());
+                log.info("自动查件参数delQueryServiceFeedbackLists：{}",delQueryServiceFeedbackLists);
             if (delQueryServiceFeedbackLists.size() == 0) {
                 iDelQueryServiceFeedbackService.insertDelQueryServiceFeedbacksu(delQueryServiceFeedback);
 
