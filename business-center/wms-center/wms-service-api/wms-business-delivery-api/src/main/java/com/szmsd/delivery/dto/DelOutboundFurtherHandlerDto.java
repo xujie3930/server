@@ -22,4 +22,7 @@ public class DelOutboundFurtherHandlerDto implements Serializable {
 
     @ApiModelProperty(value = "失败了是否推送发货指令，默认false不推送")
     private boolean shipmentShipping;
+
+    //是否执行更新发货指令接口调用,供应商等
+    private boolean execShipmentShipping;
 }

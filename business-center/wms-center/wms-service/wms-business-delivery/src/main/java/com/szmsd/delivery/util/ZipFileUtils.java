@@ -1,11 +1,17 @@
 package com.szmsd.delivery.util;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ZipUtil;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
@@ -24,35 +30,41 @@ public class ZipFileUtils {
      * @author liukai
      */
     public static void downloadZip(HttpServletResponse response, String filePath, String fileName) {
+
+        // 先去模板目录中获取模板
+        // 模板目录中没有模板再从项目中获取模板
         String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery");
         File file = new File(basedir + "/" + filePath);
-
-        OutputStream toClient = null;
+        InputStream inputStream = null;
+        ServletOutputStream outputStream = null;
         try {
-            // 以流的形式下载文件。
-            BufferedInputStream fis = new BufferedInputStream(new FileInputStream(file.getPath()));
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-            fis.close();
-            // 清空response
-            response.reset();
-            toClient = new BufferedOutputStream(response.getOutputStream());
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType("application/octet-stream");
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
-            toClient.write(buffer);
-            toClient.flush();
-        } catch (Exception e) {
-            log.error("下载zip压缩包过程发生异常:", e);
-        } finally {
-            if (toClient != null) {
-                try {
-                    toClient.close();
-                } catch (IOException e) {
-                    log.error("zip包下载关流失败:", e);
-                }
+            if (file.exists()) {
+                inputStream = new FileInputStream(file);
+                response.setHeader("File-Source", "local");
+            } else {
+                Resource resource = new ClassPathResource(filePath);
+                inputStream = resource.getInputStream();
+                response.setHeader("File-Source", "resource");
             }
+            outputStream = response.getOutputStream();
+            //response为HttpServletResponse对象
+            response.setContentType("application/octet-stream");
+            String efn = URLEncoder.encode(fileName, "utf-8");
+            //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            response.setHeader("Content-Disposition", "attachment;filename=" + efn + ".zip");
+            IOUtils.copy(inputStream, outputStream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();;
+            throw new CommonException("999", "文件不存在，" + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();;
+            throw new CommonException("999", "文件流处理失败，" + e.getMessage());
+        } finally {
+            IoUtil.flush(outputStream);
+            IoUtil.close(outputStream);
+            IoUtil.close(inputStream);
         }
+
     }
 
     /**
