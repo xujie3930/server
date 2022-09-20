@@ -714,7 +714,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
     @Override
     public int insertDelQueryServiceList(List<DelQueryService> delQueryServiceList) {
-            log.info("定时任务参数：{}",delQueryServiceList);
+            log.info("定时任务参数大小：{}",delQueryServiceList.size());
             for (int i=0;i<delQueryServiceList.size();i++){
 
 
@@ -799,11 +799,13 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 iDelQueryServiceFeedbackService.insertDelQueryServiceFeedbacksu(delQueryServiceFeedback);
 
             } else if (delQueryServiceFeedbackLists.size() > 0) {
+                log.info("自动查件参数delQueryServiceFeedback：{}",delQueryServiceFeedback);
                 iDelQueryServiceFeedbackService.insertDelQueryServiceFeedback(delQueryServiceFeedback);
             }
 
 
         }
+        log.info("跳出循环");
         return 1;
     }
 
