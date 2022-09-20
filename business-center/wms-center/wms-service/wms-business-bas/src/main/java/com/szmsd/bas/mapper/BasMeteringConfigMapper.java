@@ -31,4 +31,6 @@ public interface BasMeteringConfigMapper {
     BasMeteringConfig  selectById(Integer id);
 
     List<BasMeteringConfigData>  selectjblj(BasMeteringConfigDto basMeteringConfigDto);
+
+    List<BasMeteringConfigData> selectjbljs(BasMeteringConfigDto basMeteringConfigDto);
 }
