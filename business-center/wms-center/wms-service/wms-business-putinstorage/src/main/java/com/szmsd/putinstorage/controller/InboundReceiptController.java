@@ -397,7 +397,7 @@ public class InboundReceiptController extends BaseController {
         }
     }
 
-    @PreAuthorize("@ss.hasPermi('inbound:receipt')")
+    //@PreAuthorize("@ss.hasPermi('inbound:receipt')")
     @PostMapping("/receipt")
     @ApiOperation(value = "#B6 转运订单收货调用", notes = "#B6 转运订单收货调用")
     @InboundReceiptLog(record = InboundReceiptRecordEnum.PUT)
