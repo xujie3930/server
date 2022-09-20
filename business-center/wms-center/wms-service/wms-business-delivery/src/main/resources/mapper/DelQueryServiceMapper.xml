@@ -49,11 +49,11 @@
 
     </select>
     <select id="selectDelOutbound" resultType="com.szmsd.delivery.domain.DelOutbound">
-        SELECT * from del_outbound where state='COMPLETED' AND tracking_status!='Delivered'
+        SELECT * from del_outbound where state='COMPLETED' AND tracking_status!='Delivered' and order_no='CKCNTIE422092000000003'
     </select>
     <select id="selectListJobs" resultType="com.szmsd.delivery.domain.DelQueryService"
             parameterType="java.lang.String">
-        SELECT * from del_query_service where order_no=#{orderNo}
+        SELECT * from del_query_service where order_no=#{orderNo}  LIMIT 0,1
     </select>
     <select id="selectDelQueryServiceFeedbackLists" resultType="com.szmsd.delivery.domain.DelQueryServiceFeedback"
             parameterType="java.lang.Integer">
