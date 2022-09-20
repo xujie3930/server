@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.open.vo.ResponseVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
+import com.szmsd.putinstorage.domain.dto.ReceiptRequest;
 import com.szmsd.putinstorage.domain.dto.ReceivingCompletedRequest;
 import com.szmsd.putinstorage.domain.dto.ReceivingRequest;
 import com.szmsd.putinstorage.domain.dto.ReceivingTrackingRequest;
@@ -33,6 +34,15 @@ public class InboundReceiptController extends BaseController {
         R.getDataAndException(inboundReceiptFeignService.receiving(receivingRequest));
         return ResponseVO.ok();
     }
+
+    @PostMapping("/receipt")
+    @ApiOperation(value = "#B6 转运订单收货调用", notes = "#B6 转运订单收货调用")
+    public ResponseVO receipt(@RequestBody ReceiptRequest receiptRequest) {
+        log.info("#B6 转运订单收货调用：{}", JSONObject.toJSONString(receiptRequest));
+        R.getDataAndException(inboundReceiptFeignService.receipt(receiptRequest));
+        return ResponseVO.ok();
+    }
+
 
     @PostMapping("/receiving/completed")
     @ApiOperation(value = "#B3 接收完成入库", notes = "#B3 接收完成入库")

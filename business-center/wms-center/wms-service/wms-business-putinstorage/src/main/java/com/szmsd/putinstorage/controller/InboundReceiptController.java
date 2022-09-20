@@ -397,6 +397,43 @@ public class InboundReceiptController extends BaseController {
         }
     }
 
+    @PreAuthorize("@ss.hasPermi('inbound:receipt')")
+    @PostMapping("/receipt")
+    @ApiOperation(value = "#B6 转运订单收货调用", notes = "#B6 转运订单收货调用")
+    @InboundReceiptLog(record = InboundReceiptRecordEnum.PUT)
+    public R receipt(@RequestBody ReceiptRequest receiptRequest) {
+        String repeatRequestKey = JSONObject.toJSONString(receiptRequest);
+        Long excuteTime = skuRep.get(repeatRequestKey);
+        if (null == excuteTime) {
+            skuRep.put(repeatRequestKey, System.currentTimeMillis());
+        } else {
+            log.info("#B1 转运订单收货调用 重复请求：{}==={}", receiptRequest, excuteTime);
+            return R.ok();
+        }
+
+        String localKey = Optional.ofNullable(SecurityUtils.getLoginUser()).map(LoginUser::getSellerCode).orElse("");
+        RLock lock = redissonClient.getLock("InboundReceiptController#receipt" + localKey);
+        try {
+            if (lock.tryLock(LOCK_TIME, TimeUnit.SECONDS)) {
+                iInboundReceiptService.receipt(receiptRequest);
+                return R.ok();
+            } else {
+                return R.failed("请求超时，请稍候重试!");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return R.failed("接收转运订单收货失败!");
+        } catch (Exception e) {
+            skuRep.remove(repeatRequestKey);
+            log.error("接收转运订单收货失败:", e);
+            throw new RuntimeException(e.getMessage());
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+    }
+
     @PreAuthorize("@ss.hasPermi('inbound:receiving:completed')")
     @PostMapping("/receiving/completed")
     @ApiOperation(value = "#B3 接收完成入库", notes = "#B3 接收完成入库")

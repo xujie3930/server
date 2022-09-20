@@ -101,6 +101,12 @@ public class InboundReceiptFeignFallback implements FallbackFactory<InboundRecei
                 log.info("InboundReceiptFeignFallback collectAndInbound{}", JSONObject.toJSONString(packageCollection));
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R receipt(ReceiptRequest receiptRequest) {
+                log.info("InboundReceiptFeignFallback receipt{}", JSONObject.toJSONString(receiptRequest), throwable);
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

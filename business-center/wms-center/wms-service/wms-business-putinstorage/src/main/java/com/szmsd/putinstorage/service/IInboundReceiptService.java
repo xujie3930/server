@@ -66,5 +66,7 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
      * @return 入库单号
      */
     InboundReceiptInfoVO collectAndInbound(PackageCollection packageCollection);
+
+    void  receipt(ReceiptRequest receiptRequest);
 }
 
