@@ -793,9 +793,10 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             delQueryServiceFeedback.setReason("Automatic push by the system");
             delQueryServiceFeedback.setCreateByName("admin");
             delQueryServiceFeedback.setCreateTime(new Date());
-            List<DelQueryServiceFeedback> delQueryServiceFeedbackLists = baseMapper.selectDelQueryServiceFeedbackLists(delQueryServiceList.get(i).getId());
+            List<DelQueryServiceFeedback> delQueryServiceFeedbackLists = baseMapper.selectDelQueryServiceFeedbackLists(delQueryServiceListus.get(i).getId());
                 log.info("自动查件参数delQueryServiceFeedbackLists：{}",delQueryServiceFeedbackLists);
             if (delQueryServiceFeedbackLists.size() == 0) {
+                log.info("自动查件参数delQueryServiceFeedback：{}",delQueryServiceFeedback);
                 iDelQueryServiceFeedbackService.insertDelQueryServiceFeedbacksu(delQueryServiceFeedback);
 
             } else if (delQueryServiceFeedbackLists.size() > 0) {
