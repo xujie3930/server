@@ -24,7 +24,8 @@
         t.put_qty,
         t.origin_code,
         t.delivery_no,
-        t.remark
+        t.remark,
+        t.warehouse_to_time
     </sql>
     <update id="updateReceiptDeta" parameterType="com.szmsd.putinstorage.domain.InboundReceiptDetail">
         UPDATE inbound_receipt_detail SET put_qty=#{putQty} ,warehouse_to_time=#{warehouseToTime}
