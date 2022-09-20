@@ -22,9 +22,11 @@ import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
+import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
@@ -182,6 +184,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Autowired
     private HtpOutboundFeignService htpOutboundFeignService;
+    @Autowired
+    private BasWarehouseClientService basWarehouseClientService;
     /**
      * 查询出库单模块
      *
@@ -574,6 +578,18 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (CollectionUtils.isEmpty(details)) {
                 throw new CommonException("400", "明细信息不能为空");
             }
+
+
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(dto.getWarehouseCode())) {
+                String warehouseCode = dto.getWarehouseCode();
+                BasWarehouse warehouse = this.basWarehouseClientService.queryByWarehouseCode(warehouseCode);
+                if (null == warehouse) {
+                    throw new CommonException("400", "仓库信息不存在");
+                }else if(!"1".equals(warehouse.getStatus())){
+                    throw new CommonException("400", "Warehouse not enabled");
+                }
+            }
+
             List<String> skus = details.stream().map(DelOutboundDetailDto::getSku).distinct().collect(Collectors.toList());
             // 判断地址信息上的国家是否存在
             DelOutboundAddressDto addressDto = dto.getAddress();
