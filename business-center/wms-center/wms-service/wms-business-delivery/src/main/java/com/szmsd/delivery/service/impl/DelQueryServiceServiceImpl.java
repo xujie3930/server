@@ -727,11 +727,11 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             for (int i=0;i<delQueryServiceList.size();i++){
 
 
-                delQueryServiceList.get(i).setOperationType(0);
+                delQueryServiceList.get(i).setOperationType(1);
             DelOutboundVO delOutboundVO = iDelOutboundService.selectDelOutboundByOrderNous(delQueryServiceList.get(i).getOrderNo(), delQueryServiceList.get(i).getOperationType());
                 log.info("自动查件参数delOutboundVO：{}",delOutboundVO);
             if (Optional.ofNullable(delOutboundVO.getCheckFlag()).isPresent()) {
-                if (delQueryServiceList.get(i).getOperationType() == 0 && delOutboundVO.getCheckFlag() == 0) {
+                if (delQueryServiceList.get(i).getOperationType() == 1 && delOutboundVO.getCheckFlag() == 0) {
                     continue;
                     //throw new CommonException("400", "发货天数或者轨迹停留天数小于对应的查件配置天数！！！");
                 }
@@ -798,6 +798,11 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 delQueryServiceFeedback.setCreateByName("admin");
                 delQueryServiceFeedback.setCreateTime(new Date());
                 BeanUtils.copyProperties(delQueryServiceList.get(i),delQueryService);
+                delQueryService.setDelDays(delOutboundVO.getDelDays());
+                delQueryService.setTrackingDays(delOutboundVO.getTrackingDays());
+                delQueryService.setQueryseShipmentDays(delOutboundVO.getQueryseShipmentDays());
+                delQueryService.setQuerysetrackStayDays(delOutboundVO.getQuerysetrackStayDays());
+
                 int a = baseMapper.insert(delQueryService);
                 delQueryServiceFeedback.setMainId(delQueryService.getId());
 
