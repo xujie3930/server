@@ -209,7 +209,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public DelOutboundVO selectDelOutboundByOrderNous(String orderNo,int operationType) {
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
-        if (operationType!=0){
+        if (operationType==1||operationType==3){
             queryWrapper.isNotNull(DelOutbound::getShipmentsTime);
             queryWrapper.isNotNull(DelOutbound::getTrackingTime);
         }
@@ -228,6 +228,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         queryWrapper.last("LIMIT 1");
         DelOutbound delOutbound = super.getOne(queryWrapper);
+        if (operationType==3&&delOutbound==null){
+            return null;
+        }
         return this.selectDelOutboundVO(delOutbound);
     }
 
