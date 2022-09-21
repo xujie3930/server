@@ -288,7 +288,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         delOutboundVO.setCheckFlag(1L);
                     }
                 }else {
-                    delOutboundVO.setCheckFlag(1L);
+                    delOutboundVO.setCheckFlag(0L);
                 }
 
             }
