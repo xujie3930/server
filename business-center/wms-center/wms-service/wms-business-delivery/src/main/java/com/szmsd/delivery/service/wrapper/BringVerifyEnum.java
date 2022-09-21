@@ -994,16 +994,19 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 updateDelOutbound.setShipmentOrderLabelUrl(delOutbound.getShipmentOrderLabelUrl());
                 delOutboundService.bringVerifySuccess(updateDelOutbound);
 
-                // 提交一个WMS任务
-                stopWatch.start();
-                IDelOutboundThirdPartyService delOutboundThirdPartyService = SpringUtils.getBean(IDelOutboundThirdPartyService.class);
-                DelOutboundThirdParty delOutboundThirdParty = new DelOutboundThirdParty();
-                delOutboundThirdParty.setOrderNo(delOutbound.getOrderNo());
-                delOutboundThirdParty.setState(DelOutboundCompletedStateEnum.INIT.getCode());
-                delOutboundThirdParty.setOperationType(DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_WMS);
-                delOutboundThirdPartyService.save(delOutboundThirdParty);
-                stopWatch.stop();
-                logger.info(">>>>>[创建出库单{}]提交一个WMS订单任务,耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
+                if(!DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())){
+                    // 提交一个WMS任务
+                    stopWatch.start();
+                    IDelOutboundThirdPartyService delOutboundThirdPartyService = SpringUtils.getBean(IDelOutboundThirdPartyService.class);
+                    DelOutboundThirdParty delOutboundThirdParty = new DelOutboundThirdParty();
+                    delOutboundThirdParty.setOrderNo(delOutbound.getOrderNo());
+                    delOutboundThirdParty.setState(DelOutboundCompletedStateEnum.INIT.getCode());
+                    delOutboundThirdParty.setOperationType(DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_WMS);
+                    delOutboundThirdPartyService.save(delOutboundThirdParty);
+                    stopWatch.stop();
+                    logger.info(">>>>>[创建出库单{}]提交一个WMS订单任务,耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
+                }
+
 
 
         }

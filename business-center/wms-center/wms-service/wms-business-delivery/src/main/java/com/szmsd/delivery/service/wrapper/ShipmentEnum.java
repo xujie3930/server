@@ -215,7 +215,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 exType = "OutboundGetTrackingFailed";
             }
             // 更新消息到WMS
-            if (delOutboundWrapperContext.isShipmentShipping()) {
+            if (delOutboundWrapperContext.isShipmentShipping() && !DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
                 ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
                 shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
                 shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
@@ -935,7 +935,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
 
 
-            if(delOutboundWrapperContext.getExecShipmentShipping()){
+            if(delOutboundWrapperContext.getExecShipmentShipping() && !DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())){
                 logger.info("核重更新发货指令{}", delOutbound.getOrderNo());
                 // 修改为异步执行
                 ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
