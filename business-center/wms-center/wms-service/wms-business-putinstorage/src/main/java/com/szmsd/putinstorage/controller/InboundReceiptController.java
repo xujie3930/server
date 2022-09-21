@@ -331,9 +331,26 @@ public class InboundReceiptController extends BaseController {
         boolean isXlsx = "xlsx".equals(suffix);
         AssertUtil.isTrue(isXls || isXlsx, "请上传xls或xlsx文件");
         List<String> error = new ArrayList<>();
-        List<InboundReceiptDetailVO> inboundReceiptDetailVOS = new ArrayList<>();
+        List<InboundReceiptDetailVO> inboundReceiptDetailVOSex = new ArrayList<>();
+        List<InboundReceiptDetailVO> inboundReceiptDetailVOS = new ArrayList();
         try {
-            inboundReceiptDetailVOS = EasyExcel.read(file.getInputStream(), InboundReceiptDetailVO.class, new SyncReadListener()).sheet().doReadSync();
+            inboundReceiptDetailVOSex = EasyExcel.read(file.getInputStream(), InboundReceiptDetailVO.class, new SyncReadListener()).sheet().doReadSync();
+
+
+
+            //list去掉重复值，并且重复值的数量相加
+            inboundReceiptDetailVOS = inboundReceiptDetailVOSex.stream().collect(Collectors.toMap(InboundReceiptDetailVO::getSku, a -> a, (o1,o2)-> {
+
+                        if (o1.getDeclareQty()!=null&&o2.getDeclareQty()!=null) {
+                            o1.setDeclareQty(o1.getDeclareQty() + o2.getDeclareQty());
+                        }
+
+                        return o1;
+
+                    })).values().stream().collect(Collectors.toList());
+
+
+
 //            ExcelUtil<InboundReceiptDetailVO> excelUtil = new ExcelUtil<>(InboundReceiptDetailVO.class);
 //            inboundReceiptDetailVOS = excelUtil.importExcel(file.getInputStream());
             Map<String, Long> collect = inboundReceiptDetailVOS.stream().map(InboundReceiptDetailVO::getSku).collect(Collectors.groupingBy(p -> p, Collectors.counting()));
