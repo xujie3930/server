@@ -1929,6 +1929,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             this.delOutboundAsyncService.cancelled(delOutbound.getOrderNo());
             result = 1;
         } else {
+            dto.setExecShipmentShipping(true);
             result = this.delOutboundAsyncService.shipmentPacking(delOutbound.getId(), dto.isShipmentShipping());
         }
         return result;
