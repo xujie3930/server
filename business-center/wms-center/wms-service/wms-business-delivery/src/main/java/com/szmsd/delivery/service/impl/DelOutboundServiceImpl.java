@@ -275,8 +275,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (Optional.ofNullable(delOutbound.getShipmentRule()).isPresent()){
 
                 Map  mapSettings=baseMapper.selectQuerySettings(delOutbound.getShipmentRule());
-                logger.info("查件配置:{}",mapSettings);
-                logger.info("查件配置的单号:{}",delOutbound.getOrderNo());
+                logger.info("查件配置：{}",mapSettings);
+                logger.info("查件配置单号：{}",delOutbound.getOrderNo());
                 if (mapSettings!=null) {
                     //配置表的发货天数
                     Long queryseShipmentDays = Long.valueOf(mapSettings.get("shipmentDays").toString());
@@ -284,12 +284,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     Long querysetrackStayDays = Long.valueOf(mapSettings.get("trackStayDays").toString());
                     delOutboundVO.setQueryseShipmentDays(queryseShipmentDays);
                     delOutboundVO.setQuerysetrackStayDays(querysetrackStayDays);
-                    if ( queryseShipmentDays>=delOutboundVO.getDelDays() && querysetrackStayDays>=delOutboundVO.getTrackingDays() ) {
+                    if ( queryseShipmentDays>delOutboundVO.getDelDays() && querysetrackStayDays>delOutboundVO.getTrackingDays() ) {
                         delOutboundVO.setCheckFlag(0L);
                     } else {
                         delOutboundVO.setCheckFlag(1L);
                     }
-                }else if (mapSettings==null){
+                }else {
                     delOutboundVO.setCheckFlag(1L);
                 }
 

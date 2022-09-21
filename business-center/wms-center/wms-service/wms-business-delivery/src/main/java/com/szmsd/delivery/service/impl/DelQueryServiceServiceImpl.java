@@ -794,6 +794,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
 
             if (delQueryServiceListus.size() == 0) {
                 DelQueryService delQueryService=new DelQueryService();
+                log.info("自动查件参数delQueryServiceFeedbackListsut：{}",delQueryServiceList.get(i));
 
                 delQueryServiceFeedback.setCreateByName("admin");
                 delQueryServiceFeedback.setCreateTime(new Date());
@@ -802,7 +803,6 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 delQueryService.setTrackingDays(delOutboundVO.getTrackingDays());
                 delQueryService.setQueryseShipmentDays(delOutboundVO.getQueryseShipmentDays());
                 delQueryService.setQuerysetrackStayDays(delOutboundVO.getQuerysetrackStayDays());
-
                 int a = baseMapper.insert(delQueryService);
                 delQueryServiceFeedback.setMainId(delQueryService.getId());
 
@@ -810,7 +810,7 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 delQueryServiceFeedback.setCreateByName("admin");
                 delQueryServiceFeedback.setCreateTime(new Date());
                 List<DelQueryServiceFeedback> delQueryServiceFeedbackLists = baseMapper.selectDelQueryServiceFeedbackLists(delQueryServiceList.get(i).getId());
-                log.info("自动查件参数delQueryServiceFeedbackListsut：{}",delQueryServiceList.get(i));
+
                 log.info("自动查件参数delQueryServiceFeedbackLists：{}",delQueryServiceFeedbackLists);
                 if (delQueryServiceFeedbackLists.size() == 0) {
                     log.info("自动查件参数delQueryServiceFeedback：{}",delQueryServiceFeedback);
