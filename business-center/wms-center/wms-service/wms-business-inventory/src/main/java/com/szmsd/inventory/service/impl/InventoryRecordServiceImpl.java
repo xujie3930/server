@@ -1,5 +1,6 @@
 package com.szmsd.inventory.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.dto.BaseProductMeasureDto;
@@ -110,20 +111,31 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
      * @return
      */
     @Override
-    public List<InventorySkuVolumeVO> selectSkuVolume(InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO) {
-        inventorySkuVolumeQueryDTO = Optional.ofNullable(inventorySkuVolumeQueryDTO).orElse(new InventorySkuVolumeQueryDTO());
+    public List<InventorySkuVolumeVO> selectSkuVolume(final InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO) {
+        //inventorySkuVolumeQueryDTO = Optional.ofNullable(inventorySkuVolumeQueryDTO).orElse(new InventorySkuVolumeQueryDTO());
+
+        if(inventorySkuVolumeQueryDTO == null){
+            return new ArrayList<>();
+        }
+
+        InventorySkuQueryDTO skuQueryDTO = new InventorySkuQueryDTO().setSku(inventorySkuVolumeQueryDTO.getSku()).setWarehouseCode(inventorySkuVolumeQueryDTO.getWarehouseCode());
 
         // 获取库存
-        List<InventorySkuVO> inventoryList = iInventoryService.selectList(new InventorySkuQueryDTO().setSku(inventorySkuVolumeQueryDTO.getSku()).setWarehouseCode(inventorySkuVolumeQueryDTO.getWarehouseCode()));
-        inventoryList = inventoryList.stream().filter(item -> item.getAvailableInventory() > 0).collect(Collectors.toList());
+        List<InventorySkuVO> inventoryList = iInventoryService.selectList(skuQueryDTO);
+
+        if(CollectionUtils.isEmpty(inventoryList)){
+            return new ArrayList<>();
+        }
+
+        List<InventorySkuVO> newInventoryList = inventoryList.stream().filter(item -> item.getAvailableInventory() > 0).collect(Collectors.toList());
 
         // 获取sku信息
-        List<String> skuList = inventoryList.stream().map(InventorySkuVO::getSku).collect(Collectors.toList());
+        List<String> skuList = newInventoryList.stream().map(InventorySkuVO::getSku).collect(Collectors.toList());
         List<BaseProductMeasureDto> skuDataList = remoteComponent.listSku(skuList);
         Map<String, BaseProductMeasureDto> skuData = skuDataList.stream().collect(Collectors.groupingBy(BaseProductMeasureDto::getCode, Collectors.collectingAndThen(Collectors.toList(), e -> e.get(0))));
 
         // 计算sku可用库存体积
-        Map<String, List<InventorySkuVO>> collect = inventoryList.stream().collect(Collectors.groupingBy(InventorySkuVO::getWarehouseCode));
+        Map<String, List<InventorySkuVO>> collect = newInventoryList.stream().collect(Collectors.groupingBy(InventorySkuVO::getWarehouseCode));
         return collect.entrySet().stream().map(item -> {
             InventorySkuVolumeVO inventorySkuVolumeVO = new InventorySkuVolumeVO();
 
@@ -209,11 +221,19 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
             records = new ArrayList<>();
         }
         Integer searchQty = records.stream().mapToInt(InventoryRecordVO::getQuantity).sum();
-        List<InventoryRecordVO> inventoryRecords = this.selectList(new InventoryRecordQueryDTO().setSku(sku).setWarehouseCode(warehouse).setTimeType(InventoryRecordQueryDTO.TimeType.OPERATE_ON).setStartTime(startTime).setEndTime(endTime).setType("1"));
+
+        InventoryRecordQueryDTO recordQueryDTO = new InventoryRecordQueryDTO().setSku(sku).setWarehouseCode(warehouse).setTimeType(InventoryRecordQueryDTO.TimeType.OPERATE_ON).setStartTime(startTime).setEndTime(endTime).setType("1");
+
+        //查询数量大于1的记录
+        recordQueryDTO.setQuantity(1);
+        List<InventoryRecordVO> inventoryRecords = this.selectList(recordQueryDTO);
+
+        if(CollectionUtils.isEmpty(inventoryRecords)){
+            log.info("我这里开始出现了空值:{},仓库：{},开始时间：{},结束时间:{},count:{},qty:{}",sku,warehouse,startTime,endTime,count,qty);
+            return records;
+        }
+
         for (InventoryRecordVO record : inventoryRecords) {
-            if (record.getQuantity() < 1) {
-                continue;
-            }
             searchQty += record.getQuantity();
             records.add(record);
             if (searchQty >= qty) {

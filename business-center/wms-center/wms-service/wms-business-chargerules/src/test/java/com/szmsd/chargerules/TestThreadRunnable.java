@@ -1,9 +1,9 @@
-package com.szmsd.chargerules.runnable;
+package com.szmsd.chargerules;
 
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.chargerules.config.ThreadPoolConfig;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.dto.WarehouseOperationDTO;
-import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
 import com.szmsd.chargerules.vo.WarehouseOperationVo;
@@ -17,25 +17,26 @@ import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
 import com.szmsd.inventory.domain.vo.SkuVolumeVO;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component
-public class ThreadRunnable {
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = BusinessChargeRulesApplication.class)
+public class TestThreadRunnable {
 
     @Resource
     private IPayService payService;
@@ -59,14 +60,9 @@ public class ThreadRunnable {
         asyncTaskExecutor = threadPoolConfig.getAsyncExecutor();
     }
 
-    /**
-     * 定时任务：储存仓租计价扣费；每日晚上8点执行
-     */
-//    @Scheduled(cron = "0/60 * * * * *")
-    // @Scheduled(cron = "0 10 0/1 * * ?") 每小时执行一次
-    //每周日0 0 20 ? * 1"
-    @Scheduled(cron = "0 0 20 * * ?")
-    public void executeWarehouse() {
+    @Test
+    public void run(){
+
         log.info("executeWarehouse() start...");
         RLock lock = redissonClient.getLock("executeOperation");
 
@@ -74,13 +70,23 @@ public class ThreadRunnable {
             if (lock.tryLock()) {
                 Map<String, List<Inventory>> warehouseSkuMap = getWarehouseSku();
                 for (Map.Entry<String, List<Inventory>> entry : warehouseSkuMap.entrySet()) {
+
+                    String warehouseCodeKey = entry.getKey();
+                    List<Inventory> inventoryList = entry.getValue();
+
+                    //log.info("仓库代码：{} 存在的商品信息:{}",warehouseCodeKey, JSONObject.toJSONString(inventoryList));
+
                     asyncTaskExecutor.execute(() -> {
                         String warehouseCode = entry.getKey();
                         List<Inventory> value = entry.getValue();
                         getSkuByWarehouse(warehouseCode, value);
                     });
+
+
                 }
             }
+
+
         } catch (Exception e) {
             log.error("executeWarehouse() execute error: ", e);
         } finally {
@@ -95,7 +101,9 @@ public class ThreadRunnable {
             throw new RuntimeException(e);
         }
 
+
         log.info("executeWarehouse() end...");
+
     }
 
     /**
@@ -107,9 +115,14 @@ public class ThreadRunnable {
     private void getSkuByWarehouse(String warehouseCode, List<Inventory> value) {
         for (Inventory inventory : value) {
             List<InventorySkuVolumeVO> skuVolumeVo = getSkuVolume(new InventorySkuVolumeQueryDTO(inventory.getSku(), warehouseCode));
-            for (InventorySkuVolumeVO inventorySkuVolumeVO : skuVolumeVo) {
-                List<SkuVolumeVO> skuVolumes = inventorySkuVolumeVO.getSkuVolumes();
-                getSkuDetails(warehouseCode, skuVolumes);
+
+            if(CollectionUtils.isNotEmpty(skuVolumeVo)) {
+
+                for (InventorySkuVolumeVO inventorySkuVolumeVO : skuVolumeVo) {
+                    List<SkuVolumeVO> skuVolumes = inventorySkuVolumeVO.getSkuVolumes();
+                    getSkuDetails(warehouseCode, skuVolumes);
+                }
+
             }
         }
     }
@@ -121,6 +134,9 @@ public class ThreadRunnable {
      * @param skuVolumes    skuVolumes
      */
     private void getSkuDetails(String warehouseCode, List<SkuVolumeVO> skuVolumes) {
+
+
+
         for (SkuVolumeVO skuVolume : skuVolumes) {
             //LocalDateTime now = LocalDateTime.now();
             WarehouseOperationDTO warehouseOperationDTO = new WarehouseOperationDTO();
@@ -128,8 +144,8 @@ public class ThreadRunnable {
             warehouseOperationDTO.setEffectiveTime(new Date());
             warehouseOperationDTO.setExpirationTime(new Date());
             warehouseOperationDTO.setCusCodeList(skuVolume.getCusCode());
-            List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationService
-                    .selectOperationByRule(warehouseOperationDTO);
+
+            List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationService.selectOperationByRule(warehouseOperationDTO);
               /*  List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationMapper.listPage(new WarehouseOperationDTO().setWarehouseCode(warehouseCode)
                         .setEffectiveTime(now).setExpirationTime(now).setCusCodeList(skuVolume.getCusCode())
                 );*/
@@ -197,8 +213,9 @@ public class ThreadRunnable {
      */
     private List<InventorySkuVolumeVO> getSkuVolume(InventorySkuVolumeQueryDTO dto) {
         R<List<InventorySkuVolumeVO>> result = inventoryFeignService.querySkuVolume(dto);
-        List<InventorySkuVolumeVO> data = result.getData();
-        if (result.getCode() == 200 && CollectionUtils.isNotEmpty(data)) {
+
+        if (result != null && result.getCode() == 200) {
+            List<InventorySkuVolumeVO> data = result.getData();
             return data;
         }
         log.error("getSkuVolume() failed: {}", result.getMsg());

@@ -1,9 +1,8 @@
-package com.szmsd.chargerules.runnable;
+package com.szmsd.chargerules.controller;
 
 import com.szmsd.chargerules.config.ThreadPoolConfig;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.dto.WarehouseOperationDTO;
-import com.szmsd.chargerules.mapper.WarehouseOperationMapper;
 import com.szmsd.chargerules.service.IPayService;
 import com.szmsd.chargerules.service.IWarehouseOperationService;
 import com.szmsd.chargerules.vo.WarehouseOperationVo;
@@ -17,25 +16,29 @@ import com.szmsd.inventory.domain.Inventory;
 import com.szmsd.inventory.domain.dto.InventorySkuVolumeQueryDTO;
 import com.szmsd.inventory.domain.vo.InventorySkuVolumeVO;
 import com.szmsd.inventory.domain.vo.SkuVolumeVO;
-import lombok.Data;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component
-public class ThreadRunnable {
+@Api(tags = {"测试"})
+@RestController
+@RequestMapping("/test")
+public class TestThreadRunnableController {
 
     @Resource
     private IPayService payService;
@@ -59,14 +62,11 @@ public class ThreadRunnable {
         asyncTaskExecutor = threadPoolConfig.getAsyncExecutor();
     }
 
-    /**
-     * 定时任务：储存仓租计价扣费；每日晚上8点执行
-     */
-//    @Scheduled(cron = "0/60 * * * * *")
-    // @Scheduled(cron = "0 10 0/1 * * ?") 每小时执行一次
-    //每周日0 0 20 ? * 1"
-    @Scheduled(cron = "0 0 20 * * ?")
-    public void executeWarehouse() {
+
+    @GetMapping("/run")
+    @ApiOperation(value = "测试")
+    public void run() {
+
         log.info("executeWarehouse() start...");
         RLock lock = redissonClient.getLock("executeOperation");
 
@@ -88,14 +88,8 @@ public class ThreadRunnable {
                 lock.unlock();
             }
         }
-
-        try {
-            Thread.sleep(100000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
         log.info("executeWarehouse() end...");
+
     }
 
     /**
@@ -145,13 +139,6 @@ public class ThreadRunnable {
             }
 
             pay(warehouseCode, skuVolume, warehouseOperationVo, amount);
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-
         }
     }
 
@@ -242,5 +229,4 @@ public class ThreadRunnable {
         custPayDTO.setOrderType(chargeLog.getOperationType());
         return custPayDTO;
     }
-
 }

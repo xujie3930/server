@@ -66,7 +66,8 @@ public class BasSellerFeignFallback implements FallbackFactory<BasSellerFeignSer
 
             @Override
             public R<BasSellerInfoVO> getInfoBySellerCode(String sellerCode) {
-                return R.convertResultJson(throwable);
+                //return R.convertResultJson(throwable);
+                return null;
             }
 
             @Override
