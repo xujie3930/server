@@ -1878,7 +1878,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             throw new CommonException("400", "取消出库单失败");
         }
         if (!responseVO.getSuccess()) {
-            throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "取消出库单失败2"));
+
+            if(!"有部分单号不存在".equals(responseVO.getMessage())){
+                throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "取消出库单失败2"));
+            }
+
         }
         // 修改单据状态为【仓库取消中】
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
