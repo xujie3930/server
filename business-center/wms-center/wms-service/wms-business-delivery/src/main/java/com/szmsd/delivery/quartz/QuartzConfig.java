@@ -42,7 +42,7 @@ public class QuartzConfig {
 
         return TriggerBuilder.newTrigger().forJob(DelQueryServiceJob())
                 .withIdentity("DelQueryServiceJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
                 .build();
     }
 
