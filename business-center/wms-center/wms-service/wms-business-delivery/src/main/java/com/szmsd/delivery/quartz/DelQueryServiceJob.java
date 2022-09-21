@@ -55,6 +55,7 @@ public class DelQueryServiceJob extends QuartzJobBean {
                 delQueryService.setServiceManager(userInfo.getServiceManager());
 
             }
+            delQueryService.setShipmentService(x.getShipmentRule());
             delQueryServiceList.add(delQueryService);
         });
         delQueryServiceService.insertDelQueryServiceList(delQueryServiceList);
