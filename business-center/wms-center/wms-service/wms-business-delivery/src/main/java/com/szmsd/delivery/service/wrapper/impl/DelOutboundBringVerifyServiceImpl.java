@@ -1190,6 +1190,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     logger.error(e.getMessage(), e);
                     throw new CommonException("500", MessageUtil.to("合并箱标文件，标签文件失败","Merging box label file, label file failed"));
                 }
+            }else{
+                pathname = mergeFilePath;
             }
         }
         if (null == pathname) {
@@ -1210,15 +1212,20 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
                 File mergeFile = new File(mergeFilePath);
                 logger.info(mergeFilePath + "," + pathname + "," + uploadBoxLabel + ","+selfPickLabelFilePath);
-                try {
-                    if (PdfUtil.merge(mergeFilePath, pathname, uploadBoxLabel, selfPickLabelFilePath)) {
-                        pathname = mergeFilePath;
+                if(mergeFile.exists()){
+                    pathname = mergeFilePath;
+                }else{
+                    try {
+                        if (PdfUtil.merge(mergeFilePath, pathname, uploadBoxLabel, selfPickLabelFilePath)) {
+                            pathname = mergeFilePath;
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        logger.error(e.getMessage(), e);
+                        throw new CommonException("500", MessageUtil.to("合并箱标文件，标签文件失败","Merging box label file, label file failed"));
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    logger.error(e.getMessage(), e);
-                    throw new CommonException("500", MessageUtil.to("合并箱标文件，标签文件失败","Merging box label file, label file failed"));
                 }
+
             }else{
 
                 if(selfPickLabelFilePath != null){
@@ -1234,17 +1241,20 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
                     logger.info(mergeFilePath + "," + pathname + "," + selfPickLabelFilePath);
-                    try {
-                        if (PdfUtil.merge(mergeFilePath, pathname, selfPickLabelFilePath)) {
-                            pathname = mergeFilePath;
+                    if(new File(mergeFilePath).exists()){
+                        pathname = mergeFilePath;
+                    }else{
+                        try {
+                            if (PdfUtil.merge(mergeFilePath, pathname, selfPickLabelFilePath)) {
+                                pathname = mergeFilePath;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            logger.error(e.getMessage(), e);
+                            throw new CommonException("500", MessageUtil.to("合并箱标文件，标签文件失败","Merging box label file, label file failed"));
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        logger.error(e.getMessage(), e);
-                        throw new CommonException("500", MessageUtil.to("合并箱标文件，标签文件失败","Merging box label file, label file failed"));
                     }
                 }
-
             }
 
         }
