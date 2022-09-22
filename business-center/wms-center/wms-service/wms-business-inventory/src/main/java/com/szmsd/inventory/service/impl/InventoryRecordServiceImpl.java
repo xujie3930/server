@@ -118,7 +118,9 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
             return new ArrayList<>();
         }
 
-        InventorySkuQueryDTO skuQueryDTO = new InventorySkuQueryDTO().setSku(inventorySkuVolumeQueryDTO.getSku()).setWarehouseCode(inventorySkuVolumeQueryDTO.getWarehouseCode());
+        String warehouseCodeIn = inventorySkuVolumeQueryDTO.getWarehouseCode();
+
+        InventorySkuQueryDTO skuQueryDTO = new InventorySkuQueryDTO().setSku(inventorySkuVolumeQueryDTO.getSku()).setWarehouseCode(warehouseCodeIn);
 
         // 获取库存
         List<InventorySkuVO> inventoryList = iInventoryService.selectList(skuQueryDTO);
@@ -129,6 +131,11 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
 
         List<InventorySkuVO> newInventoryList = inventoryList.stream().filter(item -> item.getAvailableInventory() > 0).collect(Collectors.toList());
 
+        if(warehouseCodeIn.equals("NJ")){
+
+            log.info("客户NJ仓库可用库存：{}",JSONObject.toJSONString(inventoryList));
+        }
+
         // 获取sku信息
         List<String> skuList = newInventoryList.stream().map(InventorySkuVO::getSku).collect(Collectors.toList());
         List<BaseProductMeasureDto> skuDataList = remoteComponent.listSku(skuList);
@@ -136,13 +143,27 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
 
         // 计算sku可用库存体积
         Map<String, List<InventorySkuVO>> collect = newInventoryList.stream().collect(Collectors.groupingBy(InventorySkuVO::getWarehouseCode));
-        return collect.entrySet().stream().map(item -> {
+
+        if(warehouseCodeIn.equals("NJ")){
+
+            log.info("客户NJ仓库SKU：{}",JSONObject.toJSONString(collect));
+        }
+
+        Set<Map.Entry<String, List<InventorySkuVO>>> inventorySet = collect.entrySet();
+
+        List<InventorySkuVolumeVO> inventorySkuVolumeVOS = inventorySet.stream().map(item -> {
             InventorySkuVolumeVO inventorySkuVolumeVO = new InventorySkuVolumeVO();
 
             String warehouseCode = item.getKey();
-            inventorySkuVolumeVO.setWarehouseCode(warehouseCode);
 
-            List<SkuVolumeVO> skuVolumeVO = item.getValue().stream().map(skuR -> {
+            List<InventorySkuVO> inventorySkuVOS = item.getValue();
+
+            if(warehouseCode.equals("NJ")){
+
+                log.info("客户NJ仓库SKU：{}",JSONObject.toJSONString(inventorySkuVOS));
+            }
+
+            List<SkuVolumeVO> skuVolumeVO = inventorySkuVOS.stream().map(skuR -> {
 
                 String sku = skuR.getSku();
                 BaseProductMeasureDto product = skuData.get(sku);
@@ -158,12 +179,19 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
                 Integer availableInventory = skuR.getAvailableInventory();
 
                 // 查询进入库记录
-                String startTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.parseDate(DateUtils.getPastDate(90)));
-                String endTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getNowDate());
+                String startTime = null;//DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.parseDate(DateUtils.getPastDate(90)));
+                String endTime = null;//DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getNowDate());
+
 
                 // 所有入库记录条数 避免死循环
                 int count = this.count(new QueryWrapper<InventoryRecord>().lambda().eq(InventoryRecord::getSku, sku).eq(InventoryRecord::getWarehouseCode, warehouseCode).gt(InventoryRecord::getQuantity, 0));
                 List<InventoryRecordVO> inventoryRecordVOS = recursionType1Record(sku, warehouseCode, startTime, endTime, new ArrayList<>(), count, availableInventory);
+
+                if(warehouseCode.equals("NJ") && sku.equals("SCNID73000320")){
+
+                    log.info("客户NJ仓库递归入库记录：{},SKU:{}",sku,JSONObject.toJSONString(inventoryRecordVOS));
+                }
+
                 String finalCusCode = cusCode;
                 BigDecimal finalSkuVolume = skuVolume;
                 List<SkuVolumeVO> result = inventoryRecordVOS.stream().map(record -> {
@@ -175,29 +203,35 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
                     int totalQty = inventoryRecordVOS.stream().mapToInt(InventoryRecordVO::getQuantity).sum();
 
                     // 溢出数量
-                    int overflowQty = totalQty - availableInventory;
-                    if (overflowQty > 0) {
-                        for (int i = e.size() - 1; i >= 0; i--) {
-                            if (overflowQty > 0) {
-                                SkuVolumeVO lastVolume = e.get(i);
-                                overflowQty = lastVolume.getQty() - overflowQty;
-                                if (overflowQty > 0) {
-                                    lastVolume.setQty(overflowQty);
-                                    BigDecimal volume = (lastVolume.getSingleVolume()).multiply(BigDecimal.valueOf(lastVolume.getQty()));
-                                    lastVolume.setVolume(volume);
-                                    break;
-                                }
-                                e = e.subList(0, i);
-                            }
-                        }
-                    }
+//                    int overflowQty = totalQty - availableInventory;
+//                    if (overflowQty > 0) {
+//                        for (int i = e.size() - 1; i >= 0; i--) {
+//                            if (overflowQty > 0) {
+//                                SkuVolumeVO lastVolume = e.get(i);
+//                                overflowQty = lastVolume.getQty() - overflowQty;
+//                                if (overflowQty > 0) {
+//                                    lastVolume.setQty(overflowQty);
+//                                    BigDecimal volume = (lastVolume.getSingleVolume()).multiply(BigDecimal.valueOf(lastVolume.getQty()));
+//                                    lastVolume.setVolume(volume);
+//                                    break;
+//                                }
+//                                e = e.subList(0, i);
+//                            }
+//                        }
+//                    }
                     return e;
                 }));
                 return result;
             }).flatMap(Collection::stream).collect(Collectors.toList());
+
             inventorySkuVolumeVO.setSkuVolumes(skuVolumeVO);
+            inventorySkuVolumeVO.setWarehouseCode(warehouseCode);
+
             return inventorySkuVolumeVO;
+
         }).collect(Collectors.toList());
+
+        return inventorySkuVolumeVOS;
     }
 
     /**
@@ -213,10 +247,10 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
      * @return
      */
     public List<InventoryRecordVO> recursionType1Record(String sku, String warehouse, String startTime, String endTime, List<InventoryRecordVO> records, Integer count, Integer qty) {
-        if (CollectionUtils.isNotEmpty(records)) {
-            startTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", startTime), 90));
-            endTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", endTime), 90));
-        }
+//        if (CollectionUtils.isNotEmpty(records)) {
+//            startTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", startTime), 90));
+//            endTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", endTime), 90));
+//        }
         if (records == null) {
             records = new ArrayList<>();
         }
@@ -224,12 +258,19 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
 
         InventoryRecordQueryDTO recordQueryDTO = new InventoryRecordQueryDTO().setSku(sku).setWarehouseCode(warehouse).setTimeType(InventoryRecordQueryDTO.TimeType.OPERATE_ON).setStartTime(startTime).setEndTime(endTime).setType("1");
 
+        if(warehouse.equals("NJ")){
+            log.info("客户NJ仓库递归入库记录,查询参数:{}",recordQueryDTO);
+        }
+
         //查询数量大于1的记录
         recordQueryDTO.setQuantity(1);
         List<InventoryRecordVO> inventoryRecords = this.selectList(recordQueryDTO);
 
+        if(warehouse.equals("NJ")){
+            log.info("客户NJ仓库递归入库记录,返回参数:{}",inventoryRecords);
+        }
+
         if(CollectionUtils.isEmpty(inventoryRecords)){
-            log.info("我这里开始出现了空值:{},仓库：{},开始时间：{},结束时间:{},count:{},qty:{}",sku,warehouse,startTime,endTime,count,qty);
             return records;
         }
 
