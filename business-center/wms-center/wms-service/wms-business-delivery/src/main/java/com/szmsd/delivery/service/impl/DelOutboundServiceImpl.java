@@ -1879,7 +1879,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         if (!responseVO.getSuccess()) {
 
-            if(!"有部分单号不存在".equals(responseVO.getMessage())){
+            if("有部分单号不存在".equals(responseVO.getMessage())){
+                this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
+                // 修改单据状态为【仓库取消】
+                LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+                updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELLED.getCode());
+                updateWrapper.in(DelOutbound::getOrderNo, orderNos);
+                return this.baseMapper.update(null, updateWrapper);
+            }else{
                 throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "取消出库单失败2"));
             }
 
