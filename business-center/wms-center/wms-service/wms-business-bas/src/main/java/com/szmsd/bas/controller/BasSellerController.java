@@ -141,7 +141,7 @@ public class BasSellerController extends BaseController{
     @ApiOperation(value = "获取模块详细信息",notes = "获取模块详细信息")
     public R<BasSellerInfoVO> getInfoBySellerCode(@PathVariable("sellerCode") String sellerCode)
     {
-        return R.ok(basSellerService.selectBasSellerBySellerCode(sellerCode));
+        return basSellerService.selectBasSellerBySellerCode(sellerCode);
     }
     /**
     * 卖家注册模块 EmailCodeValid切面校验邮箱验证码

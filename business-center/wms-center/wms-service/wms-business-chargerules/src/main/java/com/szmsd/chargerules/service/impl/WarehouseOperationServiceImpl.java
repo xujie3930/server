@@ -199,10 +199,20 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
             //查询用户的类型
             if (queryByCusCode) {
                 R<BasSellerInfoVO> info = basSellerFeignService.getInfoBySellerCode(cusCodeList);
-                BasSellerInfoVO userInfo = R.getDataAndException(info);
-                String discountUserType = userInfo.getDiscountUserType();
-                if (StringUtils.isBlank(discountUserType)) return null;
-                cusTypeCode = discountUserType;
+
+                log.info("BasSellerInfoVO:{}",JSONObject.toJSONString(info));
+
+                if(info.getCode() == 200) {
+
+                    BasSellerInfoVO userInfo = info.getData();
+
+                    String discountUserType = userInfo.getDiscountUserType();
+                    if (StringUtils.isBlank(discountUserType)) {
+                        return null;
+                    }
+                    cusTypeCode = discountUserType;
+
+                }
             }
             queryDTO.setCusCodeList(null);
             queryDTO.setCusTypeCode(cusTypeCode);

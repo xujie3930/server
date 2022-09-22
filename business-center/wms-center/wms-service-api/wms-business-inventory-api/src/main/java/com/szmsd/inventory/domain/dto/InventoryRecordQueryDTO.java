@@ -36,6 +36,9 @@ public class InventoryRecordQueryDTO {
     @ApiModelProperty(value = "结束时间 - 由接口调用方定义")
     private String endTime;
 
+    @ApiModelProperty(value = "数量")
+    private Integer quantity;
+
     @Getter
     @AllArgsConstructor
     public enum TimeType {

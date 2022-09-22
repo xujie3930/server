@@ -15,7 +15,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(contextId = "FeignClient.InventoryFeignService", name = BusinessInventoryInterface.SERVICE_NAME, fallbackFactory = InventoryFeignFallback.class)
+@FeignClient(
+        contextId = "FeignClient.InventoryFeignService",
+        name = BusinessInventoryInterface.SERVICE_NAME,
+        fallbackFactory = InventoryFeignFallback.class
+)
 public interface InventoryFeignService {
 
     @PostMapping("/inventory/inbound")
