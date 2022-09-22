@@ -237,7 +237,9 @@ public class ThreadRunnable {
         custPayDTO.setPayMethod(BillEnum.PayMethod.WAREHOUSE_RENT);
         custPayDTO.setCurrencyCode(chargeLog.getCurrencyCode());
         custPayDTO.setAmount(amount);
-        custPayDTO.setNo(chargeLog.getOrderNo());
+        //汪经理说：SKU 当单号使用
+        //custPayDTO.setNo(chargeLog.getOrderNo());
+        custPayDTO.setNo(sku.getSku());
         custPayDTO.setSerialBillInfoList(serialBillInfoList);
         custPayDTO.setOrderType(chargeLog.getOperationType());
         return custPayDTO;
