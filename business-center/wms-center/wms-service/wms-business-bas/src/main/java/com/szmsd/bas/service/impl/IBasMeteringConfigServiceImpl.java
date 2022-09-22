@@ -148,7 +148,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
             if (list.size()>0) {
                 list.forEach(x -> {
                     //0表示重量差，1表示百分比
-                    if (x.getWeightTypeNameOne().equals("计费重量") && x.getWeightTypeNameTwo().equals("体积重")) {
+                    if (x.getWeightTypeNameOneCode().equals("billableWeight") && x.getWeightTypeNameTwoCode().equals("volumeWeight")) {
                         if (x.getDifferenceType() == 0) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -175,7 +175,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                         }
 
                     }
-                    if (x.getWeightTypeNameOne().equals("体积重") && x.getWeightTypeNameTwo().equals("计费重量")) {
+                    if (x.getWeightTypeNameOneCode().equals("volumeWeight") && x.getWeightTypeNameTwoCode().equals("billableWeight")) {
                         if (x.getDifferenceType() == 0) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -201,7 +201,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
                         }
                     }
-                    if (x.getWeightTypeNameOne().equals("计费重量") && x.getWeightTypeNameTwo().equals("下单重量")) {
+                    if (x.getWeightTypeNameOneCode().equals("billableWeight") && x.getWeightTypeNameTwoCode().equals("forecastWeight")) {
                         if (x.getDifferenceType() == 0) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -227,7 +227,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
                         }
                     }
-                    if (x.getWeightTypeNameOne().equals("下单重量") && x.getWeightTypeNameTwo().equals("计费重量")) {
+                    if (x.getWeightTypeNameOneCode().equals("forecastWeight") && x.getWeightTypeNameTwoCode().equals("billableWeight")) {
                         if (x.getDifferenceType() == 0) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -253,7 +253,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
                         }
                     }
-                    if (x.getWeightTypeNameOne().equals("下单重量") && x.getWeightTypeNameTwo().equals("体积重")) {
+                    if (x.getWeightTypeNameOneCode().equals("forecastWeight") && x.getWeightTypeNameTwoCode().equals("volumeWeight")) {
                         if (x.getDifferenceType() == 0) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -279,7 +279,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
                         }
                     }
-                    if (x.getWeightTypeNameOne().equals("体积重") && x.getWeightTypeNameTwo().equals("下单重量")) {
+                    if (x.getWeightTypeNameOneCode().equals("volumeWeight") && x.getWeightTypeNameTwoCode().equals("forecastWeight")) {
                         if (x.getDifferenceType() == 0) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -312,7 +312,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                 if (list3.size()>0) {
                     list3.forEach(x -> {
                         //0表示重量差，1表示百分比
-                        if (x.getWeightTypeNameOne().equals("计费重量") && x.getWeightTypeNameTwo().equals("体积重")) {
+                        if (x.getWeightTypeNameOneCode().equals("billableWeight") && x.getWeightTypeNameTwoCode().equals("volumeWeight")) {
                             if (x.getDifferenceType() == 0) {
                                 if (basMeteringConfigDto.getVolume() != null && basMeteringConfigDto.getCalcWeight() != null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
@@ -344,7 +344,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
 
                         }
-                        if (x.getWeightTypeNameOne().equals("体积重") && x.getWeightTypeNameTwo().equals("计费重量")) {
+                        if (x.getWeightTypeNameOneCode().equals("volumeWeight") && x.getWeightTypeNameTwoCode().equals("billableWeight")) {
                             if (x.getDifferenceType() == 0) {
                                 if (basMeteringConfigDto.getVolume()!=null&&basMeteringConfigDto.getCalcWeight()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
@@ -374,7 +374,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                                 }
                             }
                         }
-                        if (x.getWeightTypeNameOne().equals("计费重量") && x.getWeightTypeNameTwo().equals("下单重量")) {
+                        if (x.getWeightTypeNameOneCode().equals("billableWeight") && x.getWeightTypeNameTwoCode().equals("forecastWeight")) {
                             if (x.getDifferenceType() == 0) {
                                 if (basMeteringConfigDto.getWeight()!=null&&basMeteringConfigDto.getCalcWeight()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
@@ -404,7 +404,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                                 }
                             }
                         }
-                        if (x.getWeightTypeNameOne().equals("下单重量") && x.getWeightTypeNameTwo().equals("计费重量")) {
+                        if (x.getWeightTypeNameOneCode().equals("forecastWeight") && x.getWeightTypeNameTwoCode().equals("billableWeight")) {
                             if (x.getDifferenceType() == 0) {
                                 if (basMeteringConfigDto.getWeight()!=null&&basMeteringConfigDto.getCalcWeight()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
@@ -434,7 +434,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                                 }
                             }
                         }
-                        if (x.getWeightTypeNameOne().equals("下单重量") && x.getWeightTypeNameTwo().equals("体积重")) {
+                        if (x.getWeightTypeNameOneCode().equals("forecastWeight") && x.getWeightTypeNameTwoCode().equals("volumeWeight")) {
                             if (x.getDifferenceType() == 0) {
                                 if (basMeteringConfigDto.getWeight()!=null&&basMeteringConfigDto.getVolume()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
@@ -464,7 +464,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                                 }
                             }
                         }
-                        if (x.getWeightTypeNameOne().equals("体积重") && x.getWeightTypeNameTwo().equals("下单重量")) {
+                        if (x.getWeightTypeNameOneCode().equals("volumeWeight") && x.getWeightTypeNameTwoCode().equals("forecastWeight")) {
                             if (x.getDifferenceType() == 0) {
                                 if (basMeteringConfigDto.getWeight()!=null&&basMeteringConfigDto.getVolume()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();

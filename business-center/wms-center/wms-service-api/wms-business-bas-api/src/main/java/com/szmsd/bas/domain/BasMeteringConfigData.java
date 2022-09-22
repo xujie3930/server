@@ -29,6 +29,12 @@ public class BasMeteringConfigData {
     @ApiModelProperty(value = "重量类型二")
     private String weightTypeNameTwo;
 
+    @ApiModelProperty(value = "重量类型一code")
+    private String weightTypeNameOneCode;
+
+    @ApiModelProperty(value = "重量类型二code")
+    private String weightTypeNameTwoCode;
+
     @ApiModelProperty(value = "差异范围")
     private Integer differenceScope;
 
