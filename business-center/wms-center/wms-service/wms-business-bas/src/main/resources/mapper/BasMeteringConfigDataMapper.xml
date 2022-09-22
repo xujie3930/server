@@ -6,10 +6,12 @@
     <result column="metering_id" property="meteringId" jdbcType="INTEGER" />
     <result column="weight_type_name_one" property="weightTypeNameOne" jdbcType="VARCHAR" />
     <result column="weight_type_name_two" property="weightTypeNameTwo" jdbcType="VARCHAR" />
+    <result column="weight_type_name_one_code" property="weightTypeNameOneCode" jdbcType="VARCHAR" />
+    <result column="weight_type_name_two_code" property="weightTypeNameTwoCode" jdbcType="VARCHAR" />
     <result column="difference_scope" property="differenceScope" jdbcType="INTEGER" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, metering_id, weight_type_name_one, weight_type_name_two, difference_scope
+    id, metering_id, weight_type_name_one, weight_type_name_two, difference_scope,weight_type_name_one_code,weight_type_name_two_code
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
@@ -42,6 +44,12 @@
       <if test="weightTypeNameTwo != null" >
         weight_type_name_two,
       </if>
+      <if test="weightTypeNameOneCode != null" >
+        weight_type_name_one_code,
+      </if>
+      <if test="weightTypeNameTwoCode != null" >
+        weight_type_name_two_code,
+      </if>
       <if test="differenceScope != null" >
         difference_scope,
       </if>
@@ -58,6 +66,12 @@
       </if>
       <if test="weightTypeNameTwo != null" >
         #{weightTypeNameTwo,jdbcType=VARCHAR},
+      </if>
+      <if test="weightTypeNameOneCode != null" >
+        #{weightTypeNameOneCode,jdbcType=VARCHAR},
+      </if>
+      <if test="weightTypeNameTwoCode != null" >
+        #{weightTypeNameTwoCode,jdbcType=VARCHAR},
       </if>
       <if test="differenceScope != null" >
         #{differenceScope,jdbcType=INTEGER},
