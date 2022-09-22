@@ -9,6 +9,7 @@ import com.szmsd.chargerules.service.IWarehouseOperationService;
 import com.szmsd.chargerules.vo.WarehouseOperationVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
@@ -116,6 +117,11 @@ public class TestThreadRunnable {
         for (Inventory inventory : value) {
             List<InventorySkuVolumeVO> skuVolumeVo = getSkuVolume(new InventorySkuVolumeQueryDTO(inventory.getSku(), warehouseCode));
 
+            if(warehouseCode.equals("NJ")){
+
+                log.info("NJ仓库产品体积数据:{}",JSONObject.toJSONString(skuVolumeVo));
+            }
+
             if(CollectionUtils.isNotEmpty(skuVolumeVo)) {
 
                 for (InventorySkuVolumeVO inventorySkuVolumeVO : skuVolumeVo) {
@@ -145,6 +151,10 @@ public class TestThreadRunnable {
             warehouseOperationDTO.setExpirationTime(new Date());
             warehouseOperationDTO.setCusCodeList(skuVolume.getCusCode());
 
+            if(warehouseCode.equals("NJ") && skuVolume.getCusCode().equals("CNID73")){
+                System.out.println("warehouseOperationConfig");
+            }
+
             List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationService.selectOperationByRule(warehouseOperationDTO);
               /*  List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationMapper.listPage(new WarehouseOperationDTO().setWarehouseCode(warehouseCode)
                         .setEffectiveTime(now).setExpirationTime(now).setCusCodeList(skuVolume.getCusCode())
@@ -158,6 +168,10 @@ public class TestThreadRunnable {
             if (amount.compareTo(BigDecimal.ZERO) < 0) {
                 log.error("getSkuDetails() 计算费用为0 仓库：{}, SKU:{}, 数量：{} 体积：{}立方厘米", warehouseCode, skuVolume.getSku(), skuVolume.getQty(), skuVolume.getVolume());
                 continue;
+            }
+
+            if(warehouseCode.equals("NJ") && skuVolume.getCusCode().equals("CNID73")){
+                System.out.println("pay");
             }
 
             pay(warehouseCode, skuVolume, warehouseOperationVo, amount);
@@ -180,6 +194,11 @@ public class TestThreadRunnable {
      * @return amount
      */
     private BigDecimal charge(String warehouseCode, SkuVolumeVO skuVolume, WarehouseOperationVo warehouseOperationVo) {
+
+        if(StringUtils.isEmpty(skuVolume.getOperateOn())){
+            log.info("skuVolume operateOn 为空,{}",JSONObject.toJSONString(skuVolume));
+        }
+
         String datePoor = DateUtils.getDatePoor(new Date(), DateUtils.parseDate(skuVolume.getOperateOn()));
         int days = Integer.parseInt(datePoor.substring(0, datePoor.indexOf("天")));
         //立方厘米转为立方米
@@ -254,7 +273,7 @@ public class TestThreadRunnable {
         custPayDTO.setPayMethod(BillEnum.PayMethod.WAREHOUSE_RENT);
         custPayDTO.setCurrencyCode(chargeLog.getCurrencyCode());
         custPayDTO.setAmount(amount);
-        custPayDTO.setNo(chargeLog.getOrderNo());
+        custPayDTO.setNo(sku.getSku());
         custPayDTO.setSerialBillInfoList(serialBillInfoList);
         custPayDTO.setOrderType(chargeLog.getOperationType());
         return custPayDTO;
