@@ -1,6 +1,8 @@
 package com.szmsd.inventory.api.factory;
 
 import com.alibaba.fastjson.JSONObject;
+import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
@@ -16,6 +18,7 @@ import java.util.List;
 @Slf4j
 @Component
 public class InventoryFeignFallback implements FallbackFactory<InventoryFeignService> {
+
     @Override
     public InventoryFeignService create(Throwable throwable) {
         log.info("InventoryFeignFallback Error", throwable);
@@ -28,7 +31,9 @@ public class InventoryFeignFallback implements FallbackFactory<InventoryFeignSer
             @Override
             public R<List<InventorySkuVolumeVO>> querySkuVolume(InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO) {
                 log.info("InventoryFeignFallback inventorySkuVolumeQueryDTO:{}", JSONObject.toJSONString(inventorySkuVolumeQueryDTO), throwable);
-                return R.convertResultJson(throwable);
+                //return R.convertResultJson(throwable);
+                //注释掉的原因：并发走太多FallbackFactory，导致线程停止
+                return null;
             }
 
             @Override

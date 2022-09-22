@@ -61,6 +61,9 @@
             <if test="operator != null and operator != ''">AND t.operator = #{operator}</if>
             <if test="startTime != null and startTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} >= #{startTime} ]]></if>
             <if test="endTime != null and endTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} <= #{endTime} ]]></if>
+            <if test="quantity != null and quantity > 0">
+                and t.quantity <![CDATA[ >= ]]> #{quantity}
+            </if>
         </where>
         GROUP BY t.id
         ORDER BY t.operate_on DESC

@@ -307,14 +307,26 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
 
     @Override
-    public BasSellerInfoVO selectBasSellerBySellerCode(String sellerCode) {
+    public R<BasSellerInfoVO> selectBasSellerBySellerCode(String sellerCode) {
         QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seller_code", sellerCode);
-        return getBasSellerInfoVO(queryWrapper);
+
+        BasSellerInfoVO basSellerInfoVO = getBasSellerInfoVO(queryWrapper);
+
+        if(basSellerInfoVO != null){
+            R.ok(basSellerInfoVO);
+        }
+
+        return R.failed("getBasSellerInfoVO 异常");
     }
 
     private BasSellerInfoVO getBasSellerInfoVO(QueryWrapper<BasSeller> queryWrapper) {
         BasSeller basSeller = super.getOne(queryWrapper);
+
+        if(basSeller == null){
+            return new BasSellerInfoVO();
+        }
+
         //查询用户证件信息
         QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
         BasSellerCertificateQueryWrapper.eq("seller_code", basSeller.getSellerCode());
@@ -334,6 +346,11 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             }
         });
         BasSellerInfoVO basSellerInfoVO = BeanMapperUtil.map(basSeller, BasSellerInfoVO.class);
+
+        if(basSellerInfoVO == null){
+            return new BasSellerInfoVO();
+        }
+
         //实名认证图片
         List<BasAttachment> attachment = ListUtils.emptyIfNull(remoteAttachmentService
                 .list(new BasAttachmentQueryDTO().setAttachmentType(AttachmentTypeEnum.SELLER_IMAGE.getAttachmentType()).setBusinessNo(basSeller.getId().toString()).setBusinessItemNo(null)).getData());
@@ -354,7 +371,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         try {
             basSellerInfoVO.setUserCreditList(listCompletableFuture.get());
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return basSellerInfoVO;
     }

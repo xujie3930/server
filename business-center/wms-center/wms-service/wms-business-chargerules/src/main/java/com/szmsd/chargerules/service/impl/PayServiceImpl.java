@@ -49,9 +49,15 @@ public class PayServiceImpl implements IPayService {
         chargeLog.setOperationPayMethod(custPayDTO.getPayMethod().getPaymentName());
         chargeLog.setHasFreeze(false);
         String code = DelOutboundOrderEnum.getCode(custPayDTO.getOrderType());
-        if (code != null) custPayDTO.setOrderType(code);
+        if (code != null){
+            custPayDTO.setOrderType(code);
+        }
+
         if (BigDecimal.ZERO.compareTo(custPayDTO.getAmount()) >= 0) {
             log.info("扣款金额为: {} 不执行操作", custPayDTO.getAmount());
+
+            log.info("扣款客户信息: {} ", JSONObject.toJSONString(custPayDTO));
+
             chargeLog.setSuccess(true);
             chargeLog.setMessage("成功");
             chargeLogService.save(chargeLog);
