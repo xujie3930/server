@@ -18,6 +18,7 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
+import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.dto.DelOutboundAddressDto;
 import com.szmsd.delivery.dto.DelOutboundAgainTrackingNoDto;
 import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
@@ -325,6 +326,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             addressDto.setPhoneNo(dto.getPhoneNo());
             addressDto.setEmail(dto.getEmail());
             trackingNoDto.setAddress(addressDto);
+            trackingNoDto.setDetailList(BeanMapperUtil.mapList(dto.getExceptionInfoDetailExportDtoList(), DelOutboundAddress.class));
             int i = this.delOutboundClientService.againTrackingNo(trackingNoDto);
             if (i != 1) {
                 throw new CommonException("999", "重新获取挂号失败");
