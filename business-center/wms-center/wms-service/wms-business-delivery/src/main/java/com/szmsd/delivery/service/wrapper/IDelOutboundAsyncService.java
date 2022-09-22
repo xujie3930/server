@@ -1,5 +1,7 @@
 package com.szmsd.delivery.service.wrapper;
 
+import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
+
 /**
  * @author zhangyuyuan
  * @date 2021-03-30 14:52
@@ -21,6 +23,16 @@ public interface IDelOutboundAsyncService {
      * @return int
      */
     int shipmentPacking(String orderNo);
+
+    /**
+     * #D2 接收出库包裹使用包材
+     *
+     * @param id               id
+     * @param shipmentShipping 失败了是否推送发货指令，默认false不推送
+     * @return int
+     */
+    int shipmentPacking(Long id, boolean shipmentShipping, DelOutboundFurtherHandlerDto dto);
+
 
     /**
      * #D2 接收出库包裹使用包材

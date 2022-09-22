@@ -323,6 +323,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     @Override
     public R warehouseFeeDeductions(CustPayDTO dto) {
+
         if (BigDecimal.ZERO.compareTo(dto.getAmount()) == 0) return R.ok();
         if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("Customer code/currency cannot be blank and the amount must be greater than 0.01");
@@ -330,6 +331,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         if (dto.getPayType() == null) {
             return R.failed("Payment type is empty");
         }
+
         setCurrencyName(dto);
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         log.info(LogUtil.format("仓储费扣除", dto));

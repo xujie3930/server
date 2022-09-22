@@ -317,7 +317,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             R.ok(basSellerInfoVO);
         }
 
-        return R.failed("getBasSellerInfoVO 异常");
+        return R.ok(basSellerInfoVO);
     }
 
     private BasSellerInfoVO getBasSellerInfoVO(QueryWrapper<BasSeller> queryWrapper) {
