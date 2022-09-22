@@ -404,6 +404,17 @@ public class ExceptionInfoController extends BaseController {
                             try {
                                 if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
                                     successSize.incrementAndGet();
+                                    if(dto.getOrderTypeName().equals("出库单")){
+                                        if (dto.getExceptionInfoDetailExportDtoList().size()>0){
+                                            exceptionInfoService.updateDelOutboundDetail(dto.getOrderNo(),dto.getExceptionInfoDetailExportDtoList());
+
+                                        }
+
+                                        if (dto.getIoss()!=null&&!dto.getIoss().equals("")){
+                                            exceptionInfoService.updateDelOutboundIoss(dto);
+                                        }
+
+                                    }
                                 } else {
                                     errorList.add("第" + (finalI + 1) + "行，" + dto.getExceptionNo() + "操作失败，不符合条件");
                                     failSize.incrementAndGet();

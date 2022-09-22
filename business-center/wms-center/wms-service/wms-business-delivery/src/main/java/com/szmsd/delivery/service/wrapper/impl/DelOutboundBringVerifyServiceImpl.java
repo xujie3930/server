@@ -26,6 +26,7 @@ import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyNoDto;
+import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
 import com.szmsd.delivery.dto.DelOutboundLabelDto;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
@@ -103,6 +104,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -123,6 +125,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -297,6 +300,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
     @Override
     public DelOutboundWrapperContext initContext(DelOutbound delOutbound) {
+
+        return initContext(delOutbound, null);
+    }
+
+    @Override
+    public DelOutboundWrapperContext initContext(DelOutbound delOutbound, DelOutboundFurtherHandlerDto furtherHandlerDto) {
         StopWatch stopWatch = new StopWatch();
 
         String orderNo = delOutbound.getOrderNo();
@@ -304,6 +313,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 查询地址信息
         stopWatch.start();
         DelOutboundAddress address = this.delOutboundAddressService.getByOrderNo(orderNo);
+
         stopWatch.stop();
         logger.info(">>>>>[创建出库单{}查询地址] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
 
@@ -316,6 +326,27 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         stopWatch.start();
         // 查询sku信息
         List<DelOutboundDetail> detailList = this.delOutboundDetailService.listByOrderNo(orderNo);
+
+
+        if(furtherHandlerDto != null){
+
+            if( furtherHandlerDto.getDelOutboundAddress() != null){
+                BeanUtils.copyProperties(furtherHandlerDto.getDelOutboundAddress(), address);
+
+            }
+            if(furtherHandlerDto.getDetailList() != null){
+                Map<Long, DelOutboundAddress> maps = furtherHandlerDto.getDetailList().stream().collect(Collectors.toMap(DelOutboundAddress::getId, Function.identity(), (key1, key2) -> key2));
+                for (DelOutboundDetail detail: detailList){
+                    if(maps.containsKey(detail.getId())){
+                        BeanUtils.copyProperties(maps.get(detail.getId()), detail);
+                    }
+                }
+
+            }
+            delOutbound.setShipmentRule(furtherHandlerDto.getShipmentRule());
+            delOutbound.setShipmentService(furtherHandlerDto.getShipmentService());
+
+        }
         stopWatch.stop();
         logger.info(">>>>>[创建出库单{}查询sku信息] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
 
