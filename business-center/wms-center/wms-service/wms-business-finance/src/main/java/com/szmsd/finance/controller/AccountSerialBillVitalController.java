@@ -35,7 +35,7 @@ public class AccountSerialBillVitalController extends BaseController {
 
     //@PreAuthorize("@ss.hasPermi('PreRecharge:save')")
     @ApiOperation(value = "账单生成")
-    @PostMapping("/generator-bill")
+    @PostMapping("/generator")
     public R<Integer> generatorBill(@RequestBody GeneratorBillRequestVO billRequestVO){
         return accountSerialBillService.generatorBill(billRequestVO);
     }
