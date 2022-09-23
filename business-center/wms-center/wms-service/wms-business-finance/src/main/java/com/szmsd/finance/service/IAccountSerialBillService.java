@@ -8,7 +8,7 @@ import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.vo.BillBalanceVO;
 import com.szmsd.finance.vo.EleBillQueryVO;
 import com.szmsd.finance.vo.ElectronicBillVO;
-import com.szmsd.finance.vo.GeneratorBillRequestVO;
+import com.szmsd.finance.vo.BillGeneratorRequestVO;
 
 import java.util.List;
 
@@ -37,7 +37,7 @@ public interface IAccountSerialBillService extends IService<AccountSerialBill> {
      * @param billRequestVO
      * @return
      */
-    R<Integer> generatorBill(GeneratorBillRequestVO billRequestVO);
+    R<Integer> generatorBill(BillGeneratorRequestVO billRequestVO);
 
     /**
      * 资金结余

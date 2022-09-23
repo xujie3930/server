@@ -60,6 +60,12 @@ public class DelOutboundThirdPartyServiceImpl extends ServiceImpl<DelOutboundThi
         if(StringUtils.isNotEmpty(delOutboundThirdParty.getState())){
             where.eq(DelOutboundThirdParty::getState, delOutboundThirdParty.getState());
         }
+        if (StringUtils.isNotEmpty(delOutboundThirdParty.getStartDate()) && StringUtils.isNotEmpty(delOutboundThirdParty.getEndDate())) {
+            where.between(DelOutboundThirdParty::getCreateTime, delOutboundThirdParty.getStartDate(), delOutboundThirdParty.getEndDate());
+        }
+        if (delOutboundThirdParty.getIds()!=null&&delOutboundThirdParty.getIds().size()>0){
+            where.in(DelOutboundThirdParty::getId,delOutboundThirdParty.getIds());
+        }
         where.orderByDesc(DelOutboundThirdParty::getCreateTime);
         return baseMapper.selectList(where);
     }

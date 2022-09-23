@@ -3,18 +3,18 @@ package com.szmsd.finance.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.vo.BillBalanceVO;
+import com.szmsd.finance.vo.BillGeneratorRequestVO;
 import com.szmsd.finance.vo.EleBillQueryVO;
 import com.szmsd.finance.vo.ElectronicBillVO;
-import com.szmsd.finance.vo.GeneratorBillRequestVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @Api(tags = {"流水账单统计"})
 @RestController
@@ -36,7 +36,7 @@ public class AccountSerialBillVitalController extends BaseController {
     //@PreAuthorize("@ss.hasPermi('PreRecharge:save')")
     @ApiOperation(value = "账单生成")
     @PostMapping("/generator")
-    public R<Integer> generatorBill(@RequestBody GeneratorBillRequestVO billRequestVO){
+    public R<Integer> generatorBill(@RequestBody @Valid BillGeneratorRequestVO billRequestVO){
         return accountSerialBillService.generatorBill(billRequestVO);
     }
 
@@ -49,7 +49,7 @@ public class AccountSerialBillVitalController extends BaseController {
 
     @ApiOperation(value = "导出")
     @PostMapping ("/export")
-    public void export(HttpServletResponse response, @RequestBody GeneratorBillRequestVO requestVO) {
+    public void export(HttpServletResponse response, @RequestBody BillGeneratorRequestVO requestVO) {
 
 
     }
