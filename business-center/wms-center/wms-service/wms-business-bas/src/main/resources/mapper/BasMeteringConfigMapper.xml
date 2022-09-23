@@ -102,7 +102,8 @@
   <select id="selectjbljs" resultType="com.szmsd.bas.domain.BasMeteringConfigData">
     SELECT b.*,a.difference_type from bas_metering_config a
                                         LEFT JOIN bas_metering_config_data b on a.id=b.metering_id
-    where  a.logistics_ervices_code=#{logisticsErvicesCode} or a.country_code=#{countryCode} or a.customer_code=#{customerCode}
+    where
+      a.logistics_ervices_code=#{logisticsErvicesCode} and (a.country_code=#{countryCode} or a.customer_code=#{customerCode})
     GROUP BY b.id
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
