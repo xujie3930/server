@@ -20,6 +20,7 @@ import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.*;
+import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
 import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.*;
 import com.szmsd.delivery.service.*;
@@ -123,20 +124,24 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         if (Objects.isNull(delOutbound)) {
             throw new CommonException("400", "单据不存在");
         }
-        return this.shipmentPacking(delOutbound, true);
+        return this.shipmentPacking(delOutbound, true, null);
+    }
+    @Override
+    public int shipmentPacking(Long id, boolean shipmentShipping){
+        return shipmentPacking(id, shipmentShipping, null);
     }
 
     @Override
-    public int shipmentPacking(Long id, boolean shipmentShipping) {
+    public int shipmentPacking(Long id, boolean shipmentShipping, DelOutboundFurtherHandlerDto dto) {
         // 获取新的出库单信息
         DelOutbound delOutbound = this.delOutboundService.getById(id);
         if (Objects.isNull(delOutbound)) {
             throw new CommonException("400", "单据不存在");
         }
-        return this.shipmentPacking(delOutbound, shipmentShipping);
+        return this.shipmentPacking(delOutbound, shipmentShipping, dto);
     }
 
-    private int shipmentPacking(DelOutbound delOutbound, boolean shipmentShipping) {
+    private int shipmentPacking(DelOutbound delOutbound, boolean shipmentShipping, DelOutboundFurtherHandlerDto dto) {
         String key = applicationName + ":DelOutbound:shipmentPacking:" + delOutbound.getOrderNo();
         RLock lock = this.redissonClient.getLock(key);
         try {
@@ -192,7 +197,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         return 10;
                     }
                 }
-                DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
+                DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound, dto);
                 logger.info("(2)初始化上下文信息，timer:{}", timer.intervalRestart());
                 if (context != null) {
                     context.setShipmentShipping(shipmentShipping);

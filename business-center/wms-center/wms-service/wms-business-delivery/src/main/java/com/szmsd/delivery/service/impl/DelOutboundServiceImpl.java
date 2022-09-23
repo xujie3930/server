@@ -561,8 +561,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (!DelOutboundOrderTypeEnum.has(dto.getOrderType())) {
             throw new CommonException("400", "订单类型不存在");
         }
-        // 来源为新增
-        dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_ADD);
+        if(StringUtils.isEmpty(dto.getSourceType())){
+            // 来源为新增
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_ADD);
+        }
         return this.createDelOutbound(dto);
     }
 
@@ -1946,7 +1948,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             result = 1;
         } else {
             dto.setExecShipmentShipping(true);
-            result = this.delOutboundAsyncService.shipmentPacking(delOutbound.getId(), dto.isShipmentShipping());
+            result = this.delOutboundAsyncService.shipmentPacking(delOutbound.getId(), dto.isShipmentShipping(), dto);
         }
         return result;
     }
@@ -2416,9 +2418,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 重新获取挂号场景：
         // 报异常，核重后的异常。
         // 在提审的时候异常，会审核失败他们自己会修改。只有核重后的，不能修改表单。
-        boolean update = delOutboundExceptionService.againTrackingNo(delOutbound, dto);
+        DelOutboundFurtherHandlerDto furtherHandlerDto = new DelOutboundFurtherHandlerDto();
+
+        boolean update = delOutboundExceptionService.againTrackingNo(delOutbound, dto, furtherHandlerDto);
         if (update) {
-            DelOutboundFurtherHandlerDto furtherHandlerDto = new DelOutboundFurtherHandlerDto();
             furtherHandlerDto.setOrderNo(delOutbound.getOrderNo());
             this.furtherHandler(furtherHandlerDto);
         }
