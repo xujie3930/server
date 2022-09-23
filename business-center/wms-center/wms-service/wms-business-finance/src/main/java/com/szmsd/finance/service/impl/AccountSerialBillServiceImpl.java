@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.constant.HttpStatus;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -18,6 +19,7 @@ import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.service.ISysDictDataService;
+import com.szmsd.finance.vo.*;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
@@ -284,5 +286,77 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         boolean flag = !count.equals(0);
 
         return flag;
+    }
+
+    @Override
+    public List<ElectronicBillVO> electronicPage(EleBillQueryVO queryVO) {
+        
+        return new ArrayList<>();
+    }
+
+    @Override
+    public R<Integer> generatorBill(GeneratorBillRequestVO billRequestVO) {
+        return R.ok();
+    }
+
+    @Override
+    public List<BillBalanceVO> balancePage(EleBillQueryVO queryVO) {
+
+        List<BillBalanceVO> billBalanceVOS = new ArrayList<>();
+
+        BillBalanceVO billBalanceVO = new BillBalanceVO();
+        billBalanceVO.setCusCode("A111");
+        billBalanceVO.setStartTime("2022-09-01");
+        billBalanceVO.setEntTime("2022-09-10");
+        billBalanceVO.setChargeCategory("本期收入");
+
+        List<BillCurrencyVO> billCurrencyAmounts = new ArrayList<>();
+        BillCurrencyVO currencyVO = new BillCurrencyVO();
+        currencyVO.setCurrencyCode("USD");
+        currencyVO.setCurrencyCode("美元");
+        currencyVO.setAmount(new BigDecimal(321421.21));
+
+        BillCurrencyVO currencyVO1 = new BillCurrencyVO();
+        currencyVO1.setCurrencyCode("CNY");
+        currencyVO1.setCurrencyCode("人民币");
+        currencyVO1.setAmount(new BigDecimal(32321.21));
+
+        billCurrencyAmounts.add(currencyVO);
+        billCurrencyAmounts.add(currencyVO1);
+
+        billBalanceVO.setBillCurrencyAmounts(billCurrencyAmounts);
+        billBalanceVOS.add(billBalanceVO);
+
+        BillBalanceVO billBalanceVO2 = new BillBalanceVO();
+        billBalanceVO2.setCusCode("A111");
+        billBalanceVO2.setStartTime("2022-09-01");
+        billBalanceVO2.setEntTime("2022-09-10");
+        billBalanceVO2.setChargeCategory("本期收入");
+
+        List<BillCurrencyVO> billCurrencyAmounts2 = new ArrayList<>();
+        BillCurrencyVO currencyVO2 = new BillCurrencyVO();
+        currencyVO2.setCurrencyCode("USD");
+        currencyVO2.setCurrencyCode("美元");
+        currencyVO2.setAmount(new BigDecimal(321421.21));
+
+        BillCurrencyVO currencyVO3 = new BillCurrencyVO();
+        currencyVO3.setCurrencyCode("CNY");
+        currencyVO3.setCurrencyCode("人民币");
+        currencyVO3.setAmount(new BigDecimal(32321.21));
+
+        BillCurrencyVO currencyVO4 = new BillCurrencyVO();
+        currencyVO4.setCurrencyCode("EOS");
+        currencyVO4.setCurrencyCode("EOS");
+        currencyVO4.setAmount(new BigDecimal(32343434421.21));
+
+        billCurrencyAmounts2.add(currencyVO2);
+        billCurrencyAmounts2.add(currencyVO3);
+        billCurrencyAmounts2.add(currencyVO4);
+
+        billBalanceVO2.setBillCurrencyAmounts(billCurrencyAmounts2);
+
+        billBalanceVOS.add(billBalanceVO2);
+
+        return billBalanceVOS;
     }
 }
