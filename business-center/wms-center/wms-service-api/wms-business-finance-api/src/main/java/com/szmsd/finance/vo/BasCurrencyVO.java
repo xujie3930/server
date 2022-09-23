@@ -4,17 +4,13 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 @Data
-public class BillCurrencyVO implements Serializable {
+public class BasCurrencyVO implements Serializable {
 
-    @ApiModelProperty(value = "币种代码")
+    @ApiModelProperty(value = "币种符号")
     private String currencyCode;
 
     @ApiModelProperty(value = "币种名称")
     private String currencyName;
-
-    @ApiModelProperty(value = "金额")
-    private BigDecimal amount;
 }
