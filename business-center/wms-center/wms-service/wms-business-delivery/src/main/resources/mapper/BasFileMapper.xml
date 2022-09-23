@@ -12,6 +12,11 @@
     <result column="state" property="state" jdbcType="VARCHAR" />
     <result column="file_route" property="fileRoute" jdbcType="VARCHAR" />
     <result column="file_name" property="fileName" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="modular_name_zh" property="modularNameZh" jdbcType="VARCHAR" />
+    <result column="modular_type" property="modularType" jdbcType="INTEGER" />
+    <result column="modular_name_en" property="modularNameEn" jdbcType="VARCHAR" />
+
   </resultMap>
   <sql id="Base_Column_List" >
     id, create_by, create_by_name, create_time, update_by, update_by_name, update_time, file_route,file_name,
@@ -74,6 +79,18 @@
       <if test="fileName != null" >
         file_name,
       </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="modularNameZh != null" >
+        modular_name_zh,
+      </if>
+      <if test="modularType != null" >
+        modular_type,
+      </if>
+      <if test="modularNameEn != null" >
+        modular_name_en,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -105,6 +122,18 @@
       </if>
       <if test="fileName != null" >
         #{fileName,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="modularNameZh != null" >
+        #{modularNameZh,jdbcType=VARCHAR},
+      </if>
+      <if test="modularType != null" >
+        #{modularType,jdbcType=INTEGER},
+      </if>
+      <if test="modularNameEn != null" >
+        #{modularNameEn,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>

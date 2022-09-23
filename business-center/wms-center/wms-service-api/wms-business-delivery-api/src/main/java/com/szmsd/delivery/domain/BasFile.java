@@ -1,16 +1,19 @@
 package com.szmsd.delivery.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 import java.util.Date;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
+@Accessors(chain = true)
 public class BasFile extends BaseEntity {
 
     @ApiModelProperty(value = "ID")
@@ -30,6 +33,24 @@ public class BasFile extends BaseEntity {
 
     @ApiModelProperty(value = "文件名")
     private String fileName;
+
+    @ApiModelProperty(value = "模块区分(0:包裹查询)")
+    private Integer modularType;
+
+    @ApiModelProperty(value = "模块名中文")
+    private String modularNameZh;
+
+    @ApiModelProperty(value = "模块名英文")
+    private String modularNameEn;
+
+    @ApiModelProperty(value = "开始时间")
+    @TableField(exist = false)
+    private String startDate;
+
+    @ApiModelProperty(value = "结束时间")
+    @TableField(exist = false)
+    private String EndDate;
+
 
 
 }
