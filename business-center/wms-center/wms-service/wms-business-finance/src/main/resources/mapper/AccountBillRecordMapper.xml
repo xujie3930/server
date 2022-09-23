@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.finance.mapper.AccountBillRecordMapper">
+
+    <resultMap id="BaseBillRecordVOMap" type="com.szmsd.finance.vo.ElectronicBillVO">
+        <id column="id" property="id"/>
+        <result column="cus_code" property="cusCode"/>
+        <result column="bill_start_time" property="billStartTime"/>
+        <result column="bill_end_time" property="billEndTime"/>
+        <result column="build_status" property="buildStatus"/>
+        <result column="file_url" property="fileUrl"/>
+        <result column="file_name" property="fileName"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="electronicPage" resultMap="BaseBillRecordVOMap" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
+
+        select
+            id,cus_code,bill_start_time,bill_end_time,build_status,file_url,file_name,create_by_name,create_time
+        from fss_account_bill_record
+
+        <where>
+            <if test="cusCode != null and cusCode != ''">
+                and cus_code like concat('%', #{cusCode}, '%')
+            </if>
+        </where>
+
+        order by id desc
+
+    </select>
+
+</mapper>
