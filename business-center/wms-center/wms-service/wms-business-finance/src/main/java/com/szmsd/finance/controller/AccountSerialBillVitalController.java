@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.List;
 
 @Api(tags = {"流水账单统计"})
 @RestController
@@ -42,9 +43,9 @@ public class AccountSerialBillVitalController extends BaseController {
 
     @ApiOperation(value = "资金结余列表")
     @GetMapping("/balance-page")
-    public TableDataInfo<BillBalanceVO> balancePage(EleBillQueryVO queryVO) {
-        startPage();
-        return getDataTable(accountSerialBillService.balancePage(queryVO));
+    public List<BillBalanceVO> balancePage(EleBillQueryVO queryVO) {
+
+        return accountSerialBillService.balancePage(queryVO);
     }
 
     @ApiOperation(value = "导出")
