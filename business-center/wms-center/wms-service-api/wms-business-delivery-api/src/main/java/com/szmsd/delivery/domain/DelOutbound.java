@@ -322,4 +322,9 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "计泡重量")
     private Double forecastWeight;
+
+
+
+    @ApiModelProperty(value = "货币金额描述")
+    private String currencyDescribe;
 }
