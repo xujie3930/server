@@ -4,6 +4,7 @@ import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyNoDto;
+import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
 import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
 import com.szmsd.http.dto.ChargeWrapper;
 import com.szmsd.http.dto.ProblemDetails;
@@ -35,6 +36,15 @@ public interface IDelOutboundBringVerifyService {
      * @return DelOutboundWrapperContext
      */
     DelOutboundWrapperContext initContext(DelOutbound delOutbound);
+
+
+    /**
+     * 初始化
+     *
+     * @param delOutbound delOutbound
+     * @return DelOutboundWrapperContext
+     */
+    DelOutboundWrapperContext initContext(DelOutbound delOutbound, DelOutboundFurtherHandlerDto furtherHandlerDto);
 
     /**
      * 通知修改wms发货指令
