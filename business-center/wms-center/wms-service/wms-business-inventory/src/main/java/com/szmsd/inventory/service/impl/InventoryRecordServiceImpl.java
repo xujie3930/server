@@ -179,18 +179,13 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
                 Integer availableInventory = skuR.getAvailableInventory();
 
                 // 查询进入库记录
-                String startTime = null;//DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.parseDate(DateUtils.getPastDate(90)));
-                String endTime = null;//DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getNowDate());
+                String startTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.parseDate(DateUtils.getPastDate(180)));
+                String endTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getNowDate());
 
 
                 // 所有入库记录条数 避免死循环
                 int count = this.count(new QueryWrapper<InventoryRecord>().lambda().eq(InventoryRecord::getSku, sku).eq(InventoryRecord::getWarehouseCode, warehouseCode).gt(InventoryRecord::getQuantity, 0));
                 List<InventoryRecordVO> inventoryRecordVOS = recursionType1Record(sku, warehouseCode, startTime, endTime, new ArrayList<>(), count, availableInventory);
-
-                if(warehouseCode.equals("NJ") && sku.equals("SCNID73000320")){
-
-                    log.info("客户NJ仓库递归入库记录：{},SKU:{}",sku,JSONObject.toJSONString(inventoryRecordVOS));
-                }
 
                 String finalCusCode = cusCode;
                 BigDecimal finalSkuVolume = skuVolume;
@@ -203,22 +198,22 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
                     int totalQty = inventoryRecordVOS.stream().mapToInt(InventoryRecordVO::getQuantity).sum();
 
                     // 溢出数量
-//                    int overflowQty = totalQty - availableInventory;
-//                    if (overflowQty > 0) {
-//                        for (int i = e.size() - 1; i >= 0; i--) {
-//                            if (overflowQty > 0) {
-//                                SkuVolumeVO lastVolume = e.get(i);
-//                                overflowQty = lastVolume.getQty() - overflowQty;
-//                                if (overflowQty > 0) {
-//                                    lastVolume.setQty(overflowQty);
-//                                    BigDecimal volume = (lastVolume.getSingleVolume()).multiply(BigDecimal.valueOf(lastVolume.getQty()));
-//                                    lastVolume.setVolume(volume);
-//                                    break;
-//                                }
-//                                e = e.subList(0, i);
-//                            }
-//                        }
-//                    }
+                    int overflowQty = totalQty - availableInventory;
+                    if (overflowQty > 0) {
+                        for (int i = e.size() - 1; i >= 0; i--) {
+                            if (overflowQty > 0) {
+                                SkuVolumeVO lastVolume = e.get(i);
+                                overflowQty = lastVolume.getQty() - overflowQty;
+                                if (overflowQty > 0) {
+                                    lastVolume.setQty(overflowQty);
+                                    BigDecimal volume = (lastVolume.getSingleVolume()).multiply(BigDecimal.valueOf(lastVolume.getQty()));
+                                    lastVolume.setVolume(volume);
+                                    break;
+                                }
+                                e = e.subList(0, i);
+                            }
+                        }
+                    }
                     return e;
                 }));
                 return result;
@@ -247,10 +242,10 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
      * @return
      */
     public List<InventoryRecordVO> recursionType1Record(String sku, String warehouse, String startTime, String endTime, List<InventoryRecordVO> records, Integer count, Integer qty) {
-//        if (CollectionUtils.isNotEmpty(records)) {
-//            startTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", startTime), 90));
-//            endTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", endTime), 90));
-//        }
+        if (CollectionUtils.isNotEmpty(records)) {
+            startTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", startTime), 180));
+            endTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", endTime), 180));
+        }
         if (records == null) {
             records = new ArrayList<>();
         }
@@ -265,10 +260,6 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         //查询数量大于1的记录
         recordQueryDTO.setQuantity(1);
         List<InventoryRecordVO> inventoryRecords = this.selectList(recordQueryDTO);
-
-        if(warehouse.equals("NJ")){
-            log.info("客户NJ仓库递归入库记录,返回参数:{}",inventoryRecords);
-        }
 
         if(CollectionUtils.isEmpty(inventoryRecords)){
             return records;
