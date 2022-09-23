@@ -306,61 +306,73 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     @Override
     public List<BillBalanceVO> balancePage(EleBillQueryVO queryVO) {
 
+        //step 1.根据客户、费用类型分组
+
+        //step 2.根据客户，计算出本期收入、本期支出、本期余额、本期需要支付数据
+
         List<BillBalanceVO> billBalanceVOS = new ArrayList<>();
 
+        List<BasCurrencyVO> basCurrencys = new ArrayList<>();
+
+        BasCurrencyVO basCurrencyVO = new BasCurrencyVO();
+        basCurrencyVO.setCurrencyName("美元");
+        basCurrencyVO.setCurrencyCode("USD");
+        basCurrencys.add(basCurrencyVO);
+
+        BasCurrencyVO basCurrencyVO1 = new BasCurrencyVO();
+        basCurrencyVO1.setCurrencyName("人民币");
+        basCurrencyVO1.setCurrencyCode("CNY");
+        basCurrencys.add(basCurrencyVO1);
+
+//
         BillBalanceVO billBalanceVO = new BillBalanceVO();
         billBalanceVO.setCusCode("A111");
         billBalanceVO.setBillStartTime("2022-09-01");
         billBalanceVO.setBillEndTime("2022-09-10");
-        billBalanceVO.setChargeCategory("本期收入");
+        billBalanceVO.setBasCurrencys(basCurrencys);
 
-        List<BillCurrencyVO> billCurrencyAmounts = new ArrayList<>();
-        BillCurrencyVO currencyVO = new BillCurrencyVO();
+        List<BillChargeCategoryVO> chargeCategorys = new ArrayList<>();
+
+        BillChargeCategoryVO billChargeCategoryVO = new BillChargeCategoryVO();
+        billChargeCategoryVO.setChargeCategory("本期收入");
+
+        List<BillCurrencyAmountVO> billCurrencyAmounts = new ArrayList<>();
+        BillCurrencyAmountVO currencyVO = new BillCurrencyAmountVO();
         currencyVO.setCurrencyCode("USD");
-        currencyVO.setCurrencyCode("美元");
-        currencyVO.setAmount(new BigDecimal(321421.21));
+        currencyVO.setCurrencyName("美元");
+        currencyVO.setAmount(new BigDecimal("321421.21"));
 
-        BillCurrencyVO currencyVO1 = new BillCurrencyVO();
-        currencyVO1.setCurrencyCode("CNY");
-        currencyVO1.setCurrencyCode("人民币");
-        currencyVO1.setAmount(new BigDecimal(32321.21));
+        BillCurrencyAmountVO currencyVO23 = new BillCurrencyAmountVO();
+        currencyVO23.setCurrencyCode("CNY");
+        currencyVO23.setCurrencyName("人民币");
+        currencyVO23.setAmount(new BigDecimal("321421.21"));
 
         billCurrencyAmounts.add(currencyVO);
-        billCurrencyAmounts.add(currencyVO1);
+        billCurrencyAmounts.add(currencyVO23);
+        billChargeCategoryVO.setBillCurrencyAmounts(billCurrencyAmounts);
 
-        billBalanceVO.setBillCurrencyAmounts(billCurrencyAmounts);
+        BillChargeCategoryVO billChargeCategoryVO1 = new BillChargeCategoryVO();
+        billChargeCategoryVO1.setChargeCategory("本期支付");
+
+        List<BillCurrencyAmountVO> billCurrencyAmounts1 = new ArrayList<>();
+        BillCurrencyAmountVO currencyVO1 = new BillCurrencyAmountVO();
+        currencyVO1.setCurrencyCode("CNY");
+        currencyVO1.setCurrencyName("人民币");
+        currencyVO1.setAmount(new BigDecimal("321421.21"));
+        billCurrencyAmounts1.add(currencyVO1);
+
+        billChargeCategoryVO1.setBillCurrencyAmounts(billCurrencyAmounts1);
+
+        chargeCategorys.add(billChargeCategoryVO);
+        chargeCategorys.add(billChargeCategoryVO1);
+
+        billBalanceVO.setChargeCategorys(chargeCategorys);
+
         billBalanceVOS.add(billBalanceVO);
 
-        BillBalanceVO billBalanceVO2 = new BillBalanceVO();
-        billBalanceVO2.setCusCode("A111");
-        billBalanceVO.setBillStartTime("2022-09-01");
-        billBalanceVO.setBillEndTime("2022-09-10");
-        billBalanceVO2.setChargeCategory("本期收入");
-
-        List<BillCurrencyVO> billCurrencyAmounts2 = new ArrayList<>();
-        BillCurrencyVO currencyVO2 = new BillCurrencyVO();
-        currencyVO2.setCurrencyCode("USD");
-        currencyVO2.setCurrencyCode("美元");
-        currencyVO2.setAmount(new BigDecimal(321421.21));
-
-        BillCurrencyVO currencyVO3 = new BillCurrencyVO();
-        currencyVO3.setCurrencyCode("CNY");
-        currencyVO3.setCurrencyCode("人民币");
-        currencyVO3.setAmount(new BigDecimal(32321.21));
-
-        BillCurrencyVO currencyVO4 = new BillCurrencyVO();
-        currencyVO4.setCurrencyCode("EOS");
-        currencyVO4.setCurrencyCode("EOS");
-        currencyVO4.setAmount(new BigDecimal(32343434421.21));
-
-        billCurrencyAmounts2.add(currencyVO2);
-        billCurrencyAmounts2.add(currencyVO3);
-        billCurrencyAmounts2.add(currencyVO4);
-
-        billBalanceVO2.setBillCurrencyAmounts(billCurrencyAmounts2);
-
-        billBalanceVOS.add(billBalanceVO2);
 
         return billBalanceVOS;
     }
+
+//
 }
