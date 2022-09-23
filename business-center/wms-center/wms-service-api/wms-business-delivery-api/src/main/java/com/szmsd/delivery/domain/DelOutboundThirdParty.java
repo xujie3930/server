@@ -1,6 +1,7 @@
 package com.szmsd.delivery.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
@@ -11,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -75,6 +77,18 @@ public class DelOutboundThirdParty extends BaseEntity {
     @ApiModelProperty(value = "uuid")
     private String uuid;
 
+
+    @ApiModelProperty(value = "开始时间 start")
+    @TableField(exist = false)
+    private String startDate;
+
+    @ApiModelProperty(value = "结束时间 end")
+    @TableField(exist = false)
+    private String endDate;
+
+    @ApiModelProperty(value = "ids")
+    @TableField(exist = false)
+    private List<Integer> ids;
 
     @ApiModelProperty(value = "关键信息")
     private String keyInfo;
