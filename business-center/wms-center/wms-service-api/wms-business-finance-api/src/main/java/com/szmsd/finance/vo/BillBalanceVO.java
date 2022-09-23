@@ -15,10 +15,10 @@ public class BillBalanceVO implements Serializable {
     private String cusCode;
 
     @ApiModelProperty(value = "开始时间")
-    private String startTime;
+    private String billStartTime;
 
     @ApiModelProperty(value = "结束时间")
-    private String entTime;
+    private String billEndTime;
 
     @ApiModelProperty("费用类别")
     private String chargeCategory;
