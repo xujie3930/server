@@ -134,9 +134,9 @@ public class PackageDeliveryConditionsController extends BaseController {
     /**
      * 删除发货条件表模块
      */
-    @PreAuthorize("@ss.hasPermi('PackageDeliveryConditions:PackageDeliveryConditions:remove')")
+//    @PreAuthorize("@ss.hasPermi('PackageDeliveryConditions:PackageDeliveryConditions:remove')")
     @Log(title = "发货条件表模块", businessType = BusinessType.DELETE)
-    @DeleteMapping("remove")
+    @PostMapping("remove")
     @ApiOperation(value = "删除发货条件表模块", notes = "删除发货条件表模块")
     public R remove(@RequestBody List<String> ids) {
         return toOk(packageDeliveryConditionsService.deletePackageDeliveryConditionsByIds(ids));
