@@ -405,12 +405,19 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()), "；"));
 
 
+
+
+            //更新PRC发货服务
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            DelOutbound updateDelOutbound = new DelOutbound();
+            updateDelOutbound.setId(delOutbound.getId());
+            updateDelOutbound.setShipmentRule(delOutbound.getShipmentRule());
+            updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
+            delOutboundService.updateByIdTransactional(updateDelOutbound);
+
             DelOutboundOperationLogEnum.BRV_PRC_PRICING.listener(delOutbound);
         }
 
-        public static void main(String[] args) {
-            System.out.println(new BigDecimal("10.22") + "CM");
-        }
         @Override
         public void rollback(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
@@ -745,10 +752,13 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 stopWatch.start();
                 ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
                 stopWatch.stop();
+                if(shipmentOrderResult != null){
+                    delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
+                    delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
+                    delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
+                }
                 logger.info(">>>>>[创建出库单{}]创建承运商 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
-                delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
-                delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
-                delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
+
                 DelOutboundOperationLogEnum.BRV_SHIPMENT_ORDER.listener(delOutbound);
             }
 
