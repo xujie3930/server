@@ -20,10 +20,9 @@ public class BillBalanceVO implements Serializable {
     @ApiModelProperty(value = "结束时间")
     private String billEndTime;
 
-    @ApiModelProperty(value = "币种明细")
-    private List<BasCurrencyVO> basCurrencys;
-
     @ApiModelProperty("费用类别")
-    private List<BillChargeCategoryVO> chargeCategorys;
+    private String chargeCategory;
 
+    @ApiModelProperty("币种金额")
+    private List<BillCurrencyVO> billCurrencyAmounts;
 }
