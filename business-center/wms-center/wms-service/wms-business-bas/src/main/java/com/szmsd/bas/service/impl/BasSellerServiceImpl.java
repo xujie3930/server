@@ -128,7 +128,15 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             where.eq("o.is_active",basSeller.getIsActive());
         }
 //        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "o.seller_code", basSeller.getSellerCode());
-        where.in(CollectionUtils.isNotEmpty( basSeller.getSellerCodeList()),"o.seller_code", basSeller.getSellerCodeList());
+        where.in(CollectionUtils.isNotEmpty(basSeller.getSellerCodeList()),"o.seller_code", basSeller.getSellerCodeList());
+        List<Map> mapList=baseMapper.selectfssAccountBalance(basSeller);
+        if (basSeller.getSellerCodeList()==null) {
+            if (basSeller.getCreditType() != null) {
+                List<String> cusCode = mapList.stream().map(map -> String.valueOf(map.get("cusCode"))).collect(Collectors.toList());
+                where.in(CollectionUtils.isNotEmpty(basSeller.getSellerCodeList()), "o.seller_code", cusCode);
+
+            }
+        }
         QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"o.user_name",basSeller.getUserName());
         LoginUser loginUser = SecurityUtils.getLoginUser();
             if (null != loginUser && !loginUser.isAllDataScope()) {
@@ -138,6 +146,13 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         int count = baseMapper.countBasSeller(where,basSeller.getReviewState());
        /* where.last("limit "+(basSeller.getPageNum()-1)*basSeller.getPageSize()+","+basSeller.getPageSize());*/
         List<BasSellerSysDto> basSellerSysDtos = baseMapper.selectBasSeller(where,basSeller.getReviewState(),(basSeller.getPageNum()-1)*basSeller.getPageSize(),basSeller.getPageSize());
+
+            basSellerSysDtos.forEach(s->{
+                List<Long> creditTypeList = mapList.stream().filter(x -> String.valueOf(x.get("cusCode")).equals(s.getSellerCode())).map(map -> Long.valueOf(String.valueOf(map.get("creditType")))).collect(Collectors.toList());
+                if (creditTypeList.size()>0) {
+                    s.setCreditType(creditTypeList.get(0));
+                }
+            });
             TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtos,count);
             table.setCode(200);
             return table;
