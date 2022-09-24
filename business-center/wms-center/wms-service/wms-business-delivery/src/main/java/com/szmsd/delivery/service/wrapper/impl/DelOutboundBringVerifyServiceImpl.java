@@ -755,47 +755,45 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 } else {
                     builder.append(MessageUtil.to("创建承运商物流订单失败，调用承运商系统失败，返回错误信息为空", "Failed to create the carrier logistics order, failed to call the carrier system, and the returned error message is blank"));
                 }
-                try {
-                    TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
-                    transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
-                    transferCallbackDTO.setLogisticsRouteId(shipmentService);
-                    transferCallbackDTO.setTransferErrorMsg(builder.toString());
-                    commonOrderFeignService.transferCallback(transferCallbackDTO);
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                }
+                this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, null, builder.toString());
                 throw new CommonException("400", builder.toString());
             }
-            try {
-                StopWatch stopWatch = new StopWatch();
-                stopWatch.start();
-                TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
-                transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
-                transferCallbackDTO.setLogisticsRouteId(shipmentService);
-                transferCallbackDTO.setTransferNumber(shipmentOrderResult.getMainTrackingNumber());
-                commonOrderFeignService.transferCallback(transferCallbackDTO);
-                stopWatch.stop();
-                logger.info(">>>>>[创建出库单{}]转仓库回调 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
+            this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, shipmentOrderResult.getMainTrackingNumber(), null);
             return shipmentOrderResult;
         } else {
             String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError(), true), "创建承运商物流订单失败，调用承运商系统失败");
-            try {
-                TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
-                transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
-                transferCallbackDTO.setLogisticsRouteId(shipmentService);
-                transferCallbackDTO.setTransferErrorMsg(exceptionMessage);
-                commonOrderFeignService.transferCallback(transferCallbackDTO);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
+            logger.info("创建承运商物流订单{}失败exceptionMessage，{}", delOutbound.getOrderNo(), exceptionMessage);
+            if(StringUtils.contains(exceptionMessage, "提交失败!【订单号"+delOutbound.getOrderNo()+"重复】")){
+                //发货指令会因为供应商不允许创建重复订单的原因
+                this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, delOutbound.getTrackingNo(), exceptionMessage);
+                return null;
+            }else{
+                this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, null, exceptionMessage);
+                if("[408]请求超时".equals(exceptionMessage)){
+                    throw new CommonException("408", exceptionMessage);
+                }
+                throw new CommonException("400", exceptionMessage);
             }
-            if("[408]请求超时".equals(exceptionMessage)){
-                throw new CommonException("408", exceptionMessage);
-            }
-            throw new CommonException("400", exceptionMessage);
+
         }
+    }
+
+    private void transferCallback(String orderNo, String shopifyOrderNo, String shipmentService, String mainTrackingNumber, String transferErrorMsg){
+        try {
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+            TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
+            transferCallbackDTO.setOrderNo(shopifyOrderNo);
+            transferCallbackDTO.setLogisticsRouteId(shipmentService);
+            transferCallbackDTO.setTransferNumber(mainTrackingNumber);
+            transferCallbackDTO.setTransferErrorMsg(transferErrorMsg);
+            commonOrderFeignService.transferCallback(transferCallbackDTO);
+            stopWatch.stop();
+            logger.info(">>>>>[创建出库单{}]转仓库回调耗时{}", orderNo, stopWatch.getLastTaskInfo().getTimeMillis());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+
     }
 
     @Override
