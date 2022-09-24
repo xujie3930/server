@@ -364,6 +364,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+
+            //核重直接跑
+            if(delOutboundWrapperContext.getExecShipmentShipping()){
+                return true;
+            }
+            
             // 判断获取承运商信息
             return DelOutboundTrackingAcquireTypeEnum.WAREHOUSE_SUPPLIER.getCode().equals(delOutbound.getTrackingAcquireType());
         }
@@ -662,6 +668,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             delOutbound.setShipmentService(data.getLogisticsRouteId());
             delOutbound.setPackingRule(data.getPackingRule());
             delOutbound.setShipmentRule(data.getShipmentRule());
+            delOutbound.setProductShipmentRule(data.getShipmentRule());
 
             // 费用信息
             Weight calcWeight = packageInfo.getCalcWeight();
@@ -739,7 +746,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 }
             }
             delOutbound.setCurrencyDescribe(ArrayUtil.join(currencyMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue))
-                    .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()), "；"));
+                    .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()).toArray(), "；"));
 
 
 
@@ -749,7 +756,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
             updateDelOutbound.setId(delOutbound.getId());
-            updateDelOutbound.setShipmentRule(delOutbound.getShipmentRule());
+            updateDelOutbound.setProductShipmentRule(data.getShipmentRule());
             updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
             delOutboundService.updateByIdTransactional(updateDelOutbound);
 

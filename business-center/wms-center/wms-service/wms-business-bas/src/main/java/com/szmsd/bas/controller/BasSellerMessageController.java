@@ -2,6 +2,7 @@ package com.szmsd.bas.controller;
 import com.szmsd.bas.domain.BasMessage;
 import com.szmsd.bas.dto.BasMessageDto;
 import com.szmsd.bas.dto.BasSellerMessageQueryDTO;
+import com.szmsd.bas.vo.BasSellerMessageNoticeVO;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.szmsd.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
@@ -50,6 +51,20 @@ public class BasSellerMessageController extends BaseController{
             List<BasMessageDto> list = basSellerMessageService.selectBasSellerMessageList(dto);
             return getDataTable(list);
       }
+
+
+    /**
+     * 通知中心求数量
+     */
+    @GetMapping("/selectMessageNumber")
+    @ApiOperation(value = "通知中心求数量",notes = "通知中心求数量")
+    public R<BasSellerMessageNoticeVO> selectMessageNumber(BasSellerMessageQueryDTO dto)
+    {
+
+        R<BasSellerMessageNoticeVO> r= basSellerMessageService.selectMessageNumber(dto);
+        return r;
+    }
+
 
     /**
     * 导出模块列表

@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.szmsd.bas.domain.BasSeller;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.szmsd.bas.dto.BasSellerQueryDto;
 import com.szmsd.bas.dto.BasSellerSysDto;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -23,4 +25,5 @@ public interface BasSellerMapper extends BaseMapper<BasSeller> {
     int countBasSeller(@Param(Constants.WRAPPER) QueryWrapper<BasSeller> queryWrapper,@Param("reviewState")Boolean reviewState);
 
 
+    List<Map>  selectfssAccountBalance(BasSellerQueryDto basSeller);
 }

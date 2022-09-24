@@ -14,6 +14,7 @@ import com.szmsd.bas.service.IBasMessageService;
 import com.szmsd.bas.service.IBasSellerMessageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.bas.vo.BasSellerMessageNoticeVO;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
@@ -159,11 +160,33 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
         return baseMapper.deleteById(id);
         }
 
+    @Override
+    public R<BasSellerMessageNoticeVO> selectMessageNumber(BasSellerMessageQueryDTO dto) {
+
+        if (dto.getSellerCodets()!=null){
+            List<String> list= Arrays.asList(dto.getSellerCodets().split(","));
+            dto.setSellerCodes(list);
+        }
+            Integer messageUnhandledNumber=baseMapper.selectMessageNumbers(dto);
+            Integer exceptionUnhandledNumber=baseMapper.selectException(dto);
+        BasSellerMessageNoticeVO basSellerMessageNoticeVO=new BasSellerMessageNoticeVO();
+        basSellerMessageNoticeVO.setMessageUnhandledNumber(messageUnhandledNumber);
+        basSellerMessageNoticeVO.setExceptionUnhandledNumber(exceptionUnhandledNumber);
+        basSellerMessageNoticeVO.setTotalNumber(messageUnhandledNumber+exceptionUnhandledNumber);
+        return R.ok(basSellerMessageNoticeVO);
+    }
+
     private void queryHandle(QueryWrapper<BasSellerMessage> queryWrapper, BasSellerMessageQueryDTO dto){
+        if (dto.getSellerCodets()!=null){
+            List<String> list= Arrays.asList(dto.getSellerCodets().split(","));
+            dto.setSellerCodes(list);
+        }
+
         QueryWrapperUtil.filterDate(queryWrapper,"m.create_time",dto.getCreateTimes());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ,"m.type",dto.getType());
         QueryWrapperUtil.filter(queryWrapper, SqlKeyword.LIKE,"m.title",dto.getTitle());
-        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ,"s.seller_code",dto.getSellerCode());
+        queryWrapper.in("seller_code",dto.getSellerCodes());
+//        QueryWrapperUtil.filter(queryWrapper, SqlKeyword.EQ,"s.seller_code",dto.getSellerCode());
     }
 
     }

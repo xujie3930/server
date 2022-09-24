@@ -28,6 +28,9 @@ public class ExceptionInfoQueryDto {
     @Excel(name = "用户编码")
     private String sellerCode;
 
+    @ApiModelProperty(value = "用户编码集合")
+    private List<String> sellerCodes;
+
     @ApiModelProperty(value = "类型")
     private String state;
 }

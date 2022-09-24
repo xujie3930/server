@@ -48,7 +48,38 @@
     left join bas_message m on m.id = s.message_id
     ${ew.customSqlSegment}
     </select>
+    <select id="selectMessageNumbers" resultType="java.lang.Integer" parameterType="com.szmsd.bas.dto.BasSellerMessageQueryDTO">
 
+        select
+            COUNT(*)
+        from bas_seller_message s
+                 left join bas_message m on m.id = s.message_id
+        <where>
+            s.bullet is null
+            <if test="sellerCodes != null and sellerCodes.size() > 0" >
+                AND seller_code IN
+                <foreach collection="sellerCodes" open="(" separator="," close=")" item="sellerCode">
+                    #{sellerCode}
+                </foreach>
+
+            </if>
+        </where>
+
+    </select>
+    <select id="selectException" resultType="java.lang.Integer">
+
+        SELECT COUNT(*) from exception_info
+        <where>
+            state='085001'
+        <if test="sellerCodes != null and sellerCodes.size() > 0" >
+            AND seller_code IN
+            <foreach collection="sellerCodes" open="(" separator="," close=")" item="sellerCode">
+                #{sellerCode}
+            </foreach>
+
+        </if>
+    </where>
+    </select>
 
 
 </mapper>

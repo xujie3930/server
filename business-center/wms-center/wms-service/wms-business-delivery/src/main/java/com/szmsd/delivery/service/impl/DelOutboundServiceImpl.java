@@ -733,8 +733,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (StringUtils.equals(dto.getSourceType(), DelOutboundConstant.SOURCE_TYPE_ADD)) {
             //单数据处理直接抛异常
             logger.info(">>>>>[创建出库单]1.1 校验Refno");
-            this.checkRefNo(dto, null);
-            logger.info(">>>>>[创建出库单]1.2 校验Refno完成，{}", timer.intervalRestart());
+            try {
+                this.checkRefNo(dto, null);
+                logger.info(">>>>>[创建出库单]1.2 校验Refno完成，{}", timer.intervalRestart());
+            }catch (CommonException e){
+                logger.info(">>>>>[创建出库单]1.2 校验Refno失败，{}", timer.intervalRestart());
+                response.setStatus(false);
+                response.setMessage(e.getMessage());
+                return response;
+            }
         }
         // 创建出库单
         try {
@@ -933,6 +940,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 返回异常错误信息
             response.setStatus(false);
             response.setMessage(e.getMessage());
+            if(StringUtils.contains(e.getMessage(), "必须唯一值")){
+                return response;
+            }
             // return response;
             // 返回错误，事务回滚
             throw e;
@@ -2132,8 +2142,43 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Override
     public List<DelOutboundTarckOn> selectDelOutboundTarckList(DelOutboundTarckOn delOutboundTarckOn) {
+        // 跟踪号，refNo
+        List<String> otherQueryNoList = new ArrayList<>();
+        if (StringUtils.isNotEmpty(delOutboundTarckOn.getOrderNos())) {
+            List<String> nos = splitToArray(delOutboundTarckOn.getOrderNos(), "[\n,]");
+            if (CollectionUtils.isNotEmpty(nos)) {
+                for (String no : nos) {
+                    // CK/RECK开头的是出库单号
+//                    if (no.startsWith("CK") || no.startsWith("RECK")) {
+//                        delOutboundNoList.add(no);
+//                    } else {
+                        otherQueryNoList.add(no);
+//                    }
+                }
+
+
+            }
+           delOutboundTarckOn.setOrderNosList(otherQueryNoList);
+
+        }
+
 
         return delOutboundTarckOnMapper.selectByPrimaryKey(delOutboundTarckOn);
+    }
+
+    public static List<String> splitToArray(String text, String split) {
+        String[] arr = text.split(split);
+        if (arr.length == 0) {
+            return Collections.emptyList();
+        }
+        List<String> list = new ArrayList<>();
+        for (String s : arr) {
+            if (StringUtils.isEmpty(s)) {
+                continue;
+            }
+            list.add(s);
+        }
+        return list;
     }
 
     @Override
