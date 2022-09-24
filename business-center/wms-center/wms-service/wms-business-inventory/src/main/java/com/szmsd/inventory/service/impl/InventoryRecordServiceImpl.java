@@ -195,25 +195,25 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
                 }).collect(Collectors.collectingAndThen(Collectors.toList(), e -> {
 
                     // 符合条件的总入库数量
-                    int totalQty = inventoryRecordVOS.stream().mapToInt(InventoryRecordVO::getQuantity).sum();
-
-                    // 溢出数量
-                    int overflowQty = totalQty - availableInventory;
-                    if (overflowQty > 0) {
-                        for (int i = e.size() - 1; i >= 0; i--) {
-                            if (overflowQty > 0) {
-                                SkuVolumeVO lastVolume = e.get(i);
-                                overflowQty = lastVolume.getQty() - overflowQty;
-                                if (overflowQty > 0) {
-                                    lastVolume.setQty(overflowQty);
-                                    BigDecimal volume = (lastVolume.getSingleVolume()).multiply(BigDecimal.valueOf(lastVolume.getQty()));
-                                    lastVolume.setVolume(volume);
-                                    break;
-                                }
-                                e = e.subList(0, i);
-                            }
-                        }
-                    }
+//                    int totalQty = inventoryRecordVOS.stream().mapToInt(InventoryRecordVO::getQuantity).sum();
+//
+//                    // 溢出数量
+//                    int overflowQty = totalQty - availableInventory;
+//                    if (overflowQty > 0) {
+//                        for (int i = e.size() - 1; i >= 0; i--) {
+//                            if (overflowQty > 0) {
+//                                SkuVolumeVO lastVolume = e.get(i);
+//                                overflowQty = lastVolume.getQty() - overflowQty;
+//                                if (overflowQty > 0) {
+//                                    lastVolume.setQty(overflowQty);
+//                                    BigDecimal volume = (lastVolume.getSingleVolume()).multiply(BigDecimal.valueOf(lastVolume.getQty()));
+//                                    lastVolume.setVolume(volume);
+//                                    break;
+//                                }
+//                                e = e.subList(0, i);
+//                            }
+//                        }
+//                    }
                     return e;
                 }));
                 return result;
