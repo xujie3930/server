@@ -35,7 +35,7 @@
     </if>
     <if test="ids != null and ids.size() > 0" >
       AND id IN
-      <foreach collection="orderNosList" open="(" separator="," close=")" item="id">
+      <foreach collection="ids" open="(" separator="," close=")" item="id">
         #{id}
       </foreach>
 

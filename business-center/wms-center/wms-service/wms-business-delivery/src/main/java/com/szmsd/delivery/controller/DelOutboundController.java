@@ -176,7 +176,7 @@ public class DelOutboundController extends BaseController {
             list1.forEach(x->{
                 x.setUpdateTimes(sdf.format(x.getUpdateTime()));
             });
-            workbook=  ExcelExportUtil.exportExcel(params, DelOutboundThirdPartyzhVO.class, list1);
+            workbook=  ExcelExportUtil.exportExcel(params, DelOutboundTarckOnZh.class, list1);
             fileName  ="挂号修改记录"+System.currentTimeMillis();
 
         }else if (len.equals("en")){
@@ -184,7 +184,7 @@ public class DelOutboundController extends BaseController {
             list2.forEach(x->{
                 x.setUpdateTimes(sdf.format(x.getUpdateTime()));
             });
-            workbook=  ExcelExportUtil.exportExcel(params, DelOutboundThirdPartyenVO.class, list2);
+            workbook=  ExcelExportUtil.exportExcel(params, DelOutboundTarckOnEh.class, list2);
             fileName  ="Tracking_No_Edit_Record"+System.currentTimeMillis();
         }
 
