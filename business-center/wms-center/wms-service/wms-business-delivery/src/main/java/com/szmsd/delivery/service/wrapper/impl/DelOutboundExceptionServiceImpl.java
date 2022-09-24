@@ -81,6 +81,7 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
         // 更新物流服务信息,放在initContext里面
         furtherHandlerDto.setShipmentRule(productCode);
         furtherHandlerDto.setShipmentService(pricedProductInfo.getLogisticsRouteId());
+        furtherHandlerDto.setTrackingAcquireType(DelOutboundTrackingAcquireTypeEnum.WAREHOUSE_SUPPLIER.getCode());
 
 
         DelOutboundWrapperContext delOutboundWrapperContext = this.delOutboundBringVerifyService.initContext(delOutbound, furtherHandlerDto);
