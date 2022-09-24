@@ -662,6 +662,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             delOutbound.setShipmentService(data.getLogisticsRouteId());
             delOutbound.setPackingRule(data.getPackingRule());
             delOutbound.setShipmentRule(data.getShipmentRule());
+            delOutbound.setProductShipmentRule(data.getShipmentRule());
 
             // 费用信息
             Weight calcWeight = packageInfo.getCalcWeight();
@@ -749,7 +750,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
             updateDelOutbound.setId(delOutbound.getId());
-            updateDelOutbound.setShipmentRule(delOutbound.getShipmentRule());
+            updateDelOutbound.setProductShipmentRule(data.getShipmentRule());
             updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
             delOutboundService.updateByIdTransactional(updateDelOutbound);
 

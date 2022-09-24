@@ -22,4 +22,7 @@ public interface BasSellerMessageMapper extends BaseMapper<BasSellerMessage> {
     int deleteBasSellerMessage(@Param("ids") List<Long> ids);
     List<BasMessageDto> selectBasSellerMessage(@Param(Constants.WRAPPER) QueryWrapper<BasSellerMessage> queryWrapper);
 
+    Integer  selectMessageNumbers();
+
+    Integer  selectException();
 }

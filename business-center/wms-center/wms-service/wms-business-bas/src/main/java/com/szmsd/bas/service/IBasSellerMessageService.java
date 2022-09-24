@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.bas.dto.BasMessageDto;
 import com.szmsd.bas.dto.BasSellerDto;
 import com.szmsd.bas.dto.BasSellerMessageQueryDTO;
+import com.szmsd.bas.vo.BasSellerMessageNoticeVO;
+import com.szmsd.common.core.domain.R;
 
 import java.util.List;
 
@@ -76,5 +78,6 @@ public interface IBasSellerMessageService extends IService<BasSellerMessage> {
         */
         int deleteBasSellerMessageById(String id);
 
+        R<BasSellerMessageNoticeVO> selectMessageNumber(BasSellerMessageQueryDTO dto);
 }
 
