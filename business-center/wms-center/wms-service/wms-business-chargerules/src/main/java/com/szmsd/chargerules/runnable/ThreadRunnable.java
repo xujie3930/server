@@ -65,7 +65,7 @@ public class ThreadRunnable {
 //    @Scheduled(cron = "0/60 * * * * *")
     // @Scheduled(cron = "0 10 0/1 * * ?") 每小时执行一次
     //每周日0 0 20 ? * 1"
-    @Scheduled(cron = "0 0 22 * * ?")
+    @Scheduled(cron = "0 0 10 * * ?")
     public void executeWarehouse() {
         log.info("executeWarehouse() start...");
         RLock lock = redissonClient.getLock("executeOperation");
@@ -73,6 +73,9 @@ public class ThreadRunnable {
         try {
             if (lock.tryLock()) {
                 Map<String, List<Inventory>> warehouseSkuMap = getWarehouseSku();
+
+                log.info("executeWarehouse() getWarehouseSku...");
+
                 for (Map.Entry<String, List<Inventory>> entry : warehouseSkuMap.entrySet()) {
                     asyncTaskExecutor.execute(() -> {
                         String warehouseCode = entry.getKey();
@@ -84,7 +87,7 @@ public class ThreadRunnable {
         } catch (Exception e) {
             log.error("executeWarehouse() execute error: ", e);
         } finally {
-            if (lock.isLocked()){
+            if (lock.isLocked() && lock.isHeldByCurrentThread()){
                 lock.unlock();
             }
         }
@@ -107,10 +110,17 @@ public class ThreadRunnable {
     private void getSkuByWarehouse(String warehouseCode, List<Inventory> value) {
         for (Inventory inventory : value) {
             List<InventorySkuVolumeVO> skuVolumeVo = getSkuVolume(new InventorySkuVolumeQueryDTO(inventory.getSku(), warehouseCode));
+
+            log.info("executeWarehouse() getSkuVolume...");
+
             for (InventorySkuVolumeVO inventorySkuVolumeVO : skuVolumeVo) {
                 List<SkuVolumeVO> skuVolumes = inventorySkuVolumeVO.getSkuVolumes();
                 getSkuDetails(warehouseCode, skuVolumes);
+
             }
+
+            log.info("executeWarehouse() getSkuDetails...");
+
         }
     }
 
@@ -147,7 +157,7 @@ public class ThreadRunnable {
             pay(warehouseCode, skuVolume, warehouseOperationVo, amount);
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
