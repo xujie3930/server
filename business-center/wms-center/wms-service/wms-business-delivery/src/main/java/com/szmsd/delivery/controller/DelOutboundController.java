@@ -623,22 +623,24 @@ public class DelOutboundController extends BaseController {
             // 初始化读取第一个sheet页的数据
 
 
+
             List<DelOutboundImportDto> dataList = null;
             List<DelOutboundDetailImportDto2> detailList = null;
-
-            DefaultAnalysisEventListener<DelOutboundImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundImportDto.class, 0, 1);
+            String orderTypeName = null;
+            DefaultAnalysisEventListener<DelOutboundTypeImportDto> defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundTypeImportDto.class, 0, 1);
             if (defaultAnalysisEventListener.isError()) {
                 return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
             }
-            defaultAnalysisEventListener = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundImportDto.class, 0, 1);
-            if (defaultAnalysisEventListener.isError()) {
-                return R.ok(ImportResult.buildFail(defaultAnalysisEventListener.getMessageList()));
-            }
-            dataList = defaultAnalysisEventListener.getList();
-            if (CollectionUtils.isEmpty(dataList)) {
+            List<DelOutboundTypeImportDto> tempDataList = defaultAnalysisEventListener.getList();
+            if (CollectionUtils.isEmpty(tempDataList)) {
                 return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
+            }else{
+                orderTypeName = tempDataList.get(0).getOrderTypeName();
             }
-            if("自提出库".equals(dataList.get(0).getOrderTypeName()) || "Pick Up".equals(dataList.get(0).getOrderTypeName())){
+
+
+
+            if("自提出库".equals(orderTypeName) || "Pick Up".equals(orderTypeName)){
                 DefaultAnalysisEventListener<DelOutboundPickUpImportDto> defaultAnalysisEventListener2 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundPickUpImportDto.class, 0, 1);
                 if (defaultAnalysisEventListener2.isError()) {
                     return R.ok(ImportResult.buildFail(defaultAnalysisEventListener2.getMessageList()));
@@ -651,7 +653,7 @@ public class DelOutboundController extends BaseController {
                 }).collect(Collectors.toList());
 
 
-            }else if("销毁出库".equals(dataList.get(0).getOrderTypeName()) || "Disposal Order".equals(dataList.get(0).getOrderTypeName())){
+            }else if("销毁出库".equals(orderTypeName) || "Disposal Order".equals(orderTypeName)){
                 DefaultAnalysisEventListener<DelOutboundDisposalImportDto> defaultAnalysisEventListener2 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundDisposalImportDto.class, 0, 1);
                 if (defaultAnalysisEventListener2.isError()) {
                     return R.ok(ImportResult.buildFail(defaultAnalysisEventListener2.getMessageList()));
@@ -661,6 +663,13 @@ public class DelOutboundController extends BaseController {
                     BeanUtils.copyProperties(info, teach);
                     return teach;
                 }).collect(Collectors.toList());
+            }else{
+                DefaultAnalysisEventListener<DelOutboundImportDto> defaultAnalysisEventListener2 = EasyExcelFactoryUtil.read(new ByteArrayInputStream(byteArray), DelOutboundImportDto.class, 0, 1);
+                if (defaultAnalysisEventListener2.isError()) {
+                    return R.ok(ImportResult.buildFail(defaultAnalysisEventListener2.getMessageList()));
+                }
+                dataList = defaultAnalysisEventListener2.getList();
+
             }
 
 
