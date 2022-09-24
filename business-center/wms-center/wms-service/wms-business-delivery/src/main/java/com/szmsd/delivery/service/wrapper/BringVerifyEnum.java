@@ -402,7 +402,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 }
             }
             delOutbound.setCurrencyDescribe(ArrayUtil.join(currencyMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue))
-                    .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()), "；"));
+                    .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()).toArray(), "；"));
 
 
 
