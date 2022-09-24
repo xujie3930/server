@@ -9,7 +9,7 @@ import java.util.Objects;
 public enum DelOutboundOrderTypeEnum {
 
     NORMAL("Normal", "普通出库单"),
-    DESTROY("Destroy", "销毁出库单"),
+    DESTROY("Destroy", "ThirdPartyz单"),
     SELF_PICK("SelfPick", "自提出库单"),
     PACKAGE_TRANSFER("PackageTransfer", "转运出库单"),
     COLLECTION("Collection", "集运出库单"),

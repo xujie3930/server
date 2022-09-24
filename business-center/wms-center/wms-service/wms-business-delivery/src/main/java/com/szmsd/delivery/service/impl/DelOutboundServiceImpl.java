@@ -733,8 +733,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (StringUtils.equals(dto.getSourceType(), DelOutboundConstant.SOURCE_TYPE_ADD)) {
             //单数据处理直接抛异常
             logger.info(">>>>>[创建出库单]1.1 校验Refno");
-            this.checkRefNo(dto, null);
-            logger.info(">>>>>[创建出库单]1.2 校验Refno完成，{}", timer.intervalRestart());
+            try {
+                this.checkRefNo(dto, null);
+                logger.info(">>>>>[创建出库单]1.2 校验Refno完成，{}", timer.intervalRestart());
+            }catch (CommonException e){
+                logger.info(">>>>>[创建出库单]1.2 校验Refno失败，{}", timer.intervalRestart());
+                response.setStatus(false);
+                response.setMessage(e.getMessage());
+                return response;
+            }
         }
         // 创建出库单
         try {
