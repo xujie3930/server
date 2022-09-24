@@ -16,7 +16,6 @@ import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
-import com.szmsd.finance.mapper.AccountBillRecordMapper;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.service.ISysDictDataService;
@@ -44,9 +43,6 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     @Resource
     private ISysDictDataService sysDictDataService;
-
-    @Resource
-    private AccountBillRecordMapper accountBillRecordMapper;
 
     @Override
 //    @DataScope("cus_code")
@@ -295,11 +291,11 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     @Override
     public List<ElectronicBillVO> electronicPage(EleBillQueryVO queryVO) {
         
-        return accountBillRecordMapper.electronicPage(queryVO);
+        return new ArrayList<>();
     }
 
     @Override
-    public R<Integer> generatorBill(BillGeneratorRequestVO billRequestVO) {
+    public R<Integer> generatorBill(GeneratorBillRequestVO billRequestVO) {
         return R.ok();
     }
 
@@ -310,8 +306,8 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
         BillBalanceVO billBalanceVO = new BillBalanceVO();
         billBalanceVO.setCusCode("A111");
-        billBalanceVO.setBillStartTime("2022-09-01");
-        billBalanceVO.setBillEndTime("2022-09-10");
+        billBalanceVO.setStartTime("2022-09-01");
+        billBalanceVO.setEntTime("2022-09-10");
         billBalanceVO.setChargeCategory("本期收入");
 
         List<BillCurrencyVO> billCurrencyAmounts = new ArrayList<>();
@@ -333,8 +329,8 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
         BillBalanceVO billBalanceVO2 = new BillBalanceVO();
         billBalanceVO2.setCusCode("A111");
-        billBalanceVO.setBillStartTime("2022-09-01");
-        billBalanceVO.setBillEndTime("2022-09-10");
+        billBalanceVO2.setStartTime("2022-09-01");
+        billBalanceVO2.setEntTime("2022-09-10");
         billBalanceVO2.setChargeCategory("本期收入");
 
         List<BillCurrencyVO> billCurrencyAmounts2 = new ArrayList<>();

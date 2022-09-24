@@ -13,8 +13,8 @@ public class EleBillQueryVO extends BaseQueryVO {
     private String cusCode;
 
     @ApiModelProperty(value = "账单开始时间")
-    private String billStartTime;
+    private String startTime;
 
     @ApiModelProperty(value = "账单结束时间")
-    private String billEndTime;
+    private String entTime;
 }

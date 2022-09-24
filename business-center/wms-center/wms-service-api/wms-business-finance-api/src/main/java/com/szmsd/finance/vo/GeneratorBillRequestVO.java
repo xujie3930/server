@@ -5,11 +5,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Data
-@ApiModel(description = "资金结余")
-public class BillBalanceVO implements Serializable {
+@ApiModel(value = "生成账单请求参数")
+public class GeneratorBillRequestVO implements Serializable {
 
     @ApiModelProperty(value = "客户代码")
     private String cusCode;
@@ -18,11 +17,5 @@ public class BillBalanceVO implements Serializable {
     private String startTime;
 
     @ApiModelProperty(value = "结束时间")
-    private String entTime;
-
-    @ApiModelProperty("费用类别")
-    private String chargeCategory;
-
-    @ApiModelProperty("币种金额")
-    private List<BillCurrencyVO> billCurrencyAmounts;
+    private String endTime;
 }

@@ -1,12 +1,10 @@
 package com.szmsd.finance.vo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Data
 @ApiModel(description = "电子账单")
@@ -19,12 +17,10 @@ public class ElectronicBillVO implements Serializable {
     private String cusCode;
 
     @ApiModelProperty(value = "账单开始时间")
-    @JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")
-    private Date billStartTime;
+    private String startTime;
 
     @ApiModelProperty(value = "账单结束时间")
-    @JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")
-    private Date billEndTime;
+    private String entTime;
 
     @ApiModelProperty(value = "状态 0 未处理 1 处理中 2 处理完成")
     private Integer buildStatus;
@@ -39,8 +35,7 @@ public class ElectronicBillVO implements Serializable {
     private String createByName;
 
     @ApiModelProperty(value = "创建时间")
-    @JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")
-    private Date createTime;
+    private String createTime;
 
 
 
