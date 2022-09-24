@@ -17,16 +17,37 @@
     from del_outbound_tarck_on
     where
         1=1
-    <if test="oddNumbers != null and oddNumbers !=''" >
-      and
-      (order_no=#{oddNumbers} or tracking_no=#{oddNumbers} or tracking_no_new=#{oddNumbers})
-      </if>
+    <if test="orderNosList != null and orderNosList.size() > 0" >
+      AND (order_no IN
+      <foreach collection="orderNosList" open="(" separator="," close=")" item="orderNo">
+        #{orderNo}
+      </foreach>
+      or tracking_no IN
+      <foreach collection="orderNosList" open="(" separator="," close=")" item="trackingNo">
+        #{trackingNo}
+      </foreach>
+      or tracking_no_new IN
+      <foreach collection="orderNosList" open="(" separator="," close=")" item="trackingNos">
+        #{trackingNos}
+      </foreach>
+          )
+
+    </if>
+    <if test="ids != null and ids.size() > 0" >
+      AND id IN
+      <foreach collection="orderNosList" open="(" separator="," close=")" item="id">
+        #{id}
+      </foreach>
+
+    </if>
     <if test="startTime != null and startTime != ''"><!-- 开始时间检索 -->
       and date_format(update_time,'%y%m%d') &gt;= date_format(#{startTime},'%y%m%d')
     </if>
     <if test="endTime != null and endTime != ''"><!-- 结束时间检索 -->
       and date_format(update_time,'%y%m%d') &lt;= date_format(#{endTime},'%y%m%d')
     </if>
+
+
 
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >

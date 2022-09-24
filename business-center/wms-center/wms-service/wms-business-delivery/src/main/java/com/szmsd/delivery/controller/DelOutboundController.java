@@ -1,5 +1,6 @@
 package com.szmsd.delivery.controller;
 
+import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
 import cn.hutool.core.bean.BeanUtil;
@@ -38,6 +39,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.BasFile;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundTarckOn;
+import com.szmsd.delivery.domain.DelOutboundThirdParty;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
@@ -64,6 +66,7 @@ import io.swagger.annotations.*;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.ss.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -84,6 +87,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -151,6 +155,101 @@ public class DelOutboundController extends BaseController {
         startPage(delOutboundTarckOn);
         return getDataTable(this.delOutboundService.selectDelOutboundTarckList(delOutboundTarckOn));
     }
+
+    /**
+     * 导出 挂号修改记录
+     */
+    @Log(title = "挂号修改记录导出", businessType = BusinessType.EXPORT)
+    @PostMapping("/exportDelTarck")
+    @ApiOperation(value = "挂号修改记录导出",notes = "挂号修改记录导出")
+    public void exportDelTarck(HttpServletResponse response,@RequestBody DelOutboundTarckOn delOutboundTarckOn) throws IOException {
+        String len=getLen();
+        List<DelOutboundTarckOn> list = delOutboundService.selectDelOutboundTarckList(delOutboundTarckOn);
+        ExportParams params = new ExportParams();
+        List<DelOutboundTarckOnZh> list1=new ArrayList<>();
+        List<DelOutboundTarckOnEh> list2=new ArrayList<>();
+        String fileName=null;
+        Workbook workbook=null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        if (len.equals("zh")){
+            list1= BeanMapperUtil.mapList(list, DelOutboundTarckOnZh.class);
+            list1.forEach(x->{
+                x.setUpdateTimes(sdf.format(x.getUpdateTime()));
+            });
+            workbook=  ExcelExportUtil.exportExcel(params, DelOutboundThirdPartyzhVO.class, list1);
+            fileName  ="挂号修改记录"+System.currentTimeMillis();
+
+        }else if (len.equals("en")){
+            list2= BeanMapperUtil.mapList(list, DelOutboundTarckOnEh.class);
+            list2.forEach(x->{
+                x.setUpdateTimes(sdf.format(x.getUpdateTime()));
+            });
+            workbook=  ExcelExportUtil.exportExcel(params, DelOutboundThirdPartyenVO.class, list2);
+            fileName  ="Tracking_No_Edit_Record"+System.currentTimeMillis();
+        }
+
+
+
+
+
+
+
+        Sheet sheet= workbook.getSheet("sheet0");
+
+        //获取第一行数据
+        Row row2 =sheet.getRow(0);
+
+        for (int i=0;i<4;i++){
+            Cell deliveryTimeCell = row2.getCell(i);
+
+            CellStyle styleMain = workbook.createCellStyle();
+
+            styleMain.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+            Font font = workbook.createFont();
+            //true为加粗，默认为不加粗
+            font.setBold(true);
+            //设置字体颜色，颜色和上述的颜色对照表是一样的
+            font.setColor(IndexedColors.WHITE.getIndex());
+            //将字体样式设置到单元格样式中
+            styleMain.setFont(font);
+
+            styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            styleMain.setAlignment(HorizontalAlignment.CENTER);
+            styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+//        CellStyle style =  workbook.createCellStyle();
+//        style.setFillPattern(HSSFColor.HSSFColorPredefined.valueOf(""));
+//        style.setFillForegroundColor(IndexedColors.RED.getIndex());
+            deliveryTimeCell.setCellStyle(styleMain);
+        }
+
+
+        try {
+
+            URLEncoder.encode(fileName, "UTF-8");
+            //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
+            response.setContentType("application/vnd.ms-excel");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+
+            response.addHeader("Pargam", "no-cache");
+            response.addHeader("Cache-Control", "no-cache");
+
+            ServletOutputStream outStream = null;
+            try {
+                outStream = response.getOutputStream();
+                workbook.write(outStream);
+                outStream.flush();
+            } finally {
+                outStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+
+
 
 
     @PostMapping("/manualTrackingYee")
