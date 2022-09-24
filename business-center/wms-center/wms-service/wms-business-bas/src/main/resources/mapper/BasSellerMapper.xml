@@ -55,6 +55,15 @@
         </if>
         )t
     </select>
+    <select id="selectfssAccountBalance" resultType="java.util.Map" parameterType="com.szmsd.bas.dto.BasSellerSysDto">
+        SELECT cus_code as cusCode ,credit_type as creditType from fss_account_balance
+        <where>
+            <if test="creditType!=null and creditType!=''">
+                credit_type=#{creditType}
+            </if>
+        </where>
+        GROUP BY cus_code
+    </select>
 
 
 </mapper>
