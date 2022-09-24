@@ -29,6 +29,7 @@ import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.ShipmentUpdateRequestDto;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -261,7 +262,13 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                         if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
                             shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
                         } else {
-                            shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+                            String shipmentRule;
+                            if (StringUtils.isNotEmpty(delOutbound.getProductShipmentRule())) {
+                                shipmentRule = delOutbound.getProductShipmentRule();
+                            } else {
+                                shipmentRule = delOutbound.getShipmentRule();
+                            }
+                            shipmentUpdateRequestDto.setShipmentRule(shipmentRule);
                         }
                         shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
                         shipmentUpdateRequestDto.setIsEx(true);

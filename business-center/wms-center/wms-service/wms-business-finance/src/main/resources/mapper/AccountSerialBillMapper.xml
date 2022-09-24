@@ -70,9 +70,54 @@
         </where>
         ORDER BY a.payment_time DESC
     </select>
+
+
     <select id="selectDelOutbound" resultType="com.szmsd.delivery.domain.DelOutbound"
             parameterType="java.lang.String">
         select * from del_outbound where order_no=#{no} LIMIT 0,1
+
+    </select>
+
+    <select id="findAccountBillResultData" resultType="com.szmsd.finance.dto.AccountBalanceBillResultDTO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
+
+        select FASB.cus_code as cusCode,FASB.currency_code as currencyCode,
+               <!--本期收入-->
+            sum(
+                case when
+                (
+                FASB.pay_method = 'ONLINE_INCOME' or FASB.pay_method = 'OFFLINE_INCOME' or FASB.pay_method = 'EXCHANGE_INCOME' or FASB.pay_method = 'EXCHANGE_PAYMENT'
+                or (FASB.pay_method = 'REFUND' and (FASB.business_category in ('优惠','赔偿','退费')))
+                )
+                then FASB.amount else 0 end
+            ) as currentIncomeAmount,
+
+                <!--本期支出-->
+            sum(
+                case when
+                (
+                FASB.pay_method = 'WAREHOUSE_RENT' or FASB.pay_method = 'BUSINESS_OPERATE' or FASB.pay_method = 'SPECIAL_OPERATE'
+                )
+                then FASB.amount else 0 end
+            ) as currentExpenditureAmount
+
+        from fss_account_serial_bill as FASB
+
+        <where>
+
+            <if test="cusCode != null and cusCode != ''">
+                and FASB.cus_code = #{cusCode}
+            </if>
+
+            <if test="billStartTime != null  and billStartTime !='' ">
+                and FASB.payment_time <![CDATA[ >= ]]> (#{billStartTime})
+            </if>
+
+            <if test="billEndTime != null  and billEndTime != ''">
+                and FASB.payment_time <![CDATA[ <= ]]> (#{billEndTime})
+            </if>
+
+        </where>
+        group by FASB.cus_code,FASB.currency_code
 
     </select>
 

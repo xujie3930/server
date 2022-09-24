@@ -15,6 +15,7 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.domain.AccountSerialBill;
+import com.szmsd.finance.dto.AccountBalanceBillResultDTO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.mapper.AccountBillRecordMapper;
@@ -317,25 +318,117 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     private List<BillBalanceVO> selectBalance(EleBillQueryVO queryVO){
 
-        //step 1.根据客户、费用类型分组
+        if(queryVO == null){
+            throw new RuntimeException("参数异常");
+        }
 
-        //step 2.根据客户，计算出本期收入、本期支出、本期余额、本期需要支付数据
+        //step 1.根据客户、币种分组统计出本期收入、本期支出数据
+        List<AccountBalanceBillResultDTO> accountBalanceBillResults = accountSerialBillMapper.findAccountBillResultData(queryVO);
+
+        if(CollectionUtils.isEmpty(accountBalanceBillResults)){
+            return new ArrayList<>();
+        }
 
         //获取基础币种
-        List<BasCurrencyVO> basCurrencyVOS = this.generatorBasCurrency();
+        List<BasCurrencyVO> basCurrencyVOS = this.findBasCurrency();
+        if(CollectionUtils.isEmpty(basCurrencyVOS)){
+            throw new RuntimeException("无法获取基础币种信息");
+        }
 
+        Map<String,List<AccountBalanceBillResultDTO>> billResultMap = accountBalanceBillResults.stream().collect(Collectors.groupingBy(AccountBalanceBillResultDTO::getCusCode));
 
+        Set<Map.Entry<String, List<AccountBalanceBillResultDTO>>> entries = billResultMap.entrySet();
+        Iterator<Map.Entry<String, List<AccountBalanceBillResultDTO>>> iterator = entries.iterator();
 
-        return null;
+        List<BillBalanceVO> billBalanceVOS = new ArrayList<>();
+
+        while (iterator.hasNext()){
+
+            Map.Entry<String, List<AccountBalanceBillResultDTO>> entry = iterator.next();
+            String cusCode = entry.getKey();
+            List<AccountBalanceBillResultDTO> resultDTOList = entry.getValue();
+
+            //step 2.根据币种分组
+            List<BillChargeCategoryVO> chargeCategorys = this.generatorChargeCategory(cusCode,resultDTOList,basCurrencyVOS);
+
+            BillBalanceVO billBalanceVO = new BillBalanceVO();
+
+            billBalanceVO.setCusCode(cusCode);
+            billBalanceVO.setBasCurrencys(basCurrencyVOS);
+            billBalanceVO.setChargeCategorys(chargeCategorys);
+
+            billBalanceVOS.add(billBalanceVO);
+        }
+
+        return billBalanceVOS;
     }
 
-    private List<BasCurrencyVO> generatorBasCurrency(){
+    private List<BillChargeCategoryVO> generatorChargeCategory(String cusCode,List<AccountBalanceBillResultDTO> resultDTOList, List<BasCurrencyVO> basCurrencyVOS) {
+
+        List<BillChargeCategoryVO> billChargeCategoryVOS = new ArrayList<>();
+
+        List<String> chargeCategoryNames = Arrays.asList("上期余额","本期收入","本期支出","本期余额","本期需支付");
+
+        Map<String,BasCurrencyVO> basCurrencyVOMap = basCurrencyVOS.stream().collect(Collectors.toMap(BasCurrencyVO::getCurrencyCode,v->v));
+
+        //币种
+        Map<String,AccountBalanceBillResultDTO> chargeCategoryMap = resultDTOList.stream().collect(Collectors.toMap(AccountBalanceBillResultDTO::getCurrencyCode,v->v));
+
+        for(String chargeCategory : chargeCategoryNames) {
+
+            List<BillCurrencyAmountVO> billCurrencyAmounts = new ArrayList<>();
+
+            for (AccountBalanceBillResultDTO entry : resultDTOList) {
+
+                String currencyCode = entry.getCurrencyCode().trim();
+
+                BasCurrencyVO basCurrencyVO = basCurrencyVOMap.get(currencyCode);
+
+                if(basCurrencyVO == null){
+                    throw new RuntimeException("无法获取币种符号异常,"+currencyCode);
+                }
+
+                AccountBalanceBillResultDTO resultDTO = chargeCategoryMap.get(currencyCode);
+
+                BillCurrencyAmountVO billCurrencyAmountVO = new BillCurrencyAmountVO();
+                billCurrencyAmountVO.setCurrencyCode(currencyCode);
+                billCurrencyAmountVO.setCurrencyName(basCurrencyVO.getCurrencyName());
+
+                if(chargeCategory.equals("上期余额")){
+                    billCurrencyAmountVO.setAmount(resultDTO.getPeriodAmount());
+                }else if(chargeCategory.equals("本期收入")){
+                    billCurrencyAmountVO.setAmount(resultDTO.getCurrentIncomeAmount());
+                }else if(chargeCategory.equals("本期支出")){
+                    billCurrencyAmountVO.setAmount(resultDTO.getCurrentExpenditureAmount());
+                }else if(chargeCategory.equals("本期余额")){
+                    billCurrencyAmountVO.setAmount(resultDTO.getCurrentAmount());
+                }else if(chargeCategory.equals("本期需支付")){
+                    billCurrencyAmountVO.setAmount(resultDTO.getCurrentNeedPay());
+                }
+
+                billCurrencyAmounts.add(billCurrencyAmountVO);
+
+            }
+
+            BillChargeCategoryVO billChargeCategoryVO = new BillChargeCategoryVO();
+            billChargeCategoryVO.setChargeCategory(chargeCategory);
+            billChargeCategoryVO.setCusCode(cusCode);
+
+            billChargeCategoryVO.setBillCurrencyAmounts(billCurrencyAmounts);
+
+            billChargeCategoryVOS.add(billChargeCategoryVO);
+        }
+
+        return billChargeCategoryVOS;
+    }
+
+    private List<BasCurrencyVO> findBasCurrency(){
 
         List<BasCurrencyVO> basCurrencyVOS = new ArrayList<>();
 
         R rs = basFeignService.list("008","币别");
 
-        if(rs.getCode() == 200){
+        if(rs != null && rs.getCode() == 200){
 
             LinkedHashMap jsonObject = (LinkedHashMap) rs.getData();
 
@@ -349,8 +442,10 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
                 Map<String,String> object = jsonArray.get(i);
                 BasCurrencyVO basCurrencyVO = new BasCurrencyVO();
-                basCurrencyVO.setCurrencyCode(object.get("subValue"));
-                basCurrencyVO.setCurrencyName(object.get("subName"));
+                if(StringUtils.isNotBlank(object.get("subValue"))) {
+                    basCurrencyVO.setCurrencyCode(object.get("subValue").trim());
+                    basCurrencyVO.setCurrencyName(object.get("subName").trim());
+                }
 
                 basCurrencyVOS.add(basCurrencyVO);
             }
