@@ -66,7 +66,8 @@
             o.upload_box_label,
             o.shipments_time,
             o.amazon_logistics_route_id,
-            o.house_no
+            o.house_no,
+            o.currency_describe
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
@@ -167,7 +168,8 @@
             o.remark,
             o.tracking_status,
             o.tracking_description,
-            o.ioss
+            o.ioss,
+            o.currency_describe
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}

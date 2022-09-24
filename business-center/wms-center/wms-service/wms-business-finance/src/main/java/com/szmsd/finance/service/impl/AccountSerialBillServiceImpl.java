@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.common.core.constant.HttpStatus;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -15,9 +17,11 @@ import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.finance.mapper.AccountBillRecordMapper;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.service.ISysDictDataService;
+import com.szmsd.finance.vo.*;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
@@ -41,6 +45,13 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     @Resource
     private ISysDictDataService sysDictDataService;
+
+    @Resource
+    private AccountBillRecordMapper accountBillRecordMapper;
+
+    @Resource
+    private BasFeignService basFeignService;
+
 
     @Override
 //    @DataScope("cus_code")
@@ -285,4 +296,67 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
         return flag;
     }
+
+    @Override
+    public List<ElectronicBillVO> electronicPage(EleBillQueryVO queryVO) {
+        
+        return accountBillRecordMapper.electronicPage(queryVO);
+    }
+
+    @Override
+    public R<Integer> generatorBill(BillGeneratorRequestVO billRequestVO) {
+        return R.ok();
+    }
+
+    @Override
+    public List<BillBalanceVO> balancePage(EleBillQueryVO queryVO) {
+
+        return this.selectBalance(queryVO);
+    }
+
+
+    private List<BillBalanceVO> selectBalance(EleBillQueryVO queryVO){
+
+        //step 1.根据客户、费用类型分组
+
+        //step 2.根据客户，计算出本期收入、本期支出、本期余额、本期需要支付数据
+
+        //获取基础币种
+        List<BasCurrencyVO> basCurrencyVOS = this.generatorBasCurrency();
+
+
+
+        return null;
+    }
+
+    private List<BasCurrencyVO> generatorBasCurrency(){
+
+        List<BasCurrencyVO> basCurrencyVOS = new ArrayList<>();
+
+        R rs = basFeignService.list("008","币别");
+
+        if(rs.getCode() == 200){
+
+            LinkedHashMap jsonObject = (LinkedHashMap) rs.getData();
+
+            if(jsonObject == null){
+                return new ArrayList<>();
+            }
+
+            List<Map<String,String>> jsonArray = (List<Map<String,String>>)jsonObject.get("币别");
+
+            for(int i = 0;i<jsonArray.size();i++){
+
+                Map<String,String> object = jsonArray.get(i);
+                BasCurrencyVO basCurrencyVO = new BasCurrencyVO();
+                basCurrencyVO.setCurrencyCode(object.get("subValue"));
+                basCurrencyVO.setCurrencyName(object.get("subName"));
+
+                basCurrencyVOS.add(basCurrencyVO);
+            }
+        }
+
+        return basCurrencyVOS;
+    }
+
 }

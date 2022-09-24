@@ -172,4 +172,8 @@ public class DelOutboundListVO implements Serializable {
 
     @ApiModelProperty(value = "亚马逊挂号服务")
     private String amazonLogisticsRouteId;
+
+
+    @ApiModelProperty(value = "货币金额描述")
+    private String currencyDescribe;
 }
