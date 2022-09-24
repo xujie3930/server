@@ -220,7 +220,13 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 ShipmentUpdateRequestDto shipmentUpdateRequestDto = new ShipmentUpdateRequestDto();
                 shipmentUpdateRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
                 shipmentUpdateRequestDto.setRefOrderNo(delOutbound.getOrderNo());
-                shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+                String shipmentRule;
+                if (StringUtils.isNotEmpty(delOutbound.getProductShipmentRule())) {
+                    shipmentRule = delOutbound.getProductShipmentRule();
+                } else {
+                    shipmentRule = delOutbound.getShipmentRule();
+                }
+                shipmentUpdateRequestDto.setShipmentRule(shipmentRule);
                 shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
                 shipmentUpdateRequestDto.setIsEx(true);
                 shipmentUpdateRequestDto.setExType(exType);
@@ -976,7 +982,13 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType()) && "SelfPick".equals(delOutbound.getShipmentChannel())) {
                     shipmentUpdateRequestDto.setShipmentRule(delOutbound.getDeliveryAgent());
                 } else {
-                    shipmentUpdateRequestDto.setShipmentRule(delOutbound.getShipmentRule());
+                    String shipmentRule;
+                    if (StringUtils.isNotEmpty(delOutbound.getProductShipmentRule())) {
+                        shipmentRule = delOutbound.getProductShipmentRule();
+                    } else {
+                        shipmentRule = delOutbound.getShipmentRule();
+                    }
+                    shipmentUpdateRequestDto.setShipmentRule(shipmentRule);
                 }
                 shipmentUpdateRequestDto.setPackingRule(delOutbound.getPackingRule());
                 shipmentUpdateRequestDto.setIsEx(false);

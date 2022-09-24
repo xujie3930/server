@@ -732,16 +732,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             // 判断结果集是不是正确的
             ShipmentOrderResult shipmentOrderResult = responseObjectWrapper.getObject();
             if (null == shipmentOrderResult) {
-                try {
-                    TransferCallbackDTO transferCallbackDTO = new TransferCallbackDTO();
-                    transferCallbackDTO.setOrderNo(delOutbound.getShopifyOrderNo());
-                    transferCallbackDTO.setLogisticsRouteId(shipmentService);
-                    transferCallbackDTO.setTransferErrorMsg(MessageUtil.to("创建承运商物流订单失败，调用承运商系统返回数据为空",
-                            "Failed to create the carrier logistics order. The data returned by calling the carrier system is blank"));
-                    commonOrderFeignService.transferCallback(transferCallbackDTO);
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                }
+                this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(),
+                        shipmentService, null, (MessageUtil.to("创建承运商物流订单失败，调用承运商系统返回数据为空",
+                        "Failed to create the carrier logistics order. The data returned by calling the carrier system is blank")));
                 throw new CommonException("400", MessageUtil.to("创建承运商物流订单失败，调用承运商系统返回数据为空",
                         "Failed to create the carrier logistics order. The data returned by calling the carrier system is blank"));
             }
@@ -757,16 +750,23 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     builder.append(error.getMessage());
                 } else {
-                    builder.append(MessageUtil.to("创建承运商物流订单失败，调用承运商系统失败，返回错误信息为空", "Failed to create the carrier logistics order, failed to call the carrier system, and the returned error message is blank"));
+                    builder.append(MessageUtil.to("创建承运商物流订单失败，调用承运商系统失败，返回错误信息为空",
+                            "Failed to create the carrier logistics order, failed to call the carrier system, and the returned error message is blank"));
                 }
-                this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, null, builder.toString());
-                throw new CommonException("400", builder.toString());
+                if(StringUtils.contains(builder.toString(), "提交失败!【订单号"+delOutbound.getOrderNo()+"重复】")){
+                    logger.info("创建承运商物流订单{}第三方失败1exceptionMessage，{}", delOutbound.getOrderNo(), builder.toString());
+                    this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, delOutbound.getTrackingNo(), null);
+                }else{
+                    logger.info("创建承运商物流订单{}第三方失败2exceptionMessage，{}", delOutbound.getOrderNo(), builder.toString());
+                    this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, null, builder.toString());
+                    throw new CommonException("400", builder.toString());
+                }
             }
             this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, shipmentOrderResult.getMainTrackingNumber(), null);
             return shipmentOrderResult;
         } else {
             String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError(), true), "创建承运商物流订单失败，调用承运商系统失败");
-            logger.info("创建承运商物流订单{}失败exceptionMessage，{}", delOutbound.getOrderNo(), exceptionMessage);
+            logger.info("创建承运商物流订单{}接口失败exceptionMessage，{}", delOutbound.getOrderNo(), exceptionMessage);
             if(StringUtils.contains(exceptionMessage, "提交失败!【订单号"+delOutbound.getOrderNo()+"重复】")){
                 //发货指令会因为供应商不允许创建重复订单的原因
                 this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, delOutbound.getTrackingNo(), exceptionMessage);
@@ -781,6 +781,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
         }
     }
+
 
     private void transferCallback(String orderNo, String shopifyOrderNo, String shipmentService, String mainTrackingNumber, String transferErrorMsg){
         try {
