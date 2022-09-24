@@ -43,9 +43,9 @@ public class AccountSerialBillVitalController extends BaseController {
 
     @ApiOperation(value = "资金结余列表")
     @GetMapping("/balance-page")
-    public R<List<BillBalanceVO>> balancePage(EleBillQueryVO queryVO) {
+    public List<BillBalanceVO> balancePage(EleBillQueryVO queryVO) {
 
-        return R.ok(accountSerialBillService.balancePage(queryVO));
+        return accountSerialBillService.balancePage(queryVO);
     }
 
     @ApiOperation(value = "导出")
