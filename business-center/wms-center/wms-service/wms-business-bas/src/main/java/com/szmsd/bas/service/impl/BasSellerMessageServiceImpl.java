@@ -14,6 +14,7 @@ import com.szmsd.bas.service.IBasMessageService;
 import com.szmsd.bas.service.IBasSellerMessageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.bas.vo.BasSellerMessageNoticeVO;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
@@ -158,6 +159,17 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
         {
         return baseMapper.deleteById(id);
         }
+
+    @Override
+    public R<BasSellerMessageNoticeVO> selectMessageNumber(BasSellerMessageQueryDTO dto) {
+            Integer messageUnhandledNumber=baseMapper.selectMessageNumbers();
+            Integer exceptionUnhandledNumber=baseMapper.selectException();
+        BasSellerMessageNoticeVO basSellerMessageNoticeVO=new BasSellerMessageNoticeVO();
+        basSellerMessageNoticeVO.setMessageUnhandledNumber(messageUnhandledNumber);
+        basSellerMessageNoticeVO.setExceptionUnhandledNumber(exceptionUnhandledNumber);
+        basSellerMessageNoticeVO.setTotalNumber(messageUnhandledNumber+exceptionUnhandledNumber);
+        return R.ok(basSellerMessageNoticeVO);
+    }
 
     private void queryHandle(QueryWrapper<BasSellerMessage> queryWrapper, BasSellerMessageQueryDTO dto){
         QueryWrapperUtil.filterDate(queryWrapper,"m.create_time",dto.getCreateTimes());
