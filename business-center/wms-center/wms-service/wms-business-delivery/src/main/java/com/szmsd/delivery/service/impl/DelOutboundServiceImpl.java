@@ -940,7 +940,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 返回异常错误信息
             response.setStatus(false);
             response.setMessage(e.getMessage());
-            if(StringUtils.contains(e.getMessage(), "Refno必须唯一值")){
+            if(StringUtils.contains(e.getMessage(), "必须唯一值")){
                 return response;
             }
             // return response;
