@@ -67,4 +67,6 @@ public class BasSellerMessage extends BaseEntity {
     private String sellerCode;
 
 
+
+
 }

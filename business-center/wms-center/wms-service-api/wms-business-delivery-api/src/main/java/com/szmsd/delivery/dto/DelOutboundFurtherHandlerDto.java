@@ -38,6 +38,8 @@ public class DelOutboundFurtherHandlerDto implements Serializable {
     //是否执行更新发货指令接口调用,供应商等
     private boolean execShipmentShipping;
 
+    @ApiModelProperty(value = "挂号获取方式")
+    private String trackingAcquireType;
 
     /**
      集合

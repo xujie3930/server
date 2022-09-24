@@ -57,7 +57,7 @@ public class BasSellerMessageController extends BaseController{
      * 通知中心求数量
      */
     @GetMapping("/selectMessageNumber")
-    @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+    @ApiOperation(value = "通知中心求数量",notes = "通知中心求数量")
     public R<BasSellerMessageNoticeVO> selectMessageNumber(BasSellerMessageQueryDTO dto)
     {
 
