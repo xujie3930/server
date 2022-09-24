@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
+import java.util.List;
+
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "出库单挂号记录表", description = "DelOutboundTarckOn对象")
@@ -44,6 +46,18 @@ public class DelOutboundTarckOn extends QueryDto {
     @ApiModelProperty(value = "结束时间")
     @TableField(exist = false)
     private String endTime;
+
+    @ApiModelProperty(value = "orderNos")
+    @TableField(exist = false)
+    private String orderNos;
+
+    @ApiModelProperty(value = "orderNosList")
+    @TableField(exist = false)
+    private List<String> orderNosList;
+
+    @ApiModelProperty(value = "ids")
+    @TableField(exist = false)
+    private List<String> ids;
 
 
 
