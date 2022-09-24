@@ -279,13 +279,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
             logger.info(">>>>>{}-开始创建承运商订单", delOutbound.getOrderNo());
             ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
+            if(shipmentOrderResult != null){
+                delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
+                delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
+                delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
+            }
             logger.info(">>>>>{}-承运商订单创建完成", delOutbound.getOrderNo());
-            String trackingNo = shipmentOrderResult.getMainTrackingNumber();
-            String orderNumber = shipmentOrderResult.getOrderNumber();
-            // 返回值
-            delOutbound.setTrackingNo(trackingNo);
-            delOutbound.setShipmentOrderNumber(orderNumber);
-            delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
             DelOutboundOperationLogEnum.SMT_SHIPMENT_ORDER.listener(delOutbound);
         }
 
@@ -741,6 +740,19 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             }
             delOutbound.setCurrencyDescribe(ArrayUtil.join(currencyMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue))
                     .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()), "；"));
+
+
+
+
+
+            //更新PRC发货服务
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            DelOutbound updateDelOutbound = new DelOutbound();
+            updateDelOutbound.setId(delOutbound.getId());
+            updateDelOutbound.setShipmentRule(delOutbound.getShipmentRule());
+            updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
+            delOutboundService.updateByIdTransactional(updateDelOutbound);
+
 
             /**
              * 特殊化日志记录，分币别
