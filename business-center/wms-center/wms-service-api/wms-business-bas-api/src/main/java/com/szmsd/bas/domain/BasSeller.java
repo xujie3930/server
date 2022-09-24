@@ -213,5 +213,5 @@ public class BasSeller extends BaseEntity {
 
     @ApiModelProperty(value = "0表示金额，1表示账期")
     @TableField(exist = false)
-    private Long creditType;
+    private String creditType;
 }

@@ -128,12 +128,15 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             where.eq("o.is_active",basSeller.getIsActive());
         }
 //        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "o.seller_code", basSeller.getSellerCode());
-        where.in(CollectionUtils.isNotEmpty(basSeller.getSellerCodeList()),"o.seller_code", basSeller.getSellerCodeList());
+            if (basSeller.getSellerCodeList()!=null){
+                where.in(CollectionUtils.isNotEmpty(basSeller.getSellerCodeList()),"o.seller_code", basSeller.getSellerCodeList());
+            }
+
         List<Map> mapList=baseMapper.selectfssAccountBalance(basSeller);
         if (basSeller.getSellerCodeList()==null) {
-            if (basSeller.getCreditType() != null) {
-                List<String> cusCode = mapList.stream().map(map -> String.valueOf(map.get("cusCode"))).collect(Collectors.toList());
-                where.in(CollectionUtils.isNotEmpty(basSeller.getSellerCodeList()), "o.seller_code", cusCode);
+            if (basSeller.getCreditType() != null&&!basSeller.getCreditType().equals("")) {
+                List<String> cusCode = mapList.stream().filter(x->String.valueOf(x.get("creditType")).equals(basSeller.getCreditType())).map(map -> String.valueOf(map.get("cusCode"))).collect(Collectors.toList());
+                where.in(CollectionUtils.isNotEmpty(cusCode), "o.seller_code", cusCode);
 
             }
         }
@@ -150,7 +153,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             basSellerSysDtos.forEach(s->{
                 List<Long> creditTypeList = mapList.stream().filter(x -> String.valueOf(x.get("cusCode")).equals(s.getSellerCode())).map(map -> Long.valueOf(String.valueOf(map.get("creditType")))).collect(Collectors.toList());
                 if (creditTypeList.size()>0) {
-                    s.setCreditType(creditTypeList.get(0));
+                    s.setCreditType(String.valueOf(creditTypeList.get(0)));
                 }
             });
             TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtos,count);
