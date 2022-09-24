@@ -346,6 +346,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             delOutbound.setShipmentRule(furtherHandlerDto.getShipmentRule());
             delOutbound.setShipmentService(furtherHandlerDto.getShipmentService());
 
+            if(StringUtils.isNotEmpty(furtherHandlerDto.getTrackingAcquireType())){
+                delOutbound.setTrackingNo(furtherHandlerDto.getTrackingAcquireType());
+            }
+
         }
         stopWatch.stop();
         logger.info(">>>>>[创建出库单{}查询sku信息] 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
