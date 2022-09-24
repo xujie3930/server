@@ -411,7 +411,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
             updateDelOutbound.setId(delOutbound.getId());
-            updateDelOutbound.setShipmentRule(delOutbound.getShipmentRule());
+            updateDelOutbound.setProductShipmentRule(data.getShipmentRule());
             updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
             delOutboundService.updateByIdTransactional(updateDelOutbound);
 
