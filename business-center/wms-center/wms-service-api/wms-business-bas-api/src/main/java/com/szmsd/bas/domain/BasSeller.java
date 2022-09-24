@@ -210,4 +210,8 @@ public class BasSeller extends BaseEntity {
 
     @ApiModelProperty(value = "是否自动生成入库单 0或null:不生成 1:生成")
     private String generateInboundReceipt;
+
+    @ApiModelProperty(value = "0表示金额，1表示账期")
+    @TableField(exist = false)
+    private Long creditType;
 }

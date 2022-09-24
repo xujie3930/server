@@ -1,9 +1,12 @@
 package com.szmsd.bas.dto;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.szmsd.bas.domain.BasSellerMessage;
 import com.szmsd.common.core.annotation.Excel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class BasSellerMessageQueryDTO extends BasSellerMessage {
@@ -19,4 +22,13 @@ public class BasSellerMessageQueryDTO extends BasSellerMessage {
     @ApiModelProperty(value = "类型")
     @Excel(name = "类型")
     private String type;
+
+    @ApiModelProperty(value = "类型")
+    @TableField(exist = false)
+    private String sellerCodets;
+
+    @ApiModelProperty(value = "类型集合")
+    @TableField(exist = false)
+    private List<String> sellerCodes;
+
 }

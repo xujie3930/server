@@ -45,10 +45,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import javax.annotation.Resource;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -97,9 +94,13 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
     }
 
     @Override
-    @DataScope("seller_code")
+    //@DataScope("seller_code")
     public List<ExceptionInfo> selectExceptionInfoPage(ExceptionInfoQueryDto dto) {
         QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
+        if (dto.getSellerCode()!=null){
+            List<String> list= Arrays.asList(dto.getSellerCode().split(","));
+            dto.setSellerCodes(list);
+        }
         this.handlerQueryCondition(where, dto);
         where.orderByDesc("create_time");
         List<ExceptionInfo> exceptionInfoList = baseMapper.selectList(where);
@@ -118,8 +119,8 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
     }
 
     private void handlerQueryCondition(QueryWrapper<ExceptionInfo> where, ExceptionInfoQueryDto dto) {
+
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "exception_type", dto.getExceptionType());
-        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "seller_code", dto.getSellerCode());
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "state", dto.getState());
         QueryWrapperUtil.filterDate(where, "create_time", dto.getCreateTimes());
         if (CollectionUtils.isNotEmpty(dto.getExceptionNos())) {
@@ -127,6 +128,9 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
         }
         if (CollectionUtils.isNotEmpty(dto.getOrderNos())) {
             where.in("order_no", dto.getOrderNos());
+        }
+        if (CollectionUtils.isNotEmpty(dto.getSellerCodes())){
+            where.in("seller_code",dto.getSellerCodes());
         }
     }
 
