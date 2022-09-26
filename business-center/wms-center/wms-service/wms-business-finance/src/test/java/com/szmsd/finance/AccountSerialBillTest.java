@@ -25,6 +25,8 @@ public class AccountSerialBillTest {
     public void balancePage() {
 
         EleBillQueryVO queryVO = new EleBillQueryVO();
+        queryVO.setBillStartTime("2022-09-25 00:00:00");
+        queryVO.setBillEndTime("2022-09-26 23:59:59");
 
         List<BillBalanceVO> billBalanceVOS = accountSerialBillService.balancePage(queryVO);
 
