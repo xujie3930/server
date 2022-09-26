@@ -11,6 +11,7 @@ import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundOpenService;
 import com.szmsd.delivery.timer.DelOutboundThirdPartyTimer;
 import com.szmsd.delivery.timer.DelOutboundTimer;
+import com.szmsd.delivery.timer.DelOutboundTransferTimer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -46,6 +47,10 @@ public class DelOutboundOpenController extends BaseController {
 
     @Resource
     private DelOutboundThirdPartyTimer delOutboundThirdPartyTimer;
+
+
+    @Resource
+    private DelOutboundTransferTimer delOutboundTransferTimer;
 
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)
     @PostMapping("/shipment")
@@ -101,6 +106,20 @@ public class DelOutboundOpenController extends BaseController {
     @PostMapping(value = "/notifyWMS")
     public R<String> notifyWMS() {
         delOutboundThirdPartyTimer.notifyWMS();
+        return R.ok("通知订单执行WMS任务完成");
+    }
+
+
+    @PostMapping(value = "/notifyDelOutboundTransferTimer")
+    public R<String> notifyDelOutboundTransferTimer() {
+        delOutboundTransferTimer.processing();
+        return R.ok("通知订单执行notifyDelOutboundTransferTimer任务完成");
+    }
+
+
+    @PostMapping(value = "/notifyDelOutboundTransferTimer2")
+    public R<String> notifyDelOutboundTransferTimer2() {
+        delOutboundTransferTimer.processing2();
         return R.ok("通知订单执行WMS任务完成");
     }
 }

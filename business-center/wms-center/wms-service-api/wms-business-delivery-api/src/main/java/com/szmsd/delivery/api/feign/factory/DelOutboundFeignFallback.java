@@ -236,6 +236,16 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R<String> notifyWMS() {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<String> notifyDelOutboundTransferTimer() {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<String> notifyDelOutboundTransferTimer2() {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }
