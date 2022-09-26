@@ -28,7 +28,7 @@ public class DelPrcProductService extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "ID")
-            @TableId(value = "id", type = IdType.UUID)
+            @TableId(value = "id", type = IdType.AUTO)
     @Excel(name = "ID")
     private Long id;
 
