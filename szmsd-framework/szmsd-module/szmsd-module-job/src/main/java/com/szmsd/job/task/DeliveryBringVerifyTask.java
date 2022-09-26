@@ -52,4 +52,16 @@ public class DeliveryBringVerifyTask {
         log.info("[szmsd-module-job]-[DeliveryBringVerifyTask]-[notifyBringVerify] 通知订单执行WMS定时任务执行任务 通知结果:{}", JSON.toJSONString(notifyBringVerify));
         log.info("[szmsd-module-job]-[DeliveryBringVerifyTask]-[notifyBringVerify] 通知订单执行WMS定时任务执行任务 定时任务 结束");
     }
+
+
+    public void notifyDelOutboundTransferTimer()
+    {
+        R<String> notifyBringVerify = feignService.notifyDelOutboundTransferTimer();
+    }
+
+
+    public void notifyDelOutboundTransferTimer2()
+    {
+        R<String> notifyBringVerify = feignService.notifyDelOutboundTransferTimer2();
+    }
 }
