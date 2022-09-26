@@ -285,20 +285,14 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
 
-            logger.info(">>>>>{}-核重后创建承运商订单{}", delOutbound.getOrderNo(), delOutboundWrapperContext.getProductList());
-            if(ArrayUtil.isNotEmpty(delOutboundWrapperContext.getProductList())){
-                IDelPrcProductServiceService delPrcProductServiceService = SpringUtils.getBean(IDelPrcProductServiceService.class);
-                LambdaQueryWrapper<DelPrcProductService> queryWrapper = new LambdaQueryWrapper();
-                queryWrapper.eq(DelPrcProductService::getProductCode, delOutboundWrapperContext.getProductList().get(0).getCode());
-                DelPrcProductService dataDelPrcProductService = delPrcProductServiceService.getBaseMapper().selectOne(queryWrapper);
-                if(dataDelPrcProductService != null && StringUtils.equals(dataDelPrcProductService.getLogisticsRouteId(), delOutbound.getShipmentService()) &&
-                        ! dataDelPrcProductService.getAgainTrackingNoFlag() ){
-                    /**
-                     * 1.先拿数据库最开始保存的服务渠道名与PRC返回的服务渠道名比较，一致后在下一步
-                     * 2.是否重跑供应商字段为”否”就不重跑供应商
-                     */
-                    return;
-                }
+
+            DelOutbound oldDelOutbound = SpringUtils.getBean(IDelOutboundService.class).getById(delOutbound.getId());
+
+
+            logger.info(">>>>>{}-核重时创建承运商订单{}===={}", oldDelOutbound.getShipmentService(), delOutbound.getShipmentService());
+            if(StringUtils.equals(oldDelOutbound.getShipmentService(), delOutbound.getShipmentService())){
+                //新老一致，不跑供应商系统
+                return;
             }
 
 
@@ -663,6 +657,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+
 
             logger.info("计算包裹运费开始,单号：{}",delOutbound.getOrderNo());
             // 获取运费信息
