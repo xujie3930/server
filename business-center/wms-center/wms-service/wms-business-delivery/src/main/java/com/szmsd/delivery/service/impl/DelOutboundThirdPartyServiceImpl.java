@@ -19,6 +19,7 @@ import com.szmsd.delivery.service.IDelOutboundThirdPartyService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.http.dto.ShipmentOrderResult;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ import com.szmsd.common.core.domain.R;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,9 +56,24 @@ public class DelOutboundThirdPartyServiceImpl extends ServiceImpl<DelOutboundThi
     public List<DelOutboundThirdParty> selectDelOutboundThirdPartyList(DelOutboundThirdParty delOutboundThirdParty) {
 
         LambdaQueryWrapper<DelOutboundThirdParty> where = new LambdaQueryWrapper<DelOutboundThirdParty>();
+        List<String> orderNoList = new ArrayList<>();
         where.eq(DelOutboundThirdParty::getOperationType, DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_WMS);
-        if(StringUtils.isNotEmpty(delOutboundThirdParty.getOrderNo())){
-            where.eq(DelOutboundThirdParty::getOrderNo, delOutboundThirdParty.getOrderNo());
+//        if(StringUtils.isNotEmpty(delOutboundThirdParty.getOrderNo())){
+//            where.eq(DelOutboundThirdParty::getOrderNo, delOutboundThirdParty.getOrderNo());
+//        }
+        if (StringUtils.isNotEmpty(delOutboundThirdParty.getOrderNoes())) {
+            List<String> nos = splitToArray(delOutboundThirdParty.getOrderNoes(), "[\n,]");
+            if (CollectionUtils.isNotEmpty(nos)) {
+                for (String no : nos) {
+
+                    orderNoList.add(no);
+
+                }
+
+
+            }
+            delOutboundThirdParty.setOrderNosList(orderNoList);
+            where.in(DelOutboundThirdParty::getOrderNo,delOutboundThirdParty.getOrderNosList());
         }
         if(StringUtils.isNotEmpty(delOutboundThirdParty.getState())){
             where.eq(DelOutboundThirdParty::getState, delOutboundThirdParty.getState());
@@ -69,6 +87,22 @@ public class DelOutboundThirdPartyServiceImpl extends ServiceImpl<DelOutboundThi
         where.orderByDesc(DelOutboundThirdParty::getCreateTime);
         return baseMapper.selectList(where);
     }
+
+    public static List<String> splitToArray(String text, String split) {
+        String[] arr = text.split(split);
+        if (arr.length == 0) {
+            return Collections.emptyList();
+        }
+        List<String> list = new ArrayList<>();
+        for (String s : arr) {
+            if (StringUtils.isEmpty(s)) {
+                continue;
+            }
+            list.add(s);
+        }
+        return list;
+    }
+
 
     @Override
     public void thirdParty(String orderNo, String amazonLogisticsRouteId) {
