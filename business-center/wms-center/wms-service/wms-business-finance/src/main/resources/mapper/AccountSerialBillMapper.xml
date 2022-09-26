@@ -95,9 +95,11 @@
             sum(
                 case when
                 (
-                FASB.pay_method = 'WAREHOUSE_RENT' or FASB.pay_method = 'BUSINESS_OPERATE' or FASB.pay_method = 'SPECIAL_OPERATE'
+                    FASB.pay_method = 'EXCHANGE_PAYMENT' or FASB.pay_method = 'WITHDRAW_PAYMENT' or FASB.pay_method = 'BALANCE_DEDUCTIONS' or
+                    FASB.pay_method = 'WAREHOUSE_RENT' or FASB.pay_method = 'BUSINESS_OPERATE' or FASB.pay_method = 'SPECIAL_OPERATE' OR
+                    (FASB.pay_method = 'REFUND' and (FASB.business_category in ('补收','增值消费')))
                 )
-                then FASB.amount else 0 end
+                then abs(FASB.amount) else 0 end
             ) as currentExpenditureAmount
 
         from fss_account_serial_bill as FASB
@@ -108,13 +110,13 @@
                 and FASB.cus_code = #{cusCode}
             </if>
 
-            <if test="billStartTime != null  and billStartTime !='' ">
-                and FASB.payment_time <![CDATA[ >= ]]> (#{billStartTime})
-            </if>
+<!--            <if test="billStartTime != null  and billStartTime !='' ">-->
+<!--                and FASB.payment_time <![CDATA[ >= ]]> (#{billStartTime})-->
+<!--            </if>-->
 
-            <if test="billEndTime != null  and billEndTime != ''">
-                and FASB.payment_time <![CDATA[ <= ]]> (#{billEndTime})
-            </if>
+<!--            <if test="billEndTime != null  and billEndTime != ''">-->
+<!--                and FASB.payment_time <![CDATA[ <= ]]> (#{billEndTime})-->
+<!--            </if>-->
 
         </where>
         group by FASB.cus_code,FASB.currency_code
