@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.szmsd.bas.api.feign.BasMeteringConfigFeignService;
 import com.szmsd.bas.dto.BasMeteringConfigDto;
 import com.szmsd.chargerules.vo.OperationRuleVO;
@@ -16,6 +17,7 @@ import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.domain.DelPrcProductService;
 import com.szmsd.delivery.dto.DelOutboundChargeData;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundExceptionStateEnum;
@@ -25,6 +27,7 @@ import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundRetryLabelService;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.IDelPrcProductServiceService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
@@ -281,6 +284,24 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+
+            logger.info(">>>>>{}-核重后创建承运商订单{}", delOutbound.getOrderNo(), delOutboundWrapperContext.getProductList());
+            if(ArrayUtil.isNotEmpty(delOutboundWrapperContext.getProductList())){
+                IDelPrcProductServiceService delPrcProductServiceService = SpringUtils.getBean(IDelPrcProductServiceService.class);
+                LambdaQueryWrapper<DelPrcProductService> queryWrapper = new LambdaQueryWrapper();
+                queryWrapper.eq(DelPrcProductService::getProductCode, delOutboundWrapperContext.getProductList().get(0).getCode());
+                DelPrcProductService dataDelPrcProductService = delPrcProductServiceService.getBaseMapper().selectOne(queryWrapper);
+                if(dataDelPrcProductService != null && StringUtils.equals(dataDelPrcProductService.getLogisticsRouteId(), delOutbound.getShipmentService()) &&
+                        ! dataDelPrcProductService.getAgainTrackingNoFlag() ){
+                    /**
+                     * 1.先拿数据库最开始保存的服务渠道名与PRC返回的服务渠道名比较，一致后在下一步
+                     * 2.是否重跑供应商字段为”否”就不重跑供应商
+                     */
+                    return;
+                }
+            }
+
+
             // 创建承运商物流订单
             IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
             logger.info(">>>>>{}-开始创建承运商订单", delOutbound.getOrderNo());
