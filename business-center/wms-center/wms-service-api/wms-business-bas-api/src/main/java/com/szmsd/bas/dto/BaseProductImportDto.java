@@ -48,27 +48,27 @@ public class BaseProductImportDto {
     @ExcelProperty(index = 18)
     @ApiModelProperty(value = "自定义sku编码")
     @Excel(name = "自定义sku编码" ,type = Excel.Type.IMPORT)
-    private Double customizeSkuCode;
+    private String customizeSkuCode;
 
     @ExcelProperty(index = 19)
     @ApiModelProperty(value = "产品介绍地址")
     @Excel(name = "产品介绍地址" ,type = Excel.Type.IMPORT)
-    private Double productIntroductAddress;
+    private String productIntroductAddress;
 
     @ExcelProperty(index = 20)
     @ApiModelProperty(value = "材质")
     @Excel(name = "材质" ,type = Excel.Type.IMPORT)
-    private Double materialQuality;
+    private String materialQuality;
 
     @ExcelProperty(index = 21)
     @ApiModelProperty(value = "用途")
     @Excel(name = "用途" ,type = Excel.Type.IMPORT)
-    private Double purpose;
+    private String purpose;
 
     @ExcelProperty(index = 22)
     @ApiModelProperty(value = "备注")
     @Excel(name = "备注" ,type = Excel.Type.IMPORT)
-    private Double remark;
+    private String remark;
 
     @ExcelProperty(index = 2)
     @ApiModelProperty(value = "中文申报品名")
