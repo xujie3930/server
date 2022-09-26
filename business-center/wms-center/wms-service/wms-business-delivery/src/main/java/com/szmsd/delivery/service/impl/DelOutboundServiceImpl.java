@@ -940,6 +940,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 返回异常错误信息
             response.setStatus(false);
             response.setMessage(e.getMessage());
+            if(StringUtils.contains(e.getMessage(), "必须唯一值")){
+                return response;
+            }
             // return response;
             // 返回错误，事务回滚
             throw e;
@@ -1103,6 +1106,18 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (Objects.isNull(address)) {
             return;
         }
+
+        if(StringUtils.isNotEmpty(address.getCountryCode())){
+            //创建/修改出库单，地址统一用英文
+            R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(address.getCountryCode());
+            BasRegionSelectListVO country = R.getDataAndException(countryR);
+            if (null == country) {
+                throw new CommonException("400", "国家信息不存在");
+            }
+            address.setCountry(country.getEnName());
+        }
+
+
         DelOutboundAddress delOutboundAddress = BeanMapperUtil.map(address, DelOutboundAddress.class);
         if (Objects.nonNull(delOutboundAddress)) {
             delOutboundAddress.setOrderNo(orderNo);
