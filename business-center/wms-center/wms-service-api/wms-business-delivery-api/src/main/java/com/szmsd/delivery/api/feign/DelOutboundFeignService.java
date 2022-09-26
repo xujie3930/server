@@ -279,4 +279,12 @@ public interface DelOutboundFeignService {
 
     @PostMapping(value = "/api/outbound/open/notifyWMS")
     R<String> notifyWMS();
+
+    @PostMapping(value = "/api/outbound/open/notifyDelOutboundTransferTimer")
+    R<String> notifyDelOutboundTransferTimer();
+
+
+    @PostMapping(value = "/api/outbound/open/notifyDelOutboundTransferTimer2")
+    R<String> notifyDelOutboundTransferTimer2();
+
 }
