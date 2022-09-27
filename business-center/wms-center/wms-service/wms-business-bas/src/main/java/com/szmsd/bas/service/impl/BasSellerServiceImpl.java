@@ -127,6 +127,23 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         if(basSeller.getIsActive()!=null){
             where.eq("o.is_active",basSeller.getIsActive());
         }
+
+           //客服人员
+            if(basSeller.getServiceStaffNickName()!=null&&!basSeller.getServiceStaffNickName().equals("")){
+                where.like("o.service_staff_nick_name",basSeller.getServiceStaffNickName());
+            }
+
+            //客户经理
+            if(basSeller.getServiceManagerNickName()!=null&&!basSeller.getServiceManagerNickName().equals("")){
+                where.like("o.service_manager_nick_name",basSeller.getServiceManagerNickName());
+            }
+
+            //第二销售人员
+            if(basSeller.getSecondSalesStaffName()!=null&&!basSeller.getSecondSalesStaffName().equals("")){
+                where.like("o.second_sales_staff_name",basSeller.getSecondSalesStaffName());
+            }
+
+
 //        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "o.seller_code", basSeller.getSellerCode());
             if (basSeller.getSellerCodeList()!=null){
                 where.in(CollectionUtils.isNotEmpty(basSeller.getSellerCodeList()),"o.seller_code", basSeller.getSellerCodeList());
@@ -161,7 +178,69 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             return table;
         }
 
-        @Override
+    @Override
+    public List<BasSellerSysDto> selectBasSellerexportList(BasSellerQueryDto basSeller) {
+        QueryWrapper<BasSeller> where = new QueryWrapper<BasSeller>();
+        if(basSeller.getIsActive()!=null){
+            where.eq("o.is_active",basSeller.getIsActive());
+        }
+
+        //客服人员
+        if(basSeller.getServiceStaffNickName()!=null&&!basSeller.getServiceStaffNickName().equals("")){
+            where.like("o.service_staff_nick_name",basSeller.getServiceStaffNickName());
+        }
+
+        //客户经理
+        if(basSeller.getServiceManagerNickName()!=null&&!basSeller.getServiceManagerNickName().equals("")){
+            where.like("o.service_manager_nick_name",basSeller.getServiceManagerNickName());
+        }
+
+        //第二销售人员
+        if(basSeller.getSecondSalesStaffName()!=null&&!basSeller.getSecondSalesStaffName().equals("")){
+            where.like("o.second_sales_staff_name",basSeller.getSecondSalesStaffName());
+        }
+
+
+//        QueryWrapperUtil.filter(where, SqlKeyword.EQ, "o.seller_code", basSeller.getSellerCode());
+        if (basSeller.getSellerCodeList()!=null){
+            where.in(CollectionUtils.isNotEmpty(basSeller.getSellerCodeList()),"o.seller_code", basSeller.getSellerCodeList());
+        }
+
+        List<Map> mapList=baseMapper.selectfssAccountBalance(basSeller);
+        if (basSeller.getSellerCodeList()==null) {
+            if (basSeller.getCreditType() != null&&!basSeller.getCreditType().equals("")) {
+                List<String> cusCode = mapList.stream().filter(x->String.valueOf(x.get("creditType")).equals(basSeller.getCreditType())).map(map -> String.valueOf(map.get("cusCode"))).collect(Collectors.toList());
+                where.in(CollectionUtils.isNotEmpty(cusCode), "o.seller_code", cusCode);
+
+            }
+        }
+        QueryWrapperUtil.filter(where,SqlKeyword.LIKE,"o.user_name",basSeller.getUserName());
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        if (null != loginUser && !loginUser.isAllDataScope()) {
+            String username = loginUser.getUsername();
+            where.and(x -> x.eq("o.service_manager_name", username).or().eq("o.service_staff_name", username));
+        }
+        //int count = baseMapper.countBasSeller(where,basSeller.getReviewState());
+        /* where.last("limit "+(basSeller.getPageNum()-1)*basSeller.getPageSize()+","+basSeller.getPageSize());*/
+        List<BasSellerSysDto> basSellerSysDtos = baseMapper.selectBasSellers(where,basSeller.getReviewState());
+
+        basSellerSysDtos.forEach(s->{
+            List<Long> creditTypeList = mapList.stream().filter(x -> String.valueOf(x.get("cusCode")).equals(s.getSellerCode())).map(map -> Long.valueOf(String.valueOf(map.get("creditType")))).collect(Collectors.toList());
+            if (creditTypeList.size()>0) {
+                if (creditTypeList.get(0)==0){
+                    s.setCreditType("金额");
+                }else if (creditTypeList.get(0)==1){
+                    s.setCreditType("账期");
+                }
+
+            }
+        });
+//        TableDataInfo<BasSellerSysDto> table = new TableDataInfo(basSellerSysDtos,count);
+//        table.setCode(200);
+        return basSellerSysDtos;
+    }
+
+    @Override
         public List<BasSellerSysDto> getBasSellerList(BasSeller basSeller){
             QueryWrapper<BasSeller> where = new QueryWrapper<BasSeller>();
             if(basSeller.getIsActive()!=null){

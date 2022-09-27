@@ -37,6 +37,10 @@ public interface IBasSellerService extends IService<BasSeller> {
         */
         TableDataInfo<BasSellerSysDto> selectBasSellerList(BasSellerQueryDto basSeller);
 
+
+        //导出
+     List<BasSellerSysDto> selectBasSellerexportList(BasSellerQueryDto basSeller);
+
         /**
          * 查询模块列表
          *
