@@ -159,7 +159,36 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         if (StringUtils.isNoneEmpty(queryDTO.getDeliveryNousD())){
             queryDTO.setDeliveryNousD(new StringBuilder("%").append(queryDTO.getDeliveryNousD()).append("%").toString());
         }
+
+        List<String> otherQueryNoList = new ArrayList<>();
+        if (StringUtils.isNotEmpty(queryDTO.getOrderNos())) {
+            List<String> nos = splitToArray(queryDTO.getOrderNos(), "[\n,]");
+            if (CollectionUtils.isNotEmpty(nos)) {
+                for (String no : nos) {
+                    otherQueryNoList.add(no);
+                }
+
+
+            }
+            queryDTO.setOrderNosList(otherQueryNoList);
+
+        }
         return baseMapper.selectListByCondiction(queryDTO);
+    }
+
+    public static List<String> splitToArray(String text, String split) {
+        String[] arr = text.split(split);
+        if (arr.length == 0) {
+            return Collections.emptyList();
+        }
+        List<String> list = new ArrayList<>();
+        for (String s : arr) {
+            if (com.szmsd.common.core.utils.StringUtils.isEmpty(s)) {
+                continue;
+            }
+            list.add(s);
+        }
+        return list;
     }
 
     /**

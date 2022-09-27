@@ -103,6 +103,14 @@ public class InboundReceiptQueryDTO extends QueryDto {
     @ApiModelProperty(value = "客户编码list")
     private List<String> cusCodeList;
 
+    @ApiModelProperty(value = "单号查询")
+    private String orderNos;
+
+    @ApiModelProperty(value = "单号查询拆分集合")
+    private List<String> OrderNosList;
+
+
+
     public void setCusCode(String cusCode) {
         this.cusCode = cusCode;
         this.cusCodeList = StringUtils.isNotEmpty(cusCode) ? Arrays.asList(cusCode.split(",")) : Lists.newArrayList();
