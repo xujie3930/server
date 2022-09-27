@@ -10,6 +10,7 @@ import com.szmsd.finance.vo.EleBillQueryVO;
 import com.szmsd.finance.vo.ElectronicBillVO;
 import com.szmsd.finance.vo.BillGeneratorRequestVO;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public interface IAccountSerialBillService extends IService<AccountSerialBill> {
@@ -37,7 +38,7 @@ public interface IAccountSerialBillService extends IService<AccountSerialBill> {
      * @param billRequestVO
      * @return
      */
-    R<Integer> generatorBill(BillGeneratorRequestVO billRequestVO);
+    void generatorBill(BillGeneratorRequestVO billRequestVO, HttpServletResponse response);
 
     /**
      * 资金结余

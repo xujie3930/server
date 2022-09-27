@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.feign.BasFeignService;
+import com.szmsd.bas.api.feign.BasSellerFeignService;
+import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
@@ -24,6 +26,7 @@ import com.szmsd.finance.mapper.AccountBillRecordMapper;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.service.ISysDictDataService;
+import com.szmsd.finance.util.ExcelUtil;
 import com.szmsd.finance.vo.*;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
@@ -32,8 +35,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -54,6 +61,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     @Resource
     private BasFeignService basFeignService;
+
+    @Resource
+    private BasSellerFeignService basSellerFeignService;
 
     @Resource
     private AccountBalanceLogMapper accountBalanceLogMapper;
@@ -310,8 +320,166 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     }
 
     @Override
-    public R<Integer> generatorBill(BillGeneratorRequestVO billRequestVO) {
-        return R.ok();
+    public void generatorBill(BillGeneratorRequestVO billRequestVO, HttpServletResponse response) {
+
+        String cusCode = billRequestVO.getCusCode();
+        R<BasSellerInfoVO> basSellerInfoVOR = basSellerFeignService.getInfoBySellerCode(cusCode);
+
+        if(basSellerInfoVOR == null){
+            throw new RuntimeException("生成失败，无法获取客户基本信息");
+        }
+
+        BasSellerInfoVO basSellerInfoVO = basSellerInfoVOR.getData();
+
+        if(StringUtils.isBlank(basSellerInfoVO.getSellerCode())){
+            throw new RuntimeException("生成失败，无法获取客户基本信息");
+        }
+
+        String fileName = "template";
+        String modelPath = "classpath:template/dm-oms-template.xlsx";
+        InputStream inputStream = null;
+
+        try {
+            inputStream = ResourceUtils.getURL(modelPath).openStream();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Map<Integer, List<?>> titleDataMap = new HashMap<>();
+        Map<Integer, List<?>> sheetAndDataMap = new HashMap<>();
+
+        Map<Integer, List<?>> otherAndDataMap = new HashMap<>();
+
+        //sheet 1.客戶基本信息、资金账结余、业务账汇总
+        List<BasSellerExcelInfoVO> cusTitleMap = this.generatorTitle(billRequestVO,basSellerInfoVO);
+
+        EleBillQueryVO queryVO = new EleBillQueryVO();
+        queryVO.setCusCode(billRequestVO.getCusCode());
+        queryVO.setBillStartTime(billRequestVO.getBillStartTime());
+        queryVO.setBillEndTime(billRequestVO.getBillEndTime());
+        //资金账结余
+        List<BillBalanceVO> billBalanceVOS = this.selectBalance(queryVO);
+        //封装导出表格数据
+        List<BillBalanceExcelResultVO> billBalanceExcelResultVOS = this.generatorBillExcelResult(billBalanceVOS);
+
+        //业务账汇总
+        List<BillBusinessTotalVO> businessTotalVOS = this.businessTotal(queryVO);
+
+        sheetAndDataMap.put(0,billBalanceExcelResultVOS);
+        titleDataMap.put(0,cusTitleMap);
+        otherAndDataMap.put(0,businessTotalVOS);
+
+
+        //sheet 2.国内直发统计
+
+        //sheet 3.仓储服务
+
+        //sheet 4.仓租
+
+        //sheet 5.大货服务
+
+        //sheet 6.充值&提现&转换&转账
+
+        //sheet 7.优惠&赔偿
+
+        //step end : 报错电子账单记录表
+
+        ExcelUtil.fillReportWithEasyExcel(response,"bas",titleDataMap,"bill",sheetAndDataMap,"business",otherAndDataMap,fileName,inputStream);
+
+        //return R.ok();
+    }
+
+    /**
+     * 业务类型汇总
+     * @param queryVO
+     * @return
+     */
+    private List<BillBusinessTotalVO> businessTotal(EleBillQueryVO queryVO) {
+
+        List<BillBusinessTotalVO> resultVOS = accountSerialBillMapper.businessTotal(queryVO);
+
+        return resultVOS;
+    }
+
+    /**
+     * 硬编码币种，导出
+     * @param billBalanceVOS
+     * @return
+     */
+    private List<BillBalanceExcelResultVO> generatorBillExcelResult(List<BillBalanceVO> billBalanceVOS) {
+
+        if(CollectionUtils.isEmpty(billBalanceVOS)){
+            return new ArrayList<>();
+        }
+
+        BillBalanceVO billBalanceVO = billBalanceVOS.get(0);
+        List<BillChargeCategoryVO> billChargeCategoryVOS = billBalanceVO.getChargeCategorys();
+        List<BillBalanceExcelResultVO> billBalanceExcelResultVOS = new ArrayList<>();
+
+        for(BillChargeCategoryVO chargeCategoryVO : billChargeCategoryVOS){
+
+            BillBalanceExcelResultVO billBalanceExcelResultVO = new BillBalanceExcelResultVO();
+            billBalanceExcelResultVO.setChargeCategory(chargeCategoryVO.getChargeCategory());
+
+            List<BillCurrencyAmountVO> billCurrencyAmountVOS = chargeCategoryVO.getBillCurrencyAmounts();
+
+            for(BillCurrencyAmountVO amountVO :billCurrencyAmountVOS){
+
+                String currencyCode = amountVO.getCurrencyCode();
+                if(currencyCode.equals("USD")){
+                    billBalanceExcelResultVO.setUsd(amountVO.getAmount());
+                }
+                if(currencyCode.equals("CNY")){
+                    billBalanceExcelResultVO.setCny(amountVO.getAmount());
+                }
+                if(currencyCode.equals("GBP")){
+                    billBalanceExcelResultVO.setGbp(amountVO.getAmount());
+                }
+                if(currencyCode.equals("AUD")){
+                    billBalanceExcelResultVO.setAud(amountVO.getAmount());
+                }
+                if(currencyCode.equals("EUR")){
+                    billBalanceExcelResultVO.setEur(amountVO.getAmount());
+                }
+                if(currencyCode.equals("CAD")){
+                    billBalanceExcelResultVO.setCad(amountVO.getAmount());
+                }
+                if(currencyCode.equals("HKD")){
+                    billBalanceExcelResultVO.setHkd(amountVO.getAmount());
+                }
+                if(currencyCode.equals("JPY")){
+                    billBalanceExcelResultVO.setJpy(amountVO.getAmount());
+                }
+            }
+
+            billBalanceExcelResultVOS.add(billBalanceExcelResultVO);
+        }
+
+        return billBalanceExcelResultVOS;
+    }
+
+    private List<BasSellerExcelInfoVO> generatorTitle(BillGeneratorRequestVO billRequestVO,BasSellerInfoVO basSellerInfoVO) {
+
+        String billStartTime = billRequestVO.getBillStartTime();
+        String billEndTime = billRequestVO.getBillEndTime();
+
+        String billTime = billStartTime + "/" + billEndTime;
+
+
+        List<BasSellerExcelInfoVO> basSellerInfoVOS = new ArrayList<>();
+
+        BasSellerExcelInfoVO excelInfoVO = new BasSellerExcelInfoVO();
+
+        excelInfoVO.setCusCode(basSellerInfoVO.getSellerCode());
+        excelInfoVO.setCusName(basSellerInfoVO.getUserName());
+        excelInfoVO.setGeneratorTime(DateUtils.getTime());
+        excelInfoVO.setBillTime(billTime);
+        excelInfoVO.setManagerNickName(basSellerInfoVO.getServiceManagerNickName());
+        excelInfoVO.setStaffNickName(basSellerInfoVO.getServiceStaffNickName() == null ? "":basSellerInfoVO.getServiceStaffNickName());
+
+        basSellerInfoVOS.add(excelInfoVO);
+
+        return basSellerInfoVOS;
     }
 
     @Override
@@ -415,7 +583,11 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         Map<String,AccountBalanceBillResultDTO> chargeCategoryMap = resultDTOList.stream().collect(Collectors.toMap(AccountBalanceBillResultDTO::getCurrencyCode,v->v));
 
         //客户币种上期余额
-        Map<String,AccountBalanceBillResultDTO> cusPeriodMap = cusBalancePeriod.stream().collect(Collectors.toMap(AccountBalanceBillResultDTO::getCurrencyCode,v->v));
+        Map<String,AccountBalanceBillResultDTO> cusPeriodMap = null;
+
+        if(CollectionUtils.isNotEmpty(cusBalancePeriod)) {
+            cusPeriodMap = cusBalancePeriod.stream().collect(Collectors.toMap(AccountBalanceBillResultDTO::getCurrencyCode, v -> v));
+        }
 
         for(String chargeCategory : chargeCategoryNames) {
 
