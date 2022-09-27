@@ -378,7 +378,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
         //sheet 1.国内直发统计
         List<BillDirectDeliveryTotalVO> directDeliverys = this.selectDirectDelivery(queryVO);
-
+        sheetAndDataMap.put(1,directDeliverys);
 
         //sheet 2.仓储服务
 
@@ -394,7 +394,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
             String f = filePath + fileName;
             File file = new File(f);
-            ExcelUtil.exportFile(file,"bas",titleDataMap,"bill",sheetAndDataMap,"business",otherAndDataMap,fileName,inputStream);
+            ExcelUtil.exportFile(file,"bas",titleDataMap,"bill",sheetAndDataMap,"business",otherAndDataMap,inputStream);
 
             //step end : 保存电子账单记录表
             LoginUser loginUser = SecurityUtils.getLoginUser();
@@ -426,9 +426,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     private List<BillDirectDeliveryTotalVO> selectDirectDelivery(EleBillQueryVO queryVO) {
 
-        
+        List<BillDirectDeliveryTotalVO> billDirectDeliveryTotalVOS = accountSerialBillMapper.selectDirectDelivery(queryVO);
 
-        return null;
+        return billDirectDeliveryTotalVOS;
     }
 
     /**
