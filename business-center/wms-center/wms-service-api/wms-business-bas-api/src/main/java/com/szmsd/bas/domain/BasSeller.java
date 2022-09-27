@@ -33,19 +33,19 @@ public class BasSeller extends BaseEntity {
 
     @ApiModelProperty(value = "id")
     @TableId(value = "id", type = IdType.AUTO)
-    @Excel(name = "id")
+//    @Excel(name = "id")
     private Long id;
 
     @ApiModelProperty(value = "创建人")
-    @Excel(name = "创建人")
+//    @Excel(name = "创建人")
     private String createBy;
 
     @ApiModelProperty(value = "修改人")
-    @Excel(name = "修改人")
+//    @Excel(name = "修改人")
     private String updateBy;
 
     @ApiModelProperty(value = "删除标识：0未删除 1已删除")
-    @Excel(name = "删除标识：0未删除 1已删除")
+//    @Excel(name = "删除标识：0未删除 1已删除")
     private String delFlag;
 
     @ApiModelProperty(value = "用户名")
@@ -53,7 +53,7 @@ public class BasSeller extends BaseEntity {
     private String userName;
 
     @ApiModelProperty(value = "初始注册邮箱")
-    @Excel(name = "初始注册邮箱")
+//    @Excel(name = "初始注册邮箱")
     private String initEmail;
 
     @ApiModelProperty(value = "客户代码")
@@ -67,116 +67,116 @@ public class BasSeller extends BaseEntity {
 
     @TableField(exist = false)
     @ApiModelProperty(value = "客户代码")
-    @Excel(name = "客户代码")
+//    @Excel(name = "客户代码")
     private List<String> sellerCodeList;
 
     @ApiModelProperty(value = "认证状态 ")
-    @Excel(name = "认证状态 ")
+//    @Excel(name = "认证状态 ")
     private Boolean state;
 
     @ApiModelProperty(value = "用户状态 生效 失效")
-    @Excel(name = "用户状态 生效 失效")
+//    @Excel(name = "用户状态 生效 失效")
     private Boolean isActive;
 
     @ApiModelProperty(value = "业务经理-id")
-    @Excel(name = "业务经理")
+//    @Excel(name = "业务经理")
     private String serviceManager;
 
     @ApiModelProperty(value = "业务经理-编码")
-    @Excel(name = "业务经理")
+//    @Excel(name = "业务经理-编码")
     private String serviceManagerName;
 
     @ApiModelProperty(value = "业务经理-名称")
-    @Excel(name = "业务经理")
+    @Excel(name = "客户经理")
     private String serviceManagerNickName;
 
     @ApiModelProperty(value = "国家")
-    @Excel(name = "国家")
+//    @Excel(name = "国家")
     private String countryName;
 
     @ApiModelProperty(value = "国家")
-    @Excel(name = "国家")
+//    @Excel(name = "国家")
     private String countryCode;
 
     @ApiModelProperty(value = "客服-id")
-    @Excel(name = "客服")
+//    @Excel(name = "客服")
     private String serviceStaff;
 
     @ApiModelProperty(value = "客服姓名-编码")
-    @Excel(name = "客服姓名")
+//    @Excel(name = "客服姓名")
     private String serviceStaffName;
 
     @ApiModelProperty(value = "客服姓名")
-    @Excel(name = "客服姓名")
+    @Excel(name = "客服人员")
     private String serviceStaffNickName;
 
     @ApiModelProperty(value = "姓名")
-    @Excel(name = "姓名")
+//    @Excel(name = "姓名")
     private String nickName;
 
     @ApiModelProperty(value = "邮箱")
-    @Excel(name = "邮箱")
+//    @Excel(name = "邮箱")
     private String email;
 
     @ApiModelProperty(value = "住址")
-    @Excel(name = "住址")
+//    @Excel(name = "住址")
     private String address;
 
     @ApiModelProperty(value = "联系电话")
-    @Excel(name = "联系电话")
+//    @Excel(name = "联系电话")
     private String phoneNumber;
 
     @ApiModelProperty(value = "身份证号码")
-    @Excel(name = "身份证号码")
+//    @Excel(name = "身份证号码")
     private String idCard;
 
     @ApiModelProperty(value = "出口易账号")
-    @Excel(name = "出口易账号")
+//    @Excel(name = "出口易账号")
     private String ck1Account;
 
     @ApiModelProperty(value = "中文名")
-    @Excel(name = "中文名")
+//    @Excel(name = "中文名")
     private String nameCn;
 
     @ApiModelProperty(value = "英文名")
-    @Excel(name = "英文名")
+//    @Excel(name = "英文名")
     private String nameEn;
 
     @ApiModelProperty(value = "公司")
-    @Excel(name = "公司")
+//    @Excel(name = "公司")
     private String company;
 
     @ApiModelProperty(value = "性别 F 女 M 男")
-    @Excel(name = "性别 F 女 M 男")
+//    @Excel(name = "性别 F 女 M 男")
     private String sex;
 
     @ApiModelProperty(value = "是否验重量尺寸")
-    @Excel(name = "是否验重量尺寸")
+//    @Excel(name = "是否验重量尺寸")
     private String inspectionRequirement;
 
 
     @ApiModelProperty(value = "是否验属性")
-    @Excel(name = "是否验属性")
+//    @Excel(name = "是否验属性")
     private String inspectionAttribute;
 
     @ApiModelProperty(value = "真实姓名")
-    @Excel(name = "真实姓名")
+//    @Excel(name = "真实姓名")
     private String realName;
 
     @ApiModelProperty(value = "证件号码")
-    @Excel(name = "证件号码")
+//    @Excel(name = "证件号码")
     private String identificationNumber;
 
     @ApiModelProperty(value = "用户类型")
-    @Excel(name = "用户类型")
+//    @Excel(name = "用户类型")
     private String type;
 
     @ApiModelProperty(value = "实名状态")
-    @Excel(name = "实名状态")
+//    @Excel(name = "实名状态")
     private String realState;
 
     @ApiModelProperty(value = "折扣用户类型-编码", notes = "主子类别")
-    @Excel(name = "折扣用户类型-编码")
+//    @Excel(name = "折扣用户类型-编码")
     private String discountUserType;
 
     /**----------------CK1 INFO----------------*/
@@ -211,7 +211,20 @@ public class BasSeller extends BaseEntity {
     @ApiModelProperty(value = "是否自动生成入库单 0或null:不生成 1:生成")
     private String generateInboundReceipt;
 
+
+
+    @ApiModelProperty(value = "第二销售人员名字")
+    @Excel(name = "第二销售人员")
+    private String secondSalesStaffName;
+
+    @ApiModelProperty(value = "第二销售人员code")
+    private String secondSalesStaffCode;
+
     @ApiModelProperty(value = "0表示金额，1表示账期")
     @TableField(exist = false)
+    @Excel(name = "授信方式")
     private String creditType;
+
+
+
 }
