@@ -7,6 +7,7 @@ import com.alibaba.excel.write.metadata.fill.FillConfig;
 import com.alibaba.excel.write.metadata.fill.FillWrapper;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,12 +38,65 @@ public class ExcelUtil {
         ExcelWriter excelWriter = null;
         try {
             OutputStream outputStream = response.getOutputStream();
-            response.setHeader("Content-disposition", "attachment; filename=" + filename + ".xlsx");
+            response.setHeader("Content-disposition", "attachment; filename=" + filename);
             response.setContentType("application/vnd.ms-excel;charset=UTF-8");//设置类型
             response.setHeader("Pragma", "No-cache");//设置头
             response.setHeader("Cache-Control", "no-cache");//设置头
             response.setDateHeader("Expires", 0);//设置日期头
             excelWriter = EasyExcel.write(outputStream).withTemplate(inputStream).build();
+            for(Map.Entry<Integer, List<?>> entry : sheetAndDataMap.entrySet()){
+                List<?> value = entry.getValue();
+                Integer key = entry.getKey();
+
+                List<?> threeData = null;
+                if(otherMapData != null){
+                    threeData = otherMapData.get(key);
+                }
+
+                List<?> titleData = null;
+                if(titleDataMap != null){
+                    titleData = titleDataMap.get(key);
+                }
+
+                WriteSheet writeSheet = EasyExcel.writerSheet(key).build();
+                FillConfig fillConfig = FillConfig.builder().forceNewRow(Boolean.TRUE).build();
+                excelWriter.fill(new FillWrapper(sheetKey,value),fillConfig, writeSheet);
+
+                if(threeData != null) {
+                    excelWriter.fill(new FillWrapper(businessKey, threeData),fillConfig, writeSheet);
+                }
+
+                if(titleData != null) {
+                    excelWriter.fill(new FillWrapper(title, titleData),fillConfig, writeSheet);
+                }
+
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+
+            excelWriter.finish();
+
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void exportFile(File file,
+                                               String title,
+                                               Map<Integer,List<?>> titleDataMap,
+                                               String sheetKey,
+                                               Map<Integer, List<?>> sheetAndDataMap,
+                                               String businessKey,
+                                               Map<Integer,List<?>> otherMapData,
+                                               String filename, InputStream inputStream){
+        ExcelWriter excelWriter = null;
+        try {
+            excelWriter = EasyExcel.write(file).withTemplate(inputStream).build();
             for(Map.Entry<Integer, List<?>> entry : sheetAndDataMap.entrySet()){
                 List<?> value = entry.getValue();
                 Integer key = entry.getKey();
