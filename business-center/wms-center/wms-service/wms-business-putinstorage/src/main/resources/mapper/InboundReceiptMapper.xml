@@ -179,6 +179,22 @@
     </select>
 
     <sql id="selectListWhere">
+        <if test="orderNosList != null and orderNosList.size() > 0" >
+            AND (t.order_no IN
+            <foreach collection="orderNosList" open="(" separator="," close=")" item="orderNo">
+                #{orderNo}
+            </foreach>
+            or t.warehouse_no IN
+            <foreach collection="orderNosList" open="(" separator="," close=")" item="warehouseNo">
+                #{warehouseNo}
+            </foreach>
+            or t.delivery_no IN
+            <foreach collection="orderNosList" open="(" separator="," close=")" item="deliveryNo">
+                #{deliveryNo}
+            </foreach>
+            )
+
+        </if>
         <if test="warehouseNoList != null and warehouseNoList.size() > 0">
             AND t.warehouse_no IN
             <foreach collection="warehouseNoList" open="(" separator="," close=")" item="warehouseNo">
@@ -214,7 +230,7 @@
         <if test="startTime != null and startTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} >= #{startTime} ]]></if>
         <if test="endTime != null and endTime != '' and timeType != null"><![CDATA[ AND ${timeType.field} <= #{endTime} ]]></if>
         <if test="warehouseMethodCode != null and warehouseMethodCode != ''">AND t.warehouse_method_code = #{warehouseMethodCode}</if>
-        <if test="deliveryNousD != null and deliveryNousD != ''">AND a.delivery_no like #{deliveryNousD}</if>
+            <if test="deliveryNousD != null and deliveryNousD != ''">AND a.delivery_no like #{deliveryNousD}</if>
 
     </sql>
 
