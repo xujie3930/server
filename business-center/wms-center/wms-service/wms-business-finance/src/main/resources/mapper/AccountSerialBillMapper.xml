@@ -110,17 +110,39 @@
                 and FASB.cus_code = #{cusCode}
             </if>
 
-<!--            <if test="billStartTime != null  and billStartTime !='' ">-->
-<!--                and FASB.payment_time <![CDATA[ >= ]]> (#{billStartTime})-->
-<!--            </if>-->
+            <if test="billStartTime != null  and billStartTime !='' ">
+                and FASB.payment_time <![CDATA[ >= ]]> (#{billStartTime})
+            </if>
 
-<!--            <if test="billEndTime != null  and billEndTime != ''">-->
-<!--                and FASB.payment_time <![CDATA[ <= ]]> (#{billEndTime})-->
-<!--            </if>-->
+            <if test="billEndTime != null  and billEndTime != ''">
+                and FASB.payment_time <![CDATA[ <= ]]> (#{billEndTime})
+            </if>
 
         </where>
         group by FASB.cus_code,FASB.currency_code
 
+    </select>
+
+    <select id="businessTotal" resultType="com.szmsd.finance.vo.BillBusinessTotalVO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
+
+        select FASB.charge_category as chargeCategory,FASB.currency_code as currencyCode,
+               FASB.remark,FASB.warehouse_name as warehouse,FASB.charge_type as chargeType,
+               sum(FASB.amount) as amount
+        from fss_account_serial_bill as FASB
+        <where>
+            <if test="cusCode != null and cusCode != ''">
+                and FASB.cus_code = #{cusCode}
+            </if>
+
+            <if test="billStartTime != null  and billStartTime !='' ">
+                and FASB.payment_time <![CDATA[ >= ]]> (#{billStartTime})
+            </if>
+
+            <if test="billEndTime != null  and billEndTime != ''">
+                and FASB.payment_time <![CDATA[ <= ]]> (#{billEndTime})
+            </if>
+        </where>
+        group by FASB.cus_code,FASB.currency_code
     </select>
 
 </mapper>

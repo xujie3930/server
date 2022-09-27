@@ -1,5 +1,6 @@
 package com.szmsd.finance;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.vo.BillBalanceVO;
@@ -25,12 +26,12 @@ public class AccountSerialBillTest {
     public void balancePage() {
 
         EleBillQueryVO queryVO = new EleBillQueryVO();
-        queryVO.setBillStartTime("2022-09-25 00:00:00");
+        queryVO.setBillStartTime("2022-06-15 00:00:00");
         queryVO.setBillEndTime("2022-09-26 23:59:59");
 
         List<BillBalanceVO> billBalanceVOS = accountSerialBillService.balancePage(queryVO);
 
-        System.out.println(JSONObject.toJSONString(billBalanceVOS));
+        System.out.println(JSON.toJSONString(billBalanceVOS));
 
     }
 }

@@ -131,11 +131,6 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
 
         List<InventorySkuVO> newInventoryList = inventoryList.stream().filter(item -> item.getAvailableInventory() > 0).collect(Collectors.toList());
 
-        if(warehouseCodeIn.equals("NJ")){
-
-            log.info("客户NJ仓库可用库存：{}",JSONObject.toJSONString(inventoryList));
-        }
-
         // 获取sku信息
         List<String> skuList = newInventoryList.stream().map(InventorySkuVO::getSku).collect(Collectors.toList());
         List<BaseProductMeasureDto> skuDataList = remoteComponent.listSku(skuList);
@@ -143,11 +138,6 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
 
         // 计算sku可用库存体积
         Map<String, List<InventorySkuVO>> collect = newInventoryList.stream().collect(Collectors.groupingBy(InventorySkuVO::getWarehouseCode));
-
-        if(warehouseCodeIn.equals("NJ")){
-
-            log.info("客户NJ仓库SKU：{}",JSONObject.toJSONString(collect));
-        }
 
         Set<Map.Entry<String, List<InventorySkuVO>>> inventorySet = collect.entrySet();
 
@@ -157,11 +147,6 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
             String warehouseCode = item.getKey();
 
             List<InventorySkuVO> inventorySkuVOS = item.getValue();
-
-            if(warehouseCode.equals("NJ")){
-
-                log.info("客户NJ仓库SKU：{}",JSONObject.toJSONString(inventorySkuVOS));
-            }
 
             List<SkuVolumeVO> skuVolumeVO = inventorySkuVOS.stream().map(skuR -> {
 
@@ -252,10 +237,6 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
         Integer searchQty = records.stream().mapToInt(InventoryRecordVO::getQuantity).sum();
 
         InventoryRecordQueryDTO recordQueryDTO = new InventoryRecordQueryDTO().setSku(sku).setWarehouseCode(warehouse).setTimeType(InventoryRecordQueryDTO.TimeType.OPERATE_ON).setStartTime(startTime).setEndTime(endTime).setType("1");
-
-        if(warehouse.equals("NJ")){
-            log.info("客户NJ仓库递归入库记录,查询参数:{}",recordQueryDTO);
-        }
 
         //查询数量大于1的记录
         recordQueryDTO.setQuantity(1);

@@ -207,11 +207,14 @@ public class ThreadRunnable {
      */
     private List<InventorySkuVolumeVO> getSkuVolume(InventorySkuVolumeQueryDTO dto) {
         R<List<InventorySkuVolumeVO>> result = inventoryFeignService.querySkuVolume(dto);
+        if(result.getCode() != 200){
+            log.error("getSkuVolume() failed: {}", result.getMsg());
+            return new ArrayList<>();
+        }
         List<InventorySkuVolumeVO> data = result.getData();
-        if (result.getCode() == 200 && CollectionUtils.isNotEmpty(data)) {
+        if(CollectionUtils.isNotEmpty(data)){
             return data;
         }
-        log.error("getSkuVolume() failed: {}", result.getMsg());
         return new ArrayList<>();
     }
 
@@ -223,9 +226,15 @@ public class ThreadRunnable {
     private Map<String, List<Inventory>> getWarehouseSku() {
         //查询所有可用库存大于0 sku
         R<List<Inventory>> result = inventoryFeignService.getWarehouseSku();
-        List<Inventory> data = result.getData();
-        if (result.getCode() == 200 && CollectionUtils.isNotEmpty(data)) {
-            return data.stream().collect(Collectors.groupingBy(Inventory::getWarehouseCode));
+
+        if (result != null && result.getCode() == 200) {
+            List<Inventory> data = result.getData();
+
+            if(CollectionUtils.isNotEmpty(data)){
+                return data.stream().collect(Collectors.groupingBy(Inventory::getWarehouseCode));
+            }
+
+            return new HashMap<>();
         }
         log.error("getWarehouseSku() failed: {}", result.getMsg());
         return new HashMap<>();

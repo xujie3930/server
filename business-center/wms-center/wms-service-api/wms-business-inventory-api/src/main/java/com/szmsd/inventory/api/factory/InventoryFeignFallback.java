@@ -31,9 +31,9 @@ public class InventoryFeignFallback implements FallbackFactory<InventoryFeignSer
             @Override
             public R<List<InventorySkuVolumeVO>> querySkuVolume(InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO) {
                 log.info("InventoryFeignFallback inventorySkuVolumeQueryDTO:{}", JSONObject.toJSONString(inventorySkuVolumeQueryDTO), throwable);
-                //return R.convertResultJson(throwable);
+                return R.convertResultJson(throwable);
                 //注释掉的原因：并发走太多FallbackFactory，导致线程停止
-                return null;
+                //return null;
             }
 
             @Override
