@@ -37,13 +37,13 @@ public class AccountSerialBillVitalController extends BaseController {
     //@PreAuthorize("@ss.hasPermi('PreRecharge:save')")
     @ApiOperation(value = "账单生成")
     @PostMapping("/generator")
-    public R<Integer> generatorBill(@RequestBody @Valid BillGeneratorRequestVO billRequestVO){
-        return accountSerialBillService.generatorBill(billRequestVO);
+    public void generatorBill(@RequestBody @Valid BillGeneratorRequestVO billRequestVO,HttpServletResponse response){
+         accountSerialBillService.generatorBill(billRequestVO,response);
     }
 
     @ApiOperation(value = "资金结余列表")
     @GetMapping("/balance-page")
-    public R<List<BillBalanceVO>> balancePage(EleBillQueryVO queryVO) {
+    public R<List<BillBalanceVO>> balancePage(@Valid EleBillQueryVO queryVO) {
 
         return R.ok(accountSerialBillService.balancePage(queryVO));
     }
