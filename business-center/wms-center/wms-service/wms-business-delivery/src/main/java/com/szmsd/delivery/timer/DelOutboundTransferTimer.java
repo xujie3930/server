@@ -80,7 +80,7 @@ public class DelOutboundTransferTimer {
         String key = applicationName + ":DelOutboundTransferTimer:processing";
         this.doWorker(key, () -> {
 
-            DelOutbound delOutbound = JSON.parseObject("{\"warehouseCode\":\"SP\",\"warehouseName\":null,\"orderType\":\"PackageTransfer\",\"orderTypeName\":\"转运出库\",\"sellerCode\":\"CNY373\",\"trackingNo\":\"\",\"shipmentRule\":\"XXX\",\"packingRule\":\"\",\"remark\":\"\",\"refNo\":\"\",\"refOrderNo\":\"\",\"isPackingByRequired\":false,\"isFirst\":false,\"newSku\":\"\",\"newSkuName\":null,\"customCode\":\"CNW759\",\"state\":\"DELIVERED\",\"deliveryMethod\":\"\",\"deliveryTime\":null,\"deliveryAgent\":\"\",\"deliveryInfo\":\"\",\"packageConfirm\":\"076001\",\"packageWeightDeviation\":0,\"length\":1.0,\"width\":1.0,\"height\":1.0,\"weight\":59.5,\"specifications\":\"1.0*1.0*1.0\",\"shipmentChannel\":\"\",\"isDefaultWarehouse\":false,\"isLabelBox\":false,\"boxNumber\":0,\"ioss\":\"\",\"codAmount\":0.00,\"availableInventory\":null,\"packings\":null,\"containerList\":null,\"combinations\":null,\"documentsFiles\":null,\"calcWeight\":0.0000,\"calcWeightUnit\":\"\",\"shipmentRetryLabel\":null,\"uploadBoxLabel\":null,\"amazonLogisticsRouteId\":null,\"houseNo\":null,\"delDays\":null,\"trackingDays\":null,\"checkFlag\":null,\"queryseShipmentDays\":null,\"querysetrackStayDays\":null,\"sourceType\":\"ADD\"}",
+            DelOutbound delOutbound = JSON.parseObject("{\"warehouseCode\":\"SP\",\"warehouseName\":null,\"orderType\":\"PackageTransfer\",\"orderTypeName\":\"转运出库\",\"sellerCode\":\"CNW759\",\"trackingNo\":\"\",\"shipmentRule\":\"XXX\",\"packingRule\":\"\",\"remark\":\"\",\"refNo\":\"\",\"refOrderNo\":\"\",\"isPackingByRequired\":false,\"isFirst\":false,\"newSku\":\"\",\"newSkuName\":null,\"customCode\":\"CNW759\",\"state\":\"DELIVERED\",\"deliveryMethod\":\"\",\"deliveryTime\":null,\"deliveryAgent\":\"\",\"deliveryInfo\":\"\",\"packageConfirm\":\"076001\",\"packageWeightDeviation\":0,\"length\":1.0,\"width\":1.0,\"height\":1.0,\"weight\":59.5,\"specifications\":\"1.0*1.0*1.0\",\"shipmentChannel\":\"\",\"isDefaultWarehouse\":false,\"isLabelBox\":false,\"boxNumber\":0,\"ioss\":\"\",\"codAmount\":0.00,\"availableInventory\":null,\"packings\":null,\"containerList\":null,\"combinations\":null,\"documentsFiles\":null,\"calcWeight\":0.0000,\"calcWeightUnit\":\"\",\"shipmentRetryLabel\":null,\"uploadBoxLabel\":null,\"amazonLogisticsRouteId\":null,\"houseNo\":null,\"delDays\":null,\"trackingDays\":null,\"checkFlag\":null,\"queryseShipmentDays\":null,\"querysetrackStayDays\":null,\"sourceType\":\"ADD\"}",
                     DelOutbound.class);
 
             DelOutboundDetail delOutboundDetail = JSON.parseObject("{\"warehouseCode\":\"SP\",\"warehouseName\":null,\"orderType\":\"PackageTransfer\",\"orderTypeName\":\"转运出库\",\"sellerCode\":\"CNY373\",\"trackingNo\":\"\",\"shipmentRule\":\"XXX\",\"packingRule\":\"\",\"remark\":\"\",\"refNo\":\"\",\"refOrderNo\":\"\",\"isPackingByRequired\":false,\"isFirst\":false,\"newSku\":\"\",\"newSkuName\":null,\"customCode\":\"CNW759\",\"state\":\"REVIEWED\",\"deliveryMethod\":\"\",\"deliveryTime\":null,\"deliveryAgent\":\"\",\"deliveryInfo\":\"\",\"packageConfirm\":\"076001\",\"packageWeightDeviation\":0,\"length\":1.0,\"width\":1.0,\"height\":1.0,\"weight\":59.5,\"specifications\":\"1.0*1.0*1.0\",\"shipmentChannel\":\"\",\"isDefaultWarehouse\":false,\"isLabelBox\":false,\"boxNumber\":0,\"ioss\":\"\",\"codAmount\":0.00,\"availableInventory\":null,\"address\":{\"consignee\":\"Stephanie Mccrillis\",\"countryCode\":\"US\",\"country\":\"United States\",\"zone\":\"\",\"stateOrProvince\":\"Louisville\",\"city\":\"Kentucky\",\"street1\":\"5342 Poindexter Dr Apt D\",\"street2\":\"\",\"street3\":\"\",\"postCode\":\"40291\",\"phoneNo\":\"14157959984\",\"email\":\"3047671706@qq.com\"},\"details\":[{\"sku\":\"\",\"qty\":1,\"newLabelCode\":\"\",\"availableInventory\":null,\"productName\":\"dress\",\"initWeight\":null,\"initLength\":null,\"initWidth\":null,\"initHeight\":null,\"initVolume\":null,\"weight\":null,\"length\":null,\"width\":null,\"height\":null,\"volume\":null,\"bindCode\":\"\",\"bindCodeName\":null,\"productNameChinese\":\"裙子\",\"declaredValue\":5.0,\"productDescription\":null,\"productAttribute\":\"GeneralCargo\",\"productAttributeName\":null,\"electrifiedMode\":\"\",\"electrifiedModeName\":null,\"batteryPackaging\":\"\",\"batteryPackagingName\":null,\"hsCode\":null,\"orderNo\":\"CKCNY37322092600000008\",\"editionImage\":null,\"ioss\":null,\"boxMark\":null,\"skuFile\":null,\"boxMarkFile\":null,\"brandFlag\":null,\"brandUrl\":null,\"boxLength\":null,\"boxWidth\":null,\"boxHeight\":null,\"boxWeight\":null,\"operationType\":null}],\"packings\":null,\"containerList\":null,\"combinations\":null,\"documentsFiles\":null,\"calcWeight\":0.0000,\"calcWeightUnit\":\"\",\"shipmentRetryLabel\":null,\"uploadBoxLabel\":null,\"amazonLogisticsRouteId\":null,\"houseNo\":null,\"delDays\":null,\"trackingDays\":null,\"checkFlag\":null,\"queryseShipmentDays\":null,\"querysetrackStayDays\":null}",
@@ -90,9 +90,10 @@ public class DelOutboundTransferTimer {
                     DelOutboundAddress.class);
 
             String prefix = "CK";
-            delOutbound.setOrderNo(prefix + "CNW759 " + serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO));
-
+            delOutbound.setOrderNo(prefix + "CNW759" + serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO));
+            delOutbound.setTrackingNo(delOutbound.getOrderNo());
             delOutbound.setCreateTime(new Date());
+            delOutbound.setSourceType("time");
             delOutboundService.getBaseMapper().insert(delOutbound);
 
 
@@ -115,13 +116,13 @@ public class DelOutboundTransferTimer {
         this.doWorker(key, () -> {
 
             //第一天的轨迹
-            processing2(new Date(), "Order details confirmed， preparing product");
+            processing2(new Date(), "Purchasing", "Order details confirmed， preparing product");
 
             //第四天
-            processing2(addAndSubtractDaysByGetTime(new Date(), -4), "Packing");
+            processing2(addAndSubtractDaysByGetTime(new Date(), -4), "Purchasing", "Packing");
 
             //第八天
-            processing2(addAndSubtractDaysByGetTime(new Date(), -8), "Packed and shipping to transit warehouse");
+            processing2(addAndSubtractDaysByGetTime(new Date(), -8), "Purchasing", "Packed and shipping to transit warehouse");
 
         });
     }
@@ -129,10 +130,12 @@ public class DelOutboundTransferTimer {
         return new Date(dateTime.getTime() + n * 24 * 60 * 60 * 1000L);
     }
 
-    private void processing2(Date date, String description){
+    private void processing2(Date date, String trackingStatus, String description){
 
         QueryWrapper<DelOutbound> queryWrapper = new QueryWrapper();
         queryWrapper.eq("seller_code", "CNW759");
+        queryWrapper.eq("source_type", "time");
+
         queryWrapper.eq("date_format(create_time,'%Y-%m-%d')", DateUtil.format(date, "yyyy-MM-dd"));
         List<DelOutbound> list = delOutboundService.list(queryWrapper);
         if(list.isEmpty()){
@@ -143,11 +146,13 @@ public class DelOutboundTransferTimer {
         for (DelOutbound delOutbound: list){
             DelTrack delTrack = new DelTrack();
             delTrack.setSource("1");
-            delTrack.setTrackingStatus("");
+            delTrack.setTrackingNo(delOutbound.getOrderNo());
+            delTrack.setTrackingStatus(trackingStatus);
             delTrack.setDescription(description);
             delTrack.setTrackingTime(new Date());
             delTrack.setOrderNo(delOutbound.getOrderNo());
             delTrack.setCreateTime(new Date());
+            delTrackList.add(delTrack);
         }
         delTrackService.saveBatch(delTrackList);
 
