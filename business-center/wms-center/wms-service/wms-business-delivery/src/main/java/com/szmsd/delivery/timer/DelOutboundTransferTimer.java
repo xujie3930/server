@@ -93,6 +93,7 @@ public class DelOutboundTransferTimer {
             delOutbound.setOrderNo(prefix + "CNW759" + serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO));
             delOutbound.setTrackingNo(delOutbound.getOrderNo());
             delOutbound.setCreateTime(new Date());
+            delOutbound.setSourceType("time");
             delOutboundService.getBaseMapper().insert(delOutbound);
 
 
@@ -133,6 +134,8 @@ public class DelOutboundTransferTimer {
 
         QueryWrapper<DelOutbound> queryWrapper = new QueryWrapper();
         queryWrapper.eq("seller_code", "CNW759");
+        queryWrapper.eq("source_type", "time");
+
         queryWrapper.eq("date_format(create_time,'%Y-%m-%d')", DateUtil.format(date, "yyyy-MM-dd"));
         List<DelOutbound> list = delOutboundService.list(queryWrapper);
         if(list.isEmpty()){
