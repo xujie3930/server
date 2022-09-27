@@ -11,6 +11,7 @@ import com.szmsd.bas.vo.BasSellerWrapVO;
 import com.szmsd.common.core.constant.SecurityConstants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
@@ -117,13 +118,12 @@ public class BasSellerController extends BaseController{
     */
      @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:export')")
      @Log(title = "模块", businessType = BusinessType.EXPORT)
-     @GetMapping("/export")
+     @PostMapping("/export")
      @ApiOperation(value = "导出模块列表",notes = "导出模块列表")
-     public void export(HttpServletResponse response, BasSeller basSeller) throws IOException {
-     /*List<BasSellerSysDto> list = basSellerService.selectBasSellerList(basSeller);
+     public void export(HttpServletResponse response, @RequestBody BasSellerQueryDto basSeller) throws IOException {
+     List<BasSellerSysDto> list = basSellerService.selectBasSellerexportList(basSeller);
      ExcelUtil<BasSellerSysDto> util = new ExcelUtil<BasSellerSysDto>(BasSellerSysDto.class);
-        util.exportExcel(response,list, "BasSeller");*/
-
+        util.exportExcel(response,list, "BasSeller");
      }
 
     /**

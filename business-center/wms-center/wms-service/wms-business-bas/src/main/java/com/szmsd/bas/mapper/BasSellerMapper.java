@@ -26,4 +26,6 @@ public interface BasSellerMapper extends BaseMapper<BasSeller> {
 
 
     List<Map>  selectfssAccountBalance(BasSellerQueryDto basSeller);
+
+    List<BasSellerSysDto> selectBasSellers(@Param(Constants.WRAPPER) QueryWrapper<BasSeller> queryWrapper,@Param("reviewState")Boolean reviewState);
 }
