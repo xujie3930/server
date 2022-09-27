@@ -44,6 +44,7 @@ import com.szmsd.pack.domain.PackageDeliveryConditions;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
+import com.szmsd.putinstorage.domain.dto.ReceiptRequest;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -57,6 +58,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -260,6 +262,14 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             delOutbound.setOrderNo(orderNo);
             delOutbound.setState(DelOutboundStateEnum.WHSE_PROCESSING.getCode());
             DelOutboundOperationLogEnum.OPN_SHIPMENT.listener(delOutbound);
+
+
+            ReceiptRequest receiptRequest = new ReceiptRequest();
+            receiptRequest.setPackageOrderNo(orderNo);
+
+            receiptRequest.setOperateOn(DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+            R r =inboundReceiptFeignService.receipt(receiptRequest);
+            logger.info("{}inbound/receipt:{}" ,orderNo, r);
         }
     }
 
