@@ -38,7 +38,7 @@ public interface IAccountSerialBillService extends IService<AccountSerialBill> {
      * @param billRequestVO
      * @return
      */
-    void generatorBill(BillGeneratorRequestVO billRequestVO, HttpServletResponse response);
+    R<Integer> generatorBill(BillGeneratorRequestVO billRequestVO);
 
     /**
      * 资金结余
