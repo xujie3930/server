@@ -347,7 +347,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             delOutbound.setShipmentService(furtherHandlerDto.getShipmentService());
 
             if(StringUtils.isNotEmpty(furtherHandlerDto.getTrackingAcquireType())){
-                delOutbound.setTrackingNo(furtherHandlerDto.getTrackingAcquireType());
+                delOutbound.setTrackingAcquireType(furtherHandlerDto.getTrackingAcquireType());
             }
 
         }

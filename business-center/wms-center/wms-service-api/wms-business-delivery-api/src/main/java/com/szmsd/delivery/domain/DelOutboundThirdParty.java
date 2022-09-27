@@ -60,6 +60,14 @@ public class DelOutboundThirdParty extends BaseEntity {
     @Excel(name = "出库单号")
     private String orderNo;
 
+    @ApiModelProperty(value = "单号")
+    @TableField(exist = false)
+    private  String orderNoes;
+
+    @ApiModelProperty(value = "orderNosList")
+    @TableField(exist = false)
+    private List<String> orderNosList;
+
     @ApiModelProperty(value = "处理状态")
     @Excel(name = "处理状态")
     private String state;
