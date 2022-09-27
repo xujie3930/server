@@ -2,6 +2,37 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.finance.mapper.AccountSerialBillMapper">
 
+    <resultMap id="DirectDeliveryVOMap" type="com.szmsd.finance.vo.BillDirectDeliveryTotalVO">
+        <result column="cus_code" property="cusCode"/>
+        <result column="business_category" property="businessCategory"/>
+        <result column="calc_weight" property="calcWeight"/>
+        <result column="create_time" property="createTime"/>
+        <result column="currency_code" property="currencyCode"/>
+        <result column="destination_delivery" property="destinationDelivery"/>
+        <result column="no" property="orderNo"/>
+        <result column="trace_id" property="traceId"/>
+        <result column="specifications" property="specifications"/>
+        <result column="ref_no" property="refNo"/>
+        <result column="order_type" property="orderType"/>
+        <result column="warehouse_code" property="warehouseCode"/>
+        <result column="product_name" property="productName"/>
+        <result column="sku" property="sku"/>
+        <result column="weight" property="weight"/>
+        <result column="forecast_weight" property="forecastWeight"/>
+        <result column="total_amount" property="totalAmount"/>
+        <result column="freight_fee" property="freightFee"/>
+        <result column="warehouse_fee" property="warehouseFee"/>
+        <result column="ex_warehourse_fee" property="exWarehourseFee"/>
+        <result column="package_fee" property="packageFee"/>
+        <result column="hander_fee" property="handerFee"/>
+        <result column="remote_fee" property="remoteFee"/>
+        <result column="fuel_fee" property="fuelFee"/>
+        <result column="return_fee" property="returnFee"/>
+        <result column="package_destrue_fee" property="packageDestrueFee"/>
+        <result column="other_fee" property="otherFee"/>
+
+    </resultMap>
+
     <select id="selectPageList" resultType="com.szmsd.finance.domain.AccountSerialBill" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
 
         SELECT
@@ -123,7 +154,7 @@
 
     </select>
 
-    <select id="businessTotal" resultType="com.szmsd.finance.vo.BillBusinessTotalVO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
+    <select id="selectBusinessTotal" resultType="com.szmsd.finance.vo.BillBusinessTotalVO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
 
         select FASB.charge_category as chargeCategory,FASB.currency_code as currencyCode,
                FASB.remark,FASB.warehouse_name as warehouse,FASB.charge_type as chargeType,
@@ -143,6 +174,51 @@
             </if>
         </where>
         group by FASB.cus_code,FASB.currency_code
+    </select>
+
+    <select id="selectDirectDelivery" resultMap="DirectDeliveryVOMap" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
+
+        select
+            FASB.business_category,FASB.`no`,FASB.currency_code,
+            DOB.trace_id,DOB.ref_no,DOB.warehouse_code,
+            DOB.destination_delivery,DOB.weight,DOB.forecast_weight,
+            DOB.calc_weight,DOB.create_time,
+            DOB.specifications,
+            DOD.product_name,DOD.sku,
+            sum(FASB.amount) as total_amount,
+            sum(case when FASB.charge_category = '物流基础费' then abs(FASB.amount) else 0 end ) as freight_fee,
+            sum(case when FASB.charge_category = '操作费' or FASB.charge_category = '特殊操作费' or FASB.charge_category='业务操作' then abs(FASB.amount) else 0 end) as ex_warehourse_fee,
+            sum(case when FASB.charge_category = '物料费' then abs(FASB.amount) else 0 end) as package_fee,
+            sum(case when FASB.charge_category = '处理费' then abs(FASB.amount) else 0 end) as hander_fee,
+            sum(case when FASB.charge_category = '燃油附加费' then abs(FASB.amount) else 0 end) as fuel_fee,
+            sum(case when FASB.charge_category = '偏远地区费' then abs(FASB.amount) else 0 end) as remote_fee,
+            sum(case when
+                FASB.charge_category = '偏远地区费'  or FASB.charge_category = '住宅派送费' or
+                FASB.charge_category = '增值税' or FASB.charge_category = '挂号费' or
+                FASB.charge_category = '超大附加费' or FASB.charge_category = '超重处理费' or
+                FASB.charge_category = '退费'
+
+                then abs(FASB.amount) else 0 end) as other_fee
+        from fss_account_serial_bill as FASB
+        inner join del_outbound as DOB on FASB.`no` = DOB.order_no
+        left join del_outbound_detail as DOD on DOB.order_no = DOD.order_no
+        <where>
+            and DOB.order_type in ('PackageTransfer') and DOB.del_flag = 0
+            <if test="cusCode != null and cusCode != ''">
+                and FASB.cus_code = #{cusCode}
+            </if>
+
+            <if test="billStartTime != null  and billStartTime !='' ">
+                and FASB.payment_time <![CDATA[ >= ]]> #{billStartTime}
+            </if>
+
+            <if test="billEndTime != null  and billEndTime != ''">
+                and FASB.payment_time <![CDATA[ <= ]]> #{billEndTime}
+            </if>
+        </where>
+
+        group by FASB.business_category,FASB.no,FASB.currency_code
+
     </select>
 
 </mapper>

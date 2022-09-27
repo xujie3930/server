@@ -1,5 +1,6 @@
 package com.szmsd.delivery.imported;
 
+import cn.hutool.core.date.DateUtil;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.delivery.dto.*;
@@ -8,10 +9,9 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -51,7 +51,22 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
             outboundDto.setShipmentRule(dto.getShipmentRule());
             outboundDto.setRemark(dto.getRemark());
             outboundDto.setDeliveryMethod(super.deliveryMethodCache.get(dto.getDeliveryMethodName()));
-            outboundDto.setDeliveryTime(dto.getDeliveryTime());
+
+            if(dto.getDeliveryTime() != null){
+                outboundDto.setDeliveryTime(dto.getDeliveryTime());
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Date date = dto.getDeliveryTime(); // date 包括时分秒
+                String s = sdf.format(date); // 把带时分秒的 date 转为 yyyy-MM-dd 格式的字符串
+                try {
+                    Date date2 = sdf.parse(s); // 把上面的字符串解析为日期类型
+                    outboundDto.setDeliveryTime(date2);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
             outboundDto.setDeliveryAgent(dto.getDeliveryAgent());
             outboundDto.setDeliveryInfo(dto.getDeliveryInfo());
             // 自提，销毁，新SKU不处理地址信息
