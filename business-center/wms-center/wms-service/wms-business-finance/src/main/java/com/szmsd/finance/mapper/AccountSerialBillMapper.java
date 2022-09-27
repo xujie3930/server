@@ -22,5 +22,5 @@ public interface AccountSerialBillMapper extends BaseMapper<AccountSerialBill> {
     List<AccountBalanceBillResultDTO> findAccountBillResultData(EleBillQueryVO eleBillQueryVO);
 
 
-    List<BillBusinessTotalVO> businessTotal(EleBillQueryVO queryVO);
+    List<BillBusinessTotalVO> selectBusinessTotal(EleBillQueryVO queryVO);
 }

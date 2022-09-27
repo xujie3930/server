@@ -12,11 +12,13 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.vo.DelOutboundListVO;
+import com.szmsd.finance.domain.AccountBillRecord;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountBalanceBillResultDTO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
@@ -34,11 +36,12 @@ import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -67,6 +70,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     @Resource
     private AccountBalanceLogMapper accountBalanceLogMapper;
+
+    @Value("${filepath}")
+    private String filePath;
 
 
     @Override
@@ -320,7 +326,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     }
 
     @Override
-    public void generatorBill(BillGeneratorRequestVO billRequestVO, HttpServletResponse response) {
+    public R<Integer> generatorBill(BillGeneratorRequestVO billRequestVO) {
 
         String cusCode = billRequestVO.getCusCode();
         R<BasSellerInfoVO> basSellerInfoVOR = basSellerFeignService.getInfoBySellerCode(cusCode);
@@ -335,7 +341,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             throw new RuntimeException("生成失败，无法获取客户基本信息");
         }
 
-        String fileName = "template";
+        Long current = System.currentTimeMillis();
+
+        String fileName = "dm-oms-template-"+current+".xlsx";
         String modelPath = "classpath:template/dm-oms-template.xlsx";
         InputStream inputStream = null;
 
@@ -350,7 +358,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
         Map<Integer, List<?>> otherAndDataMap = new HashMap<>();
 
-        //sheet 1.客戶基本信息、资金账结余、业务账汇总
+        //sheet 0.客戶基本信息、资金账结余、业务账汇总
         List<BasSellerExcelInfoVO> cusTitleMap = this.generatorTitle(billRequestVO,basSellerInfoVO);
 
         EleBillQueryVO queryVO = new EleBillQueryVO();
@@ -363,30 +371,64 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         List<BillBalanceExcelResultVO> billBalanceExcelResultVOS = this.generatorBillExcelResult(billBalanceVOS);
 
         //业务账汇总
-        List<BillBusinessTotalVO> businessTotalVOS = this.businessTotal(queryVO);
-
+        List<BillBusinessTotalVO> businessTotalVOS = this.selectBusinessTotal(queryVO);
         sheetAndDataMap.put(0,billBalanceExcelResultVOS);
         titleDataMap.put(0,cusTitleMap);
         otherAndDataMap.put(0,businessTotalVOS);
 
+        //sheet 1.国内直发统计
+        List<BillDirectDeliveryTotalVO> directDeliverys = this.selectDirectDelivery(queryVO);
 
-        //sheet 2.国内直发统计
 
-        //sheet 3.仓储服务
+        //sheet 2.仓储服务
 
-        //sheet 4.仓租
+        //sheet 3.仓租
 
-        //sheet 5.大货服务
+        //sheet 4.大货服务
 
-        //sheet 6.充值&提现&转换&转账
+        //sheet 5.充值&提现&转换&转账
 
-        //sheet 7.优惠&赔偿
+        //sheet 6.优惠&赔偿
 
-        //step end : 报错电子账单记录表
+        try{
 
-        ExcelUtil.fillReportWithEasyExcel(response,"bas",titleDataMap,"bill",sheetAndDataMap,"business",otherAndDataMap,fileName,inputStream);
+            String f = filePath + fileName;
+            File file = new File(f);
+            ExcelUtil.exportFile(file,"bas",titleDataMap,"bill",sheetAndDataMap,"business",otherAndDataMap,fileName,inputStream);
 
-        //return R.ok();
+            //step end : 保存电子账单记录表
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+
+            AccountBillRecord accountBillRecord = new AccountBillRecord();
+            Date pbillStartTime = DateUtils.parseDate(queryVO.getBillStartTime());
+            Date pbillendTime = DateUtils.parseDate(queryVO.getBillEndTime());
+            accountBillRecord.setBillStartTime(pbillStartTime);
+            accountBillRecord.setBillEndTime(pbillendTime);
+            accountBillRecord.setCusCode(cusCode);
+            accountBillRecord.setDeleted(0);
+            accountBillRecord.setVersion(0L);
+            accountBillRecord.setCreateBy(loginUser.getSellerCode());
+            accountBillRecord.setCreateByName(loginUser.getUsername());
+            accountBillRecord.setFileName(fileName);
+            accountBillRecord.setFileUrl(f);
+            accountBillRecord.setBuildStatus(2);
+            accountBillRecord.setCreateTime(new Date());
+            accountBillRecordMapper.insert(accountBillRecord);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            log.error("文件生成失败:",e);
+            return R.failed("文件生成失败");
+        }
+
+        return R.ok();
+    }
+
+    private List<BillDirectDeliveryTotalVO> selectDirectDelivery(EleBillQueryVO queryVO) {
+
+        
+
+        return null;
     }
 
     /**
@@ -394,9 +436,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
      * @param queryVO
      * @return
      */
-    private List<BillBusinessTotalVO> businessTotal(EleBillQueryVO queryVO) {
+    private List<BillBusinessTotalVO> selectBusinessTotal(EleBillQueryVO queryVO) {
 
-        List<BillBusinessTotalVO> resultVOS = accountSerialBillMapper.businessTotal(queryVO);
+        List<BillBusinessTotalVO> resultVOS = accountSerialBillMapper.selectBusinessTotal(queryVO);
 
         return resultVOS;
     }

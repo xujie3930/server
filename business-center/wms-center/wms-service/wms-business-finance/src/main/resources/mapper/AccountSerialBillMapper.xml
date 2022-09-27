@@ -123,7 +123,7 @@
 
     </select>
 
-    <select id="businessTotal" resultType="com.szmsd.finance.vo.BillBusinessTotalVO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
+    <select id="selectBusinessTotal" resultType="com.szmsd.finance.vo.BillBusinessTotalVO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
 
         select FASB.charge_category as chargeCategory,FASB.currency_code as currencyCode,
                FASB.remark,FASB.warehouse_name as warehouse,FASB.charge_type as chargeType,
