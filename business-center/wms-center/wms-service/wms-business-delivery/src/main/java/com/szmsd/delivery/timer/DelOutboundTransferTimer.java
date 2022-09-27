@@ -153,8 +153,11 @@ public class DelOutboundTransferTimer {
             delTrack.setOrderNo(delOutbound.getOrderNo());
             delTrack.setCreateTime(new Date());
             delTrackList.add(delTrack);
+
+            delOutbound.setTrackingStatus(trackingStatus);
         }
         delTrackService.saveBatch(delTrackList);
+        delOutboundService.updateBatchById(list);
 
     }
 
