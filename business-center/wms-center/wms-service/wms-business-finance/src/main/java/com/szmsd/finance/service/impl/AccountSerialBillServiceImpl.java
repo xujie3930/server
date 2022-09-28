@@ -358,7 +358,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
         Map<Integer, List<?>> otherAndDataMap = new HashMap<>();
 
-        //sheet 0.客戶基本信息、资金账结余、业务账汇总
+        //sheet 1.客戶基本信息、资金账结余、业务账汇总
         List<BasSellerExcelInfoVO> cusTitleMap = this.generatorTitle(billRequestVO,basSellerInfoVO);
 
         EleBillQueryVO queryVO = new EleBillQueryVO();
@@ -371,32 +371,37 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         List<BillBalanceExcelResultVO> billBalanceExcelResultVOS = this.generatorBillExcelResult(billBalanceVOS);
 
         //业务账汇总
-        List<BillBusinessTotalVO> businessTotalVOS = this.selectBusinessTotal(queryVO);
+        List<BillBusinessTotalVO> businessTotalVOS = this.businessTotal(queryVO);
+
         sheetAndDataMap.put(0,billBalanceExcelResultVOS);
         titleDataMap.put(0,cusTitleMap);
         otherAndDataMap.put(0,businessTotalVOS);
 
-        //sheet 1.国内直发统计
-        List<BillDirectDeliveryTotalVO> directDeliverys = this.selectDirectDelivery(queryVO);
+        String f = filePath + fileName;
+
+        File file = new File(f);
 
 
-        //sheet 2.仓储服务
+        //sheet 2.国内直发统计
 
-        //sheet 3.仓租
+        //sheet 3.仓储服务
 
-        //sheet 4.大货服务
+        //sheet 4.仓租
 
-        //sheet 5.充值&提现&转换&转账
+        //sheet 5.大货服务
 
-        //sheet 6.优惠&赔偿
+        //sheet 6.充值&提现&转换&转账
+
+        //sheet 7.优惠&赔偿
+
+        //step end : 报错电子账单记录表
 
         try{
 
-            String f = filePath + fileName;
-            File file = new File(f);
+
             ExcelUtil.exportFile(file,"bas",titleDataMap,"bill",sheetAndDataMap,"business",otherAndDataMap,fileName,inputStream);
 
-            //step end : 保存电子账单记录表
+
             LoginUser loginUser = SecurityUtils.getLoginUser();
 
             AccountBillRecord accountBillRecord = new AccountBillRecord();
@@ -424,21 +429,14 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         return R.ok();
     }
 
-    private List<BillDirectDeliveryTotalVO> selectDirectDelivery(EleBillQueryVO queryVO) {
-
-        
-
-        return null;
-    }
-
     /**
      * 业务类型汇总
      * @param queryVO
      * @return
      */
-    private List<BillBusinessTotalVO> selectBusinessTotal(EleBillQueryVO queryVO) {
+    private List<BillBusinessTotalVO> businessTotal(EleBillQueryVO queryVO) {
 
-        List<BillBusinessTotalVO> resultVOS = accountSerialBillMapper.selectBusinessTotal(queryVO);
+        List<BillBusinessTotalVO> resultVOS = accountSerialBillMapper.businessTotal(queryVO);
 
         return resultVOS;
     }
