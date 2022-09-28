@@ -42,7 +42,6 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     @Resource
     private ISysDictDataService sysDictDataService;
 
-
     @Override
 //    @DataScope("cus_code")
     public List<AccountSerialBill> listPage(AccountSerialBillDTO dto) {
@@ -286,7 +285,6 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
         return flag;
     }
-
 
 
 }
