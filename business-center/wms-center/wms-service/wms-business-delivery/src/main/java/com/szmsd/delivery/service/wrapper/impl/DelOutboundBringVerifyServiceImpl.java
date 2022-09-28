@@ -753,7 +753,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     builder.append(MessageUtil.to("创建承运商物流订单失败，调用承运商系统失败，返回错误信息为空",
                             "Failed to create the carrier logistics order, failed to call the carrier system, and the returned error message is blank"));
                 }
-                if(StringUtils.contains(builder.toString(), "提交失败!【订单号"+delOutbound.getOrderNo()+"重复】")){
+                if(StringUtils.contains(builder.toString(), "提交失败!【订单号"+delOutbound.getOrderNo()+"重复】") || StringUtils.contains(builder.toString(), "派送标签还未生成")){
                     logger.info("创建承运商物流订单{}第三方失败1exceptionMessage，{}", delOutbound.getOrderNo(), builder.toString());
                     this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, delOutbound.getTrackingNo(), null);
                 }else{
@@ -767,7 +767,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         } else {
             String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError(), true), "创建承运商物流订单失败，调用承运商系统失败");
             logger.info("创建承运商物流订单{}接口失败exceptionMessage，{}", delOutbound.getOrderNo(), exceptionMessage);
-            if(StringUtils.contains(exceptionMessage, "提交失败!【订单号"+delOutbound.getOrderNo()+"重复】")){
+            if(StringUtils.contains(exceptionMessage, "提交失败!【订单号"+delOutbound.getOrderNo()+"重复】")|| StringUtils.contains(exceptionMessage, "派送标签还未生成")){
                 //发货指令会因为供应商不允许创建重复订单的原因
                 this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, delOutbound.getTrackingNo(), exceptionMessage);
                 return null;
