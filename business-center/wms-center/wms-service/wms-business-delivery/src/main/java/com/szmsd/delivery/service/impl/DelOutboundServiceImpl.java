@@ -314,45 +314,55 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 detailDtos.add(BeanMapperUtil.map(detail, DelOutboundDetailVO.class));
                 skus.add(detail.getSku());
             }
-            InventoryAvailableQueryDto inventoryAvailableQueryDto = new InventoryAvailableQueryDto();
-            inventoryAvailableQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
-            inventoryAvailableQueryDto.setCusCode(delOutbound.getSellerCode());
-            inventoryAvailableQueryDto.setSkus(skus);
-            // 可用库存为0的也需要查询出来
-            inventoryAvailableQueryDto.setQueryType(2);
-            // 集运出库的
-            if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType())) {
-                inventoryAvailableQueryDto.setSource("084002");
-            }
-            List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList2(inventoryAvailableQueryDto);
-            // 去查询SKU的信息，集运出库需要查看产品详情，需要单独去查询
-            Map<String, BaseProduct> baseProductMap = null;
-            if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType())) {
+
+            if(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())){
+                //转运出库单，详情界面按客户录入的显示
+
+
+            }else if(DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType())){
+                //集运按sku带出来
                 BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
                 conditionQueryDto.setSkus(skus);
+                conditionQueryDto.setSellerCode(delOutbound.getSellerCode());
                 List<BaseProduct> baseProductList = this.baseProductClientService.queryProductList(conditionQueryDto);
                 if (CollectionUtils.isNotEmpty(baseProductList)) {
-                    baseProductMap = baseProductList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (a, b) -> a));
+                    Map<String, BaseProduct>  baseProductMap = baseProductList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (a, b) -> a));
+                    for (DelOutboundDetailVO vo : detailDtos) {
+                        BaseProduct available = baseProductMap.get(vo.getSku());
+                        if (null != available) {
+                            BeanMapperUtil.map(available, vo);
+                        }
+                    }
                 }
-            }
-            Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
-            if (CollectionUtils.isNotEmpty(availableList)) {
-                for (InventoryAvailableListVO vo : availableList) {
-                    availableMap.put(vo.getSku(), vo);
+            }else {
+                InventoryAvailableQueryDto inventoryAvailableQueryDto = new InventoryAvailableQueryDto();
+                inventoryAvailableQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
+                inventoryAvailableQueryDto.setCusCode(delOutbound.getSellerCode());
+                inventoryAvailableQueryDto.setSkus(skus);
+                // 可用库存为0的也需要查询出来
+                inventoryAvailableQueryDto.setQueryType(2);
+               /* // 集运出库的
+                if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType())) {
+                    inventoryAvailableQueryDto.setSource("084002");
+                }*/
+                List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList2(inventoryAvailableQueryDto);
+                Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
+                if (CollectionUtils.isNotEmpty(availableList)) {
+                    for (InventoryAvailableListVO vo : availableList) {
+                        availableMap.put(vo.getSku(), vo);
+                    }
                 }
-            }
-            for (DelOutboundDetailVO vo : detailDtos) {
-                InventoryAvailableListVO available = availableMap.get(vo.getSku());
-                if (null != available) {
-                    BeanMapperUtil.map(available, vo);
-                }
-                if (DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType()) && null != baseProductMap) {
-                    BaseProduct baseProduct = baseProductMap.get(vo.getSku());
-                    if (null != baseProduct) {
-                        vo.setProductDescription(baseProduct.getProductDescription());
+                for (DelOutboundDetailVO vo : detailDtos) {
+                    InventoryAvailableListVO available = availableMap.get(vo.getSku());
+                    if (null != available) {
+                        BeanMapperUtil.map(available, vo);
                     }
                 }
             }
+
+
+
+
             delOutboundVO.setDetails(detailDtos);
         }
         // 批量出库

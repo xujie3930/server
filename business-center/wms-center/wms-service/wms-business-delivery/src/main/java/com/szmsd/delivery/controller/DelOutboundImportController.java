@@ -300,7 +300,7 @@ public class DelOutboundImportController extends BaseController {
 
 
             // 获取导入的数据
-            List<DelOutboundDto> dtoList = new DelOutboundCollectionImportContainer(dataList, countryList, detailList, importValidationData, sellerCode).get();
+            List<DelOutboundDto> dtoList = new DelOutboundCollectionImportContainer(dataList, countryList, detailList, importValidationData, sellerCode, productMap).get();
             // 批量新增
             // 批量新增
             List<DelOutboundAddResponse> outboundAddResponseList = this.delOutboundService.insertDelOutbounds(dtoList);
