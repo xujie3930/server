@@ -323,7 +323,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 //集运按sku带出来
                 BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
                 conditionQueryDto.setSkus(skus);
-                conditionQueryDto.setWarehouseCode(delOutbound.getWarehouseCode());
                 conditionQueryDto.setSellerCode(delOutbound.getSellerCode());
                 List<BaseProduct> baseProductList = this.baseProductClientService.queryProductList(conditionQueryDto);
                 if (CollectionUtils.isNotEmpty(baseProductList)) {
