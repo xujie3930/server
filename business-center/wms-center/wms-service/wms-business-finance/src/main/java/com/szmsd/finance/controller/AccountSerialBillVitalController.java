@@ -3,7 +3,7 @@ package com.szmsd.finance.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
-import com.szmsd.finance.service.IAccountSerialBillService;
+import com.szmsd.finance.service.AccountBillRecordService;
 import com.szmsd.finance.vo.BillBalanceVO;
 import com.szmsd.finance.vo.BillGeneratorRequestVO;
 import com.szmsd.finance.vo.EleBillQueryVO;
@@ -23,7 +23,7 @@ import java.util.List;
 public class AccountSerialBillVitalController extends BaseController {
 
     @Resource
-    private IAccountSerialBillService accountSerialBillService;
+    private AccountBillRecordService accountSerialBillService;
 
     //@AutoValue
     //@PreAuthorize("@ss.hasPermi('AccountSerialBill:listPage')")
