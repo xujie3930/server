@@ -63,9 +63,14 @@ public class DelOutboundCollectionDetailImportValidation implements ImportValida
 //        this.importContext.isEmpty(object.getProductNameChinese(), rowIndex, 3, null, "中文申报品名不能为空");
 //        this.importContext.isNull(object.getDeclaredValue(), rowIndex, 4, null, "申报价值不能为空");
 
-        this.importContext.isEmpty(object.getCode(), rowIndex, 2, null, "产品编码不能为空");
+        if(!this.importContext.isEmpty(object.getCode(), rowIndex, 2, null, "产品编码不能为空")){
+            String name = this.importContext.productMap.get(object.getCode()) != null ? "1" : null;
+            this.importContext.isEmpty(name, rowIndex, 2, name, "产品编码不存在");
+        }
 
         this.importContext.isNull(object.getQty(), rowIndex, 3, null, "数量不能为空");
+
+
         /*String productAttributeName = object.getProductAttributeName();
         if (this.importContext.isEmpty(productAttributeName, rowIndex, 6, null, "产品属性不能为空")) {
             return;
