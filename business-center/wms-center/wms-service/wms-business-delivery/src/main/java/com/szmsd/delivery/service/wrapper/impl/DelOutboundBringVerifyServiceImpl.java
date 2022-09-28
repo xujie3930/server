@@ -231,7 +231,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 boolean isAuditFailed = DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState());
                 if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
                         || isAuditFailed)) {
-                    throw new CommonException("400", MessageUtil.to("单据状态不正确，不能提审", "单据状态不正确，不能提审"));
+                    throw new CommonException("400", MessageUtil.to("单据状态不正确，不能提审", "The document status is incorrect and cannot be submitted for approval"));
                 }
 
                 // 自提单判断面单是否上传
