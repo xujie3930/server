@@ -26,20 +26,18 @@ public class DelOutboundCollectionImportContainer extends DelOutboundCollectionI
     private final String sellerCode;
     private Map<String, BaseProduct> productMap;
 
-    public void setProductMap(Map<String, BaseProduct> productMap) {
-        this.productMap = productMap;
-    }
 
     public DelOutboundCollectionImportContainer(List<DelOutboundCollectionImportDto> dataList,
                                                 List<BasRegionSelectListVO> countryList,
                                                 List<DelOutboundCollectionDetailImportDto2> detailList,
                                                 ImportValidationData importValidationData,
-                                                String sellerCode) {
+                                                String sellerCode, Map<String, BaseProduct> productMap) {
         super(dataList, countryList);
         this.detailList = detailList;
         this.detailMapList = this.detailToMapList();
         this.importValidationData = importValidationData;
         this.sellerCode = sellerCode;
+        this.productMap = productMap;
     }
 
     public List<DelOutboundDto> get() {
@@ -107,6 +105,7 @@ public class DelOutboundCollectionImportContainer extends DelOutboundCollectionI
                 detail.setElectrifiedMode(product.getElectrifiedMode());
                 detail.setDeclaredValue(product.getDeclaredValue());
                 detail.setProductAttribute(product.getProductAttribute());
+                detail.setRemark(product.getProductDescription());
             }
             detail.setQty(Long.valueOf(dto2.getQty()));
             details.add(detail);
