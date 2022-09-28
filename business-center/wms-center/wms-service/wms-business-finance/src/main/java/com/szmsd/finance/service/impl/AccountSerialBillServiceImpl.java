@@ -335,6 +335,10 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             throw new RuntimeException("生成失败，无法获取客户基本信息");
         }
 
+        if(basSellerInfoVOR.getCode() != 200){
+            throw new RuntimeException(basSellerInfoVOR.getMsg());
+        }
+
         BasSellerInfoVO basSellerInfoVO = basSellerInfoVOR.getData();
 
         if(StringUtils.isBlank(basSellerInfoVO.getSellerCode())){
@@ -377,18 +381,62 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         otherAndDataMap.put(0,businessTotalVOS);
 
         //sheet 1.国内直发统计
-        List<BillDirectDeliveryTotalVO> directDeliverys = this.selectDirectDelivery(queryVO);
+        EleBillQueryVO directDeliveryQueryVO = new EleBillQueryVO();
+        directDeliveryQueryVO.setCusCode(billRequestVO.getCusCode());
+        directDeliveryQueryVO.setBillStartTime(billRequestVO.getBillStartTime());
+        directDeliveryQueryVO.setBillEndTime(billRequestVO.getBillEndTime());
+        List<String> orderTypeList = new ArrayList<>();
+        orderTypeList.add("PackageTransfer");
+        List<BillDirectDeliveryTotalVO> directDeliverys = this.selectDirectDelivery(directDeliveryQueryVO);
         sheetAndDataMap.put(1,directDeliverys);
 
         //sheet 2.仓储服务
+        EleBillQueryVO storegeQueryVO = new EleBillQueryVO();
+        storegeQueryVO.setCusCode(billRequestVO.getCusCode());
+        storegeQueryVO.setBillStartTime(billRequestVO.getBillStartTime());
+        storegeQueryVO.setBillEndTime(billRequestVO.getBillEndTime());
+        List<String> storegeOrderTypeList = new ArrayList<>();
+        storegeOrderTypeList.add("Batch");
+        storegeOrderTypeList.add("Collection");
+        storegeOrderTypeList.add("Destroy");
+        storegeOrderTypeList.add("NewSku");
+        storegeOrderTypeList.add("Normal");
+        storegeOrderTypeList.add("SelfPick");
+        storegeOrderTypeList.add("SplitSku");
+        storegeQueryVO.setOrderTypeList(storegeOrderTypeList);
+        List<BillDirectDeliveryTotalVO> storegeDeliverys = this.selectDirectDelivery(storegeQueryVO);
+        sheetAndDataMap.put(2,storegeDeliverys);
 
         //sheet 3.仓租
 
         //sheet 4.大货服务
+        EleBillQueryVO bigGoodsQueryVO = new EleBillQueryVO();
+        bigGoodsQueryVO.setCusCode(billRequestVO.getCusCode());
+        bigGoodsQueryVO.setBillStartTime(billRequestVO.getBillStartTime());
+        bigGoodsQueryVO.setBillEndTime(billRequestVO.getBillEndTime());
+        List<String> bigGoodsTypeList = new ArrayList<>();
+        bigGoodsTypeList.add("BulkOrder");
+        bigGoodsQueryVO.setOrderTypeList(bigGoodsTypeList);
+        List<BillDirectDeliveryTotalVO> bigGoodsDeliverys = this.selectDirectDelivery(bigGoodsQueryVO);
+        sheetAndDataMap.put(4,bigGoodsDeliverys);
 
         //sheet 5.充值&提现&转换&转账
+        EleBillQueryVO billDetailQueryVO = new EleBillQueryVO();
+        billDetailQueryVO.setCusCode(billRequestVO.getCusCode());
+        billDetailQueryVO.setBillStartTime(billRequestVO.getBillStartTime());
+        billDetailQueryVO.setBillEndTime(billRequestVO.getBillEndTime());
+        billDetailQueryVO.setSheetNo(5);
+        List<AccountSerialBill> billDetails = this.selectBillDetails(billDetailQueryVO);
+        sheetAndDataMap.put(5,billDetails);
 
         //sheet 6.优惠&赔偿
+        EleBillQueryVO discountDetailQueryVO = new EleBillQueryVO();
+        discountDetailQueryVO.setCusCode(billRequestVO.getCusCode());
+        discountDetailQueryVO.setBillStartTime(billRequestVO.getBillStartTime());
+        discountDetailQueryVO.setBillEndTime(billRequestVO.getBillEndTime());
+        discountDetailQueryVO.setSheetNo(6);
+        List<AccountSerialBill> discountDetails = this.selectBillDetails(discountDetailQueryVO);
+        sheetAndDataMap.put(6,discountDetails);
 
         try{
 
@@ -422,6 +470,11 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         }
 
         return R.ok();
+    }
+
+    private List<AccountSerialBill> selectBillDetails(EleBillQueryVO billDetailQueryVO) {
+
+        return accountSerialBillMapper.selectBillDetails(billDetailQueryVO);
     }
 
     private List<BillDirectDeliveryTotalVO> selectDirectDelivery(EleBillQueryVO queryVO) {
