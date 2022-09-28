@@ -42,6 +42,9 @@ public class AccountBillRecord extends FssBaseEntity {
     @ApiModelProperty(value = "版本号")
     private Long version;
 
+    @ApiModelProperty(value = "业务ID")
+    private String recordId;
+
 
 
 }
