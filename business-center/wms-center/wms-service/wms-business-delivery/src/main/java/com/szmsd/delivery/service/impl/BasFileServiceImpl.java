@@ -17,13 +17,14 @@ public class BasFileServiceImpl extends ServiceImpl<BasFileMapper, BasFile>  imp
     public List<BasFile> selectBasFile(BasFile basFile) {
 
         LambdaQueryWrapper<BasFile> where = new LambdaQueryWrapper<BasFile>();
-        if(StringUtils.isNotEmpty(basFile.getCreateBy())){
+        if(StringUtils.isNotEmpty(basFile.getCreateBy())&&!basFile.getCreateBy().equals("admin")){
             where.eq(BasFile::getCreateBy, basFile.getCreateBy());
         }
 
         if (StringUtils.isNotEmpty(basFile.getStartDate()) && StringUtils.isNotEmpty(basFile.getEndDate())) {
             where.between(BasFile::getCreateTime, basFile.getStartDate(), basFile.getEndDate());
         }
+
 
         where.orderByDesc(BasFile::getCreateTime);
         return baseMapper.selectList(where);
