@@ -255,6 +255,26 @@ public class DelOutboundImportController extends BaseController {
 
             // 查询国家数据
             R<List<BasRegionSelectListVO>> countryListR = this.basRegionFeignService.countryList(new BasRegionSelectListQueryDto());
+
+
+            List<String> detailSkuList = new ArrayList<>();
+
+            for(DelOutboundCollectionDetailImportDto2 detailImportDto2: detailList){
+                if(StringUtils.isNotEmpty(detailImportDto2.getCode())){
+                    detailSkuList.add(detailImportDto2.getCode());
+                }
+            }
+            Map<String, BaseProduct> productMap = new HashMap<>();
+            if(!detailSkuList.isEmpty()){
+                BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+                conditionQueryDto.setSkus(detailSkuList);
+                List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+                if (CollectionUtils.isNotEmpty(productList)) {
+                    productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v, v2) -> v));
+                }
+            }
+
+
             List<BasRegionSelectListVO> countryList = R.getDataAndException(countryListR);
             // 初始化导入上下文
             DelOutboundCollectionImportContext importContext = new DelOutboundCollectionImportContext(dataList, countryList);
@@ -269,7 +289,7 @@ public class DelOutboundImportController extends BaseController {
             // 初始化SKU数据验证器
             DelOutboundDetailImportValidationData importValidationData = new DelOutboundDetailImportValidationData(sellerCode, inventoryFeignClientService);
             // 初始化SKU导入上下文
-            DelOutboundCollectionDetailImportContext importContext1 = new DelOutboundCollectionDetailImportContext(detailList, productAttributeList, electrifiedModeList, batteryPackagingList);
+            DelOutboundCollectionDetailImportContext importContext1 = new DelOutboundCollectionDetailImportContext(detailList, productAttributeList, electrifiedModeList, batteryPackagingList, productMap);
             // 初始化SKU导入验证容器
             ImportResult importResult1 = new ImportValidationContainer<>(importContext1, ImportValidation.build(new DelOutboundCollectionDetailImportValidation(outerContext, importContext1))).valid();
             // 验证SKU导入验证结果
@@ -278,21 +298,6 @@ public class DelOutboundImportController extends BaseController {
             }
 
 
-            List<String> detailSkuList = new ArrayList<>();
-
-            for(DelOutboundCollectionDetailImportDto2 detailImportDto2: detailList){
-
-                detailSkuList.add(detailImportDto2.getCode());
-            }
-            Map<String, BaseProduct> productMap = new HashMap<>();
-            if(!detailSkuList.isEmpty()){
-                BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
-                conditionQueryDto.setSkus(detailSkuList);
-                List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
-                if (CollectionUtils.isNotEmpty(productList)) {
-                    productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v, v2) -> v));
-                }
-            }
 
             // 获取导入的数据
             List<DelOutboundDto> dtoList = new DelOutboundCollectionImportContainer(dataList, countryList, detailList, importValidationData, sellerCode).get();

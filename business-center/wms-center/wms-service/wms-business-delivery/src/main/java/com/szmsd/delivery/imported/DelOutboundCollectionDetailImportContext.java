@@ -1,10 +1,12 @@
 package com.szmsd.delivery.imported;
 
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.delivery.dto.DelOutboundCollectionDetailImportDto2;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhangyuyuan
@@ -16,10 +18,12 @@ public class DelOutboundCollectionDetailImportContext extends ImportContext<DelO
     protected CacheContext<String, String> electrifiedModeCache;
     protected CacheContext<String, String> batteryPackagingCache;
 
+    protected Map<String, BaseProduct> productMap;
+
     public DelOutboundCollectionDetailImportContext(List<DelOutboundCollectionDetailImportDto2> dataList,
                                                     List<BasSubWrapperVO> productAttributeList,
                                                     List<BasSubWrapperVO> electrifiedModeList,
-                                                    List<BasSubWrapperVO> batteryPackagingList) {
+                                                    List<BasSubWrapperVO> batteryPackagingList, Map<String, BaseProduct> productMap) {
         super(dataList);
         this.productAttributeCache = new MapCacheContext<>();
         this.electrifiedModeCache = new MapCacheContext<>();
@@ -39,6 +43,7 @@ public class DelOutboundCollectionDetailImportContext extends ImportContext<DelO
                 this.batteryPackagingCache.put(vo.getSubName(), vo.getSubValue());
             }
         }
+        this.productMap = productMap;
     }
 
 }
