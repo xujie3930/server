@@ -7,6 +7,8 @@ import com.szmsd.bas.domain.BasMaterial;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.BasFile;
 import com.szmsd.delivery.service.BasFileService;
 import com.szmsd.delivery.task.BatchDownFilesUtils;
@@ -41,6 +43,8 @@ public class BasFileController extends BaseController {
     public TableDataInfo list(@RequestBody BasFile basFile)
     {
         startPage();
+        LoginUser loginUser =SecurityUtils.getLoginUser();
+        basFile.setCreateBy(loginUser.getUsername());
         List<BasFile> list = basFileService.selectBasFile(basFile);
         return getDataTable(list);
     }
@@ -74,7 +78,7 @@ public class BasFileController extends BaseController {
                     //前端还没传自己先测
                     String zipFilePath = zipName + zipx; //zip缓存的位置，方法工具类中方法下载完成后删除缓存zip
                     for (String filename : filenam) {
-                        String path = filePath  +"\\"+ filename;
+                        String path = filePath + filename;
                         log.info("文件下载地址：{}",path);
                         File file = new File(path);
                         fileList.add(file);
