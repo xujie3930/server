@@ -7,6 +7,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
 @ApiModel(value = "查询条件")
@@ -24,4 +25,12 @@ public class EleBillQueryVO extends BaseQueryVO {
     @NotNull(message = "结束时间不能为空")
     @NotEmpty(message = "结束时间不能为空")
     private String billEndTime;
+
+    @ApiModelProperty(value = "订单类型")
+    private List<String> orderTypeList;
+
+    @ApiModelProperty(value = "sheet 页数")
+    private Integer sheetNo;
+
+
 }
