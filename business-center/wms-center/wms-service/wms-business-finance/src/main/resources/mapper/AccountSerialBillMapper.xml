@@ -30,6 +30,7 @@
         <result column="return_fee" property="returnFee"/>
         <result column="package_destrue_fee" property="packageDestrueFee"/>
         <result column="other_fee" property="otherFee"/>
+
     </resultMap>
 
     <select id="selectPageList" resultType="com.szmsd.finance.domain.AccountSerialBill" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
@@ -186,25 +187,23 @@
             DOD.product_name,DOD.sku,
             sum(FASB.amount) as total_amount,
             sum(case when FASB.charge_category = '物流基础费' then abs(FASB.amount) else 0 end ) as freight_fee,
-            sum(case when FASB.charge_category in ('操作费','特殊操作费','业务操作') then abs(FASB.amount) else 0 end) as ex_warehourse_fee,
+            sum(case when FASB.charge_category = '操作费' or FASB.charge_category = '特殊操作费' or FASB.charge_category='业务操作' then abs(FASB.amount) else 0 end) as ex_warehourse_fee,
             sum(case when FASB.charge_category = '物料费' then abs(FASB.amount) else 0 end) as package_fee,
             sum(case when FASB.charge_category = '处理费' then abs(FASB.amount) else 0 end) as hander_fee,
             sum(case when FASB.charge_category = '燃油附加费' then abs(FASB.amount) else 0 end) as fuel_fee,
             sum(case when FASB.charge_category = '偏远地区费' then abs(FASB.amount) else 0 end) as remote_fee,
             sum(case when
-                FASB.charge_category in ('偏远地区费','住宅派送费','增值税','挂号费','超大附加费','超重处理费','退费')
+                FASB.charge_category = '偏远地区费'  or FASB.charge_category = '住宅派送费' or
+                FASB.charge_category = '增值税' or FASB.charge_category = '挂号费' or
+                FASB.charge_category = '超大附加费' or FASB.charge_category = '超重处理费' or
+                FASB.charge_category = '退费'
+
                 then abs(FASB.amount) else 0 end) as other_fee
         from fss_account_serial_bill as FASB
         inner join del_outbound as DOB on FASB.`no` = DOB.order_no
         left join del_outbound_detail as DOD on DOB.order_no = DOD.order_no
         <where>
-            and DOB.del_flag = 0
-            <if test="orderTypeList != null">
-                and DOB.order_type in
-                <foreach collection="orderTypeList" close=")" open="(" separator="," item="item">
-                    #{item}
-                </foreach>
-            </if>
+            and DOB.order_type in ('PackageTransfer') and DOB.del_flag = 0
             <if test="cusCode != null and cusCode != ''">
                 and FASB.cus_code = #{cusCode}
             </if>
@@ -220,37 +219,6 @@
 
         group by FASB.business_category,FASB.no,FASB.currency_code
 
-    </select>
-
-    <select id="selectBillDetails" resultType="com.szmsd.finance.domain.AccountSerialBill" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
-        SELECT
-            a.id,a.no,a.tracking_no,a.cus_code,a.cus_name,a.currency_code,a.currency_name,a.amount,
-            a.warehouse_code,a.warehouse_name,a.pay_method,a.business_category,a.product_code,a.product_category,
-            a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
-            a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
-            a.calc_weight,a.specifications,a.serial_number
-        FROM `fss_account_serial_bill` a
-        <where>
-            <if test="cusCode != null and cusCode != ''">
-                and a.cus_code = #{cusCode}
-            </if>
-
-            <if test="sheetNo != null and sheetNo == 5">
-                and (a.business_category in ('线下充值','在线充值') or a.business_category like '%转%' or a.business_category like '%提现%')
-            </if>
-
-            <if test="sheetNo != null and sheetNo == 6">
-                and a.business_category in ('优惠','赔偿')
-            </if>
-
-            <if test="billStartTime != null  and billStartTime !='' ">
-                and a.payment_time <![CDATA[ >= ]]> #{billStartTime}
-            </if>
-
-            <if test="billEndTime != null  and billEndTime != ''">
-                and a.payment_time <![CDATA[ <= ]]> #{billEndTime}
-            </if>
-        </where>
     </select>
 
 </mapper>
