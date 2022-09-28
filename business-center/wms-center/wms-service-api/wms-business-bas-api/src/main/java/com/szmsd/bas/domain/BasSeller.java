@@ -213,11 +213,11 @@ public class BasSeller extends BaseEntity {
 
 
 
-    @ApiModelProperty(value = "第二销售人员名字")
-    @Excel(name = "第二销售人员")
+    @ApiModelProperty(value = "推荐人名字")
+    @Excel(name = "推荐人")
     private String secondSalesStaffName;
 
-    @ApiModelProperty(value = "第二销售人员code")
+    @ApiModelProperty(value = "推荐人名字code")
     private String secondSalesStaffCode;
 
     @ApiModelProperty(value = "0表示金额，1表示账期")
