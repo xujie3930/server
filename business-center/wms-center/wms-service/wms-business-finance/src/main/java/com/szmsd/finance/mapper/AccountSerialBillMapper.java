@@ -5,7 +5,6 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountBalanceBillResultDTO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
-import com.szmsd.finance.vo.BillBusinessTotalVO;
 import com.szmsd.finance.vo.EleBillQueryVO;
 import org.apache.ibatis.annotations.Param;
 
@@ -21,6 +20,4 @@ public interface AccountSerialBillMapper extends BaseMapper<AccountSerialBill> {
 
     List<AccountBalanceBillResultDTO> findAccountBillResultData(EleBillQueryVO eleBillQueryVO);
 
-
-    List<BillBusinessTotalVO> businessTotal(EleBillQueryVO queryVO);
 }
