@@ -86,23 +86,14 @@ public class ExcelUtil {
         }
     }
 
-    /**
-     * 导出file
-     * @param file
-     * @param title
-     * @param titleDataMap
-     * @param sheetKey
-     * @param sheetAndDataMap
-     * @param businessKey
-     * @param otherMapData
-     * @param inputStream
-     */
-    public static void exportFile(File file,String title,
+    public static void exportFile(File file,
+                                               String title,
                                                Map<Integer,List<?>> titleDataMap,
                                                String sheetKey,
                                                Map<Integer, List<?>> sheetAndDataMap,
                                                String businessKey,
-                                               Map<Integer,List<?>> otherMapData, InputStream inputStream){
+                                               Map<Integer,List<?>> otherMapData,
+                                               String filename, InputStream inputStream){
         ExcelWriter excelWriter = null;
         try {
             excelWriter = EasyExcel.write(file).withTemplate(inputStream).build();
@@ -131,6 +122,7 @@ public class ExcelUtil {
                 if(titleData != null) {
                     excelWriter.fill(new FillWrapper(title, titleData),fillConfig, writeSheet);
                 }
+
             }
 
         }catch (Exception e){
