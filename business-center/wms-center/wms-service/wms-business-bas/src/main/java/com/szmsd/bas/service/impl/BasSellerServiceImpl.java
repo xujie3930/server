@@ -138,7 +138,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 where.like("o.service_manager_nick_name",basSeller.getServiceManagerNickName());
             }
 
-            //第二销售人员
+            //推荐人
             if(basSeller.getSecondSalesStaffName()!=null&&!basSeller.getSecondSalesStaffName().equals("")){
                 where.like("o.second_sales_staff_name",basSeller.getSecondSalesStaffName());
             }
@@ -195,7 +195,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             where.like("o.service_manager_nick_name",basSeller.getServiceManagerNickName());
         }
 
-        //第二销售人员
+        //推荐人
         if(basSeller.getSecondSalesStaffName()!=null&&!basSeller.getSecondSalesStaffName().equals("")){
             where.like("o.second_sales_staff_name",basSeller.getSecondSalesStaffName());
         }

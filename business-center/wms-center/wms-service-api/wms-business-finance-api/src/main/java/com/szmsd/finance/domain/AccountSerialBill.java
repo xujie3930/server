@@ -116,8 +116,6 @@ public class AccountSerialBill extends FssBaseEntity {
     private String remark;
 
 
-
-
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "下单时间")
     @Excel(name = "下单时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
@@ -127,6 +125,9 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "结算时间")
     @Excel(name = "结算时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date paymentTime;
+
+    @ApiModelProperty(value = "流水号")
+    private String serialNumber;
 
     public void setRemark(String remark) {
         this.remark = remark;

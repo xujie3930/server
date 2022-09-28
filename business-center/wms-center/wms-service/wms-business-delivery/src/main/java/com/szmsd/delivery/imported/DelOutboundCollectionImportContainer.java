@@ -1,6 +1,7 @@
 package com.szmsd.delivery.imported;
 
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
@@ -23,6 +24,11 @@ public class DelOutboundCollectionImportContainer extends DelOutboundCollectionI
     private final Map<Integer, List<DelOutboundCollectionDetailImportDto2>> detailMapList;
     private final ImportValidationData importValidationData;
     private final String sellerCode;
+    private Map<String, BaseProduct> productMap;
+
+    public void setProductMap(Map<String, BaseProduct> productMap) {
+        this.productMap = productMap;
+    }
 
     public DelOutboundCollectionImportContainer(List<DelOutboundCollectionImportDto> dataList,
                                                 List<BasRegionSelectListVO> countryList,
@@ -89,14 +95,20 @@ public class DelOutboundCollectionImportContainer extends DelOutboundCollectionI
         }
         for (DelOutboundCollectionDetailImportDto2 dto2 : list) {
             DelOutboundDetailDto detail = new DelOutboundDetailDto();
-//            detail.setProductName(dto2.getProductName());
-//            detail.setProductNameChinese(dto2.getProductNameChinese());
-//            detail.setDeclaredValue(dto2.getDeclaredValue());
+
+
+            detail.setSku(dto2.getCode());
+            if(productMap !=null && productMap.containsKey(detail.getSku())){
+                BaseProduct product =  productMap.get(detail.getSku());
+                detail.setProductName(product.getProductName());
+                detail.setProductNameChinese(product.getProductNameChinese());
+                detail.setHsCode(product.getHsCode());
+                detail.setBatteryPackaging(product.getBatteryPackaging());
+                detail.setElectrifiedMode(product.getElectrifiedMode());
+                detail.setDeclaredValue(product.getDeclaredValue());
+                detail.setProductAttribute(product.getProductAttribute());
+            }
             detail.setQty(Long.valueOf(dto2.getQty()));
-//            detail.setProductAttribute(dto2.getProductAttribute());
-//            detail.setElectrifiedMode(dto2.getElectrifiedMode());
-//            detail.setBatteryPackaging(dto2.getBatteryPackaging());
-//            detail.setHsCode(dto2.getHsCode());
             details.add(detail);
         }
         return details;

@@ -9,6 +9,9 @@ import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
+import com.szmsd.bas.api.service.BaseProductClientService;
+import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -52,10 +55,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 出库管理
@@ -79,6 +80,9 @@ public class DelOutboundImportController extends BaseController {
     private BasRegionFeignService basRegionFeignService;
     @Autowired
     private InventoryFeignClientService inventoryFeignClientService;
+
+    @Autowired
+    private BaseProductClientService baseProductClientService;
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutboundImport:collectionExportTemplate')")
     @GetMapping("/collectionExportTemplate")
@@ -274,13 +278,47 @@ public class DelOutboundImportController extends BaseController {
             }
 
 
+            List<String> detailSkuList = new ArrayList<>();
+
+            for(DelOutboundCollectionDetailImportDto2 detailImportDto2: detailList){
+
+                detailSkuList.add(detailImportDto2.getCode());
+            }
+            Map<String, BaseProduct> productMap = new HashMap<>();
+            if(!detailSkuList.isEmpty()){
+                BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+                conditionQueryDto.setSkus(detailSkuList);
+                List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+                if (CollectionUtils.isNotEmpty(productList)) {
+                    productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v, v2) -> v));
+                }
+            }
 
             // 获取导入的数据
             List<DelOutboundDto> dtoList = new DelOutboundCollectionImportContainer(dataList, countryList, detailList, importValidationData, sellerCode).get();
             // 批量新增
-            this.delOutboundService.insertDelOutbounds(dtoList);
+            // 批量新增
+            List<DelOutboundAddResponse> outboundAddResponseList = this.delOutboundService.insertDelOutbounds(dtoList);
+            List<ImportMessage> messageList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(outboundAddResponseList)) {
+                int index = 1;
+                for (DelOutboundAddResponse outboundAddResponse : outboundAddResponseList) {
+                    if (!outboundAddResponse.getStatus()) {
+                        messageList.add(new ImportMessage(index, 1, "", outboundAddResponse.getMessage()));
+                    }
+                    index++;
+                }
+            }
             // 返回成功的结果
-            return R.ok(ImportResult.buildSuccess());
+            ImportResult importResult2;
+            if (CollectionUtils.isNotEmpty(messageList)) {
+                importResult2 = ImportResult.buildFail(messageList);
+            } else {
+                importResult2 = ImportResult.buildSuccess();
+            }
+            importResult2.setResultList(outboundAddResponseList);
+            // 返回成功的结果
+            return R.ok(importResult2);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             // 返回失败的结果
@@ -487,9 +525,27 @@ public class DelOutboundImportController extends BaseController {
             // 获取导入的数据
             List<DelOutboundDto> dtoList = new DelOutboundBatchImportContainer(dataList, countryList, shipmentChannelList, detailList, sellerCode).get();
             // 批量新增
-            this.delOutboundService.insertDelOutbounds(dtoList);
+            List<DelOutboundAddResponse> outboundAddResponseList = this.delOutboundService.insertDelOutbounds(dtoList);
+            List<ImportMessage> messageList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(outboundAddResponseList)) {
+                int index = 1;
+                for (DelOutboundAddResponse outboundAddResponse : outboundAddResponseList) {
+                    if (!outboundAddResponse.getStatus()) {
+                        messageList.add(new ImportMessage(index, 1, "", outboundAddResponse.getMessage()));
+                    }
+                    index++;
+                }
+            }
             // 返回成功的结果
-            return R.ok(ImportResult.buildSuccess());
+            ImportResult importResult2;
+            if (CollectionUtils.isNotEmpty(messageList)) {
+                importResult2 = ImportResult.buildFail(messageList);
+            } else {
+                importResult2 = ImportResult.buildSuccess();
+            }
+            importResult2.setResultList(outboundAddResponseList);
+            // 返回成功的结果
+            return R.ok(importResult2);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             // 返回失败的结果
