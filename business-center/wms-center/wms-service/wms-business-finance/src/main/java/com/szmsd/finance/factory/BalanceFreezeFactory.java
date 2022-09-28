@@ -161,6 +161,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         log.info("checkAndSetBalance ========= S");
 
         BigDecimal changeAmount = dto.getAmount();
+        String currencyCode = dto.getCurrencyCode();
         if (BillEnum.PayMethod.BALANCE_FREEZE == dto.getPayMethod()) {
 
             log.info("checkAndSetBalance ========= BALANCE_FREEZE");
@@ -183,7 +184,9 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 balance.freeze(changeAmount);
             } else {
                 if (!balance.checkAndSetAmountAndCreditAnd(changeAmount, false, BalanceDTO::freeze)) {
-                    throw new RuntimeException("可用余额不足以冻结，费用：" + changeAmount);
+
+                    String message = "Sorry, your "+currencyCode+" balance is low ,"+changeAmount;
+                    throw new RuntimeException(message);
                 }
                 return true;
             }
