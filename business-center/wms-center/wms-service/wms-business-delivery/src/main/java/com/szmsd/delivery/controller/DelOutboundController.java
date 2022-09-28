@@ -843,7 +843,7 @@ public class DelOutboundController extends BaseController {
             exportContext.setTrackingStatusCache(listMap.get("099"));
             String filepath=this.filepath;
             Integer DelOutboundExportTotal = basFileMapper.selectDelOutboundCount();
-            Integer pageSize = 100000;
+            Integer pageSize = 20000;
             if (len.equals("zh")) {
                 QueryDto queryDto1 = new QueryDto();
 
@@ -867,6 +867,16 @@ public class DelOutboundController extends BaseController {
                     QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
                     QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto1, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
                    String fileName="出库单详情-" + System.currentTimeMillis();
+                    BasFile basFile=new BasFile();
+                    basFile.setState("0");
+                    basFile.setFileRoute(filepath);
+                    basFile.setCreateBy(SecurityUtils.getUsername());
+                    basFile.setFileName(fileName+".xls");
+                    basFile.setModularType(0);
+                    basFile.setModularNameZh("包裹查询");
+                    basFile.setModularNameEn("OutboundOrderInformation");
+                    basFileMapper.insertSelective(basFile);
+
                     EasyPoiExportTask<DelOutboundExportListVO, DelOutboundExportItemListVO> delOutboundExportExTask = new EasyPoiExportTask<DelOutboundExportListVO, DelOutboundExportItemListVO>()
                             .setExportParams(new ExportParams(fileName, "出库单详情(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, DelOutboundExportTotal)) + ")", ExcelType.XSSF))
                             .setData(queryPage.getPage())
@@ -876,15 +886,9 @@ public class DelOutboundController extends BaseController {
                             .setFilepath(filepath)
                             .setCountDownLatch(countDownLatch);
 
-                    BasFile basFile=new BasFile();
                     basFile.setState("1");
-                    basFile.setFileRoute(filepath);
-                    basFile.setCreateBy(SecurityUtils.getUsername());
-                    basFile.setFileName(fileName+".xls");
-                    basFile.setModularType(0);
-                    basFile.setModularNameZh("包裹查询");
-                    basFile.setModularNameEn("OutboundOrderInformation");
-                    basFileMapper.insertSelective(basFile);
+                    basFileMapper.updateByPrimaryKeySelective(basFile);
+
                     //threadPoolTaskExecutor.execute(delOutboundExportExTask);
                     new Thread(delOutboundExportExTask,"export-"+i).start();
                 }
@@ -925,15 +929,6 @@ public class DelOutboundController extends BaseController {
                     }
                     String fileName="OutboundOrderInformation-" + System.currentTimeMillis();
 
-                    EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO> delOutboundExportExTask = new EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO>()
-                            .setExportParams(new ExportParams(fileName, "OutboundOrderInformation(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, DelOutboundExportTotal)) + ")", ExcelType.XSSF))
-                            .setData(page)
-                            .setClazz(DelOutboundExportListEnVO.class)
-                            .setData2(page1)
-                            .setClazz2(DelOutboundExportItemListEnVO.class)
-                            .setFilepath(filepath)
-                            .setCountDownLatch(countDownLatch);
-
                     BasFile basFile=new BasFile();
                     basFile.setState("1");
                     basFile.setFileRoute(filepath);
@@ -943,6 +938,20 @@ public class DelOutboundController extends BaseController {
                     basFile.setModularNameZh("包裹查询");
                     basFile.setModularNameEn("OutboundOrderInformation");
                     basFileMapper.insertSelective(basFile);
+
+                    EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO> delOutboundExportExTask = new EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO>()
+                            .setExportParams(new ExportParams(fileName, "OutboundOrderInformation(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, DelOutboundExportTotal)) + ")", ExcelType.XSSF))
+                            .setData(page)
+                            .setClazz(DelOutboundExportListEnVO.class)
+                            .setData2(page1)
+                            .setClazz2(DelOutboundExportItemListEnVO.class)
+                            .setFilepath(filepath)
+                            .setCountDownLatch(countDownLatch);
+
+                    basFile.setState("1");
+                    basFileMapper.updateByPrimaryKeySelective(basFile);
+
+
                     //threadPoolTaskExecutor.execute(delOutboundExportExTask);
                     new Thread(delOutboundExportExTask,"export-"+i).start();                }
                 countDownLatch.await();
