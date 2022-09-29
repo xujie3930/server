@@ -17,8 +17,8 @@ public class BillDirectDeliveryTotalVO implements Serializable {
     @ApiModelProperty(value = "单号")
     private String orderNo;
 
-    @ApiModelProperty(value = "跟踪ID")
-    private String traceId;
+    @ApiModelProperty(value = "跟踪号")
+    private String trackingNo;
 
     @ApiModelProperty(value = "规格")
     private String specifications;
