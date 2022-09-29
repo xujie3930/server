@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ExcelUtil {
 
@@ -98,11 +99,11 @@ public class ExcelUtil {
      * @param inputStream
      */
     public static void exportFile(File file,String title,
-                                               Map<Integer,List<?>> titleDataMap,
+                                               ConcurrentHashMap<Integer,List<?>> titleDataMap,
                                                String sheetKey,
-                                               Map<Integer, List<?>> sheetAndDataMap,
+                                               ConcurrentHashMap<Integer, List<?>> sheetAndDataMap,
                                                String businessKey,
-                                               Map<Integer,List<?>> otherMapData, InputStream inputStream){
+                                               ConcurrentHashMap<Integer,List<?>> otherMapData, InputStream inputStream){
         ExcelWriter excelWriter = null;
         try {
             excelWriter = EasyExcel.write(file).withTemplate(inputStream).build();

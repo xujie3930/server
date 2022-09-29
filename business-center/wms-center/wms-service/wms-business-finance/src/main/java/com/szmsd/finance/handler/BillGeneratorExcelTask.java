@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskResultVO> {
@@ -63,10 +64,10 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
             throw new RuntimeException(e);
         }
 
-        Map<Integer, List<?>> titleDataMap = new HashMap<>();
-        Map<Integer, List<?>> sheetAndDataMap = new HashMap<>();
+        ConcurrentHashMap<Integer, List<?>> titleDataMap = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Integer, List<?>> sheetAndDataMap = new ConcurrentHashMap<>();
 
-        Map<Integer, List<?>> otherAndDataMap = new HashMap<>();
+        ConcurrentHashMap<Integer, List<?>> otherAndDataMap = new ConcurrentHashMap<>();
 
         //sheet 0.客戶基本信息、资金账结余、业务账汇总
         List<BasSellerExcelInfoVO> cusTitleMap = this.generatorTitle(billRequestVO,basSellerInfoVO);
