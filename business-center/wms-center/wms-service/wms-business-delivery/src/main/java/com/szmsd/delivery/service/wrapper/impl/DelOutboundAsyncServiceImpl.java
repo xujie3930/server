@@ -264,13 +264,15 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             DelOutboundOperationLogEnum.OPN_SHIPMENT.listener(delOutbound);
 
 
-            ReceiptRequest receiptRequest = new ReceiptRequest();
-            receiptRequest.setPackageOrderNo(orderNo);
-
-            receiptRequest.setOperateOn(DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-            R r =inboundReceiptFeignService.receipt(receiptRequest);
-            logger.info("{}inbound/receipt:{}" ,orderNo, r);
         }
+
+
+        ReceiptRequest receiptRequest = new ReceiptRequest();
+        receiptRequest.setPackageOrderNo(orderNo);
+
+        receiptRequest.setOperateOn(DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+        R r =inboundReceiptFeignService.receipt(receiptRequest);
+        logger.info("{}inbound/receipt:{}" ,orderNo, JSON.toJSONString(r));
     }
 
     @Override
