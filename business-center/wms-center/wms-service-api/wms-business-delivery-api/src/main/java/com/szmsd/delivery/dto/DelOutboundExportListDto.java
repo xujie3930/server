@@ -81,10 +81,10 @@ public class DelOutboundExportListDto implements Serializable {
     private String specifications;
 
     @ApiModelProperty(value = "提审时间")
-    private Date bringVerifyTime;
+    private String bringVerifyTime;
 
     @ApiModelProperty(value = "发货时间")
-    private Date shipmentsTime;
+    private String shipmentsTime;
 
     @ApiModelProperty(value = "异常状态")
     private String exceptionState;
