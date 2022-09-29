@@ -59,6 +59,9 @@ public class BillDirectDeliveryTotalVO implements Serializable {
     @ApiModelProperty(value = "订单创建时间")
     private String createTime;
 
+    @ApiModelProperty(value = "结算时间")
+    private String paymentTime;
+
     @ApiModelProperty(value = "合计")
     private BigDecimal totalAmount;
 
@@ -91,6 +94,7 @@ public class BillDirectDeliveryTotalVO implements Serializable {
 
     @ApiModelProperty(value = "其他费")
     private BigDecimal otherFee;
+
 
 
 }

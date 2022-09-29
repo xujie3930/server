@@ -100,7 +100,7 @@ public class DelOutboundCollectionImportContainer extends DelOutboundCollectionI
                 BaseProduct product =  productMap.get(detail.getSku());
                 detail.setProductName(product.getProductName());
                 detail.setProductNameChinese(product.getProductNameChinese());
-                detail.setHsCode(product.getHsCode());
+                detail.setHsCode(super.stringNumber(product.getHsCode()));
                 detail.setBatteryPackaging(product.getBatteryPackaging());
                 detail.setElectrifiedMode(product.getElectrifiedMode());
                 detail.setDeclaredValue(product.getDeclaredValue());
