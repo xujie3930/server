@@ -10,6 +10,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.BasFile;
+import com.szmsd.delivery.domain.BasFileDao;
 import com.szmsd.delivery.service.BasFileService;
 import com.szmsd.delivery.task.BatchDownFilesUtils;
 import io.swagger.annotations.Api;
@@ -40,9 +41,9 @@ public class BasFileController extends BaseController {
 
     @PostMapping("/list")
     @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
-    public TableDataInfo list(@RequestBody BasFile basFile)
+    public TableDataInfo<BasFile> list(@RequestBody BasFileDao basFile)
     {
-        startPage();
+        startPage(basFile);
         LoginUser loginUser =SecurityUtils.getLoginUser();
         basFile.setCreateBy(loginUser.getUsername());
         List<BasFile> list = basFileService.selectBasFile(basFile);
