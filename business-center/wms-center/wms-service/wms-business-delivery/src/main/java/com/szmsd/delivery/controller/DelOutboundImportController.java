@@ -160,7 +160,7 @@ public class DelOutboundImportController extends BaseController {
             filePath = "/template/DM-CentralizedTransportation.xlsx";
             fileName = "集运出库模板";
         }else if (len.equals("en")){
-            filePath = "/template/DM-CentralizedTransportation-en.xls";
+            filePath = "/template/DM-CentralizedTransportation-en.xlsx";
             fileName = "CentralizedTransportationTemplate";
         }
 
