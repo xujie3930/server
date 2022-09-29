@@ -10,7 +10,7 @@
         <result column="currency_code" property="currencyCode"/>
         <result column="destination_delivery" property="destinationDelivery"/>
         <result column="no" property="orderNo"/>
-        <result column="trace_id" property="traceId"/>
+        <result column="tracking_no" property="trackingNo"/>
         <result column="specifications" property="specifications"/>
         <result column="ref_no" property="refNo"/>
         <result column="order_type" property="orderType"/>
@@ -180,7 +180,19 @@
 
         select
             FASB.business_category,FASB.`no`,FASB.currency_code,FASB.payment_time,
-            DOB.trace_id,DOB.ref_no,DOB.warehouse_code,
+            FASB.cus_code,
+            <if test="sheetNo != null">
+                <if test="sheetNo == 1">
+                    '国内直发' as order_type,
+                </if>
+                <if test="sheetNo == 2">
+                    '仓储服务' as order_type,
+                </if>
+                <if test="sheetNo == 4">
+                    '大货服务' as order_type,
+                </if>
+            </if>
+            DOB.tracking_no,DOB.ref_no,DOB.warehouse_code,
             DOB.destination_delivery,DOB.weight,DOB.forecast_weight,
             DOB.calc_weight,DOB.create_time,
             DOB.specifications,
