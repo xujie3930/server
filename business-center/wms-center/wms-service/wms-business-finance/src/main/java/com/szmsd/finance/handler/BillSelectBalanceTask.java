@@ -144,7 +144,7 @@ public class BillSelectBalanceTask implements Serializable {
 
                 //本期支出转负数
                 BigDecimal currentExpenditureAmount = resultDTO.getCurrentExpenditureAmount();
-                if(currentExpenditureAmount.compareTo(BigDecimal.ZERO) > 0){
+                if(currentExpenditureAmount != null && currentExpenditureAmount.compareTo(BigDecimal.ZERO) > 0){
                     resultDTO.setCurrentExpenditureAmount(currentExpenditureAmount.negate());
                 }
 

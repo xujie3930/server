@@ -50,9 +50,9 @@ public class AccountSerialBillVitalController extends BaseController {
 
     @ApiOperation(value = "导出")
     @PostMapping ("/export")
-    public void export(HttpServletResponse response, @RequestBody BillGeneratorRequestVO requestVO) {
+    public void export(HttpServletResponse response, @RequestBody @Valid EleBillQueryVO requestVO) {
 
-
+        accountSerialBillService.export(response,requestVO);
     }
 
 }

@@ -6,6 +6,7 @@ import com.szmsd.finance.vo.BillGeneratorRequestVO;
 import com.szmsd.finance.vo.EleBillQueryVO;
 import com.szmsd.finance.vo.ElectronicBillVO;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public interface AccountBillRecordService {
@@ -30,4 +31,11 @@ public interface AccountBillRecordService {
      * @return
      */
     List<BillBalanceVO> balancePage(EleBillQueryVO queryVO);
+
+    /**
+     * 资金结余导出
+     * @param response
+     * @param requestVO
+     */
+    void export(HttpServletResponse response, EleBillQueryVO requestVO);
 }
