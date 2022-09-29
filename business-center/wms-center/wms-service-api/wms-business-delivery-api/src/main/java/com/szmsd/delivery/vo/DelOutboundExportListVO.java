@@ -108,11 +108,11 @@ public class DelOutboundExportListVO implements Serializable {
 
     @ExcelProperty(value = {"提审时间", "Time of arraignment"})
     @Excel(name = "提审时间",width = 15)
-    private Date bringVerifyTime;
+    private String bringVerifyTime;
 
     @ExcelProperty(value = {"发货时间", "Delivery time"})
     @Excel(name = "发货时间",width = 15)
-    private Date shipmentsTime;
+    private String shipmentsTime;
 
     @ExcelProperty(value = {"异常状态", "Exception state"})
     @Excel(name = "异常状态",width = 15)

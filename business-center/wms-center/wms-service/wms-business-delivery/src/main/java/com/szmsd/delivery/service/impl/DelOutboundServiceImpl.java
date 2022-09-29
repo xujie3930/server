@@ -46,6 +46,7 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundPackingTypeConstant;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
+import com.szmsd.delivery.mapper.BasFileMapper;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.mapper.DelOutboundTarckOnMapper;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
@@ -186,6 +187,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private HtpOutboundFeignService htpOutboundFeignService;
     @Autowired
     private BasWarehouseClientService basWarehouseClientService;
+
+    @Autowired
+    private BasFileMapper basFileMapper;
     /**
      * 查询出库单模块
      *
@@ -2186,6 +2190,21 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
 
         return delOutboundTarckOnMapper.selectByPrimaryKey(delOutboundTarckOn);
+    }
+
+    @Override
+    public Integer selectDelOutboundCount(DelOutboundListQueryDto queryDto) {
+        QueryWrapper<DelOutboundListQueryDto> queryWrapper = new QueryWrapper<>();
+        // 界面上选择了记录进行导出
+        if (CollectionUtils.isNotEmpty(queryDto.getSelectIds())) {
+            queryWrapper.in("o.id", queryDto.getSelectIds());
+            // 按照创建时间倒序
+            queryWrapper.orderByDesc("o.create_time");
+        } else {
+            DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
+        }
+        return basFileMapper.selectDelOutboundCount(queryWrapper);
+
     }
 
     public static List<String> splitToArray(String text, String split) {
