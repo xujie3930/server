@@ -1,7 +1,9 @@
 package com.szmsd.delivery.imported;
 
+import cn.hutool.core.util.NumberUtil;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
@@ -93,11 +95,12 @@ public class DelOutboundPackageTransferImportContainer extends DelOutboundPackag
             detail.setProductAttribute(dto2.getProductAttribute());
             detail.setElectrifiedMode(dto2.getElectrifiedMode());
             detail.setBatteryPackaging(dto2.getBatteryPackaging());
-            detail.setHsCode(dto2.getHsCode());
+            detail.setHsCode(super.stringNumber(dto2.getHsCode()));
             details.add(detail);
         }
         return details;
     }
+
 
     private Map<Integer, List<DelOutboundPackageTransferDetailImportDto>> detailToMapList() {
         if (null == this.detailList) {
