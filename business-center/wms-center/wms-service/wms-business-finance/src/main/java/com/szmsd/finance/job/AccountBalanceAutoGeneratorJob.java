@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -27,16 +28,16 @@ public class AccountBalanceAutoGeneratorJob {
     @Scheduled(cron = "58 59 23 * * ?")
     public void autoGeneratorBalance() {
         log.info("autoGeneratorBalance() start...");
-        RLock lock = redissonClient.getLock("executeOperation");
+        RLock lock = redissonClient.getLock("autoGeneratorBalance");
 
         try {
-            if (lock.tryLock()) {
+            if (lock.tryLock(3, TimeUnit.SECONDS)) {
                 iAccountBalanceLogService.autoGeneratorBalance();
             }
         } catch (Exception e) {
             log.error("autoGeneratorBalance() execute error: ", e);
         } finally {
-            if (lock.isLocked() && lock.isHeldByCurrentThread()){
+            if (lock.isLocked()){
                 lock.unlock();
             }
         }

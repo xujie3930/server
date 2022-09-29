@@ -1,6 +1,7 @@
 package com.szmsd.finance.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.feign.BasFeignService;
@@ -19,18 +20,21 @@ import com.szmsd.finance.mapper.AccountBalanceLogMapper;
 import com.szmsd.finance.mapper.AccountBillRecordMapper;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.service.AccountBillRecordService;
+import com.szmsd.finance.util.ExcelUtil;
 import com.szmsd.finance.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 @Service("AccountBillRecordServiceImpl")
 @Slf4j
@@ -62,12 +66,24 @@ public class AccountBillRecordServiceImpl implements AccountBillRecordService {
     @Override
     public List<ElectronicBillVO> electronicPage(EleBillQueryVO queryVO) {
 
+        String billStartTime = queryVO.getBillStartTime() + " 00:00:00";
+        String billEndTime = queryVO.getBillEndTime() + " 23:59:59";
+
+        queryVO.setBillStartTime(billStartTime);
+        queryVO.setBillEndTime(billEndTime);
+
         return accountBillRecordMapper.electronicPage(queryVO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public R<Integer> generatorBill(BillGeneratorRequestVO billRequestVO) {
+
+        String billStartTime = billRequestVO.getBillStartTime() + " 00:00:00";
+        String billEndTime = billRequestVO.getBillEndTime() + " 23:59:59";
+
+        billRequestVO.setBillStartTime(billStartTime);
+        billRequestVO.setBillEndTime(billEndTime);
 
         String cusCode = billRequestVO.getCusCode();
         R<BasSellerInfoVO> basSellerInfoVOR = basSellerFeignService.getInfoBySellerCode(cusCode);
@@ -129,9 +145,112 @@ public class AccountBillRecordServiceImpl implements AccountBillRecordService {
     @Override
     public List<BillBalanceVO> balancePage(EleBillQueryVO queryVO) {
 
-        BillSelectBalanceTask billSelectBalanceTask = new BillSelectBalanceTask(accountSerialBillMapper,accountBalanceLogMapper,basFeignService);
+        String billStartTime = queryVO.getBillStartTime() + " 00:00:00";
+        String billEndTime = queryVO.getBillEndTime() + " 23:59:59";
 
+        queryVO.setBillStartTime(billStartTime);
+        queryVO.setBillEndTime(billEndTime);
+
+        BillSelectBalanceTask billSelectBalanceTask = new BillSelectBalanceTask(accountSerialBillMapper,accountBalanceLogMapper,basFeignService);
         return billSelectBalanceTask.find(queryVO);
+    }
+
+    @Override
+    public void export(HttpServletResponse response, EleBillQueryVO requestVO) {
+
+        String billStartTime = requestVO.getBillStartTime() + " 00:00:00";
+        String billEndTime = requestVO.getBillEndTime() + " 23:59:59";
+
+        requestVO.setBillStartTime(billStartTime);
+        requestVO.setBillEndTime(billEndTime);
+
+        BillSelectBalanceTask billSelectBalanceTask = new BillSelectBalanceTask(accountSerialBillMapper,accountBalanceLogMapper,basFeignService);
+        List<BillBalanceVO> billBalanceVOS = billSelectBalanceTask.find(requestVO);
+
+        List<BillBalanceExcelResultVO> billBalanceExcelResultVOS = this.generatorBillExcelResult(billBalanceVOS,requestVO);
+
+        Long current = System.currentTimeMillis();
+
+        String fileName = "dm-oms-balance-"+current+".xlsx";
+        String modelPath = "classpath:template/dm-oms-balance.xlsx";
+        InputStream inputStream = null;
+
+        Map<Integer,List<?>> map = new HashMap<>();
+
+        map.put(0,billBalanceExcelResultVOS);
+        try {
+            inputStream = ResourceUtils.getURL(modelPath).openStream();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        ExcelUtil.fillReportWithEasyExcel(response,null,null,"bill",map,null,null,fileName,inputStream);
+
+    }
+
+    private List<BillBalanceExcelResultVO> generatorBillExcelResult(List<BillBalanceVO> billBalanceVOS,EleBillQueryVO requestVO) {
+
+        if(CollectionUtils.isEmpty(billBalanceVOS)){
+            return new ArrayList<>();
+        }
+
+        List<BillBalanceExcelResultVO> billBalanceExcelResultVOS = new ArrayList<>();
+
+        String billStartTime = requestVO.getBillStartTime();
+        String billEndTime = requestVO.getBillEndTime();
+
+        String resultTime = billStartTime + "/" + billEndTime;
+
+
+        for(BillBalanceVO billBalanceVO : billBalanceVOS) {
+
+            List<BillChargeCategoryVO> billChargeCategoryVOS = billBalanceVO.getChargeCategorys();
+
+            for (BillChargeCategoryVO chargeCategoryVO : billChargeCategoryVOS) {
+
+                BillBalanceExcelResultVO billBalanceExcelResultVO = new BillBalanceExcelResultVO();
+
+                billBalanceExcelResultVO.setCusCode(chargeCategoryVO.getCusCode());
+                billBalanceExcelResultVO.setResultTime(resultTime);
+
+                billBalanceExcelResultVO.setChargeCategory(chargeCategoryVO.getChargeCategory());
+
+                List<BillCurrencyAmountVO> billCurrencyAmountVOS = chargeCategoryVO.getBillCurrencyAmounts();
+
+                for (BillCurrencyAmountVO amountVO : billCurrencyAmountVOS) {
+
+                    String currencyCode = amountVO.getCurrencyCode();
+                    if (currencyCode.equals("USD")) {
+                        billBalanceExcelResultVO.setUsd(amountVO.getAmount());
+                    }
+                    if (currencyCode.equals("CNY")) {
+                        billBalanceExcelResultVO.setCny(amountVO.getAmount());
+                    }
+                    if (currencyCode.equals("GBP")) {
+                        billBalanceExcelResultVO.setGbp(amountVO.getAmount());
+                    }
+                    if (currencyCode.equals("AUD")) {
+                        billBalanceExcelResultVO.setAud(amountVO.getAmount());
+                    }
+                    if (currencyCode.equals("EUR")) {
+                        billBalanceExcelResultVO.setEur(amountVO.getAmount());
+                    }
+                    if (currencyCode.equals("CAD")) {
+                        billBalanceExcelResultVO.setCad(amountVO.getAmount());
+                    }
+                    if (currencyCode.equals("HKD")) {
+                        billBalanceExcelResultVO.setHkd(amountVO.getAmount());
+                    }
+                    if (currencyCode.equals("JPY")) {
+                        billBalanceExcelResultVO.setJpy(amountVO.getAmount());
+                    }
+                }
+
+                billBalanceExcelResultVOS.add(billBalanceExcelResultVO);
+            }
+        }
+
+        return billBalanceExcelResultVOS;
     }
 
     private String addAccountBillRecord(BillGeneratorRequestVO billRequestVO){
