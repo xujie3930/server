@@ -451,5 +451,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     void labelSelfPick(HttpServletResponse response, DelOutboundLabelDto dto);
 
     List<DelOutboundTarckOn> selectDelOutboundTarckList(DelOutboundTarckOn delOutboundTarckOn);
+
+    Integer selectDelOutboundCount(DelOutboundListQueryDto queryDto);
 }
 

@@ -33,6 +33,7 @@
       COUNT(o.id)
     FROM del_outbound o
            LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
+      ${ew.customSqlSegment}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from bas_file
