@@ -7,6 +7,7 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.mapper.AccountBalanceLogMapper;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
+import com.szmsd.finance.mapper.ChargeRelationMapper;
 import com.szmsd.finance.util.ExcelUtil;
 import com.szmsd.finance.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,6 +29,9 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
     private AccountSerialBillMapper accountSerialBillMapper;
 
     private AccountBalanceLogMapper accountBalanceLogMapper;
+
+
+    //private ChargeRelationMapper chargeRelationMapper;
 
     private BasFeignService basFeignService;
 
@@ -182,6 +184,15 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
 
         List<BillDirectDeliveryTotalVO> billDirectDeliveryTotalVOS = accountSerialBillMapper.selectDirectDelivery(queryVO);
 
+        for(BillDirectDeliveryTotalVO billDirectDeliveryTotalVO : billDirectDeliveryTotalVOS){
+
+            String resultCalaWeight = "";
+            if(billDirectDeliveryTotalVO.getCalcWeight() != null && billDirectDeliveryTotalVO.getCalcWeightUnit() != null){
+                resultCalaWeight = billDirectDeliveryTotalVO.getCalcWeight() + billDirectDeliveryTotalVO.getCalcWeightUnit();
+            }
+            billDirectDeliveryTotalVO.setResultCalcWeight(resultCalaWeight);
+        }
+
         return billDirectDeliveryTotalVOS;
     }
 
@@ -193,6 +204,15 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
     private List<BillBusinessTotalVO> selectBusinessTotal(EleBillQueryVO queryVO) {
 
         List<BillBusinessTotalVO> resultVOS = accountSerialBillMapper.selectBusinessTotal(queryVO);
+
+//        Wrapper<ChargeRelation> queryWrapper = new QueryWrapper<>();
+//
+//        List<ChargeRelation> chargeRelations = chargeRelationMapper.selectList(queryWrapper);
+//        if(CollectionUtils.isEmpty(chargeRelations)){
+//            throw new RuntimeException("异常，无法获取 fss_charge_relation 数据");
+//        }
+//
+//        chargeRelations.stream().collect(Collectors.groupingBy(ChargeRelation::getChargeCategory));
 
         return resultVOS;
     }
