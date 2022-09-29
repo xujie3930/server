@@ -41,6 +41,15 @@ public class BillDirectDeliveryTotalVO implements Serializable {
     @ApiModelProperty(value = "目的地")
     private String destinationDelivery;
 
+    @ApiModelProperty(value = "目的国家")
+    private String country;
+
+    @ApiModelProperty(value = "出库产品代码")
+    private String shipmentRule;
+
+    @ApiModelProperty(value = "出库产品名称")
+    private String shipmentService;
+
     @ApiModelProperty(value = "产品名称")
     private String productName;
 
@@ -55,6 +64,12 @@ public class BillDirectDeliveryTotalVO implements Serializable {
 
     @ApiModelProperty(value = "计量重")
     private BigDecimal calcWeight;
+
+    @ApiModelProperty(value = "计量重单位")
+    private String calcWeightUnit;
+
+    @ApiModelProperty(value = "计量重+单位")
+    private String resultCalcWeight;
 
     @ApiModelProperty(value = "订单创建时间")
     private String createTime;

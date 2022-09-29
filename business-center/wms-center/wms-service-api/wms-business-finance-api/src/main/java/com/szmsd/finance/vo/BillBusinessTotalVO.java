@@ -16,7 +16,7 @@ public class BillBusinessTotalVO implements Serializable {
     private String warehouse;
 
     @ApiModelProperty(value = "业务类型")
-    private String chargeType;
+    private String businessType;
 
     @ApiModelProperty(value = "费用类别")
     private String chargeCategory;

@@ -31,6 +31,10 @@
         <result column="package_destrue_fee" property="packageDestrueFee"/>
         <result column="other_fee" property="otherFee"/>
         <result column="payment_time" property="paymentTime"/>
+        <result column="country" property="country"/>
+        <result column="shipment_rule" property="shipmentRule"/>
+        <result column="shipment_service" property="shipmentService"/>
+        <result column="calc_weight_unit" property="calcWeightUnit"/>
     </resultMap>
 
     <select id="selectPageList" resultType="com.szmsd.finance.domain.AccountSerialBill" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
@@ -157,8 +161,9 @@
     <select id="selectBusinessTotal" resultType="com.szmsd.finance.vo.BillBusinessTotalVO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
 
         select FASB.charge_category as chargeCategory,FASB.currency_code as currencyCode,
-               FASB.remark,FASB.warehouse_name as warehouse,FASB.charge_type as chargeType,
-               sum(FASB.amount) as amount
+               FASB.warehouse_code as warehouse,
+               sum(FASB.amount) as amount,
+               FASB.remark
         from fss_account_serial_bill as FASB
         <where>
             <if test="cusCode != null and cusCode != ''">
@@ -173,7 +178,7 @@
                 and FASB.payment_time <![CDATA[ <= ]]> (#{billEndTime})
             </if>
         </where>
-        group by FASB.cus_code,FASB.currency_code
+        group by FASB.charge_category,FASB.warehouse_code,FASB.currency_code
     </select>
 
     <select id="selectDirectDelivery" resultMap="DirectDeliveryVOMap" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
@@ -193,10 +198,13 @@
                 </if>
             </if>
             DOB.tracking_no,DOB.ref_no,DOB.warehouse_code,
+            DOB.shipment_rule,DOB.shipment_service,
             DOB.destination_delivery,DOB.weight,DOB.forecast_weight,
-            DOB.calc_weight,DOB.create_time,
+            DOB.calc_weight,DOB.calc_weight_unit,
+            DOB.create_time,
             DOB.specifications,
             DOD.product_name,DOD.sku,
+            DOA.country,DOA.country_code,
             sum(FASB.amount) as total_amount,
             sum(case when FASB.charge_category = '物流基础费' then abs(FASB.amount) else 0 end ) as freight_fee,
             sum(case when FASB.charge_category in ('操作费','特殊操作费','业务操作') then abs(FASB.amount) else 0 end) as ex_warehourse_fee,
@@ -210,6 +218,7 @@
         from fss_account_serial_bill as FASB
         inner join del_outbound as DOB on FASB.`no` = DOB.order_no
         left join del_outbound_detail as DOD on DOB.order_no = DOD.order_no
+        left join del_outbound_address as DOA on DOB.order_no = DOA.order_no
         <where>
             and DOB.del_flag = 0
             <if test="orderTypeList != null">
