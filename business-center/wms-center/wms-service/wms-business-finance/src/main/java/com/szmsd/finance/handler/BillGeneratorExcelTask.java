@@ -97,6 +97,7 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         directDeliveryQueryVO.setBillEndTime(billRequestVO.getBillEndTime());
         List<String> orderTypeList = new ArrayList<>();
         orderTypeList.add("PackageTransfer");
+        directDeliveryQueryVO.setSheetNo(1);
         List<BillDirectDeliveryTotalVO> directDeliverys = this.selectDirectDelivery(directDeliveryQueryVO);
         sheetAndDataMap.put(1,directDeliverys);
 
@@ -114,6 +115,7 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         storegeOrderTypeList.add("SelfPick");
         storegeOrderTypeList.add("SplitSku");
         storegeQueryVO.setOrderTypeList(storegeOrderTypeList);
+        storegeQueryVO.setSheetNo(2);
         List<BillDirectDeliveryTotalVO> storegeDeliverys = this.selectDirectDelivery(storegeQueryVO);
         sheetAndDataMap.put(2,storegeDeliverys);
 
@@ -127,6 +129,7 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         List<String> bigGoodsTypeList = new ArrayList<>();
         bigGoodsTypeList.add("BulkOrder");
         bigGoodsQueryVO.setOrderTypeList(bigGoodsTypeList);
+        bigGoodsQueryVO.setSheetNo(4);
         List<BillDirectDeliveryTotalVO> bigGoodsDeliverys = this.selectDirectDelivery(bigGoodsQueryVO);
         sheetAndDataMap.put(4,bigGoodsDeliverys);
 
