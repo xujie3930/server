@@ -231,7 +231,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 boolean isAuditFailed = DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(delOutbound.getState());
                 if (!(DelOutboundStateEnum.REVIEWED.getCode().equals(delOutbound.getState())
                         || isAuditFailed)) {
-                    throw new CommonException("400", MessageUtil.to("单据状态不正确，不能提审", "单据状态不正确，不能提审"));
+                    throw new CommonException("400", MessageUtil.to("单据状态不正确，不能提审", "The document status is incorrect and cannot be submitted for approval"));
                 }
 
                 // 自提单判断面单是否上传
@@ -1229,67 +1229,34 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             }
         }
         if (null == pathname) {
-            // 判断从承运商获取的标签文件是否存在
-            pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
-            if("Y".equals(delOutbound.getUploadBoxLabel())){
-                String uploadBoxLabel = getBoxLabel(delOutbound);
-                String mergeFileDirPath = DelOutboundServiceImplUtil.getBatchMergeFilePath(delOutbound);
-                File mergeFileDir = new File(mergeFileDirPath);
-                if (!mergeFileDir.exists()) {
-                    try {
-                        FileUtils.forceMkdir(mergeFileDir);
-                    } catch (IOException e) {
-                        logger.error(e.getMessage(), e);
-                        throw new CommonException("500", MessageUtil.to("创建文件夹失败，", "Failed to create folder,") + e.getMessage());
-                    }
-                }
-                String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
-                File mergeFile = new File(mergeFilePath);
-                logger.info(mergeFilePath + "," + pathname + "," + uploadBoxLabel + ","+selfPickLabelFilePath);
-                if(mergeFile.exists()){
-                    pathname = mergeFilePath;
-                }else{
-                    try {
-                        if (PdfUtil.merge(mergeFilePath, pathname, uploadBoxLabel, selfPickLabelFilePath)) {
-                            pathname = mergeFilePath;
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        logger.error(e.getMessage(), e);
-                        throw new CommonException("500", MessageUtil.to("合并箱标文件，标签文件失败","Merging box label file, label file failed"));
-                    }
-                }
 
-            }else{
-
-                if(selfPickLabelFilePath != null){
-                    String mergeFileDirPath = DelOutboundServiceImplUtil.getBatchMergeFilePath(delOutbound);
-                    File mergeFileDir = new File(mergeFileDirPath);
-                    if (!mergeFileDir.exists()) {
-                        try {
-                            FileUtils.forceMkdir(mergeFileDir);
-                        } catch (IOException e) {
-                            logger.error(e.getMessage(), e);
-                            throw new CommonException("500", MessageUtil.to("创建文件夹失败，", "Failed to create folder,") + e.getMessage());
-                        }
-                    }
-                    String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
-                    logger.info(mergeFilePath + "," + pathname + "," + selfPickLabelFilePath);
-                    if(new File(mergeFilePath).exists()){
-                        pathname = mergeFilePath;
-                    }else{
-                        try {
-                            if (PdfUtil.merge(mergeFilePath, pathname, selfPickLabelFilePath)) {
-                                pathname = mergeFilePath;
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            logger.error(e.getMessage(), e);
-                            throw new CommonException("500", MessageUtil.to("合并箱标文件，标签文件失败","Merging box label file, label file failed"));
-                        }
+            String boxFilePath = "";
+            // 标签文件
+            if (delOutbound.getIsLabelBox()) {
+                BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_BATCH_LABEL.getBusinessCode());
+                basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
+                if (null != listR && null != listR.getData()) {
+                    List<BasAttachment> attachmentList = listR.getData();
+                    if (CollectionUtils.isNotEmpty(attachmentList)) {
+                        BasAttachment attachment = attachmentList.get(0);
+                        // 箱标文件 - 上传的
+                        boxFilePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
                     }
                 }
             }
+
+            // 判断从承运商获取的标签文件是否存在
+            pathname = DelOutboundServiceImplUtil.getLabelFilePath(delOutbound) + "/" + delOutbound.getShipmentOrderNumber() + ".pdf";
+
+
+            //此变量表示通过导入箱标的附件
+            String uploadBoxLabel = null;
+            if("Y".equals(delOutbound.getUploadBoxLabel())){
+                uploadBoxLabel = getBoxLabel(delOutbound);
+            }
+            pathname = this.mergeFile(delOutbound, pathname, boxFilePath, selfPickLabelFilePath, uploadBoxLabel);
 
         }
         File labelFile = new File(pathname);
@@ -1315,6 +1282,31 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 throw new CommonException("500", "读取标签文件失败");
             }
         }
+    }
+
+    private String mergeFile(DelOutbound delOutbound, String... urls){
+        String mergeFileDirPath = DelOutboundServiceImplUtil.getBatchMergeFilePath(delOutbound);
+        File mergeFileDir = new File(mergeFileDirPath);
+        if (!mergeFileDir.exists()) {
+            try {
+                FileUtils.forceMkdir(mergeFileDir);
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+                throw new CommonException("500", MessageUtil.to("创建文件夹失败，", "Failed to create folder,") + e.getMessage());
+            }
+        }
+        String mergeFilePath = mergeFileDirPath + "/" + delOutbound.getOrderNo();
+        new File(mergeFilePath).deleteOnExit();
+        logger.info("{}出库单传wms数据集合{}", delOutbound.getOrderNo(), urls);
+            ;
+        try {
+            PdfUtil.merge(mergeFilePath, urls);
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error(e.getMessage(), e);
+            throw new CommonException("500", MessageUtil.to("合并箱标文件，标签文件失败","Merging box label file, label file failed"));
+        }
+        return mergeFilePath;
     }
 
     @Override
