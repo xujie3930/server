@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.runnable;
 
+import com.alibaba.fastjson.JSON;
 import com.szmsd.chargerules.config.ThreadPoolConfig;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.dto.WarehouseOperationDTO;
@@ -77,7 +78,7 @@ public class ThreadRunnable {
 
                 Map<String, List<Inventory>> warehouseSkuMap = getWarehouseSku();
 
-                log.info("executeWarehouse() getWarehouseSku...{}",warehouseSkuMap);
+                log.info("executeWarehouse() getWarehouseSku...{}", JSON.toJSONString(warehouseSkuMap));
 
                 for (Map.Entry<String, List<Inventory>> entry : warehouseSkuMap.entrySet()) {
                     asyncTaskExecutor.execute(() -> {
