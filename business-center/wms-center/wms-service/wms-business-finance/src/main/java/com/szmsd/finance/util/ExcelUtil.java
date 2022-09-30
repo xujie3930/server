@@ -37,6 +37,13 @@ public class ExcelUtil {
                                                Map<Integer,List<?>> otherMapData,
                                                String filename, InputStream inputStream){
         ExcelWriter excelWriter = null;
+
+        //需要合并的列
+        int [] mergeCollindex = {0,1,2};
+
+        //从第一行开始
+        int mergeRowIndex = 1;
+
         try {
             OutputStream outputStream = response.getOutputStream();
             response.setHeader("Content-disposition", "attachment; filename=" + filename);
@@ -44,7 +51,7 @@ public class ExcelUtil {
             response.setHeader("Pragma", "No-cache");//设置头
             response.setHeader("Cache-Control", "no-cache");//设置头
             response.setDateHeader("Expires", 0);//设置日期头
-            excelWriter = EasyExcel.write(outputStream).withTemplate(inputStream).build();
+            excelWriter = EasyExcel.write(outputStream).withTemplate(inputStream).registerWriteHandler(new MergeStrategy(mergeCollindex,mergeRowIndex)).build();
             for(Map.Entry<Integer, List<?>> entry : sheetAndDataMap.entrySet()){
                 List<?> value = entry.getValue();
                 Integer key = entry.getKey();
@@ -106,8 +113,10 @@ public class ExcelUtil {
                                                ConcurrentHashMap<Integer,List<?>> otherMapData, InputStream inputStream){
         ExcelWriter excelWriter = null;
 
+        //需要合并的列
         int [] mergeCollindex = {0,1,2};
 
+        //从第一行开始
         int mergeRowIndex = 1;
 
         try {
