@@ -31,7 +31,7 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
     private AccountBalanceLogMapper accountBalanceLogMapper;
 
 
-    //private ChargeRelationMapper chargeRelationMapper;
+    private ChargeRelationMapper chargeRelationMapper;
 
     private BasFeignService basFeignService;
 
@@ -203,18 +203,72 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
      */
     private List<BillBusinessTotalVO> selectBusinessTotal(EleBillQueryVO queryVO) {
 
-        List<BillBusinessTotalVO> resultVOS = accountSerialBillMapper.selectBusinessTotal(queryVO);
+        List<BillBusinessTotalVO> businessTotalVOS = new ArrayList<>();
 
-//        Wrapper<ChargeRelation> queryWrapper = new QueryWrapper<>();
-//
-//        List<ChargeRelation> chargeRelations = chargeRelationMapper.selectList(queryWrapper);
-//        if(CollectionUtils.isEmpty(chargeRelations)){
-//            throw new RuntimeException("异常，无法获取 fss_charge_relation 数据");
-//        }
-//
-//        chargeRelations.stream().collect(Collectors.groupingBy(ChargeRelation::getChargeCategory));
+        //国内直发
+        List<String> orderTypePackageTransferList = new ArrayList<>();
+        orderTypePackageTransferList.add("PackageTransfer");
+        queryVO.setOrderTypeList(orderTypePackageTransferList);
+        queryVO.setSheetNo(1);
+        List<BillBusinessTotalVO> resultVOS = accountSerialBillMapper.selectAllOrderType(queryVO);
 
-        return resultVOS;
+        //List<BillBusinessTotalVO> packageTrans = this.generatorOrderType(resultVOS);
+
+        //仓储服务
+        List<String> orderTypeWmsList = new ArrayList<>();
+        orderTypeWmsList.add("Batch");
+        orderTypeWmsList.add("Collection");
+        orderTypeWmsList.add("Destroy");
+        orderTypeWmsList.add("NewSku");
+        orderTypeWmsList.add("Normal");
+        orderTypeWmsList.add("SelfPick");
+        orderTypeWmsList.add("SplitSku");
+        queryVO.setOrderTypeList(orderTypeWmsList);
+        queryVO.setSheetNo(2);
+        List<BillBusinessTotalVO> orderWmsVOS = accountSerialBillMapper.selectAllOrderType(queryVO);
+
+
+        //大货服务
+        List<String> bigGoodsWmsList = new ArrayList<>();
+        bigGoodsWmsList.add("BulkOrder");
+        queryVO.setOrderTypeList(bigGoodsWmsList);
+        queryVO.setSheetNo(4);
+        List<BillBusinessTotalVO> bigGoodsVOS = accountSerialBillMapper.selectAllOrderType(queryVO);
+
+        //充值
+        queryVO.setOrderTypeList(null);
+        queryVO.setSheetNo(null);
+        List<BillBusinessTotalVO> rechargeData = accountSerialBillMapper.recharge(queryVO);
+
+        //提现
+        List<BillBusinessTotalVO> withdrawalData = accountSerialBillMapper.withdrawal(queryVO);
+
+        //补收
+        List<BillBusinessTotalVO> supplementaryData  = accountSerialBillMapper.supplementary(queryVO);
+
+        //优惠/赔偿/退费
+        List<BillBusinessTotalVO> businessAll  = accountSerialBillMapper.businessAll(queryVO);
+
+        //余额转换
+        List<BillBusinessTotalVO> balanceData  = accountSerialBillMapper.balanceConversion(queryVO);
+
+        businessTotalVOS.addAll(resultVOS);
+        businessTotalVOS.addAll(bigGoodsVOS);
+        businessTotalVOS.addAll(orderWmsVOS);
+        businessTotalVOS.addAll(rechargeData);
+        businessTotalVOS.addAll(withdrawalData);
+        businessTotalVOS.addAll(supplementaryData);
+        businessTotalVOS.addAll(businessAll);
+        businessTotalVOS.addAll(balanceData);
+
+        return businessTotalVOS;
+    }
+
+    private List<BillBusinessTotalVO> generatorOrderType(List<BillBusinessTotalVO> resultVOS) {
+
+
+
+        return null;
     }
 
     /**

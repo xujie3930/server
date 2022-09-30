@@ -28,4 +28,16 @@ public interface AccountSerialBillMapper extends BaseMapper<AccountSerialBill> {
     List<BillDirectDeliveryTotalVO> selectDirectDelivery(EleBillQueryVO queryVO);
 
     List<AccountSerialBill> selectBillDetails(EleBillQueryVO billDetailQueryVO);
+
+    List<BillBusinessTotalVO> selectAllOrderType(EleBillQueryVO queryVO);
+
+    List<BillBusinessTotalVO> recharge(EleBillQueryVO queryVO);
+
+    List<BillBusinessTotalVO> withdrawal(EleBillQueryVO queryVO);
+
+    List<BillBusinessTotalVO> supplementary(EleBillQueryVO queryVO);
+
+    List<BillBusinessTotalVO> businessAll(EleBillQueryVO queryVO);
+
+    List<BillBusinessTotalVO> balanceConversion(EleBillQueryVO queryVO);
 }

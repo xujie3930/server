@@ -5,7 +5,7 @@
     <insert id="autoGeneratorBalance">
 
         INSERT INTO `fss_account_balance_log` ( `cus_id`, `cus_code`, `cus_name`, `currency_code`, `currency_name`, `current_balance`, `freeze_balance`, `total_balance`, `credit_type`, `credit_status`, `credit_line`, `credit_use_amount`, `credit_begin_time`, `credit_end_time`, `credit_time_interval`, `credit_time_flag`, `credit_time_unit`, `credit_buffer_time`, `credit_buffer_time_interval`, `credit_buffer_time_unit`, `credit_repaid_amount`, `create_by_name`, `create_time`, `update_by_name`, `update_time`, `create_by`, `update_by`, `remark`, `version`,`generator_time`)
-        select  `cus_id`, `cus_code`, `cus_name`, `currency_code`, `currency_name`, `current_balance`, `freeze_balance`, `total_balance`, `credit_type`, `credit_status`, `credit_line`, `credit_use_amount`, `credit_begin_time`, `credit_end_time`, `credit_time_interval`, `credit_time_flag`, `credit_time_unit`, `credit_buffer_time`, `credit_buffer_time_interval`, `credit_buffer_time_unit`, `credit_repaid_amount`, `create_by_name`, `create_time`, `update_by_name`, `update_time`, `create_by`, `update_by`, `remark`, `version`,now() from fss_account_balance
+        select  `cus_id`, `cus_code`, `cus_name`, `currency_code`, `currency_name`, `current_balance`, `freeze_balance`, `total_balance`, `credit_type`, `credit_status`, `credit_line`, `credit_use_amount`, `credit_begin_time`, `credit_end_time`, `credit_time_interval`, `credit_time_flag`, `credit_time_unit`, `credit_buffer_time`, `credit_buffer_time_interval`, `credit_buffer_time_unit`, `credit_repaid_amount`, `create_by_name`, now(), `update_by_name`, `update_time`, `create_by`, `update_by`, `remark`, `version`,now() from fss_account_balance
 
     </insert>
 
