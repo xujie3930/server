@@ -1,33 +1,23 @@
 package com.szmsd.doc.api.auth;
 
 import cn.hutool.core.codec.Base64Decoder;
-import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSON;
-import com.sun.javafx.fxml.builder.URLBuilder;
-import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.common.core.constant.SecurityConstants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.enums.UserStatus;
 import com.szmsd.common.core.exception.com.LogisticsException;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.feign.AuthClientService;
 import com.szmsd.system.api.feign.RemoteUserService;
 import com.szmsd.system.api.model.UserInfo;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.utils.URIBuilder;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriBuilder;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.net.URI;
 import java.util.Enumeration;
-import java.util.List;
 
 /**
  * @Author lc
@@ -106,14 +96,6 @@ public class BasicOauthController {
             log.info("[wms-business-doc]-[BasicOauthController]-[basicAuthorization] 内部登录 请求参数:{}", JSON.toJSONString(username));
             Object data = authClient.token(username, "1", "01", "client", "password", "123456", SecurityConstants.LOGIN_FREE, "Basic Y2xpZW50OjEyMzQ1Ng==");
             return R.ok(data);
-//            URI build = new URIBuilder("http://127.0.0.1:8080/auth/oauth/token")
-//                    .setParameter("username", username).setParameter("password", password)
-//                    .setParameter("grant_type", "password").setParameter("scope", "server")
-//                    .setParameter("user_type", "01").setParameter("LOGIN_FREE", SecurityConstants.LOGIN_FREE).build();
-//            String data = HttpRequest.get(build.toString()).header("Authorization", "Basic Y2xpZW50OjEyMzQ1Ng==").execute().body();
-//            log.info("[wms-business-doc]-[BasicOauthController]-[basicAuthorization] 内部登录 响应结果:{}", JSON.toJSONString(data));
-//            return R.ok(data);
-
         } catch (Exception e) {
             e.printStackTrace();
             if (e instanceof LogisticsException) {
