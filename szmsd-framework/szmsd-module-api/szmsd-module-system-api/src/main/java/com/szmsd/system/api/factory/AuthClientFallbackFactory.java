@@ -28,8 +28,10 @@ public class AuthClientFallbackFactory implements FallbackFactory<AuthClientServ
                 throw new CommonException("999", ExceptionMessageEnum.FAIL.getValue());
             }
 
-
-
+            @Override
+            public Object token(String username, String password, String user_type, String client_id, String grant_type, String client_secret, String LOGIN_FREE, String authHeader) {
+                throw new CommonException("999", ExceptionMessageEnum.FAIL.getValue());
+            }
         };
     }
 }
