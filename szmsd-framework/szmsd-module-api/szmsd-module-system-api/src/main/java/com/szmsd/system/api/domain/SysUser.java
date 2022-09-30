@@ -157,6 +157,9 @@ public class SysUser extends BaseEntity {
     @TableField(exist = false)
     private List<String> childParentCodeList;
 
+    @ApiModelProperty(value = "客户basic认证秘钥")
+    private String sellerKey;
+
     public SysUser() {
 
     }

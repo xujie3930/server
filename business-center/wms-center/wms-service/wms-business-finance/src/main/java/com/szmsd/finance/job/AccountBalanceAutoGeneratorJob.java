@@ -25,7 +25,7 @@ public class AccountBalanceAutoGeneratorJob {
     /**
      * 定时任务：每天定时备份账户余额表,晚上12点之前
      */
-    @Scheduled(cron = "58 59 23 * * ?")
+    @Scheduled(cron = "40 59 23 * * ?")
     public void autoGeneratorBalance() {
         log.info("autoGeneratorBalance() start...");
         RLock lock = redissonClient.getLock("autoGeneratorBalance");
