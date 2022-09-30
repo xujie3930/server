@@ -105,8 +105,13 @@ public class ExcelUtil {
                                                String businessKey,
                                                ConcurrentHashMap<Integer,List<?>> otherMapData, InputStream inputStream){
         ExcelWriter excelWriter = null;
+
+        int [] mergeCollindex = {0,1,2};
+
+        int mergeRowIndex = 1;
+
         try {
-            excelWriter = EasyExcel.write(file).withTemplate(inputStream).build();
+            excelWriter = EasyExcel.write(file).withTemplate(inputStream).registerWriteHandler(new MergeStrategy(mergeCollindex,mergeRowIndex)).build();
             for(Map.Entry<Integer, List<?>> entry : sheetAndDataMap.entrySet()){
                 List<?> value = entry.getValue();
                 Integer key = entry.getKey();
