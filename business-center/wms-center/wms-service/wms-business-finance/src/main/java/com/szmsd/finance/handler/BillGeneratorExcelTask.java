@@ -13,6 +13,8 @@ import com.szmsd.finance.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ResourceUtils;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,10 +32,9 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
 
     private AccountBalanceLogMapper accountBalanceLogMapper;
 
-
-    private ChargeRelationMapper chargeRelationMapper;
-
     private BasFeignService basFeignService;
+
+    private HttpServletRequest request;
 
     public BillGeneratorExcelTask(){
 
@@ -54,6 +55,7 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         String filePath = billGeneratorBO.getFilePath();
         accountBalanceLogMapper = billGeneratorBO.getAccountBalanceLogMapper();
         basFeignService = billGeneratorBO.getBasFeignService();
+        request = billGeneratorBO.getRequest();
 
 
         String fileName = "dm-oms-template-"+current+".xlsx";
@@ -157,13 +159,17 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
 
             AccountBillRecordTaskResultVO taskResultVO = new AccountBillRecordTaskResultVO();
 
+            String requestUrl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort();
+
             String f = filePath + fileName;
             File file = new File(f);
             ExcelUtil.exportFile(file,"bas",titleDataMap,"bill",sheetAndDataMap,"business",otherAndDataMap,inputStream);
 
+            String fileUrl = requestUrl + f;
+
             taskResultVO.setFileName(fileName);
             taskResultVO.setRecordId(billGeneratorBO.getRecordId());
-            taskResultVO.setFileUrl(f);
+            taskResultVO.setFileUrl(fileUrl);
 
             return taskResultVO;
 

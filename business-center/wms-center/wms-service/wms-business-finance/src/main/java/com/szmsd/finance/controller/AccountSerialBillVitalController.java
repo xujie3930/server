@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
@@ -37,8 +38,8 @@ public class AccountSerialBillVitalController extends BaseController {
     //@PreAuthorize("@ss.hasPermi('PreRecharge:save')")
     @ApiOperation(value = "账单生成")
     @PostMapping("/generator")
-    public R<Integer> generatorBill(@RequestBody @Valid BillGeneratorRequestVO billRequestVO){
-         return accountSerialBillService.generatorBill(billRequestVO);
+    public R<Integer> generatorBill(HttpServletRequest request, @RequestBody @Valid BillGeneratorRequestVO billRequestVO){
+         return accountSerialBillService.generatorBill(request,billRequestVO);
     }
 
     @ApiOperation(value = "资金结余列表")

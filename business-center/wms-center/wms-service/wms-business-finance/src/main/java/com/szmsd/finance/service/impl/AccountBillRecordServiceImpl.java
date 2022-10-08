@@ -31,6 +31,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,7 +78,7 @@ public class AccountBillRecordServiceImpl implements AccountBillRecordService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public R<Integer> generatorBill(BillGeneratorRequestVO billRequestVO) {
+    public R<Integer> generatorBill(HttpServletRequest request,BillGeneratorRequestVO billRequestVO) {
 
         String billStartTime = billRequestVO.getBillStartTime() + " 00:00:00";
         String billEndTime = billRequestVO.getBillEndTime() + " 23:59:59";
@@ -114,6 +115,7 @@ public class AccountBillRecordServiceImpl implements AccountBillRecordService {
         billGeneratorBO.setRecordId(recordId);
         billGeneratorBO.setBasFeignService(basFeignService);
         billGeneratorBO.setBasSellerInfoVO(basSellerInfoVO);
+        billGeneratorBO.setRequest(request);
         BillGeneratorExcelTask task = new BillGeneratorExcelTask(billGeneratorBO);
 
         ListenableFuture<AccountBillRecordTaskResultVO> taskResultVOFuture = exportThreadPoolTaskExecutor.submitListenable(task);

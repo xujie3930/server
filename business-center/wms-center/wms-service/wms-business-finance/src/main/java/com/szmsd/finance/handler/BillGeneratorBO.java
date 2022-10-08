@@ -7,6 +7,8 @@ import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.vo.BillGeneratorRequestVO;
 import lombok.Data;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Data
 public class BillGeneratorBO {
 
@@ -17,5 +19,7 @@ public class BillGeneratorBO {
     private BasSellerInfoVO basSellerInfoVO;
     private String filePath;
     private String recordId;
+
+    private HttpServletRequest request;
 
 }
