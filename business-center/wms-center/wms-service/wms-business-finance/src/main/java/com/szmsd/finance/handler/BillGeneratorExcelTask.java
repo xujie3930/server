@@ -7,14 +7,12 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.mapper.AccountBalanceLogMapper;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
-import com.szmsd.finance.mapper.ChargeRelationMapper;
 import com.szmsd.finance.util.ExcelUtil;
 import com.szmsd.finance.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ResourceUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,6 +55,9 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         basFeignService = billGeneratorBO.getBasFeignService();
         request = billGeneratorBO.getRequest();
 
+        String scheme = request.getScheme();
+        int port = request.getServerPort();
+        String serverName = request.getServerName();
 
         String fileName = "dm-oms-template-"+current+".xlsx";
         String modelPath = "classpath:template/dm-oms-template.xlsx";
@@ -159,7 +160,8 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
 
             AccountBillRecordTaskResultVO taskResultVO = new AccountBillRecordTaskResultVO();
 
-            String requestUrl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort();
+
+            String requestUrl = scheme+"://"+serverName+":"+port;
 
             String f = filePath + fileName;
             File file = new File(f);

@@ -39,7 +39,7 @@ public class AccountSerialBillVitalController extends BaseController {
     @ApiOperation(value = "账单生成")
     @PostMapping("/generator")
     public R<Integer> generatorBill(HttpServletRequest request, @RequestBody @Valid BillGeneratorRequestVO billRequestVO){
-         return accountSerialBillService.generatorBill(request,billRequestVO);
+        return accountSerialBillService.generatorBill(request,billRequestVO);
     }
 
     @ApiOperation(value = "资金结余列表")
