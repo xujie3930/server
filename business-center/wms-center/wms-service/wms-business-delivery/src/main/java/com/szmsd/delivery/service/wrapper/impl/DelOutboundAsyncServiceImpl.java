@@ -209,9 +209,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 String shipmentState = delOutbound.getShipmentState();
                 if (StringUtils.isEmpty(shipmentState)) {
                     currentState = ShipmentEnum.BEGIN;
-                } else if(shipmentState.equals(ShipmentEnum.SHIPMENT_ORDER)
-                        || shipmentState.equals(ShipmentEnum.FREEZE_BALANCE)
-                        || shipmentState.equals(ShipmentEnum.FREEZE_INVENTORY)){
+                } else if(shipmentState.equals(ShipmentEnum.SHIPMENT_ORDER.toString())
+                        || shipmentState.equals(ShipmentEnum.FREEZE_BALANCE.toString())
+                        || shipmentState.equals(ShipmentEnum.FREEZE_INVENTORY.toString())){
                     //以上状态直接从PRC算费开始
                     currentState = ShipmentEnum.PRC_PRICING;
                 }else {
