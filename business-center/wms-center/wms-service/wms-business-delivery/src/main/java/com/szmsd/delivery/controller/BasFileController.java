@@ -1,10 +1,9 @@
 package com.szmsd.delivery.controller;
 
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.szmsd.bas.domain.BasMaterial;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.BatchDownFilesUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
@@ -12,7 +11,6 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.BasFile;
 import com.szmsd.delivery.domain.BasFileDao;
 import com.szmsd.delivery.service.BasFileService;
-import com.szmsd.delivery.task.BatchDownFilesUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Api(tags = {"文件中心下载"})
