@@ -7,12 +7,12 @@ import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.mapper.AccountBalanceLogMapper;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
-import com.szmsd.finance.mapper.ChargeRelationMapper;
 import com.szmsd.finance.util.ExcelUtil;
 import com.szmsd.finance.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ResourceUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,10 +30,9 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
 
     private AccountBalanceLogMapper accountBalanceLogMapper;
 
-
-    private ChargeRelationMapper chargeRelationMapper;
-
     private BasFeignService basFeignService;
+
+    private HttpServletRequest request;
 
     public BillGeneratorExcelTask(){
 
@@ -54,7 +53,11 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         String filePath = billGeneratorBO.getFilePath();
         accountBalanceLogMapper = billGeneratorBO.getAccountBalanceLogMapper();
         basFeignService = billGeneratorBO.getBasFeignService();
+        request = billGeneratorBO.getRequest();
 
+        String scheme = request.getScheme();
+        int port = request.getServerPort();
+        String serverName = request.getServerName();
 
         String fileName = "dm-oms-template-"+current+".xlsx";
         String modelPath = "classpath:template/dm-oms-template.xlsx";
@@ -157,13 +160,18 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
 
             AccountBillRecordTaskResultVO taskResultVO = new AccountBillRecordTaskResultVO();
 
+
+            String requestUrl = scheme+"://"+serverName+":"+port;
+
             String f = filePath + fileName;
             File file = new File(f);
             ExcelUtil.exportFile(file,"bas",titleDataMap,"bill",sheetAndDataMap,"business",otherAndDataMap,inputStream);
 
+            String fileUrl = requestUrl + f;
+
             taskResultVO.setFileName(fileName);
             taskResultVO.setRecordId(billGeneratorBO.getRecordId());
-            taskResultVO.setFileUrl(f);
+            taskResultVO.setFileUrl(fileUrl);
 
             return taskResultVO;
 

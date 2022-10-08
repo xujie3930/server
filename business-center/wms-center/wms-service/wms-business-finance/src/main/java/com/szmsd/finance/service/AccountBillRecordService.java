@@ -6,6 +6,7 @@ import com.szmsd.finance.vo.BillGeneratorRequestVO;
 import com.szmsd.finance.vo.EleBillQueryVO;
 import com.szmsd.finance.vo.ElectronicBillVO;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public interface AccountBillRecordService {
      * @param billRequestVO
      * @return
      */
-    R<Integer> generatorBill(BillGeneratorRequestVO billRequestVO);
+    R<Integer> generatorBill(HttpServletRequest request,BillGeneratorRequestVO billRequestVO);
 
     /**
      * 资金结余
