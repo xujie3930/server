@@ -17,7 +17,6 @@ import com.szmsd.system.api.domain.SysUser;
 import com.szmsd.system.api.domain.dto.SysUserByTypeAndUserType;
 import com.szmsd.system.api.domain.dto.SysUserDto;
 import com.szmsd.system.api.model.UserInfo;
-import com.szmsd.system.config.Base64Utilrs;
 import com.szmsd.system.domain.dto.SysUserEditPsw;
 import com.szmsd.system.service.ISysPermissionService;
 import com.szmsd.system.service.ISysPostService;
@@ -356,11 +355,11 @@ public class SysUserController extends BaseController {
         //user.setCreateByName(userDto.getCreateByName());
 //        user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
 //        user.setSpearPassword(SecurityUtils.encryptPassword(user.getSpearPassword()));
-        String a =user.getUserName()+ UUID.randomUUID().toString().replaceAll("-","");
-        Base64Utilrs base64Utilrs=new Base64Utilrs();
+        String a =UUID.randomUUID().toString().replaceAll("-","");
+//        Base64Utilrs base64Utilrs=new Base64Utilrs();
         //加密
-         String sellerKey=base64Utilrs.getBase64(a);
-         user.setSellerKey(sellerKey);
+//         String sellerKey=base64Utilrs.getBase64(a);
+         user.setSellerKey(a);
         return userService.insertUser(user);
     }
 

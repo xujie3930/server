@@ -21,6 +21,7 @@ import com.szmsd.bas.dto.*;
 import com.szmsd.bas.mapper.BasSellerMapper;
 import com.szmsd.bas.service.IBasSellerCertificateService;
 import com.szmsd.bas.service.IBasSellerService;
+import com.szmsd.bas.util.Base64Utilrs;
 import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BasSellerCertificateVO;
 import com.szmsd.bas.vo.BasSellerInfoVO;
@@ -423,6 +424,17 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         if(basSeller == null){
             return new BasSellerInfoVO();
         }
+        SysUserByTypeAndUserType sysUserByTypeAndUserType=new SysUserByTypeAndUserType();
+        sysUserByTypeAndUserType.setNickName(basSeller.getUserName());
+        R<SysUser> sysUserR = remoteUserService.getNameByNickName(sysUserByTypeAndUserType);
+
+        String sellerKey=sysUserR.getData().getSellerKey();
+        //加密
+        Base64Utilrs base64Utilrs=new Base64Utilrs();
+
+        String sellerKeys=base64Utilrs.getBase64(basSeller.getUserName()+":"+sellerKey);
+        basSeller.setSellerKey(sellerKeys);
+
 
         //查询用户证件信息
         QueryWrapper<BasSellerCertificate> BasSellerCertificateQueryWrapper = new QueryWrapper<>();
