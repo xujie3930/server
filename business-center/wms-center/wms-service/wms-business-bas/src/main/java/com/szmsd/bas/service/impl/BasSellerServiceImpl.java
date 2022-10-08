@@ -425,7 +425,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             return new BasSellerInfoVO();
         }
         SysUserByTypeAndUserType sysUserByTypeAndUserType=new SysUserByTypeAndUserType();
-        sysUserByTypeAndUserType.setNickName(basSeller.getUserName());
+        sysUserByTypeAndUserType.setUsername(basSeller.getUserName());
         R<SysUser> sysUserR = remoteUserService.getNameByNickName(sysUserByTypeAndUserType);
 
         String sellerKey=sysUserR.getData().getSellerKey();

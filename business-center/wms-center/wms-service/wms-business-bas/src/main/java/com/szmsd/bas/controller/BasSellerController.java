@@ -129,7 +129,7 @@ public class BasSellerController extends BaseController{
     /**
     * 获取模块详细信息
     */
-    @PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:query')")
+    //@PreAuthorize("@ss.hasPermi('BasSeller:BasSeller:query')")
     @GetMapping(value = "getInfo/{userName}")
     @ApiOperation(value = "获取模块详细信息",notes = "获取模块详细信息")
     public R<BasSellerInfoVO> getInfo(@PathVariable("userName") String userName)

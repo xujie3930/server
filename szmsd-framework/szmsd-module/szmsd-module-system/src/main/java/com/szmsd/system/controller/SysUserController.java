@@ -180,6 +180,7 @@ public class SysUserController extends BaseController {
     public R<SysUser> getNameByNickName(@RequestBody SysUserByTypeAndUserType sysUserByTypeAndUserType) {
         SysUser sysUser = new SysUser();
         sysUser.setNickName(sysUserByTypeAndUserType.getNickName());
+        sysUser.setUserName(sysUserByTypeAndUserType.getUsername());
         List<SysUser> list = userService.selectUserList(sysUser);
         if (CollectionUtils.isNotEmpty(list) && list.size() == 1) {
             return R.ok(list.get(0));
