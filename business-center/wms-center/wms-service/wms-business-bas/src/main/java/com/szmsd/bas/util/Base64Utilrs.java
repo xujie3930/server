@@ -1,4 +1,4 @@
-package com.szmsd.system.config;
+package com.szmsd.bas.util;
 
 import org.apache.commons.codec.binary.Base64;
 

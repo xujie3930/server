@@ -225,6 +225,12 @@ public class BasSeller extends BaseEntity {
     @Excel(name = "授信方式")
     private String creditType;
 
+    @ApiModelProperty(value = "客户basic认证秘钥")
+    @TableField(exist = false)
+    private String sellerKey;
+
+
+
 
 
 }
