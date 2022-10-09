@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.szmsd.bas.api.feign.BasPartnerFeignService;
 import com.szmsd.bas.domain.BasPartner;
@@ -194,11 +195,13 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
             boolean bool = false;
             // 查询发货条件
             if (StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
-                    && StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
+                    && StringUtils.isNotEmpty(delOutbound.getShipmentService())) {
                 PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
                 packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
                 packageDeliveryConditions.setProductCode(delOutbound.getShipmentService());
                 R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
+                logger.info("订单号{}查询发货条件接口成功{}，{}, 返回json", delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), delOutbound.getShipmentService(),
+                        JSONUtil.toJsonStr(packageDeliveryConditionsR));
                 PackageDeliveryConditions packageDeliveryConditionsRData = null;
                 if (null != packageDeliveryConditionsR && Constants.SUCCESS == packageDeliveryConditionsR.getCode()) {
                     packageDeliveryConditionsRData = packageDeliveryConditionsR.getData();
@@ -207,6 +210,8 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                     //出库测量后接收发货指令 就不调用标签接口
                     bool = true;
                 }
+            }else{
+                logger.info("订单号{}查询发货条件失败{}，{}", delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), delOutbound.getShipmentService());
             }
             if(!bool){
                 // 提交一个获取标签的任务
