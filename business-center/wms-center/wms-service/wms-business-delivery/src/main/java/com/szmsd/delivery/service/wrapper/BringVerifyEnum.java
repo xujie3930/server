@@ -981,6 +981,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
             stopWatch.start();
             OperationFeignService operationFeignService = SpringUtils.getBean(OperationFeignService.class);
+            //业务计费 - 出库冻结余额
             R<?> r = operationFeignService.delOutboundFreeze(delOutboundOperationVO);
             stopWatch.stop();
 
