@@ -382,7 +382,9 @@ public class OperationServiceImpl implements IOperationService {
         chargeLog.setOrderNo(dto.getOrderNo());
         chargeLog.setOperationType(dto.getOrderType());
         DelOutboundOrderEnum delOutboundOrderEnum = DelOutboundOrderEnum.get(dto.getOrderType());
-        if (delOutboundOrderEnum != null) chargeLog.setOperationType(delOutboundOrderEnum.getName());
+        if (delOutboundOrderEnum != null){
+            chargeLog.setOperationType(delOutboundOrderEnum.getName());
+        }
         chargeLog.setPayMethod(BillEnum.PayMethod.BALANCE_FREEZE.name());
         chargeLog.setOperationPayMethod(BillEnum.PayMethod.BUSINESS_OPERATE.getPaymentName());
         chargeLog.setWarehouseCode(dto.getWarehouseCode());
