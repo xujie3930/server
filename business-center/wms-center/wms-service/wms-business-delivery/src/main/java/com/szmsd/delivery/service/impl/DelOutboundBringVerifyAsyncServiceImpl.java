@@ -200,7 +200,7 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
                 packageDeliveryConditions.setProductCode(delOutbound.getShipmentService());
                 R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
-                logger.info("订单号{}查询发货条件接口成功{}，{}, 返回json", delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), delOutbound.getShipmentService(),
+                logger.info("订单号{}查询发货条件接口成功{}，{}, 返回json:{}", delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), delOutbound.getShipmentService(),
                         JSONUtil.toJsonStr(packageDeliveryConditionsR));
                 PackageDeliveryConditions packageDeliveryConditionsRData = null;
                 if (null != packageDeliveryConditionsR && Constants.SUCCESS == packageDeliveryConditionsR.getCode()) {
