@@ -49,6 +49,8 @@ import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
+import com.szmsd.pack.api.feign.PackageDeliveryConditionsFeignService;
+import com.szmsd.pack.domain.PackageDeliveryConditions;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.redisson.api.RLock;
@@ -1127,7 +1129,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public ApplicationState nextState() {
-            return END;
+            return SHIPMENT_LABEL;
         }
     }
 
@@ -1144,8 +1146,27 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public void handle(ApplicationContext context) {
-            /*DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            // 查询发货条件
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
+                    && org.apache.commons.lang3.StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
+
+                PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
+                packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
+                packageDeliveryConditions.setProductCode(delOutbound.getShipmentService());
+                PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService = SpringUtils.getBean(PackageDeliveryConditionsFeignService.class);
+                R<PackageDeliveryConditions> packageDeliveryConditionsR = packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
+                PackageDeliveryConditions packageDeliveryConditionsRData = null;
+                if (null != packageDeliveryConditionsR && Constants.SUCCESS == packageDeliveryConditionsR.getCode()) {
+                    packageDeliveryConditionsRData = packageDeliveryConditionsR.getData();
+                }
+                if (null != packageDeliveryConditionsRData && "AfterMeasured".equals(packageDeliveryConditionsRData.getCommandNodeCode())) {
+                    //出库测量后接收发货指令 就不调用标签接口
+                    return;
+                }
+            }
             DelOutboundOperationLogEnum.BRV_SHIPMENT_LABEL.listener(delOutbound);
             logger.info("更新出库单{}标签中",delOutbound.getOrderNo());
             R<List<BasAttachment>> listR = null;
@@ -1242,7 +1263,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     throw new CommonException("500", MessageUtil.to("读取标签文件失败", "Failed to read label file"));
                 }
 
-            }*/
+            }
 
 
 
@@ -1271,7 +1292,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public ApplicationState preState() {
-            return SHIPMENT_CREATE;
+            return SHIPMENT_LABEL;
         }
 
         @Override
