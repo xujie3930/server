@@ -33,7 +33,7 @@ public class BaseProductRequest {
     @NotBlank(message = "英文产品名称不能为空")
     private String productName;
     @ApiModelProperty(value = "产品编码")
-    @Size(max = 15, message = "SKU cannot be longer than 15 characters when it is created")
+    @Size(max = 30, message = "SKU cannot be longer than 30 characters when it is created")
     @Pattern(regexp = "^[0-9a-zA-Z/+%$-.\\s?]*$", message = "只允许数字和大小写字母及特殊字符(/+%$-.)及中间空格")
 //    @NotBlank(message = "产品编码不能为空")
     private String code;
