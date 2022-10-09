@@ -31,4 +31,8 @@ public class BasSellerMessageQueryDTO extends BasSellerMessage {
     @TableField(exist = false)
     private List<String> sellerCodes;
 
+    @ApiModelProperty(value = "客户端传用户名")
+    @TableField(exist = false)
+    private String userName;
+
 }

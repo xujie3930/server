@@ -81,5 +81,14 @@
     </where>
     </select>
 
+    <select id="selectsellerCodes" resultType="java.lang.String">
+        SELECT seller_code from bas_seller where del_flag=0
+
+    </select>
+
+    <select id="selectsellerCode" resultType="java.lang.String" parameterType="java.lang.String">
+        SELECT seller_code from bas_seller where del_flag=0 and(service_manager_name=#{username} or service_staff_name=#{username})
+    </select>
+
 
 </mapper>

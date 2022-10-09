@@ -26,4 +26,8 @@ public interface BasSellerMessageMapper extends BaseMapper<BasSellerMessage> {
     Integer  selectMessageNumbers(BasSellerMessageQueryDTO dto);
 
     Integer  selectException(BasSellerMessageQueryDTO dto);
+
+    List<String> selectsellerCodes();
+
+    List<String>  selectsellerCode(@Param("username") String username);
 }

@@ -18,6 +18,7 @@ import com.szmsd.bas.vo.BasSellerMessageNoticeVO;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import com.szmsd.finance.domain.AccountBalance;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -162,17 +163,47 @@ public class BasSellerMessageServiceImpl extends ServiceImpl<BasSellerMessageMap
 
     @Override
     public R<BasSellerMessageNoticeVO> selectMessageNumber(BasSellerMessageQueryDTO dto) {
+        BasSellerMessageNoticeVO basSellerMessageNoticeVO=new BasSellerMessageNoticeVO();
 
-        if (dto.getSellerCodets()!=null){
+        //如果sellerCodets不是空的 表示是客户端
+        if (dto.getSellerCodets()!=null&&!dto.getSellerCodets().equals("")){
             List<String> list= Arrays.asList(dto.getSellerCodets().split(","));
             dto.setSellerCodes(list);
-        }
             Integer messageUnhandledNumber=baseMapper.selectMessageNumbers(dto);
             Integer exceptionUnhandledNumber=baseMapper.selectException(dto);
-        BasSellerMessageNoticeVO basSellerMessageNoticeVO=new BasSellerMessageNoticeVO();
-        basSellerMessageNoticeVO.setMessageUnhandledNumber(messageUnhandledNumber);
-        basSellerMessageNoticeVO.setExceptionUnhandledNumber(exceptionUnhandledNumber);
-        basSellerMessageNoticeVO.setTotalNumber(messageUnhandledNumber+exceptionUnhandledNumber);
+
+            basSellerMessageNoticeVO.setMessageUnhandledNumber(messageUnhandledNumber);
+            basSellerMessageNoticeVO.setExceptionUnhandledNumber(exceptionUnhandledNumber);
+            basSellerMessageNoticeVO.setTotalNumber(messageUnhandledNumber+exceptionUnhandledNumber);
+        }
+        //如果sellerCodets是空的 表示是管理端
+        if (dto.getSellerCodets()==null||dto.getSellerCodets().equals("")){
+            if (dto.getUserName().equals("admin")){
+                dto.setSellerCodes(baseMapper.selectsellerCodes());
+                Integer messageUnhandledNumber=baseMapper.selectMessageNumbers(dto);
+                Integer exceptionUnhandledNumber=baseMapper.selectException(dto);
+
+                basSellerMessageNoticeVO.setMessageUnhandledNumber(messageUnhandledNumber);
+                basSellerMessageNoticeVO.setExceptionUnhandledNumber(exceptionUnhandledNumber);
+                basSellerMessageNoticeVO.setTotalNumber(messageUnhandledNumber+exceptionUnhandledNumber);
+
+            }else if (!dto.getUserName().equals("admin")){
+
+                dto.setSellerCodes(baseMapper.selectsellerCode(dto.getUserName()));
+                Integer messageUnhandledNumber=0;
+                Integer exceptionUnhandledNumber=0;
+                if (dto.getSellerCodes().size()>0){
+                    messageUnhandledNumber =baseMapper.selectMessageNumbers(dto);
+                    exceptionUnhandledNumber =baseMapper.selectException(dto);
+                }
+
+
+                basSellerMessageNoticeVO.setMessageUnhandledNumber(messageUnhandledNumber);
+                basSellerMessageNoticeVO.setExceptionUnhandledNumber(exceptionUnhandledNumber);
+                basSellerMessageNoticeVO.setTotalNumber(messageUnhandledNumber+exceptionUnhandledNumber);
+            }
+        }
+
         return R.ok(basSellerMessageNoticeVO);
     }
 
