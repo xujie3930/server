@@ -1060,11 +1060,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
             if(bool){
                 //只推送标签，不执行发货指令
-                delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo());
+                delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), "pushLabel", null);
 
             }else{
                 //只推送标签， 推送发货指令
-                delOutboundRetryLabelService.save(delOutbound.getOrderNo());
+                delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), null, null);
             }
             // 记录日志
             delOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());

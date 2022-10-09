@@ -1127,7 +1127,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public ApplicationState nextState() {
-            return SHIPMENT_LABEL;
+            return END;
         }
     }
 
@@ -1144,7 +1144,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public void handle(ApplicationContext context) {
-            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            /*DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.BRV_SHIPMENT_LABEL.listener(delOutbound);
             logger.info("更新出库单{}标签中",delOutbound.getOrderNo());
@@ -1242,7 +1242,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     throw new CommonException("500", MessageUtil.to("读取标签文件失败", "Failed to read label file"));
                 }
 
-            }
+            }*/
 
 
 
@@ -1271,7 +1271,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public ApplicationState preState() {
-            return SHIPMENT_LABEL;
+            return SHIPMENT_CREATE;
         }
 
         @Override

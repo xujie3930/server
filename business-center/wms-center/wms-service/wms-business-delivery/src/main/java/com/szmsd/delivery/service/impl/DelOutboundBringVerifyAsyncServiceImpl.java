@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.szmsd.bas.api.feign.BasPartnerFeignService;
 import com.szmsd.bas.domain.BasPartner;
 import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.config.AsyncThreadObject;
@@ -23,6 +24,8 @@ import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.http.util.Ck1DomainPluginUtil;
 import com.szmsd.http.util.DomainInterceptorUtil;
+import com.szmsd.pack.api.feign.PackageDeliveryConditionsFeignService;
+import com.szmsd.pack.domain.PackageDeliveryConditions;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
@@ -63,6 +66,9 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
     private BasPartnerFeignService partnerFeignService;
     @Autowired
     private IDelTrackService delTrackService;
+    @SuppressWarnings({"all"})
+    @Autowired
+    private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
 
     @Override
     public void bringVerifyAsync(String orderNo) {
@@ -184,8 +190,29 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 // 增加出库单已取消记录，异步处理，定时任务
                 this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
             }
-            // 提交一个获取标签的任务
-            delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo());
+
+            boolean bool = false;
+            // 查询发货条件
+            if (StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
+                    && StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
+                PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
+                packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
+                packageDeliveryConditions.setProductCode(delOutbound.getShipmentService());
+                R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
+                PackageDeliveryConditions packageDeliveryConditionsRData = null;
+                if (null != packageDeliveryConditionsR && Constants.SUCCESS == packageDeliveryConditionsR.getCode()) {
+                    packageDeliveryConditionsRData = packageDeliveryConditionsR.getData();
+                }
+                if (null != packageDeliveryConditionsRData && "AfterMeasured".equals(packageDeliveryConditionsRData.getCommandNodeCode())) {
+                    //出库测量后接收发货指令 就不调用标签接口
+                    bool = true;
+                }
+            }
+            if(!bool){
+                // 提交一个获取标签的任务
+                delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), "pushLabel", "bringVerify");
+            }
+
             delTrackService.addData(new DelTrack()
                     .setOrderNo(delOutbound.getOrderNo())
                     .setTrackingNo(delOutbound.getTrackingNo())

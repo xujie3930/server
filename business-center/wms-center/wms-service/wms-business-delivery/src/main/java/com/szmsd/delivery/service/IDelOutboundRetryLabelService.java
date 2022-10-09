@@ -5,7 +5,6 @@ import com.szmsd.delivery.domain.DelOutboundRetryLabel;
 
 public interface IDelOutboundRetryLabelService extends IService<DelOutboundRetryLabel> {
 
-    void save(String orderNo);
+    void saveAndPushLabel(String orderNo, String pushLabel, String createBy);
 
-    void saveAndPushLabel(String orderNo);
 }
