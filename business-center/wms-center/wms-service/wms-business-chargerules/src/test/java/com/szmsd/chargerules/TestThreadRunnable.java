@@ -104,6 +104,25 @@ public class TestThreadRunnable {
 
     }
 
+    @Test
+    public void run1(){
+
+        String warehouseCode = "NJ";
+        String sku = "SCNID73000200";
+
+        List<InventorySkuVolumeVO> skuVolumeVo = getSkuVolume(new InventorySkuVolumeQueryDTO(sku, warehouseCode));
+
+        if(CollectionUtils.isNotEmpty(skuVolumeVo)) {
+
+            for (InventorySkuVolumeVO inventorySkuVolumeVO : skuVolumeVo) {
+                List<SkuVolumeVO> skuVolumes = inventorySkuVolumeVO.getSkuVolumes();
+                getSkuDetails(warehouseCode, skuVolumes);
+            }
+
+        }
+
+    }
+
     /**
      * 遍历SKU详情
      *
@@ -148,8 +167,8 @@ public class TestThreadRunnable {
             warehouseOperationDTO.setExpirationTime(new Date());
             warehouseOperationDTO.setCusCodeList(skuVolume.getCusCode());
 
-            if(warehouseCode.equals("NJ") && skuVolume.getCusCode().equals("CNID73")){
-                System.out.println("warehouseOperationConfig");
+            if(skuVolume.getSku().equals("SCNID73000200")){
+                System.out.println();
             }
 
             List<WarehouseOperationVo> warehouseOperationConfig = warehouseOperationService.selectOperationByRule(warehouseOperationDTO);
@@ -161,7 +180,17 @@ public class TestThreadRunnable {
                 continue;
             }
             WarehouseOperationVo warehouseOperationVo = warehouseOperationConfig.get(0);
+
+            if(skuVolume.getSku().equals("SCNID73000200")){
+                System.out.println();
+            }
+
             BigDecimal amount = charge(warehouseCode, skuVolume, warehouseOperationVo);
+
+            if(warehouseCode.equals("NJ") && skuVolume.getSku().equals("SCNID73000200")){
+                System.out.println(amount);
+            }
+
             if (amount.compareTo(BigDecimal.ZERO) < 0) {
                 log.error("getSkuDetails() 计算费用为0 仓库：{}, SKU:{}, 数量：{} 体积：{}立方厘米", warehouseCode, skuVolume.getSku(), skuVolume.getQty(), skuVolume.getVolume());
                 continue;
@@ -200,7 +229,8 @@ public class TestThreadRunnable {
         int days = Integer.parseInt(datePoor.substring(0, datePoor.indexOf("天")));
         //立方厘米转为立方米
         BigDecimal volume = skuVolume.getVolume().divide(new BigDecimal(1000000), 4, BigDecimal.ROUND_HALF_UP);
-        return warehouseOperationService.charge(days, volume, warehouseCode, warehouseOperationVo);
+        BigDecimal result = warehouseOperationService.charge(days, volume, warehouseCode, warehouseOperationVo);
+        return result;
     }
 
     /**
