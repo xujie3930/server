@@ -1086,6 +1086,11 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             inboundReceiptDetail.setWarehouseToTime(warehouseToTime);
             //修改到仓时间和数量
           int a=  inboundReceiptDetailMapper.updateReceiptDeta(inboundReceiptDetail);
+          InboundReceipt inboundReceipt=baseMapper.selectwarehouseNo(inboundReceiptDetail.getWarehouseNo());
+            if (inboundReceipt!=null){
+                inboundReceipt.setTotalPutQty(inboundReceipt.getTotalPutQty()+inboundReceiptDetail.getPutQty());
+                baseMapper.updateById(inboundReceipt);
+            }
         }
 
         }catch (Exception e){
