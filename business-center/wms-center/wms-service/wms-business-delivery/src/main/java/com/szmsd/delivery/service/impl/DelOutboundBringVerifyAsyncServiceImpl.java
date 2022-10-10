@@ -2,6 +2,7 @@ package com.szmsd.delivery.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.feign.BasPartnerFeignService;
 import com.szmsd.bas.domain.BasPartner;
 import com.szmsd.bas.domain.BaseProduct;
@@ -192,15 +193,22 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
             }
 
+            String productCode;
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(delOutbound.getProductShipmentRule())) {
+                productCode = delOutbound.getProductShipmentRule();
+            } else {
+                productCode = delOutbound.getShipmentRule();
+            }
+
             boolean bool = false;
             // 查询发货条件
             if (StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
-                    && StringUtils.isNotEmpty(delOutbound.getShipmentService())) {
+                    && StringUtils.isNotEmpty(productCode)) {
                 PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
                 packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
-                packageDeliveryConditions.setProductCode(delOutbound.getShipmentService());
+                packageDeliveryConditions.setProductCode(productCode);
                 R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
-                logger.info("订单号{}查询发货条件接口成功{}，{}, 返回json", delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), delOutbound.getShipmentService(),
+                logger.info("订单号{}查询发货条件接口成功{}，{}, 返回json:{}", delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), delOutbound.getShipmentService(),
                         JSONUtil.toJsonStr(packageDeliveryConditionsR));
                 PackageDeliveryConditions packageDeliveryConditionsRData = null;
                 if (null != packageDeliveryConditionsR && Constants.SUCCESS == packageDeliveryConditionsR.getCode()) {
