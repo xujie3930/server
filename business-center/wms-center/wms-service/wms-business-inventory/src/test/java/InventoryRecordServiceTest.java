@@ -22,7 +22,7 @@ public class InventoryRecordServiceTest {
     public void selectSkuVolume(){
 
         InventorySkuVolumeQueryDTO inventorySkuVolumeQueryDTO = new InventorySkuVolumeQueryDTO();
-        inventorySkuVolumeQueryDTO.setSku("FKSKU0001");
+        inventorySkuVolumeQueryDTO.setSku("SCNID73000200");
         inventorySkuVolumeQueryDTO.setWarehouseCode("NJ");
 
         List<InventorySkuVolumeVO> skuVolumeVOS = iInventoryRecordService.selectSkuVolume(inventorySkuVolumeQueryDTO);
