@@ -202,11 +202,11 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     @Override
     public List<InventorySkuVO> selectList(InventorySkuQueryDTO inventorySkuQueryDTO) {
         String sku = inventorySkuQueryDTO.getSku();
-//        if (StringUtils.isNotEmpty(sku)) {
-//            List<String> skuSplit = Arrays.asList(sku.split(","));
-//            List<String> skuList = ListUtils.emptyIfNull(inventorySkuQueryDTO.getSkuList());
-//            inventorySkuQueryDTO.setSkuList(Stream.of(skuSplit, skuList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
-//        }
+        if (StringUtils.isNotEmpty(sku)) {
+            List<String> skuSplit = Arrays.asList(sku.split(","));
+            List<String> skuList = ListUtils.emptyIfNull(inventorySkuQueryDTO.getSkuList());
+            inventorySkuQueryDTO.setSkuList(Stream.of(skuSplit, skuList).flatMap(Collection::stream).distinct().collect(Collectors.toList()));
+        }
         //屏蔽字母账号，在发uat
 //        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
 //            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
