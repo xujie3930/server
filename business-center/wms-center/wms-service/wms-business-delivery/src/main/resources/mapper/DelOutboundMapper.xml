@@ -162,6 +162,7 @@
             o.specifications,
             DATE_FORMAT(o.bring_verify_time, '%Y-%m-%d %H:%i:%s') as bring_verify_time,
             DATE_FORMAT(o.shipments_time, '%Y-%m-%d %H:%i:%s') as shipments_time,
+            DATE_FORMAT(o.tracking_time, '%Y-%m-%d %H:%i:%s') as tracking_time,
             o.exception_state,
             o.exception_message,
             o.cod_amount,

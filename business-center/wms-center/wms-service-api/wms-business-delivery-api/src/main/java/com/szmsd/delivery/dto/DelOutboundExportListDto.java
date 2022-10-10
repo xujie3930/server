@@ -107,4 +107,7 @@ public class DelOutboundExportListDto implements Serializable {
 
     @ApiModelProperty(value = "轨迹信息描述")
     private String trackingDescription;
+    @ApiModelProperty(value = "轨迹时间")
+    private String trackingTime;
+
 }
