@@ -139,6 +139,15 @@ public class ExchangePayFactory extends AbstractPayFactory {
             serialBill.setProductCategory(serialBill.getProductCategory());
             serialBill.setRemark("汇率为: ".concat(dto.getRate().toString()));
             serialBill.setNo(accountBalanceChange.getSerialNum());
+
+            BigDecimal amountChange = accountBalanceChange.getAmountChange();
+            //小于0算支出
+            if(amountChange != null && amountChange.compareTo(BigDecimal.ZERO)  == -1){
+                serialBill.setPayMethod(BillEnum.PayMethod.EXCHANGE_PAYMENT);
+            }else{
+                serialBill.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
+            }
+
             accountSerialBillService.add(serialBill);
         });
     }
