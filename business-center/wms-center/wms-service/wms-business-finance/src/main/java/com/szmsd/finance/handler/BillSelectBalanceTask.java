@@ -57,6 +57,11 @@ public class BillSelectBalanceTask implements Serializable {
         }
 
         Date parseStartTime = DateUtils.parseDate(billStartTime);
+
+        if(parseStartTime == null){
+            throw new RuntimeException("开始时间日期格式异常");
+        }
+
         Date startTime = DateUtils.getPastDate(parseStartTime,1);
 
 
