@@ -164,8 +164,8 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
                 Integer availableInventory = skuR.getAvailableInventory();
 
                 // 查询进入库记录
-                String startTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.parseDate(DateUtils.getPastDate(180)));
-                String endTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getNowDate());
+                String startTime = null;//DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.parseDate(DateUtils.getPastDate(180)));
+                String endTime = null;//DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getNowDate());
 
 
                 // 所有入库记录条数 避免死循环
@@ -228,8 +228,8 @@ public class InventoryRecordServiceImpl extends ServiceImpl<InventoryRecordMappe
      */
     public List<InventoryRecordVO> recursionType1Record(String sku, String warehouse, String startTime, String endTime, List<InventoryRecordVO> records, Integer count, Integer qty) {
         if (CollectionUtils.isNotEmpty(records)) {
-            startTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", startTime), 180));
-            endTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", endTime), 180));
+            //startTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'00:00:00.000'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", startTime), 180));
+            //endTime = DateUtils.parseDateToStr("yyyy-MM-dd'T'23:23:59.999'Z'", DateUtils.getPastDate(DateUtils.dateTime("yyyy-MM-dd", endTime), 180));
         }
         if (records == null) {
             records = new ArrayList<>();
