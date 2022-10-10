@@ -32,6 +32,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -68,26 +69,23 @@ public class TestThreadRunnable {
         RLock lock = redissonClient.getLock("executeOperation");
 
         try {
-            if (lock.tryLock()) {
+
+            boolean ty = lock.tryLock(3, TimeUnit.SECONDS);
+
+            log.info("executeWarehouse() tryLock...{}",ty);
+
+            if (ty) {
+
                 Map<String, List<Inventory>> warehouseSkuMap = getWarehouseSku();
+
                 for (Map.Entry<String, List<Inventory>> entry : warehouseSkuMap.entrySet()) {
-
-                    String warehouseCodeKey = entry.getKey();
-                    List<Inventory> inventoryList = entry.getValue();
-
-                    //log.info("仓库代码：{} 存在的商品信息:{}",warehouseCodeKey, JSONObject.toJSONString(inventoryList));
-
                     asyncTaskExecutor.execute(() -> {
                         String warehouseCode = entry.getKey();
                         List<Inventory> value = entry.getValue();
                         getSkuByWarehouse(warehouseCode, value);
                     });
-
-
                 }
             }
-
-
         } catch (Exception e) {
             log.error("executeWarehouse() execute error: ", e);
         } finally {
@@ -101,7 +99,6 @@ public class TestThreadRunnable {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
 
         log.info("executeWarehouse() end...");
 
