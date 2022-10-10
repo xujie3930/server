@@ -56,10 +56,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -174,6 +171,11 @@ public class ExceptionInfoController extends BaseController {
         // 获取登录用户的客户编码
         String sellerCode = loginUser.getSellerCode();
         //dto.setSellerCode(sellerCode);
+
+        if (dto.getSellerCode()!=null){
+            List<String> list= Arrays.asList(dto.getSellerCode().split(","));
+            dto.setSellerCodes(list);
+        }
         // 查询出库类型数据
         Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("085");
         ExceptionInfoExportContext exportContext = new ExceptionInfoExportContext();
