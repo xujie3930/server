@@ -193,10 +193,11 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
             }
 
-            String productCode = delOutbound.getShipmentRule();
-            String prcProductCode = context.getPrcProductCode();
-            if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(prcProductCode)) {
-                productCode = prcProductCode;
+            String productCode;
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(delOutbound.getProductShipmentRule())) {
+                productCode = delOutbound.getProductShipmentRule();
+            } else {
+                productCode = delOutbound.getShipmentRule();
             }
 
             boolean bool = false;
