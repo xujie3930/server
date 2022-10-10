@@ -193,7 +193,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setSupplierCalcType(delOutbound.getSupplierCalcType());
             updateDelOutbound.setSupplierCalcId(delOutbound.getSupplierCalcId());
 
-            updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+//            updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
 
             // 规格，长*宽*高
             updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
