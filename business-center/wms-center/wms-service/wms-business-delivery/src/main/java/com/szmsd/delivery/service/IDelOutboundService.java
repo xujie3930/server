@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundTarckError;
 import com.szmsd.delivery.domain.DelOutboundTarckOn;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
@@ -453,5 +454,8 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     List<DelOutboundTarckOn> selectDelOutboundTarckList(DelOutboundTarckOn delOutboundTarckOn);
 
     Integer selectDelOutboundCount(DelOutboundListQueryDto queryDto);
+
+    //导出挂号失败的数据
+    List<DelOutboundTarckError> selectbatchTrackingexport();
 }
 

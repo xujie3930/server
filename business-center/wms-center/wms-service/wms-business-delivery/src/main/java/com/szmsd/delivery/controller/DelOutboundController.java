@@ -36,10 +36,7 @@ import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.common.security.utils.SecurityUtils;
-import com.szmsd.delivery.domain.BasFile;
-import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.domain.DelOutboundTarckOn;
-import com.szmsd.delivery.domain.DelOutboundThirdParty;
+import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
@@ -88,10 +85,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
@@ -1063,6 +1057,89 @@ public class DelOutboundController extends BaseController {
             return R.failed(e.getMessage());
         }
     }
+
+
+
+    /**
+     * 导出查件服务模块列表
+     */
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:batchTrackingexport')")
+    @Log(title = "挂号失败导出", businessType = BusinessType.EXPORT)
+    @GetMapping("/batchTrackingexport")
+    @ApiOperation(value = "导出挂号失败",notes = "导出挂号失败")
+    public void batchTrackingexport(HttpServletResponse response) throws IOException {
+        List<DelOutboundTarckError> list = delOutboundService.selectbatchTrackingexport();
+        ExportParams params = new ExportParams();
+
+
+
+
+        Workbook workbook = ExcelExportUtil.exportExcel(params, DelOutboundTarckError.class, list);
+
+
+        Sheet sheet= workbook.getSheet("sheet0");
+
+        //获取第一行数据
+        Row row2 =sheet.getRow(0);
+
+        for (int i=0;i<3;i++){
+            Cell deliveryTimeCell = row2.getCell(i);
+
+            CellStyle styleMain = workbook.createCellStyle();
+             if (i==2){
+                 styleMain.setFillForegroundColor(IndexedColors.LIGHT_ORANGE.getIndex());
+             }else {
+                 styleMain.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+
+             }
+            Font font = workbook.createFont();
+            //true为加粗，默认为不加粗
+            font.setBold(true);
+            //设置字体颜色，颜色和上述的颜色对照表是一样的
+            font.setColor(IndexedColors.WHITE.getIndex());
+            //将字体样式设置到单元格样式中
+            styleMain.setFont(font);
+
+            styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            styleMain.setAlignment(HorizontalAlignment.CENTER);
+            styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+//        CellStyle style =  workbook.createCellStyle();
+//        style.setFillPattern(HSSFColor.HSSFColorPredefined.valueOf(""));
+//        style.setFillForegroundColor(IndexedColors.RED.getIndex());
+            deliveryTimeCell.setCellStyle(styleMain);
+        }
+
+
+
+        try {
+            String fileName="失败挂号"+System.currentTimeMillis();
+            URLEncoder.encode(fileName, "UTF-8");
+            //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
+            response.setContentType("application/vnd.ms-excel");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+
+            response.addHeader("Pargam", "no-cache");
+            response.addHeader("Cache-Control", "no-cache");
+
+            ServletOutputStream outStream = null;
+            try {
+                outStream = response.getOutputStream();
+                workbook.write(outStream);
+                outStream.flush();
+            } finally {
+                outStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+
+
+
+
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:againTrackingNo')")
     @Log(title = "出库单模块", businessType = BusinessType.UPDATE)

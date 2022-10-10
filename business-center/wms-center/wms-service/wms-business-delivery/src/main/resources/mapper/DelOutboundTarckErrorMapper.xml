@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.szmsd.delivery.mapper.DelOutboundTarckErrorMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.delivery.domain.DelOutboundTarckError" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+    <result column="tracking_no" property="trackingNo" jdbcType="VARCHAR" />
+    <result column="error_reason" property="errorReason" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, order_no, tracking_no, error_reason
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from del_outbound_tarck_error
+
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from del_outbound_tarck_error
+  </delete>
+  <insert id="insert" parameterType="com.szmsd.delivery.domain.DelOutboundTarckError" >
+    insert into del_outbound_tarck_error (id, order_no, tracking_no, 
+      error_reason)
+    values (#{id,jdbcType=INTEGER}, #{orderNo,jdbcType=VARCHAR}, #{trackingNo,jdbcType=VARCHAR}, 
+      #{errorReason,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.szmsd.delivery.domain.DelOutboundTarckError" >
+    insert into del_outbound_tarck_error
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="orderNo != null" >
+        order_no,
+      </if>
+      <if test="trackingNo != null" >
+        tracking_no,
+      </if>
+      <if test="errorReason != null" >
+        error_reason,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="orderNo != null" >
+        #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="trackingNo != null" >
+        #{trackingNo,jdbcType=VARCHAR},
+      </if>
+      <if test="errorReason != null" >
+        #{errorReason,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.delivery.domain.DelOutboundTarckError" >
+    update del_outbound_tarck_error
+    <set >
+      <if test="orderNo != null" >
+        order_no = #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="trackingNo != null" >
+        tracking_no = #{trackingNo,jdbcType=VARCHAR},
+      </if>
+      <if test="errorReason != null" >
+        error_reason = #{errorReason,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.delivery.domain.DelOutboundTarckError" >
+    update del_outbound_tarck_error
+    set order_no = #{orderNo,jdbcType=VARCHAR},
+      tracking_no = #{trackingNo,jdbcType=VARCHAR},
+      error_reason = #{errorReason,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
