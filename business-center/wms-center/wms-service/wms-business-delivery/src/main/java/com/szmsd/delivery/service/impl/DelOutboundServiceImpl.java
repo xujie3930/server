@@ -36,6 +36,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.*;
@@ -48,6 +49,7 @@ import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.mapper.BasFileMapper;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
+import com.szmsd.delivery.mapper.DelOutboundTarckErrorMapper;
 import com.szmsd.delivery.mapper.DelOutboundTarckOnMapper;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
@@ -190,6 +192,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Autowired
     private BasFileMapper basFileMapper;
+
+    @Autowired
+    private DelOutboundTarckErrorMapper delOutboundTarckErrorMapper;
+
     /**
      * 查询出库单模块
      *
@@ -1402,6 +1408,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public List<Map<String, Object>> batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list) {
         List<Map<String, Object>> resultList = new ArrayList<>();
+        int a=0;
+        int b=0;
         for (int i = 0; i < list.size(); i++) {
             DelOutboundBatchUpdateTrackingNoDto updateTrackingNoDto = list.get(i);
             if (StringUtils.isEmpty(updateTrackingNoDto.getOrderNo())) {
@@ -1421,25 +1429,39 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             //导入挂号记录表
             DelOutbound delOutbound=baseMapper.selectTrackingNo(updateTrackingNoDto.getOrderNo());
-            DelOutboundTarckOn delOutboundTarckOn=new DelOutboundTarckOn();
-            delOutboundTarckOn.setOrderNo(delOutbound.getOrderNo());
-            delOutboundTarckOn.setTrackingNo(delOutbound.getTrackingNo());
-            delOutboundTarckOn.setUpdateTime(new Date());
-            delOutboundTarckOn.setTrackingNoNew(updateTrackingNoDto.getTrackingNo());
-            int u = super.baseMapper.updateTrackingNo(updateTrackingNoDto);
-            delOutboundTarckOnMapper.insertSelective(delOutboundTarckOn);
-            ShipmentTrackingChangeRequestDto shipmentTrackingChangeRequestDto=new ShipmentTrackingChangeRequestDto();
-            shipmentTrackingChangeRequestDto.setTrackingNo(updateTrackingNoDto.getTrackingNo());
-            shipmentTrackingChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
-            shipmentTrackingChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
-            R<ResponseVO> r= htpOutboundFeignService.shipmentTracking(shipmentTrackingChangeRequestDto);
-
-            if (u < 1) {
-                Map<String, Object> result = new HashMap<>();
-                result.put("msg", "第 " + (i + 1) + " 行，出库单号不存在。");
-                resultList.add(result);
+            if (delOutbound!=null){
+                a=a+1;
+                DelOutboundTarckOn delOutboundTarckOn=new DelOutboundTarckOn();
+                delOutboundTarckOn.setOrderNo(delOutbound.getOrderNo());
+                delOutboundTarckOn.setTrackingNo(delOutbound.getTrackingNo());
+                delOutboundTarckOn.setUpdateTime(new Date());
+                delOutboundTarckOn.setTrackingNoNew(updateTrackingNoDto.getTrackingNo());
+                int u = super.baseMapper.updateTrackingNo(updateTrackingNoDto);
+                delOutboundTarckOnMapper.insertSelective(delOutboundTarckOn);
+                ShipmentTrackingChangeRequestDto shipmentTrackingChangeRequestDto=new ShipmentTrackingChangeRequestDto();
+                shipmentTrackingChangeRequestDto.setTrackingNo(updateTrackingNoDto.getTrackingNo());
+                shipmentTrackingChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
+                shipmentTrackingChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+                R<ResponseVO> r= htpOutboundFeignService.shipmentTracking(shipmentTrackingChangeRequestDto);
+            }else if (delOutbound==null){
+                b=b+1;
+                DelOutboundTarckError delOutboundTarckError=new DelOutboundTarckError();
+                BeanUtils.copyProperties(updateTrackingNoDto,delOutboundTarckError);
+                delOutboundTarckError.setErrorReason("出库单号不存在");
+                delOutboundTarckErrorMapper.insertSelective(delOutboundTarckError);
             }
+
+
+//            if (u < 1) {
+//                Map<String, Object> result = new HashMap<>();
+//                result.put("msg", "第 " + (i + 1) + " 行，出库单号不存在。");
+//                resultList.add(result);
+//            }
         }
+        Map map=new HashMap();
+        map.put("successNumber",a);
+        map.put("errorNumber",b);
+        resultList.add(map);
         /*
         int size = list.size();
         executeBatch(sqlSession -> {
@@ -2205,6 +2227,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         return basFileMapper.selectDelOutboundCount(queryWrapper);
 
+    }
+
+    @Override
+    public List<DelOutboundTarckError> selectbatchTrackingexport() {
+        List<DelOutboundTarckError> list=delOutboundTarckErrorMapper.selectByPrimaryKey();
+        delOutboundTarckErrorMapper.deleteByPrimaryKey();
+        return list;
     }
 
     public static List<String> splitToArray(String text, String split) {
