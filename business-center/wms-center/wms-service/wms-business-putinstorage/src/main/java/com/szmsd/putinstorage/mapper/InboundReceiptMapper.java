@@ -20,4 +20,6 @@ public interface InboundReceiptMapper extends BaseMapper<InboundReceipt> {
     List<InboundReceiptExportVO> selectExport(InboundReceiptQueryDTO queryDTO);
 
     List<InboundCountVO> statistics(InboundReceiptQueryDTO queryDTO);
+
+    InboundReceipt  selectwarehouseNo(@Param("warehouseNo") String warehouseNo);
 }
