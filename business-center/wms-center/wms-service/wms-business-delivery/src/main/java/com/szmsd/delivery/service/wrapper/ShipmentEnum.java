@@ -193,7 +193,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setSupplierCalcType(delOutbound.getSupplierCalcType());
             updateDelOutbound.setSupplierCalcId(delOutbound.getSupplierCalcId());
 
-            updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
+//            updateDelOutbound.setShipmentService(delOutbound.getShipmentService());
 
             // 规格，长*宽*高
             updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
@@ -287,12 +287,9 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
 
             logger.info(">>>>>{}-核重时创建承运商订单{}===={}", oldDelOutbound.getShipmentService(), delOutbound.getShipmentService());
+            //新老一致，不跑供应商系统
             if(StringUtils.equals(oldDelOutbound.getShipmentService(), delOutbound.getShipmentService())){
-                //新老一致，不跑供应商系统
-
-                if(!DelOutboundTrackingAcquireTypeEnum.WAREHOUSE_SUPPLIER.getCode().equals(delOutbound.getTrackingAcquireType())){
-                    return;
-                }
+                return;
             }
 
 

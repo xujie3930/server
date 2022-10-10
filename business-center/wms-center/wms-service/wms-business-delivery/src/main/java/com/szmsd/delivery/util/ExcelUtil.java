@@ -98,13 +98,13 @@ public class ExcelUtil {
         // title的参数为ExportParams类型
         DelOutboundExportMap.put("title", params);
         // 模版导出对应得实体类型
-        DelOutboundExportMap.put("entity", DelOutboundExportListVO.class);
+        DelOutboundExportMap.put("entity", pojoClass);
         // sheet中要填充得数据
         DelOutboundExportMap.put("data", data);
         // 创建sheet2使用得map
         Map<String, Object>  DelOutboundExportItemListMap = new HashMap<>(4);
         DelOutboundExportItemListMap.put("title", exportParams2);
-        DelOutboundExportItemListMap.put("entity", DelOutboundExportItemListVO.class);
+        DelOutboundExportItemListMap.put("entity", pojoClass2);
         DelOutboundExportItemListMap.put("data", data2);
         // 将sheet1和sheet2使用得map进行包装
         List<Map<String, Object>> sheetsList = new ArrayList<>();

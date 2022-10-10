@@ -107,5 +107,8 @@ public class DelOutboundExportListEnVO implements Serializable {
     @Excel(name = "Latest track",width = 30)
     private String trackingDescription;
 
+    @Excel(name = "Latest Time",width = 30)
+    private String trackingTime;
+
 
 }
