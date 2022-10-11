@@ -398,6 +398,13 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     List<Map<String, Object>> batchUpdateTrackingNo(List<DelOutboundBatchUpdateTrackingNoDto> list);
 
     /**
+     * 批量更新挂号
+     *
+     * @param list list
+     */
+    void emailBatchUpdateTrackingNo(List<Map<String, Object>> list);
+
+    /**
      * 重新获取挂号
      *
      * @param dto dto
