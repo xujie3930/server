@@ -5,6 +5,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
+import com.szmsd.finance.domain.AccountBalanceExcle;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.vo.UserCreditInfoVO;
 
@@ -16,6 +17,13 @@ import java.util.List;
  */
 public interface IAccountBalanceService {
     R<PageInfo<AccountBalance>> listPage(AccountBalanceDTO dto,String len);
+
+
+
+    //导出功能
+    List<AccountBalanceExcle> accountBalanceExport(AccountBalanceDTO dto, String len);
+
+
 
     List<AccountBalance> listPages(AccountBalanceDTO dto);
 

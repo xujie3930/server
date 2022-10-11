@@ -14,13 +14,16 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.dto.DelQueryServiceImport;
 import com.szmsd.delivery.vo.DelOutboundDetailVO;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
+import com.szmsd.finance.domain.AccountBalanceExcle;
 import com.szmsd.finance.domain.ThirdRechargeRecord;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
@@ -56,6 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -183,6 +187,117 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
     }
 
+    @Override
+    public List<AccountBalanceExcle> accountBalanceExport(AccountBalanceDTO dto, String len) {
+        try {
+            LambdaQueryWrapper<AccountBalance> queryWrapper = Wrappers.lambdaQuery();
+            if (StringUtils.isNotEmpty(dto.getCusCode())) {
+                queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
+            }
+
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            List<String> sellerCodeList=null;
+            List<String> sellerCodeList1=null;
+            if (null != loginUser && !loginUser.getUsername().equals("admin")) {
+                String username = loginUser.getUsername();
+                sellerCodeList=accountBalanceMapper.selectsellerCode(username);
+
+                if (sellerCodeList.size()>0){
+                    queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
+
+                } else if (sellerCodeList.size()==0){
+                    sellerCodeList1=accountBalanceMapper.selectsellerCodeus(username);
+                    if (sellerCodeList1.size()>0){
+                        queryWrapper.in(AccountBalance::getCusCode, sellerCodeList1);
+                    }else {
+                        queryWrapper.in(AccountBalance::getCusCode, "");
+                    }
+                }
+                if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
+                    queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
+                }
+
+            }
+            if (null != loginUser && loginUser.getUsername().equals("admin")){
+                sellerCodeList=accountBalanceMapper.selectsellerCodes();
+                if (sellerCodeList.size()>0){
+                    queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
+
+                }
+                if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
+                    queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
+                }
+
+            }
+            //设置分页参数
+            PageHelper.startPage(dto.getPageNum(),dto.getPageSize());
+
+            List<AccountBalance> accountBalances = accountBalanceMapper.listPage(queryWrapper);
+
+
+
+
+            accountBalances.forEach(x -> {
+                Map<String, CreditUseInfo> creditUseInfoMap = iDeductionRecordService.queryTimeCreditUse( x.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
+                Map<String, CreditUseInfo> needRepayCreditUseInfoMap = iDeductionRecordService.queryTimeCreditUse( x.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.CHECKED));
+                String currencyCode = x.getCurrencyCode();
+                BigDecimal creditUseAmount = Optional.ofNullable(creditUseInfoMap.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+                x.setCreditUseAmount(creditUseAmount);
+                BigDecimal needRepayCreditUseAmount = Optional.ofNullable(needRepayCreditUseInfoMap.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+                x.setNeedRepayCreditUseAmount(needRepayCreditUseAmount);
+            });
+            accountBalances.forEach(AccountBalance::showCredit);
+
+            accountBalances.forEach(x-> {
+                if (len.equals("en")) {
+                    if (x.getCreditType().equals("0")){
+                        x.setCreditType("quota");
+                    }else if (x.getCreditType().equals("1")){
+                        x.setCreditType("type");
+                    }
+                    x.setCurrencyName(x.getCurrencyCode());
+                } else if (len.equals("zh")) {
+                    x.setCurrencyName(x.getCurrencyName());
+                    if (x.getCreditType().equals("0")){
+                        x.setCreditType("额度");
+                    }else if (x.getCreditType().equals("1")){
+                        x.setCreditType("类型");
+                    }
+                }
+
+            });
+
+            List<AccountBalanceExcle> list = BeanMapperUtil.mapList(accountBalances, AccountBalanceExcle.class);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            list.forEach(x->{
+                if (x.getCreateTime()!=null){
+                    x.setCreateTimes(sdf.format(x.getCreateTime()));
+
+
+                }
+                if (x.getCreditEndTime()!=null){
+                    x.setCreditEndTimes(sdf.format(x.getCreditEndTime()));
+
+                }
+                if (x.getCreditBufferTime()!=null){
+                    x.setCreditBufferTimes(sdf.format(x.getCreditBufferTime()));
+
+                }
+                x.setTotalBalance( x.getTotalBalance().stripTrailingZeros());
+                x.setCurrentBalance( x.getCurrentBalance().stripTrailingZeros());
+                x.setFreezeBalance( x.getFreezeBalance().stripTrailingZeros());
+
+
+            });
+
+            //获取分页信息
+
+            return list;
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 
 
     @Override
