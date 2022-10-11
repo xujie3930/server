@@ -1,21 +1,34 @@
 package com.szmsd.finance.controller;
 
+import cn.afterturn.easypoi.excel.ExcelExportUtil;
+import cn.afterturn.easypoi.excel.entity.ExportParams;
 import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.log.annotation.Log;
+import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.delivery.domain.DelOutboundTarckError;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
+import com.szmsd.finance.domain.AccountBalanceExcle;
+import com.szmsd.finance.domain.AccountBalanceExcleEn;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.vo.UserCreditInfoVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -36,6 +49,87 @@ public class AccountBalanceController extends FssBaseController {
          String len=getLen();
 
         return  accountBalanceService.listPage(dto,len);
+    }
+
+
+    /**
+     * 导出账户信息
+     */
+    @PreAuthorize("@ss.hasPermi('ExchangeRate:accountBalanceExport')")
+    @Log(title = "导出账户信息", businessType = BusinessType.EXPORT)
+    @GetMapping("/accountBalanceExport")
+    @ApiOperation(value = "导出账户信息",notes = "导出账户信息")
+    public void accountBalanceExport(HttpServletResponse response,AccountBalanceDTO dto) throws IOException {
+        String len=getLen();
+
+        List<AccountBalanceExcle> list = accountBalanceService.accountBalanceExport(dto,len);
+        ExportParams params = new ExportParams();
+
+
+
+
+        Workbook workbook = null;
+        if (len.equals("zh")){
+            workbook=   ExcelExportUtil.exportExcel(params, AccountBalanceExcle.class, list);
+
+        }else if (len.equals("en")){
+            List<AccountBalanceExcleEn> list1= BeanMapperUtil.mapList(list,AccountBalanceExcleEn.class);
+            workbook=   ExcelExportUtil.exportExcel(params, AccountBalanceExcleEn.class, list1);
+
+        }
+
+
+        Sheet sheet= workbook.getSheet("sheet0");
+
+        //获取第一行数据
+        Row row2 =sheet.getRow(0);
+
+        for (int i=0;i<9;i++){
+            Cell deliveryTimeCell = row2.getCell(i);
+
+            CellStyle styleMain = workbook.createCellStyle();
+            styleMain.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+            Font font = workbook.createFont();
+            //true为加粗，默认为不加粗
+            font.setBold(true);
+            //设置字体颜色，颜色和上述的颜色对照表是一样的
+            font.setColor(IndexedColors.WHITE.getIndex());
+            //将字体样式设置到单元格样式中
+            styleMain.setFont(font);
+
+            styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            styleMain.setAlignment(HorizontalAlignment.CENTER);
+            styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+//        CellStyle style =  workbook.createCellStyle();
+//        style.setFillPattern(HSSFColor.HSSFColorPredefined.valueOf(""));
+//        style.setFillForegroundColor(IndexedColors.RED.getIndex());
+            deliveryTimeCell.setCellStyle(styleMain);
+        }
+
+
+
+        try {
+            String fileName="账户信息"+System.currentTimeMillis();
+            URLEncoder.encode(fileName, "UTF-8");
+            //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
+            response.setContentType("application/vnd.ms-excel");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+
+            response.addHeader("Pargam", "no-cache");
+            response.addHeader("Cache-Control", "no-cache");
+
+            ServletOutputStream outStream = null;
+            try {
+                outStream = response.getOutputStream();
+                workbook.write(outStream);
+                outStream.flush();
+            } finally {
+                outStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:list')")
