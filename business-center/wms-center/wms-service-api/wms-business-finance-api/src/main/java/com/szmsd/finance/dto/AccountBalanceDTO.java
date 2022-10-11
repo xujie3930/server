@@ -52,6 +52,9 @@ public class AccountBalanceDTO extends QueryDto implements Serializable  {
     @ApiModelProperty(value = "客户编码list")
     private List<String> cusCodeList;
 
+    @ApiModelProperty(value = "导出ids")
+    private List<String> ids;
+
     public void setCusCode(String cusCode) {
         this.cusCode = cusCode;
         this.cusCodeList = StringUtils.isNotEmpty(cusCode) ? Arrays.asList(cusCode.split(",")) : Lists.newArrayList();
