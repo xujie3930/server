@@ -466,12 +466,40 @@
         where FASB.nature is null
     </select>
 
-    <select id="findBillCurrencyData"  resultType="com.szmsd.finance.dto.AccountBalanceBillCurrencyVO">
+    <select id="findBillCurrencyData"  resultType="com.szmsd.finance.dto.AccountBalanceBillCurrencyVO" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
         select  a.currency_code as currencyCode,
                 sum(a.amount) as amount
         from fss_account_serial_bill as a
         <include refid="SelectSerialBillWhere"/>
         group by a.currency_code
+    </select>
+
+    <select id="selectBillTotal" resultType="com.szmsd.finance.domain.AccountSerialBillTotalVO" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
+
+        SELECT
+            DATE_FORMAT( payment_time, '%Y-%m-%d' ) AS paymentTime,
+            b.`service_manager_nick_name` AS serviceManagerNickName,
+            b.`service_staff_nick_name` AS serviceStaffNickName,
+            cus_code AS cusCode,
+            warehouse_name AS warehouseName,
+            a.`business_category` AS businessCategory,
+            charge_category AS chargeCategory,
+            product_code as productCode,
+            SUM( amount ) AS amount,
+            currency_code AS currencyCode
+        FROM
+        fss_account_serial_bill a
+        JOIN bas_seller b ON a.`cus_code` = b.`seller_code`
+        WHERE
+        <include refid="SelectSerialBillWhere"/>
+        GROUP BY
+        DATE_FORMAT( payment_time, '%Y-%m-%d' ),
+        cus_code,
+        warehouse_name,
+        charge_category,
+        currency_code,
+        product_code
+
     </select>
 
 </mapper>
