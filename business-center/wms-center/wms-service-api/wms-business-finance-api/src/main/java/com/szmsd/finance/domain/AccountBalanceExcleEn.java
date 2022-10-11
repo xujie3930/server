@@ -46,16 +46,16 @@ public class AccountBalanceExcleEn {
     private String creditType;
 
     @ApiModelProperty(value = "授信结束时间")
-    private Date creditEndTime;
-
     @Excel(name="creditEndTime",width = 30)
-    private String creditEndTimes;
+
+    private String creditEndTime;
+
+
 
 
 
     @ApiModelProperty(value = "授信缓冲截止时间")
-    private Date creditBufferTime;
-
     @Excel(name="creditBufferTime",width = 30)
-    private String creditBufferTimes;
+    private String creditBufferTime;
+
 }
