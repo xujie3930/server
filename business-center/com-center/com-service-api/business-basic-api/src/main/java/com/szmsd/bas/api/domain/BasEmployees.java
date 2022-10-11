@@ -145,6 +145,10 @@ public class BasEmployees {
     @Excel(name = "用户id")
     private long userId;
 
+    @ApiModelProperty(value = "邮箱")
+    private String email;
+
+
     @TableField(exist = false)
     @ApiModelProperty(value = "网点List")
     @Excel(name = "网点List")
