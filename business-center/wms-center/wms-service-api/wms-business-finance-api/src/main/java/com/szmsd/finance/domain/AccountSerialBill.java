@@ -27,6 +27,10 @@ public class AccountSerialBill extends FssBaseEntity {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    @ApiModelProperty(value = "流水号")
+    @Excel(name = "流水号")
+    private String serialNumber;
+
     @ApiModelProperty(value = "单号")
     @Excel(name = "单号")
     private String no;
@@ -126,8 +130,16 @@ public class AccountSerialBill extends FssBaseEntity {
     @Excel(name = "结算时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date paymentTime;
 
-    @ApiModelProperty(value = "流水号")
-    private String serialNumber;
+
+
+    @ApiModelProperty(value = "性质")
+    private String nature;
+
+    @ApiModelProperty(value = "业务类型")
+    private String businessType;
+
+    @ApiModelProperty(value = "费用类别转换后")
+    private String chargeCategoryChange;
 
     public void setRemark(String remark) {
         this.remark = remark;
