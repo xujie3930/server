@@ -287,9 +287,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
 
             logger.info(">>>>>{}-核重时创建承运商订单{}===={}", oldDelOutbound.getShipmentService(), delOutbound.getShipmentService());
-            //新老一致，不跑供应商系统
+            //新的PRC发货服务和老的PRC服务一致并且订单挂号获取方式是“下单后获取”，就不跑供应商系统
             if(StringUtils.equals(oldDelOutbound.getShipmentService(), delOutbound.getShipmentService())){
-                return;
+                if(!DelOutboundTrackingAcquireTypeEnum.WAREHOUSE_SUPPLIER.getCode().equals(delOutbound.getTrackingAcquireType())){
+                    return;
+                }
             }
 
 
@@ -1065,7 +1067,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             }
             // 查询发货条件
 
-            boolean shippingConditions = false;
+            /*boolean shippingConditions = false;
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
                     && org.apache.commons.lang3.StringUtils.isNotEmpty(productCode)) {
 
@@ -1083,14 +1085,14 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     shippingConditions = true;
                     return;
                 }
-            }
-            if(shippingConditions){
+            }*/
+            /*if(shippingConditions){
                 if(bool){
                     //只推送发货指令
                     IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
                     delOutboundBringVerifyService.shipmentShipping(delOutbound);
                 }
-            }else{
+            }else{*/
                 if(bool){
                     //只推送标签，不执行发货指令
                     delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), "pushLabel", null);
@@ -1098,7 +1100,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     //只推送标签， 推送发货指令
                     delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), null, null);
                 }
-            }
+//            }
 
 
 
