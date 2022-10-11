@@ -13,6 +13,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.AccountSerialBillEn;
+import com.szmsd.finance.dto.AccountBalanceBillCurrencyVO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import io.swagger.annotations.Api;
@@ -60,6 +61,15 @@ public class AccountSerialBillController extends BaseController {
         startPage(page);
         return R.ok(getDataTable(accountSerialBillService.listPage(dto)));
     }
+
+    //@AutoValue
+    //@PreAuthorize("@ss.hasPermi('AccountSerialBill:list')")
+    @ApiOperation(value = "流水账单 - 币种统计")
+    @PostMapping("/bill-currency-data")
+    public R<List<AccountBalanceBillCurrencyVO>> findBillCurrencyData(@RequestBody AccountSerialBillDTO dto){
+        return R.ok(accountSerialBillService.findBillCurrencyData(dto));
+    }
+
 
     @PreAuthorize("@ss.hasPermi('AccountSerialBill:export')")
     @ApiOperation(value = "流水账单 - 列表导出")
