@@ -1,10 +1,12 @@
 package com.szmsd.finance.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.constant.HttpStatus;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -14,6 +16,7 @@ import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.ChargeRelation;
+import com.szmsd.finance.dto.AccountBalanceBillCurrencyVO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.AccountSerialBillNatureDTO;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -210,10 +213,12 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     @Override
     public int add(AccountSerialBillDTO dto) {
         AccountSerialBill accountSerialBill = BeanMapperUtil.map(dto, AccountSerialBill.class);
-        if (StringUtils.isBlank(accountSerialBill.getWarehouseName()))
+        if (StringUtils.isBlank(accountSerialBill.getWarehouseName())) {
             accountSerialBill.setWarehouseName(sysDictDataService.getWarehouseNameByCode(accountSerialBill.getWarehouseCode()));
-        if (StringUtils.isBlank(accountSerialBill.getCurrencyName()))
+        }
+        if (StringUtils.isBlank(accountSerialBill.getCurrencyName())) {
             accountSerialBill.setCurrencyName(sysDictDataService.getCurrencyNameByCode(dto.getCurrencyCode()));
+        }
         accountSerialBill.setBusinessCategory(accountSerialBill.getChargeCategory());//性质列内容，同费用类别
         //单号不为空的时候
         if (StringUtils.isNotBlank(dto.getNo())){
@@ -227,11 +232,20 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                    accountSerialBill.setSpecifications(delOutbound.getSpecifications());
                }
            }
-
-
-
         }
+
+        String serialNumber = this.createSerialNumber();
+        accountSerialBill.setSerialNumber(serialNumber);
+
         return accountSerialBillMapper.insert(accountSerialBill);
+    }
+
+    private String createSerialNumber(){
+
+        String s = DateUtils.dateTime();
+        String randomNums = RandomUtil.randomNumbers(8);
+
+        return s + randomNums;
     }
 
     @Override
@@ -324,6 +338,19 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             }
         }
 
+    }
+
+    @Override
+    public List<AccountBalanceBillCurrencyVO> findBillCurrencyData(AccountSerialBillDTO dto) {
+
+        if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+            String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
+            if (com.szmsd.common.core.utils.StringUtils.isEmpty(dto.getCusCode())) {
+                dto.setCusCode(cusCode);
+            }
+        }
+
+        return accountSerialBillMapper.findBillCurrencyData(dto);
     }
 
 

@@ -20,6 +20,10 @@ import java.util.Date;
 @ApiModel(value = "流水账单表EN", description = "流水账单表EN")
 public class AccountSerialBillEn{
 
+    @ApiModelProperty(value = "流水号")
+    @Excel(name = "流水号")
+    private String serialNumber;
+
     @ApiModelProperty(value = "单号")
     @Excel(name = "Order Number")
     private String no;

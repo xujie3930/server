@@ -46,65 +46,65 @@
         a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
         a.calc_weight,a.specifications
 
-        FROM
-        `fss_account_serial_bill` a
-
-        <where>
-        1=1
-<!--        <if test="cusCode != null  and cusCode!=''">-->
-<!--        and a.cus_code=#{cusCode}-->
-<!--        </if>-->
-        <if test="noList != null  and noList.size()>0">
-            and a.no IN
-            <foreach collection="noList" item="item" index="i" open="(" close=")" separator=",">
-                #{item}
-            </foreach>
-        </if>
-        <if test="cusCodeList != null  and cusCodeList.size()>0">
-          and a.cus_code IN
-         <foreach collection="cusCodeList" item="item" index="i" open="(" close=")" separator=",">
-                    #{item}
-           </foreach>
-        </if>
-       <if test="productCodeList != null  and productCodeList.size()>0">
-                and a.product_code IN
-          <foreach collection="productCodeList" item="item" index="i" open="(" close=")" separator=",">
-                    #{item}
-           </foreach>
-       </if>
-
-       <if test="chargeType != null  and chargeType!=''">
-                and a.charge_type =#{chargeType}
-        </if>
-        <if test="warehouseCode != null  and warehouseCode!=''">
-                and a.warehouse_code =#{warehouseCode}
-          </if>
-
-         <if test="currencyCode != null  and currencyCode!=''">
-                and a.currency_code =#{currencyCode}
-         </if>
-        <if test="businessCategory != null  and businessCategory!=''">
-            and a.business_category =#{businessCategory}
-        </if>
-        <if test="productCategory != null  and productCategory!=''">
-            and a.product_category =#{productCategory}
-        </if>
-        <if test="chargeCategory != null  and chargeCategory!=''">
-            and a.charge_category =#{chargeCategory}
-        </if>
-        <if test="createTimeStart != null  and createTimeStart!=''">
-            and date_format(a.create_time,'%y%m%d') &gt;= date_format(#{createTimeStart},'%y%m%d')
-
-        </if>
-        <if test="createTimeEnd != null  and createTimeEnd!=''">
-            and date_format(a.create_time,'%y%m%d') &lt;= date_format(#{createTimeEnd},'%y%m%d')
-        </if>
-        <if test="ids != null  and ids!=''">
-            and FIND_IN_SET(a.id,#{ids})
-        </if>
-        </where>
+        FROM `fss_account_serial_bill` a
+        <include refid="SelectSerialBillWhere"/>
         ORDER BY a.payment_time DESC
     </select>
+
+    <sql id="SelectSerialBillWhere">
+
+        <where>
+            <if test="noList != null  and noList.size()>0">
+                and a.no IN
+                <foreach collection="noList" item="item" index="i" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="cusCodeList != null  and cusCodeList.size()>0">
+                and a.cus_code IN
+                <foreach collection="cusCodeList" item="item" index="i" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="productCodeList != null  and productCodeList.size()>0">
+                and a.product_code IN
+                <foreach collection="productCodeList" item="item" index="i" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="chargeType != null  and chargeType!=''">
+                and a.charge_type =#{chargeType}
+            </if>
+            <if test="warehouseCode != null  and warehouseCode!=''">
+                and a.warehouse_code =#{warehouseCode}
+            </if>
+
+            <if test="currencyCode != null  and currencyCode!=''">
+                and a.currency_code =#{currencyCode}
+            </if>
+            <if test="businessCategory != null  and businessCategory!=''">
+                and a.business_category =#{businessCategory}
+            </if>
+            <if test="productCategory != null  and productCategory!=''">
+                and a.product_category =#{productCategory}
+            </if>
+            <if test="chargeCategory != null  and chargeCategory!=''">
+                and a.charge_category =#{chargeCategory}
+            </if>
+            <if test="createTimeStart != null  and createTimeStart!=''">
+                and date_format(a.create_time,'%y%m%d') &gt;= date_format(#{createTimeStart},'%y%m%d')
+
+            </if>
+            <if test="createTimeEnd != null  and createTimeEnd!=''">
+                and date_format(a.create_time,'%y%m%d') &lt;= date_format(#{createTimeEnd},'%y%m%d')
+            </if>
+            <if test="ids != null  and ids!=''">
+                and FIND_IN_SET(a.id,#{ids})
+            </if>
+        </where>
+
+    </sql>
 
 
     <select id="selectDelOutbound" resultType="com.szmsd.delivery.domain.DelOutbound"
@@ -464,6 +464,14 @@
         from fss_account_serial_bill as FASB
         inner join del_outbound as DOB on FASB.`no` = DOB.order_no
         where FASB.nature is null
+    </select>
+
+    <select id="findBillCurrencyData"  resultType="com.szmsd.finance.dto.AccountBalanceBillCurrencyVO">
+        select  a.currency_code as currencyCode,
+                sum(a.amount) as amount
+        from fss_account_serial_bill as a
+        <include refid="SelectSerialBillWhere"/>
+        group by a.currency_code
     </select>
 
 </mapper>
