@@ -3,4 +3,20 @@
 <mapper namespace="com.szmsd.finance.mapper.ChargeRelationMapper">
 
 
+    <select id="findChargeRelation" resultType="com.szmsd.finance.domain.ChargeRelation">
+
+        select nature,business_type,order_type,charge_category_change,charge_category from fss_charge_relation
+
+        <where>
+            <if test="businessCategory != null">
+                and charge_category = #{businessCategory}
+            </if>
+
+            <if test="orderType != null">
+                and find_in_set(#{orderType}, order_type) > 0
+            </if>
+        </where>
+
+    </select>
+
 </mapper>

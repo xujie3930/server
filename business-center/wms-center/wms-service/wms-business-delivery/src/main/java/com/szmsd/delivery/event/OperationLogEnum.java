@@ -1,5 +1,7 @@
 package com.szmsd.delivery.event;
 
+import java.text.MessageFormat;
+
 /**
  * @author zhangyuyuan
  * @date 2021-06-22 13:57
@@ -35,5 +37,9 @@ public interface OperationLogEnum {
      * @param object object
      * @return String
      */
-    String getLog(Object object);
+    String getLog(Object object, MessageFormat messageFormat);
+
+
+    MessageFormat getFormat();
+
 }
