@@ -1051,7 +1051,8 @@ public class DelOutboundController extends BaseController {
             excelReaderSheetBuilder.build().setHeadRowNumber(1);
             excelReaderSheetBuilder.doRead();
             List<DelOutboundBatchUpdateTrackingNoDto> list = analysisEventListener.getList();
-            return R.ok(this.delOutboundService.batchUpdateTrackingNo(list));
+            List<Map<String, Object>> list1=this.delOutboundService.batchUpdateTrackingNo(list);
+            return R.ok(list1);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return R.failed(e.getMessage());
@@ -1061,7 +1062,7 @@ public class DelOutboundController extends BaseController {
 
 
     /**
-     * 导出查件服务模块列表
+     * 导出挂号失败
      */
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:batchTrackingexport')")
     @Log(title = "挂号失败导出", businessType = BusinessType.EXPORT)
