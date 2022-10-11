@@ -70,6 +70,13 @@ public class AccountSerialBillController extends BaseController {
         return R.ok(accountSerialBillService.findBillCurrencyData(dto));
     }
 
+    @ApiOperation(value = "流水账单 - 导出汇总")
+    @PostMapping ("/export-total")
+    public void exportTotal(HttpServletResponse response, @RequestBody AccountSerialBillDTO dto){
+
+        accountSerialBillService.exportBillTotal(response,dto);
+    }
+
 
     @PreAuthorize("@ss.hasPermi('AccountSerialBill:export')")
     @ApiOperation(value = "流水账单 - 列表导出")
