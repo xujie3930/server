@@ -287,9 +287,11 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
 
             logger.info(">>>>>{}-核重时创建承运商订单{}===={}", oldDelOutbound.getShipmentService(), delOutbound.getShipmentService());
-            //新老一致，不跑供应商系统
+            //新的PRC发货服务和老的PRC服务一致并且订单挂号获取方式是“下单后获取”，就不跑供应商系统
             if(StringUtils.equals(oldDelOutbound.getShipmentService(), delOutbound.getShipmentService())){
-                return;
+                if(!DelOutboundTrackingAcquireTypeEnum.WAREHOUSE_SUPPLIER.getCode().equals(delOutbound.getTrackingAcquireType())){
+                    return;
+                }
             }
 
 
