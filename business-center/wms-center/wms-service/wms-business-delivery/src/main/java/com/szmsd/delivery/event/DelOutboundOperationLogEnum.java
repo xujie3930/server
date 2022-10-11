@@ -27,12 +27,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("新增出库单:{0},类型:{1}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "新增";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType())};
             return format.format(arguments);
         }
@@ -41,12 +46,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("修改出库单:{0},类型:{1}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "修改";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType())};
             return format.format(arguments);
         }
@@ -55,12 +65,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("删除出库单:{0},类型:{1}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "删除";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType())};
             return format.format(arguments);
         }
@@ -69,12 +84,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("取消出库单:{0},类型:{1}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "取消";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType())};
             return format.format(arguments);
         }
@@ -83,12 +103,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("处理出库单:{0},类型:{1}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "处理";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType())};
             return format.format(arguments);
         }
@@ -97,12 +122,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("继续处理出库单:{0},类型:{1}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "继续处理";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType())};
             return format.format(arguments);
         }
@@ -116,12 +146,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},长宽高:{2}*{3}*{4},计费重:{5} {6},费用:{7} {8},发货规则:{9}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-PRC计费";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight(),
                     delOutbound.getCalcWeight(), delOutbound.getCalcWeightUnit(),
@@ -134,12 +169,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},费用:{2} {3}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-冻结物流费用";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getAmount(), delOutbound.getCurrencyCode()};
             return format.format(arguments);
@@ -149,12 +189,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},产品代码(发货规则):{2}【发货规则：{6}】,结果@挂号获取方式:{3},发货服务名称:{4},临时产品编码:{5}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-获取产品信息";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getShipmentRule(),
                     delOutbound.getTrackingAcquireType(),
@@ -173,12 +218,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-新增/修改发货规则";
         }
 
         @Override
-        String personalizeFormat(Object object) {
+        String personalizeFormat(Object object, MessageFormat format) {
             Object[] objects = (Object[]) object;
             DelOutbound delOutbound = (DelOutbound) objects[0];
             String desc = (String) objects[1];
@@ -191,12 +241,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},创建承运商返回结果,挂号:{2},承运商订单号:{3}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-创建承运商物流订单";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getTrackingNo(), delOutbound.getShipmentOrderNumber()};
             return format.format(arguments);
@@ -206,12 +261,18 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},创建亚马逊承运商返回结果,亚马逊挂号:{2},承运商订单号:{3}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+
+        @Override
         public String getType() {
             return "提交-创建亚马逊承运商物流订单";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getAmazonLogisticsRouteId(), delOutbound.getShipmentOrderNumber()};
             return format.format(arguments);
@@ -219,6 +280,11 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
     },
     BRV_FREEZE_INVENTORY {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},库存:{2}");
+
+        @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
 
         @Override
         public String getType() {
@@ -232,7 +298,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
 
         @SuppressWarnings({"unchecked"})
         @Override
-        String personalizeFormat(Object object) {
+        String personalizeFormat(Object object, MessageFormat format) {
             Object[] objects = (Object[]) object;
             DelOutbound delOutbound = (DelOutbound) objects[0];
             List<InventoryOperateDto> list = (List<InventoryOperateDto>) objects[1];
@@ -254,6 +320,11 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},库存:{2}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-冻结操作费用";
         }
@@ -265,7 +336,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
 
         @SuppressWarnings({"unchecked"})
         @Override
-        String personalizeFormat(Object object) {
+        String personalizeFormat(Object object, MessageFormat format) {
             Object[] objects = (Object[]) object;
             DelOutbound delOutbound = (DelOutbound) objects[0];
             List<DelOutboundOperationDetailVO> list = (List<DelOutboundOperationDetailVO>) objects[1];
@@ -287,12 +358,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},WMS单号:{2}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-推单WMS";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getRefOrderNo()};
             return format.format(arguments);
@@ -302,12 +378,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-更新标签";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType())};
             return format.format(arguments);
         }
@@ -316,12 +397,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},费用:{2} {3}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-取消冻结物流费用";
         }
 
         @Override
-        String format(DelOutbound delOutbound) {
+        String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getAmount(), delOutbound.getCurrencyCode()};
             return format.format(arguments);
@@ -331,12 +417,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},挂号:{2},承运商订单号:{3}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-取消承运商物流订单";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getTrackingNo(), delOutbound.getShipmentOrderNumber()};
             return format.format(arguments);
@@ -346,12 +437,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-取消冻结库存";
         }
 
         @Override
-        String format(DelOutbound delOutbound) {
+        String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType())};
             return format.format(arguments);
         }
@@ -360,12 +456,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},费用:{2} {3}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "提交-取消冻结操作费用";
         }
 
         @Override
-        String format(DelOutbound delOutbound) {
+        String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getAmount(), delOutbound.getCurrencyCode()};
             return format.format(arguments);
@@ -378,17 +479,27 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
      */
     SMT_SHIPMENT_ORDER {
         @Override
+        public MessageFormat getFormat() {
+            return BRV_SHIPMENT_ORDER.getFormat();
+        }
+
+        @Override
         public String getType() {
             return "发货指令-创建承运商物流订单";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
-            return BRV_SHIPMENT_ORDER.format(delOutbound);
+        public String format(DelOutbound delOutbound, MessageFormat format) {
+            return BRV_SHIPMENT_ORDER.format(delOutbound, format);
         }
     },
     SMT_SHIPMENT_TRACKING {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},更新挂号:{2}");
+
+        @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
 
         @Override
         public String getType() {
@@ -396,7 +507,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getTrackingNo()};
             return format.format(arguments);
@@ -406,12 +517,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},承运商订单号:{2},挂号:{3}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "发货指令-获取标签";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                     delOutbound.getShipmentOrderNumber(), delOutbound.getTrackingNo()};
             return format.format(arguments);
@@ -421,29 +537,44 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "发货指令-更新标签";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType())};
             return format.format(arguments);
         }
     },
     SMT_THAW_BALANCE {
         @Override
+        public MessageFormat getFormat() {
+            return RK_BRV_FREEZE_BALANCE.getFormat();
+        }
+
+        @Override
         public String getType() {
             return "发货指令-取消冻结物流费用";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
-            return RK_BRV_FREEZE_BALANCE.format(delOutbound);
+        public String format(DelOutbound delOutbound, MessageFormat format) {
+            return RK_BRV_FREEZE_BALANCE.format(delOutbound, format);
         }
     },
     SMT_PRC_PRICING {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},长宽高:{2}*{3}*{4},计费重:{5} {6},费用:{7},发货规则:{8}");
+
+        @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
 
         @Override
         public String getType() {
@@ -451,14 +582,14 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
 
-            if(delOutbound instanceof DelOutboundChargeData){
+            if (delOutbound instanceof DelOutboundChargeData) {
                 DelOutboundChargeData data = (DelOutboundChargeData) delOutbound;
                 StringBuffer stringBuffer = new StringBuffer(",");
 
-                if(data.getDelOutboundCharges() != null){
-                    for(DelOutboundCharge charge: data.getDelOutboundCharges()){
+                if (data.getDelOutboundCharges() != null) {
+                    for (DelOutboundCharge charge : data.getDelOutboundCharges()) {
                         stringBuffer.append(charge.getAmount()).append(" ").append(charge.getCurrencyCode()).append(",");
                     }
                 }
@@ -470,21 +601,26 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
                         delOutbound.getProductShipmentRule()};
                 return format.format(arguments);
 
-            }else{
-                return BRV_PRC_PRICING.format(delOutbound);
+            } else {
+                return BRV_PRC_PRICING.format(delOutbound, format);
             }
 
         }
     },
     SMT_FREEZE_BALANCE {
         @Override
+        public MessageFormat getFormat() {
+            return BRV_FREEZE_BALANCE.getFormat();
+        }
+
+        @Override
         public String getType() {
             return "发货指令-冻结物流费用";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
-            return BRV_FREEZE_BALANCE.format(delOutbound);
+        public String format(DelOutbound delOutbound, MessageFormat format) {
+            return BRV_FREEZE_BALANCE.format(delOutbound, format);
         }
     },
     SMT_SHIPMENT_SHIPPING {
@@ -492,12 +628,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat exFormat = new MessageFormat("出库单:{0},类型:{1},挂号:{2},是否异常:{3},异常原因:{4}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "发货指令-更新发货指令";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             if (DelOutboundExceptionStateEnum.ABNORMAL.getCode().equals(delOutbound.getExceptionState())) {
                 Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
                         delOutbound.getTrackingNo(), "true", delOutbound.getExceptionMessage()};
@@ -518,18 +659,28 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},更新状态:{1}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "WMS指令-接收出库单状态";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundStateEnum.getOriginName(delOutbound.getState())};
             return format.format(arguments);
         }
     },
     OPN_PACKING {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},更新包材:{2}");
+
+        @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
 
         @Override
         public String getType() {
@@ -542,7 +693,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
 
         @Override
-        String personalizeFormat(Object object) {
+        String personalizeFormat(Object object, MessageFormat format) {
             Object[] objects = (Object[]) object;
             DelOutbound delOutbound = (DelOutbound) objects[0];
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType()),
@@ -554,12 +705,17 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1}");
 
         @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
+
+        @Override
         public String getType() {
             return "WMS指令-接收批量出库单类型装箱信息";
         }
 
         @Override
-        public String format(DelOutbound delOutbound) {
+        public String format(DelOutbound delOutbound, MessageFormat format) {
             Object[] arguments = new Object[]{delOutbound.getOrderNo(), DelOutboundOrderTypeEnum.getOriginName(delOutbound.getOrderType())};
             return format.format(arguments);
         }
@@ -567,6 +723,11 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
 
     AGAIN_TRACKING_NO {
         final MessageFormat format = new MessageFormat("出库单:{0},类型:{1},物流服务由{2}改为{3}");
+
+        @Override
+        public MessageFormat getFormat() {
+            return format;
+        }
 
         @Override
         public String getType() {
@@ -579,7 +740,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
         }
 
         @Override
-        String personalizeFormat(Object object) {
+        String personalizeFormat(Object object, MessageFormat format) {
             Object[] objects = (Object[]) object;
             DelOutbound delOutbound = (DelOutbound) objects[0];
             Object[] arguments = new Object[]{delOutbound.getOrderNo(),
@@ -610,7 +771,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
      *
      * @return String
      */
-    String personalizeFormat(Object object) {
+    String personalizeFormat(Object object, MessageFormat format) {
         return "";
     }
 
@@ -620,7 +781,7 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
      * @param delOutbound delOutbound
      * @return String
      */
-    String format(DelOutbound delOutbound) {
+    String format(DelOutbound delOutbound, MessageFormat format) {
         return "";
     }
 
@@ -647,15 +808,15 @@ public enum DelOutboundOperationLogEnum implements OperationLogEnum {
     }
 
     @Override
-    public String getLog(Object object) {
+    public String getLog(Object object, MessageFormat messageFormat) {
         if (null == object) {
             return "";
         }
         if (this.personalize()) {
-            return this.personalizeFormat(object);
+            return this.personalizeFormat(object, messageFormat);
         } else if (object instanceof DelOutbound) {
             DelOutbound delOutbound = (DelOutbound) object;
-            return this.format(delOutbound);
+            return this.format(delOutbound, messageFormat);
         }
         return "";
     }
