@@ -278,14 +278,14 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 
 
                 }
-                if (x.getCreditEndTime()!=null){
-                    x.setCreditEndTimes(sdf.format(x.getCreditEndTime()));
-
-                }
-                if (x.getCreditBufferTime()!=null){
-                    x.setCreditBufferTimes(sdf.format(x.getCreditBufferTime()));
-
-                }
+//                if (x.getCreditEndTime()!=null){
+//                    x.setCreditEndTimes(sdf.format(x.getCreditEndTime()));
+//
+//                }
+//                if (x.getCreditBufferTime()!=null){
+//                    x.setCreditBufferTimes(sdf.format(x.getCreditBufferTime()));
+//
+//                }
                 x.setTotalBalance( x.getTotalBalance().stripTrailingZeros());
                 x.setCurrentBalance( x.getCurrentBalance().stripTrailingZeros());
                 x.setFreezeBalance( x.getFreezeBalance().stripTrailingZeros());

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 
@@ -46,16 +47,18 @@ public class AccountBalanceExcle {
     private String creditType;
 
     @ApiModelProperty(value = "授信结束时间")
-    private Date creditEndTime;
-
     @Excel(name="账期截止时间",width = 30)
-    private String creditEndTimes;
+    private LocalDateTime creditEndTime;
+
+//    @Excel(name="账期截止时间",width = 30)
+//    private String creditEndTimes;
 
 
 
     @ApiModelProperty(value = "授信缓冲截止时间")
-    private Date creditBufferTime;
-
     @Excel(name="授信缓冲截止时间",width = 30)
-    private String creditBufferTimes;
+    private LocalDateTime creditBufferTime;
+
+//    @Excel(name="授信缓冲截止时间",width = 30)
+//    private String creditBufferTimes;
 }
