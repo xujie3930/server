@@ -26,5 +26,8 @@ public interface IAccountSerialBillService extends IService<AccountSerialBill> {
      */
     boolean checkForDuplicateCharges(CustPayDTO dto);
 
-
+    /**
+     * 更新业务账单表 nature、business_type、charge_category_change 信息
+     */
+    void executeSerialBillNature();
 }

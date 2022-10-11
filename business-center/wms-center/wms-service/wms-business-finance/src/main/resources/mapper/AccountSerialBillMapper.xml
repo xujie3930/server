@@ -457,4 +457,13 @@
 
     </select>
 
+    <select id="selectBillOutbount"  resultType="com.szmsd.finance.dto.AccountSerialBillNatureDTO">
+        select  FASB.charge_type as chargeType,FASB.business_category as businessCategory,
+                FASB.charge_category as chargeCategory,FASB.`no`,FASB.id,
+                DOB.order_type as orderType
+        from fss_account_serial_bill as FASB
+        inner join del_outbound as DOB on FASB.`no` = DOB.order_no
+        where FASB.nature is null
+    </select>
+
 </mapper>

@@ -13,9 +13,12 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.domain.AccountSerialBill;
+import com.szmsd.finance.domain.ChargeRelation;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
+import com.szmsd.finance.dto.AccountSerialBillNatureDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
+import com.szmsd.finance.mapper.ChargeRelationMapper;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
@@ -41,6 +44,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     @Resource
     private ISysDictDataService sysDictDataService;
+
+    @Resource
+    private ChargeRelationMapper chargeRelationMapper;
 
     @Override
 //    @DataScope("cus_code")
@@ -284,6 +290,40 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         boolean flag = !count.equals(0);
 
         return flag;
+    }
+
+    @Override
+    public void executeSerialBillNature() {
+
+        List<AccountSerialBillNatureDTO> accountSerialBillDTOList = accountSerialBillMapper.selectBillOutbount();
+
+        for(AccountSerialBillNatureDTO billNatureDTO : accountSerialBillDTOList){
+
+            String chargeCategory = billNatureDTO.getChargeCategory();
+            String businessCategory = billNatureDTO.getBusinessCategory();
+            String orderType = billNatureDTO.getOrderType();
+            Long id = billNatureDTO.getId();
+
+            if(StringUtils.isBlank(businessCategory) || StringUtils.isBlank(orderType)){
+                continue;
+            }
+
+            List<ChargeRelation> chargeRelationList = chargeRelationMapper.findChargeRelation(businessCategory,orderType);
+
+            if(CollectionUtils.isNotEmpty(chargeRelationList)){
+
+                ChargeRelation chargeRelation = chargeRelationList.get(0);
+
+                AccountSerialBill accountSerialBill = new AccountSerialBill();
+                accountSerialBill.setId(id);
+                accountSerialBill.setNature(chargeRelation.getNature());
+                accountSerialBill.setBusinessType(chargeRelation.getBusinessType());
+                accountSerialBill.setChargeCategoryChange(chargeRelation.getChargeCategoryChange());
+
+                accountSerialBillMapper.updateById(accountSerialBill);
+            }
+        }
+
     }
 
 
