@@ -57,7 +57,7 @@ public enum DelOutboundOrderTypeEnum {
     public static String getOriginName(String code) {
         DelOutboundOrderTypeEnum anEnum = get(code);
         if (null != anEnum) {
-            return anEnum.getName();
+            return anEnum.getCode();
         }
         return "";
     }
