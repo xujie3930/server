@@ -229,6 +229,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 }
 
             }
+            if (dto.getIds()!=null&&dto.getIds().size()>0){
+                queryWrapper.in(AccountBalance::getId, dto.getIds());
+            }
             //设置分页参数
             PageHelper.startPage(dto.getPageNum(),dto.getPageSize());
 
