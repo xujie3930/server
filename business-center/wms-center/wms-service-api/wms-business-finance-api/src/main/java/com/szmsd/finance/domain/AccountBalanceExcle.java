@@ -48,7 +48,7 @@ public class AccountBalanceExcle {
 
     @ApiModelProperty(value = "授信结束时间")
     @Excel(name="账期截止时间",width = 30)
-    private LocalDateTime creditEndTime;
+    private String creditEndTime;
 
 //    @Excel(name="账期截止时间",width = 30)
 //    private String creditEndTimes;
@@ -57,7 +57,7 @@ public class AccountBalanceExcle {
 
     @ApiModelProperty(value = "授信缓冲截止时间")
     @Excel(name="授信缓冲截止时间",width = 30)
-    private LocalDateTime creditBufferTime;
+    private String creditBufferTime;
 
 //    @Excel(name="授信缓冲截止时间",width = 30)
 //    private String creditBufferTimes;
