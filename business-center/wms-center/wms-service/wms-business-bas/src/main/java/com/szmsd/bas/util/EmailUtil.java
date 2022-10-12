@@ -1,5 +1,12 @@
 package com.szmsd.bas.util;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.support.ExcelTypeEnum;
+import com.alibaba.excel.util.FileUtils;
+import com.alibaba.excel.write.builder.ExcelWriterBuilder;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.szmsd.bas.dto.EmailObjectDto;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +22,10 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,42 +80,62 @@ public class EmailUtil {
      * @param filePath  文件路径
      * @throws MessagingException
      */
-    public void sendAttachmentMail(String to,String subject,String text,String filePath){
+    public void sendAttachmentMail(String to, String subject, String text, String filePath, List<EmailObjectDto> list){
 
-        try {
+
             //邮件对象
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 
             //邮件处理对象
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage,true);
+            MimeMessageHelper helper =null;
 
-            //发件人
-            helper.setFrom("DM");
+            //创建附件
+            File excelWriter = attachmentInfo(list);
+            try {
+                helper =  new MimeMessageHelper(mimeMessage,true);
+                //发件人
+                helper.setFrom(fromEmail);
+                //收信人账号
+                //收件人
+                helper.setTo(to);
+                //主题
+                helper.setSubject(subject);
+                //文本内容
+                helper.setText(text,true);
+                //加入附件
+                helper.addAttachment(MimeUtility.encodeWord("Update trackingNo.xlsx"), excelWriter);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.info("报表发送失败{}",e.getMessage());
+            }
 
-            //收件人
-            helper.setTo(to);
-
-            //主题
-            helper.setSubject(subject);
-
-            //文本内容
-            helper.setText(text,true);
-
-            //文件资源
-            FileSystemResource resource = new FileSystemResource(new File(filePath));
-
-            //文件名称
-            String filename = resource.getFilename();
-
-            //设置文件资源
-            helper.addAttachment(filename,resource);
 
             //发送
             javaMailSender.send(mimeMessage);
             log.info("【单附件邮件发送成功】收件人：{} 主题：{} 文本内容：{} 文件路径：{}",to,subject,text,filePath);
-        } catch (MessagingException e) {
-            log.error("单附件邮件发送失败：{}",e);
+
+    }
+
+    File attachmentInfo(List<EmailObjectDto> list){
+        ExcelWriter excelWriter = null;
+        //生成文件
+        File cacheTmpFile = FileUtils.createTmpFile("Update trackingNo.xlsx");
+        try {
+            excelWriter = new ExcelWriterBuilder()
+                    .file(cacheTmpFile)
+                    .excelType(ExcelTypeEnum.XLSX)
+                    .autoCloseStream(true)
+                    .build();
+            //将数据写入sheet页中
+            WriteSheet writeSheet = EasyExcel.writerSheet(0, "sheet1").head(EmailObjectDto.class).build();
+            excelWriter.write(list,writeSheet);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("报表导出失败{}",e.getMessage());
+        }finally {
+            excelWriter.finish();
         }
+        return cacheTmpFile;
     }
 
     public static boolean isEmail(String email) {
