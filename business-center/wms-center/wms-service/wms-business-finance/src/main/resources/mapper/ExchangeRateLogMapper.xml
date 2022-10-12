@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.finance.mapper.ExchangeRateLogMapper">
+
+
+    <insert id="saveBatch" parameterType="java.util.List">
+        INSERT INTO `fss_exchange_rate_log`
+        (`exchange_from_code`, `exchange_to_code`, `exchange_from`, `exchange_to`, `before_rate`,`after_rate`, `expire_time`, `create_by_name`, `create_time`, `update_by_name`, `update_time`, `create_by`, `update_by`, `remark`)
+        VALUES
+        <foreach collection ="list" item="item" separator =",">
+            (#{item.exchangeFromCode}, #{item.exchangeToCode}, #{item.exchangeFrom},#{item.exchangeTo},#{item.beforeRate},#{item.afterRate},#{item.expireTime},#{item.createByName},#{item.createTime},#{item.updateByName},#{item.updateTime},#{item.createBy},#{item.updateBy},#{item.remark})
+        </foreach>
+    </insert>
+
+</mapper>
