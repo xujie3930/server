@@ -1053,7 +1053,7 @@ public class DelOutboundController extends BaseController {
             List<DelOutboundBatchUpdateTrackingNoDto> list = analysisEventListener.getList();
             List<Map<String, Object>> list1=this.delOutboundService.batchUpdateTrackingNo(list);
              //传list1做邮件发送功能
-            delOutboundService.emailBatchUpdateTrackingNo(list1);
+            delOutboundService.emailBatchUpdateTrackingNo(list1,filepath);
             return R.ok(list1);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

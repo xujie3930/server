@@ -402,7 +402,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
      *
      * @param list list
      */
-    void emailBatchUpdateTrackingNo(List<Map<String, Object>> list);
+    void emailBatchUpdateTrackingNo(List<Map<String, Object>> list,String filepath);
 
     /**
      * 重新获取挂号

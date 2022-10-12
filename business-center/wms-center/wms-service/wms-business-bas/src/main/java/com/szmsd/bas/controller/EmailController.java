@@ -2,6 +2,7 @@ package com.szmsd.bas.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.bas.domain.BasSeller;
+import com.szmsd.bas.dto.EmailDto;
 import com.szmsd.bas.enums.EmailEnum;
 import com.szmsd.bas.service.IBasSellerService;
 import com.szmsd.bas.util.EmailUtil;
@@ -16,10 +17,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.concurrent.CompletableFuture;
@@ -71,6 +69,15 @@ public class EmailController extends BaseController {
                 log.error("邮件发送失败，请稍后重试, {}, {}", email, e.getMessage(), e);
             }
         }, asyncTaskExecutor);
+        return R.ok();
+    }
+
+    @PreAuthorize("@ss.hasPermi('bas:email:sendEmail')")
+    @PostMapping("/sendEmail")
+    @ApiOperation(value = "发送邮件", notes = "发送邮件")
+    public R sendEmail(@RequestBody EmailDto emailDto) {
+        emailUtil.sendAttachmentMail(emailDto.getTo(), emailDto.getSubject(), emailDto.getText(),emailDto.getFilePath(),emailDto.getList());
+
         return R.ok();
     }
 
