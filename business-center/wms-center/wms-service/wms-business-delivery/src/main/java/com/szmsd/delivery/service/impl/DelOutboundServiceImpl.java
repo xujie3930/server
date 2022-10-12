@@ -1599,10 +1599,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 //        emailDto.setFilePath(fileAddress);
         List<EmailObjectDto> emailObjectDtoList= BeanMapperUtil.mapList(list, EmailObjectDto.class);
         emailDto.setList(emailObjectDtoList);
-       R r= emailFeingService.sendEmail(emailDto);
-       if (r.getCode()== HttpStatus.SUCCESS){
+        if(email!=null&&!email.equals("")){
+            R r= emailFeingService.sendEmail(emailDto);
+            if (r.getCode()== HttpStatus.SUCCESS){
 
-       }
+            }
+        }
+
     }
 
 
