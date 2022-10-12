@@ -3,6 +3,7 @@ package com.szmsd.delivery.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto;
@@ -89,4 +90,8 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     DelOutbound  selectTrackingNo(@Param("orderNo") String orderNo);
 
     void  updateFssAccountSerial(DelOutboundBatchUpdateTrackingNoDto delOutboundBatchUpdateTrackingNoDto);
+
+    List<DelOutbound>  selectorderNos(@Param("orderNos") List<String> orderNos);
+
+    List<BasSeller> selectdelsellerCodes();
 }

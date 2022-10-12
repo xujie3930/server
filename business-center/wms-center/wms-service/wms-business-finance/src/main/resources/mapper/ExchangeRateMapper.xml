@@ -24,4 +24,13 @@
     <delete id="deleteExchangeRate">
          delete from fss_exchange_rate where exchange_from=#{map.exchangeFrom} and exchange_to=#{map.exchangeTo}
     </delete>
+
+    <insert id="saveBatch" parameterType="java.util.List">
+        INSERT INTO `fss_exchange_rate`
+            (`exchange_from_code`, `exchange_to_code`, `exchange_from`, `exchange_to`, `rate`, `expire_time`, `create_by_name`, `create_time`, `update_by_name`, `update_time`, `create_by`, `update_by`, `remark`)
+        VALUES
+        <foreach collection ="list" item="item" separator =",">
+            (#{item.exchangeFromCode}, #{item.exchangeToCode}, #{item.exchangeFrom},#{item.exchangeTo},#{item.rate},#{item.expireTime},#{item.createByName},#{item.createTime},#{item.updateByName},#{item.updateTime},#{item.createBy},#{item.updateBy},#{item.remark})
+        </foreach>
+    </insert>
 </mapper>

@@ -1,24 +1,36 @@
 package com.szmsd.finance.service.impl;
 
 
+import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.bas.plugin.service.BasSubFeignPluginService;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.domain.ExchangeRate;
 import com.szmsd.finance.dto.ExchangeRateDTO;
+import com.szmsd.finance.handler.ExchangeRateExcelListener;
+import com.szmsd.finance.mapper.ExchangeRateLogMapper;
 import com.szmsd.finance.mapper.ExchangeRateMapper;
 import com.szmsd.finance.service.IExchangeRateService;
+import com.szmsd.finance.util.ExcelFile;
+import com.szmsd.finance.vo.ExchangeRateExcelVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author liulei
@@ -28,7 +40,13 @@ import java.util.stream.Collectors;
 public class ExchangeRateServiceImpl implements IExchangeRateService {
 
     @Autowired
-    ExchangeRateMapper exchangeRateMapper;
+    private ExchangeRateMapper exchangeRateMapper;
+
+    @Autowired
+    private BasSubFeignPluginService basSubFeignPluginService;
+
+    @Autowired
+    private ExchangeRateLogMapper exchangeRateLogMapper;
 
     @Override
     public List<ExchangeRate> listPage(ExchangeRateDTO dto) {
@@ -142,6 +160,33 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
     @Override
     public void deleteExchangeRate(Map map) {
        exchangeRateMapper.deleteExchangeRate(map);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R uploadExchangeRate(MultipartFile file) {
+
+        if(file == null){
+            return R.failed("请上传文件");
+        }
+
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+
+        //把字段名和导入数据匹配对应 存入数据库
+        try {
+
+            EasyExcel.read(
+                    file.getInputStream(),
+                    ExchangeRateExcelVO.class,
+                    new ExchangeRateExcelListener(basSubFeignPluginService,exchangeRateMapper,exchangeRateLogMapper,loginUser)
+            ).sheet().doRead();
+
+            return R.ok("导入成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("导入汇率异常:{}",e.getMessage());
+            return R.failed(e.getMessage());
+        }
     }
 
 }
