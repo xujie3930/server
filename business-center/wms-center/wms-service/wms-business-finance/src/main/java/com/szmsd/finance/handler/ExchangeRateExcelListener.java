@@ -10,12 +10,14 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.domain.LoginUser;
-import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.domain.ExchangeRate;
+import com.szmsd.finance.domain.ExchangeRateLog;
+import com.szmsd.finance.mapper.ExchangeRateLogMapper;
 import com.szmsd.finance.mapper.ExchangeRateMapper;
 import com.szmsd.finance.vo.ExchangeRateExcelVO;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,11 +29,14 @@ public class ExchangeRateExcelListener extends AnalysisEventListener<ExchangeRat
 
     private ExchangeRateMapper exchangeRateMapper;
 
+    private ExchangeRateLogMapper exchangeRateLogMapper;
+
     private LoginUser loginUser;
 
-    public ExchangeRateExcelListener(BasSubFeignPluginService basSubFeignPluginService,ExchangeRateMapper exchangeRateMapper,LoginUser loginUser){
+    public ExchangeRateExcelListener(BasSubFeignPluginService basSubFeignPluginService,ExchangeRateMapper exchangeRateMapper,ExchangeRateLogMapper exchangeRateLogMapper,LoginUser loginUser){
         this.basSubFeignPluginService = basSubFeignPluginService;
         this.exchangeRateMapper = exchangeRateMapper;
+        this.exchangeRateLogMapper = exchangeRateLogMapper;
         this.loginUser = loginUser;
     }
 
@@ -55,9 +60,8 @@ public class ExchangeRateExcelListener extends AnalysisEventListener<ExchangeRat
 
         //根据from  to 去重复
         List<ExchangeRate> exchangeRateList = exchangeRates.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(()->new TreeSet<>(Comparator.comparing(o->o.getExchangeFromCode()+";"+o.getExchangeToCode()))), ArrayList::new));
-
-        List<ExchangeRate> removeExchangeRate = new ArrayList<>();
-
+        List<Long> exchangeRateIds = new ArrayList<>();
+        List<ExchangeRateLog> exchangeRateLogs = new ArrayList<>();
         for(ExchangeRate exchangeRate : exchangeRateList){
 
             List<ExchangeRate> hasExchangeRates = exchangeRateMapper.selectList(Wrappers.<ExchangeRate>query().lambda()
@@ -66,10 +70,53 @@ public class ExchangeRateExcelListener extends AnalysisEventListener<ExchangeRat
             );
 
             if(CollectionUtils.isNotEmpty(hasExchangeRates)){
-                removeExchangeRate.addAll(hasExchangeRates);
+                List<Long> hasIds = hasExchangeRates.stream().map(ExchangeRate::getId).collect(Collectors.toList());
+                exchangeRateIds.addAll(hasIds);
+                ExchangeRateLog exchangeRateLog = this.generatorExchangeRateLog(exchangeRate,hasExchangeRates.get(0).getRate());
+                exchangeRateLogs.add(exchangeRateLog);
             }
         }
 
+        try {
+
+            //删除旧数据
+            if (CollectionUtils.isNotEmpty(exchangeRateIds)) {
+                exchangeRateMapper.deleteBatchIds(exchangeRateIds);
+            }
+            //添加新数据
+            if (CollectionUtils.isNotEmpty(exchangeRateList)) {
+                exchangeRateMapper.saveBatch(exchangeRateList);
+            }
+
+            //添加日志
+            if (CollectionUtils.isNotEmpty(exchangeRateLogs)) {
+                exchangeRateLogMapper.saveBatch(exchangeRateLogs);
+            }
+
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    private ExchangeRateLog generatorExchangeRateLog(ExchangeRate exchangeRate, BigDecimal beforeRate) {
+
+        ExchangeRateLog exchangeRateLog = new ExchangeRateLog();
+        exchangeRateLog.setAfterRate(exchangeRate.getRate());
+        exchangeRateLog.setExchangeFrom(exchangeRate.getExchangeFrom());
+        exchangeRateLog.setExchangeTo(exchangeRate.getExchangeTo());
+        exchangeRateLog.setExchangeFromCode(exchangeRate.getExchangeFromCode());
+        exchangeRateLog.setExchangeToCode(exchangeRate.getExchangeToCode());
+        exchangeRateLog.setExpireTime(exchangeRate.getExpireTime());
+        exchangeRateLog.setBeforeRate(beforeRate);
+        exchangeRateLog.setCreateBy(exchangeRate.getCreateBy());
+        exchangeRateLog.setCreateByName(exchangeRate.getCreateByName());
+        exchangeRateLog.setCreateTime(exchangeRate.getCreateTime());
+        exchangeRateLog.setUpdateBy(loginUser.getSellerCode());
+        exchangeRateLog.setUpdateTime(new Date());
+        exchangeRateLog.setUpdateByName(loginUser.getUsername());
+        exchangeRateLog.setRemark(exchangeRate.getRemark());
+
+        return exchangeRateLog;
     }
 
 
@@ -93,7 +140,7 @@ public class ExchangeRateExcelListener extends AnalysisEventListener<ExchangeRat
         Map<String,BasSubWrapperVO> basSubWrapperNameVOMap = baslist.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName,v->v));
 
         //map<币种代码,>
-        Map<String,BasSubWrapperVO> basSubWrapperCodeVOMap = baslist.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubCode,v->v));
+        Map<String,BasSubWrapperVO> basSubWrapperCodeVOMap = baslist.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue,v->v));
 
         List<ExchangeRate> exchangeRates = new ArrayList<>();
 
@@ -119,7 +166,9 @@ public class ExchangeRateExcelListener extends AnalysisEventListener<ExchangeRat
             exchangeRate.setExchangeFrom(exchangeFrom);
             exchangeRate.setExchangeTo(exchangeTo);
 
-            Date expireTime = DateUtils.dateTime(strExpireTime + " 23:59:59",DateUtils.YYYY_MM_DD_HH_MM_SS);
+            String newExpireTime = strExpireTime.replace("/","-");
+
+            Date expireTime = DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS,newExpireTime + " 23:59:59");
 
             exchangeRate.setExpireTime(expireTime);
             exchangeRate.setRate(exchangeRateExcelVO.getRate());

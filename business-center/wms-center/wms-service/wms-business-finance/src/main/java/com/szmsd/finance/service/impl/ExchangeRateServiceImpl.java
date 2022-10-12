@@ -17,6 +17,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.domain.ExchangeRate;
 import com.szmsd.finance.dto.ExchangeRateDTO;
 import com.szmsd.finance.handler.ExchangeRateExcelListener;
+import com.szmsd.finance.mapper.ExchangeRateLogMapper;
 import com.szmsd.finance.mapper.ExchangeRateMapper;
 import com.szmsd.finance.service.IExchangeRateService;
 import com.szmsd.finance.util.ExcelFile;
@@ -43,6 +44,9 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
 
     @Autowired
     private BasSubFeignPluginService basSubFeignPluginService;
+
+    @Autowired
+    private ExchangeRateLogMapper exchangeRateLogMapper;
 
     @Override
     public List<ExchangeRate> listPage(ExchangeRateDTO dto) {
@@ -162,9 +166,9 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
     @Transactional(rollbackFor = Exception.class)
     public R uploadExchangeRate(MultipartFile file) {
 
-        //定义参数
-        ArrayList<String> addList = new ArrayList<>();
-        Collections.addAll(addList,"exchangeFrom","exchangeTo","rate","expireTime","remark");
+        if(file == null){
+            return R.failed("请上传文件");
+        }
 
         LoginUser loginUser = SecurityUtils.getLoginUser();
 
@@ -174,53 +178,14 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
             EasyExcel.read(
                     file.getInputStream(),
                     ExchangeRateExcelVO.class,
-                    new ExchangeRateExcelListener(basSubFeignPluginService,exchangeRateMapper,loginUser)
+                    new ExchangeRateExcelListener(basSubFeignPluginService,exchangeRateMapper,exchangeRateLogMapper,loginUser)
             ).sheet().doRead();
 
-//            R<Map<String, List<BasSubWrapperVO>>> basSubCurrencyRs = basSubFeignPluginService.getSub("008");
-//
-//            if(!Constants.SUCCESS.equals(basSubCurrencyRs.getCode())){
-//                return R.failed("无法获取币种信息");
-//            }
-//
-//            List<BasSubWrapperVO>  baslist = basSubCurrencyRs.getData().get("008");
-//
-//            log.info("导入调用");
-//            //汇率专用  解析excel数据
-//            List<Map> mapList = ExcelFile.getExcelDataFinance(file,addList);
-//
-//            log.info("导入参数：{}",mapList);
-//            for (int x=0;x < mapList.size();x++) {
-//
-//                if (String.valueOf(mapList.get(x).get("exchangeFrom")).equals("") || String.valueOf(mapList.get(x).get("exchangeTo")).equals("") || String.valueOf(mapList.get(x).get("rate")).equals("") || String.valueOf(mapList.get(x).get("expireTime")).equals("")) {
-//                    throw new BaseException("第" + (x + 2) + "行的导入数据需要填写必填项，必填项为（原币别，现币别，比率，失效时间）");
-//                }
-//                String expireTimes=String.valueOf(mapList.get(x).get("expireTime"));
-//                String str = expireTimes.substring(0, 10);
-//                String expireTime=str+" "+"23:59:59";
-//                mapList.get(x).put("expireTime",expireTime);
-//                for (int i = 0; i < baslist.size(); i++) {
-//                    //根据中英文匹配现有的货币code
-//                    if (String.valueOf(mapList.get(x).get("exchangeFrom")).equals(baslist.get(i).getSubName()) || String.valueOf(mapList.get(x).get("exchangeFrom")).equals(baslist.get(i).getSubNameEn())) {
-//                        mapList.get(x).put("exchangeFromCode", baslist.get(i).getSubValue());
-//                    }
-//                    if (String.valueOf(mapList.get(x).get("exchangeTo")).equals(baslist.get(i).getSubName()) || String.valueOf(mapList.get(x).get("exchangeTo")).equals(baslist.get(i).getSubNameEn())) {
-//                        mapList.get(x).put("exchangeToCode", baslist.get(i).getSubValue());
-//                    }
-//                }
-//
-//                //验证数据库是否存在(需针对原币别+现币别+失败时间，进行唯一判断)
-//                List<ExchangeRateDTO> list = this.selectRates(mapList.get(x));
-//                if (list.size()>0){
-//                    this.deleteExchangeRate(mapList.get(x));
-//                }
-//            }
-//
-//            this.insertExchangeRate(mapList);
             return R.ok("导入成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return R.failed(((BaseException) e).getDefaultMessage());
+            log.error("导入汇率异常:{}",e.getMessage());
+            return R.failed(e.getMessage());
         }
     }
 
