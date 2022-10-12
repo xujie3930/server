@@ -429,11 +429,15 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         R<SysUser> sysUserR = remoteUserService.getNameByNickName(sysUserByTypeAndUserType);
 
         String sellerKey=sysUserR.getData().getSellerKey();
-        //加密
-        Base64Utilrs base64Utilrs=new Base64Utilrs();
 
-        String sellerKeys=base64Utilrs.getBase64(basSeller.getUserName()+":"+sellerKey);
-        basSeller.setSellerKey(sellerKeys);
+        if (sellerKey!=null&&!sellerKey.equals("")){
+            //加密
+            Base64Utilrs base64Utilrs=new Base64Utilrs();
+
+            String sellerKeys=base64Utilrs.getBase64(basSeller.getUserName()+":"+sellerKey);
+            basSeller.setSellerKey(sellerKeys);
+        }
+
 
 
         //查询用户证件信息
