@@ -1,5 +1,8 @@
 package com.szmsd.delivery.service.impl;
 
+import cn.afterturn.easypoi.excel.ExcelExportUtil;
+import cn.afterturn.easypoi.excel.entity.ExportParams;
+import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TimeInterval;
 import cn.hutool.core.io.IoUtil;
@@ -15,12 +18,15 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.BasEmployees;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
+import com.szmsd.bas.api.feign.EmailFeingService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
@@ -30,8 +36,11 @@ import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.bas.dto.EmailDto;
+import com.szmsd.bas.dto.EmailObjectDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
+import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
@@ -95,13 +104,17 @@ import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
 import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.http.HttpRequest;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.executor.BatchResult;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +131,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -137,6 +151,7 @@ import java.util.stream.Stream;
  * @since 2021-03-05
  */
 @Service
+@Slf4j
 public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOutbound> implements IDelOutboundService {
     private Logger logger = LoggerFactory.getLogger(DelOutboundServiceImpl.class);
 
@@ -197,6 +212,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Autowired
     private DelOutboundTarckErrorMapper delOutboundTarckErrorMapper;
+
+    @Autowired
+    private BasFeignService basFeignService;
+    @Autowired
+    private EmailFeingService emailFeingService;
 
     /**
      * 查询出库单模块
@@ -1491,7 +1511,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
      * @param list list
      */
     @Override
-    public void emailBatchUpdateTrackingNo(List<Map<String, Object>> list) {
+    public void emailBatchUpdateTrackingNo(List<Map<String, Object>> list,String filepath) {
         //拿到成功的单号
         Map map=list.get(1);
         List<DelOutboundBatchUpdateTrackingNoDto> list1= (List<DelOutboundBatchUpdateTrackingNoDto>) map.get("list1");
@@ -1517,14 +1537,22 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 basSellerList.stream().filter(x->x.getSellerCode().equals(dto.getCustomCode())).findFirst().ifPresent(basSeller -> {
 
-                    DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto=new DelOutboundBatchUpdateTrackingNoEmailDto();
 
-                    BeanUtils.copyProperties(dto,delOutboundBatchUpdateTrackingNoEmailDto);
+
+
+
                     if (basSeller.getServiceManagerName()!=null&&!basSeller.getServiceManagerName().equals("")){
-                        delOutboundBatchUpdateTrackingNoEmailDto.setEmpCode(basSeller.getServiceManagerName());
-                        delOutboundBatchUpdateTrackingNoEmailDtoList.add(delOutboundBatchUpdateTrackingNoEmailDto);
+                        if (!basSeller.getServiceManagerName().equals(basSeller.getServiceStaffName())) {
+                            DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto=new DelOutboundBatchUpdateTrackingNoEmailDto();
+                            BeanUtils.copyProperties(dto,delOutboundBatchUpdateTrackingNoEmailDto);
+
+                            delOutboundBatchUpdateTrackingNoEmailDto.setEmpCode(basSeller.getServiceManagerName());
+                            delOutboundBatchUpdateTrackingNoEmailDtoList.add(delOutboundBatchUpdateTrackingNoEmailDto);
+                        }
                     }
                     if (basSeller.getServiceStaffName()!=null&&!basSeller.getServiceStaffName().equals("")){
+                        DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto=new DelOutboundBatchUpdateTrackingNoEmailDto();
+                        BeanUtils.copyProperties(dto,delOutboundBatchUpdateTrackingNoEmailDto);
                         delOutboundBatchUpdateTrackingNoEmailDto.setEmpCode(basSeller.getServiceStaffName());
                         delOutboundBatchUpdateTrackingNoEmailDtoList.add(delOutboundBatchUpdateTrackingNoEmailDto);
 
@@ -1533,29 +1561,51 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 });
 
 
-//                DelOutboundBatchUpdateTrackingNoDto batchUpdateTrackingNoDto= list1.stream().filter(x->x.getCustomCode().equals(basSeller.getSellerCode())).collect(Collectors.toList()).get(0);
-//
-//
-//                DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto=new DelOutboundBatchUpdateTrackingNoEmailDto();
-//                BeanUtils.copyProperties(batchUpdateTrackingNoDto,delOutboundBatchUpdateTrackingNoEmailDto);
-//                if (basSeller.getServiceManagerName()!=null&&!basSeller.getServiceManagerName().equals("")){
-//                    delOutboundBatchUpdateTrackingNoEmailDto.setEmpCode(basSeller.getServiceManagerName());
-//                    delOutboundBatchUpdateTrackingNoEmailDtoList.add(delOutboundBatchUpdateTrackingNoEmailDto);
-//                }
-//                if (basSeller.getServiceStaffName()!=null&&!basSeller.getServiceStaffName().equals("")){
-//                    delOutboundBatchUpdateTrackingNoEmailDto.setEmpCode(basSeller.getServiceStaffName());
-//                    delOutboundBatchUpdateTrackingNoEmailDtoList.add(delOutboundBatchUpdateTrackingNoEmailDto);
-//
-//                }
+
 
 
             }
 
-            System.out.println(delOutboundBatchUpdateTrackingNoEmailDtoList);
+            BasEmployees basEmployees=new BasEmployees();
+            //查询员工表
+            R<List<BasEmployees>> basEmployeesR= basFeignService.empList(basEmployees);
+
+            List<BasEmployees> basEmployeesList=basEmployeesR.getData();
+            //找到员工中的邮箱
+            for (DelOutboundBatchUpdateTrackingNoEmailDto dto:delOutboundBatchUpdateTrackingNoEmailDtoList){
+                basEmployeesList.stream().filter(x->x.getEmpCode().equals(dto.getEmpCode())).map(BasEmployees::getEmail).findAny().ifPresent(i -> {
+                    dto.setEmail(i);
+                });
+            }
+
+            //将组合的数据 分解成Map<List> (员工为key,组合这个员工下的所有信息)
+           Map<String,List<DelOutboundBatchUpdateTrackingNoEmailDto>> delOutboundBatchUpdateTrackingNoEmailDtoMap=delOutboundBatchUpdateTrackingNoEmailDtoList.stream().collect(Collectors.groupingBy(DelOutboundBatchUpdateTrackingNoEmailDto::getEmpCode));
+            //循环map，得到每一组的数据 然后生产excel
+            for (Map.Entry<String, List<DelOutboundBatchUpdateTrackingNoEmailDto>> entry : delOutboundBatchUpdateTrackingNoEmailDtoMap.entrySet()) {
+                System.out.println("key = " + entry.getKey() + ", value = " + entry.getValue());
+                ExcleDelOutboundBatchUpdateTracking(entry.getValue(),entry.getKey(),entry.getValue().get(0).getEmail(), filepath);
+            }
 
         }
 
     }
+
+    public void ExcleDelOutboundBatchUpdateTracking(List<DelOutboundBatchUpdateTrackingNoEmailDto> list,String empCode,String email,String filepath){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        EmailDto emailDto=new EmailDto();
+        emailDto.setSubject("Notice on Update of Tracking Number-"+list.get(0).getCustomCode()+"-"+simpleDateFormat.format(new Date()));
+        emailDto.setTo(email);
+        emailDto.setText("customer:"+list.get(0).getCustomCode()+"on"+"["+simpleDateFormat.format(new Date())+"]"+"Total number of updated tracking numbers"+"["+list.size()+"]"+"Please download the attachment for details");
+//        emailDto.setFilePath(fileAddress);
+        List<EmailObjectDto> emailObjectDtoList= BeanMapperUtil.mapList(list, EmailObjectDto.class);
+        emailDto.setList(emailObjectDtoList);
+       R r= emailFeingService.sendEmail(emailDto);
+       if (r.getCode()== HttpStatus.SUCCESS){
+
+       }
+    }
+
+
 
     /**
      * 批量删除出库单模块
