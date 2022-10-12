@@ -20,6 +20,6 @@ public class DelOutboundBatchUpdateTrackingNoEmailDto {
     //员工编号
     private String empCode;
 
-    //员工邮箱
+    //员工的邮箱
     private String email;
 }
