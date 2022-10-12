@@ -119,6 +119,12 @@
             <artifactId>wms-business-chargerules-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.helipay.cross-border.demo.common</groupId>
+            <artifactId>helipay-cross-border-demo-common</artifactId>
+            <version>20200709</version>
+        </dependency>
+
 
     </dependencies>
 
