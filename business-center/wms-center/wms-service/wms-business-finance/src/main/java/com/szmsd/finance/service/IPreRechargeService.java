@@ -16,4 +16,6 @@ public interface IPreRechargeService {
     R save(PreRechargeDTO dto);
 
     R audit(PreRechargeAuditDTO dto);
+
+    R pay(PreRechargeDTO preRechargeDTO);
 }
