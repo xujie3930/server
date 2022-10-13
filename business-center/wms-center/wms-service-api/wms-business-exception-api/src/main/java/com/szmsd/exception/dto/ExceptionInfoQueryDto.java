@@ -1,13 +1,14 @@
 package com.szmsd.exception.dto;
 
 import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class ExceptionInfoQueryDto {
+public class ExceptionInfoQueryDto  {
     @ApiModelProperty(value = "异常类型")
     @Excel(name = "异常类型")
     private String exceptionType;
@@ -33,4 +34,7 @@ public class ExceptionInfoQueryDto {
 
     @ApiModelProperty(value = "类型")
     private String state;
+
+    @ApiModelProperty(value = "0表示客户端，1表示管理端")
+    private int type=0;
 }
