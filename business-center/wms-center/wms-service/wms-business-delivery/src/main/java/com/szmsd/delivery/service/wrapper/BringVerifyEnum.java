@@ -225,8 +225,14 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             }
 
 
+            if(currentState.name().equals(SHIPMENT_ORDER.name())){
+                //如果是供应商报错，从新开始执行
+                updateDelOutbound.setBringVerifyState(BEGIN.name());
+            }else{
+                updateDelOutbound.setBringVerifyState(currentState.name());
 
-            updateDelOutbound.setBringVerifyState(currentState.name());
+            }
+
 
             updateDelOutbound.setExceptionMessage(exceptionMessage);
             // PRC计费

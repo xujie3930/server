@@ -1,33 +1,42 @@
 package com.szmsd.chargerules.service.impl;
 
+import cn.afterturn.easypoi.cache.manager.IFileLoader;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.feign.BasWarehouseFeignService;
+import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.chargerules.dto.CreateProductDTO;
 import com.szmsd.chargerules.dto.FreightCalculationDTO;
 import com.szmsd.chargerules.dto.PricedProductQueryDTO;
 import com.szmsd.chargerules.dto.UpdateProductDTO;
+import com.szmsd.chargerules.mapper.BasProductServiceMapper;
 import com.szmsd.chargerules.service.IPricedProductService;
 import com.szmsd.chargerules.vo.FreightCalculationVO;
 import com.szmsd.chargerules.vo.PricedProductInfoVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.FileStream;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.common.core.web.page.TableDataInfo;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +52,9 @@ public class PricedProductServiceImpl implements IPricedProductService {
 
     @Resource
     private BasWarehouseFeignService basWarehouseFeignService;
+
+    @Autowired
+    private BasProductServiceMapper basProductServiceMapper;
 
     /**
      * 根据包裹基本信息获取可下单报价产品
@@ -180,8 +192,26 @@ public class PricedProductServiceImpl implements IPricedProductService {
      */
     @Override
     public void update(UpdateProductDTO updateProductDTO) {
+       LoginUser loginUser= SecurityUtils.getLoginUser();
         log.info("修改报价产品信息：{}", updateProductDTO);
         UpdatePricedProductCommand updatePricedProductCommand = BeanMapperUtil.map(updateProductDTO, UpdatePricedProductCommand.class);
+        BasProductService basProductService=new BasProductService();
+
+        BeanUtils.copyBeanProp(basProductService,updateProductDTO);
+        basProductService.setProductName(updateProductDTO.getName());
+        basProductService.setProductCode(updateProductDTO.getCode());
+
+        BasProductService basProductService1=basProductServiceMapper.selectByPrimaryKey(updateProductDTO.getCode());
+        if (basProductService1!=null){
+            basProductService.setUpdateByName(loginUser.getUsername());
+            basProductService.setUpdateTime(new Date());
+            basProductServiceMapper.updateByPrimaryKeySelective(basProductService);
+        }else if (basProductService1==null){
+            basProductService.setCreateByName(loginUser.getUsername());
+            basProductService.setCreateTime(new Date());
+            basProductServiceMapper.insertSelective(basProductService);
+        }
+
         R<ResponseVO> responseVOR = htpPricedProductFeignService.update(updatePricedProductCommand);
         ResponseVO.resultAssert(responseVOR, "修改报价产品信息");
         log.info("创建报价产品信息：操作完成");

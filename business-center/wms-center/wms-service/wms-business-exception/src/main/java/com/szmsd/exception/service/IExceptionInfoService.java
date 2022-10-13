@@ -63,6 +63,7 @@ public interface IExceptionInfoService extends IService<ExceptionInfo> {
      * @param processExceptionRequest
      */
     void processExceptionInfo(@RequestBody ProcessExceptionRequest processExceptionRequest);
+    void processByOrderNo(@RequestBody ProcessExceptionOrderRequest processExceptionRequest);
 
     /**
      * 修改模块

@@ -547,6 +547,16 @@ public class ExceptionInfoController extends BaseController {
         return R.ok();
     }
 
+
+    @PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:add')")
+    @Log(title = "模块", businessType = BusinessType.INSERT)
+    @PostMapping("processByOrderNo")
+    @ApiOperation(value = "处理模块-订单号", notes = "处理模块-订单号")
+    public R processByOrderNo(@RequestBody ProcessExceptionOrderRequest processExceptionRequest) {
+        exceptionInfoService.processByOrderNo(processExceptionRequest);
+        return R.ok();
+    }
+
     /**
      * 修改模块
      */
