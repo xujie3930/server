@@ -17,6 +17,8 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.datascope.annotation.DataScope;
+import com.szmsd.common.security.domain.LoginUser;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.service.DelOutboundClientService;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.dto.DelOutboundAddressDto;
@@ -32,6 +34,7 @@ import com.szmsd.exception.enums.ProcessTypeEnum;
 import com.szmsd.exception.enums.StateSubEnum;
 import com.szmsd.exception.mapper.ExceptionInfoMapper;
 import com.szmsd.exception.service.IExceptionInfoService;
+import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.http.api.feign.HtpExceptionFeignService;
 import com.szmsd.http.dto.ExceptionProcessRequest;
 import com.szmsd.http.vo.ResponseVO;
@@ -96,14 +99,55 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
     @Override
     //@DataScope("seller_code")
     public List<ExceptionInfo> selectExceptionInfoPage(ExceptionInfoQueryDto dto) {
-        QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
-        if (dto.getSellerCode()!=null){
-            List<String> list= Arrays.asList(dto.getSellerCode().split(","));
-            dto.setSellerCodes(list);
+        List<ExceptionInfo> exceptionInfoList=new ArrayList<>();
+        //客户端
+        if (dto.getType()==0) {
+            QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
+            if (dto.getSellerCode() != null) {
+                List<String> list = Arrays.asList(dto.getSellerCode().split(","));
+                dto.setSellerCodes(list);
+            }
+            this.handlerQueryCondition(where, dto);
+            where.orderByDesc("create_time");
+
+            exceptionInfoList = baseMapper.selectList(where);
+        }else if (dto.getType()==1){
+            //pc端
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            List<String> sellerCodeList=null;
+            if (null != loginUser && !loginUser.getUsername().equals("admin")) {
+                String username = loginUser.getUsername();
+                sellerCodeList=baseMapper.selectsellerCode(username);
+
+                if (sellerCodeList.size()>0){
+                    dto.setSellerCodes(sellerCodeList);
+
+                }
+                if (sellerCodeList.size()==0){
+                    sellerCodeList.add("");
+                    dto.setSellerCodes(sellerCodeList);
+                }
+
+            }
+//            if (null != loginUser && loginUser.getUsername().equals("admin")){
+//                sellerCodeList=baseMapper.selectsellerCodes();
+//                if (sellerCodeList.size()>0){
+//                    dto.setSellerCodes(sellerCodeList);
+//
+//                }
+//            }
+
+            QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
+            if (dto.getSellerCode() != null) {
+                List<String> list = Arrays.asList(dto.getSellerCode().split(","));
+                dto.setSellerCodes(list);
+            }
+            this.handlerQueryCondition(where, dto);
+            where.orderByDesc("create_time");
+
+            exceptionInfoList = baseMapper.selectList(where);
         }
-        this.handlerQueryCondition(where, dto);
-        where.orderByDesc("create_time");
-        List<ExceptionInfo> exceptionInfoList = baseMapper.selectList(where);
+
         if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
             // 查询异常描述信息
             List<String> orderNos = exceptionInfoList.stream().map(ExceptionInfo::getOrderNo).collect(Collectors.toList());

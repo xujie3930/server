@@ -1596,7 +1596,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         emailDto.setSubject("Notice on Update of Tracking Number-"+list.get(0).getCustomCode()+"-"+simpleDateFormat.format(new Date()));
         emailDto.setTo(email);
         emailDto.setText("customer:"+list.get(0).getCustomCode()+"on"+"["+simpleDateFormat.format(new Date())+"]"+"Total number of updated tracking numbers"+"["+list.size()+"]"+"Please download the attachment for details");
-//        emailDto.setFilePath(fileAddress);
         List<EmailObjectDto> emailObjectDtoList= BeanMapperUtil.mapList(list, EmailObjectDto.class);
         emailDto.setList(emailObjectDtoList);
         if(email!=null&&!email.equals("")){
