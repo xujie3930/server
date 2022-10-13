@@ -27,4 +27,8 @@ public interface ExceptionInfoMapper extends BaseMapper<ExceptionInfo> {
     void updateDelOutboundDetail(ExceptionInfoDetailExportDto x);
 
     void updateDelOutboundEx(ExceptionInfoExportDto dto);
+
+    List<String>  selectsellerCode(@Param("username") String username);
+
+    List<String> selectsellerCodes();
 }
