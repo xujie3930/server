@@ -267,7 +267,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
     public void processByOrderNo(@RequestBody ProcessExceptionOrderRequest processExceptionRequest) {
         QueryWrapper<ExceptionInfo> queryWrapper = new QueryWrapper();
         queryWrapper.eq("order_no", processExceptionRequest.getOrderNo());
-        if (super.count(queryWrapper) != 1) {
+        if (super.count(queryWrapper) == 0) {
             return;
         }
         String operationOn = processExceptionRequest.getOperateOn();
