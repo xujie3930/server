@@ -16,6 +16,7 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <helipay.version>20200709</helipay.version>
     </properties>
 
     <dependencies>
@@ -120,9 +121,21 @@
         </dependency>
 
         <dependency>
-            <groupId>com.helipay.cross-border.demo.common</groupId>
+            <groupId>com.helipay</groupId>
             <artifactId>helipay-cross-border-demo-common</artifactId>
-            <version>20200709</version>
+            <version>${helipay.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.helipay</groupId>
+            <artifactId>helipay-component-facade</artifactId>
+            <version>${helipay.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.helipay</groupId>
+            <artifactId>helipay-cross-border-trx-facade</artifactId>
+            <version>${helipay.version}</version>
         </dependency>
 
 
