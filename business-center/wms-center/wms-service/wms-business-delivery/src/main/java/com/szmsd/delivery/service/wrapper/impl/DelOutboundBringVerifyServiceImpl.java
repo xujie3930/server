@@ -759,7 +759,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }else{
                     logger.info("创建承运商物流订单{}第三方失败2exceptionMessage，{}", delOutbound.getOrderNo(), builder.toString());
                     this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, null, builder.toString());
-                    throw new CommonException("400", builder.toString());
+                    throw new CommonException("412", builder.toString());
                 }
             }
             this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, shipmentOrderResult.getMainTrackingNumber(), null);
