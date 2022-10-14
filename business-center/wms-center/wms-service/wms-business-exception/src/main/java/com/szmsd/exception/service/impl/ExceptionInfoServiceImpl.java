@@ -179,7 +179,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
     }
 
     @Override
-    @DataScope("seller_code")
+//    @DataScope("seller_code")
     public List<ExceptionInfoExportDto> exportList(ExceptionInfoQueryDto dto) {
         QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
         this.handlerQueryCondition(where, dto);
