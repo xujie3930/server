@@ -30,6 +30,7 @@ import com.szmsd.exception.enums.StateSubEnum;
 import com.szmsd.exception.exported.DefaultSyncReadListener;
 import com.szmsd.exception.exported.ExceptionInfoExportContext;
 import com.szmsd.exception.exported.ExceptionInfoExportQueryPage;
+import com.szmsd.exception.mapper.ExceptionInfoMapper;
 import com.szmsd.exception.service.IExceptionInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -82,6 +83,8 @@ public class ExceptionInfoController extends BaseController {
     @SuppressWarnings({"all"})
     @Autowired
     private BasRegionFeignService basRegionFeignService;
+    @Autowired
+    private ExceptionInfoMapper exceptionInfoMapper;
 
     /**
      * 查询模块列表
@@ -168,14 +171,37 @@ public class ExceptionInfoController extends BaseController {
         if (null == loginUser) {
             throw new CommonException("500", "非法的操作");
         }
+
+
+
+
         // 获取登录用户的客户编码
         String sellerCode = loginUser.getSellerCode();
         //dto.setSellerCode(sellerCode);
 
-        if (dto.getSellerCode()!=null){
-            List<String> list= Arrays.asList(dto.getSellerCode().split(","));
-            dto.setSellerCodes(list);
+        if (dto.getType()==0) {
+            if (dto.getSellerCode()!=null){
+                List<String> list= Arrays.asList(dto.getSellerCode().split(","));
+                dto.setSellerCodes(list);
+            }
+        }else if (dto.getType()==1) {
+            //pc端
+            List<String> sellerCodeList = null;
+            if (null != loginUser && !loginUser.getUsername().equals("admin")) {
+                String username = loginUser.getUsername();
+                sellerCodeList = exceptionInfoMapper.selectsellerCode(username);
+
+                if (sellerCodeList.size() > 0) {
+                    dto.setSellerCodes(sellerCodeList);
+
+                }
+                if (sellerCodeList.size() == 0) {
+                    sellerCodeList.add("");
+                    dto.setSellerCodes(sellerCodeList);
+                }
+            }
         }
+
         // 查询出库类型数据
         Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("085");
         ExceptionInfoExportContext exportContext = new ExceptionInfoExportContext();
