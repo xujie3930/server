@@ -5,6 +5,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.exception.api.feign.ExceptionInfoFeignService;
 import com.szmsd.exception.dto.ExceptionInfoDto;
 import com.szmsd.exception.dto.NewExceptionRequest;
+import com.szmsd.exception.dto.ProcessExceptionOrderRequest;
 import com.szmsd.exception.dto.ProcessExceptionRequest;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,12 @@ public class ExceptionInfoFeignFallback implements FallbackFactory<ExceptionInfo
             public R processException(ProcessExceptionRequest processExceptionRequest) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R processByOrderNo(ProcessExceptionOrderRequest processExceptionRequest) {
+                return R.convertResultJson(throwable);
+            }
+
             @Override
             public R<Integer> countException(@RequestBody String sellerCode){
                 return R.convertResultJson(throwable);

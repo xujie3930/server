@@ -6,6 +6,7 @@ import com.szmsd.exception.api.BusinessExceptionInterface;
 import com.szmsd.exception.api.factory.ExceptionInfoFeignFallback;
 import com.szmsd.exception.dto.ExceptionInfoDto;
 import com.szmsd.exception.dto.NewExceptionRequest;
+import com.szmsd.exception.dto.ProcessExceptionOrderRequest;
 import com.szmsd.exception.dto.ProcessExceptionRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,10 @@ public interface ExceptionInfoFeignService {
 
     @PostMapping(value = "/exception/info/process")
     R processException(@RequestBody ProcessExceptionRequest processExceptionRequest);
+
+
+    @PostMapping(value = "/exception/info/processByOrderNo")
+    R processByOrderNo(@RequestBody ProcessExceptionOrderRequest processExceptionRequest);
 
     @PostMapping(value = "/exception/info/count")
     R<Integer> countException(@RequestBody String sellerCode);

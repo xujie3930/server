@@ -28,6 +28,9 @@ import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
+import com.szmsd.exception.api.feign.ExceptionInfoFeignService;
+import com.szmsd.exception.dto.ProcessExceptionOrderRequest;
+import com.szmsd.exception.dto.ProcessExceptionRequest;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
@@ -60,6 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -114,7 +118,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
     @Autowired
     private IDelTrackService delTrackService;
-
+    @Autowired
+    private ExceptionInfoFeignService exceptionInfoFeignService;
     @Override
     public int shipmentPacking(Long id) {
         return this.shipmentPacking(id, true);
@@ -541,6 +546,19 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                      * 推送SRM成本计费计算
                      */
                     this.pushSrmCost(delOutbound);
+
+                    //修改异常中心处理完成
+                    try {
+                        ProcessExceptionOrderRequest request = new ProcessExceptionOrderRequest();
+                        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                        request.setOperateOn(df.format(new Date()));
+                        request.setOrderNo(delOutbound.getOrderNo());
+                        request.setRemark("The system completes automatically");
+                        exceptionInfoFeignService.processByOrderNo(request);
+                    }catch (Exception e){
+                        logger.error("订单号{}修改失败", delOutbound.getOrderNo());
+                        e.printStackTrace();
+                    }
 
 
                     delTrackService.addData(new DelTrack()
