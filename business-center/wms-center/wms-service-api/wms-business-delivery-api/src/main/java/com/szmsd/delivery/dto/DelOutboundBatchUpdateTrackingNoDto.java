@@ -17,6 +17,11 @@ public class DelOutboundBatchUpdateTrackingNoDto implements Serializable {
 
     private String trackingNo;
 
+
+    private String noTrackingNo;
+
     private String customCode;
+
+
 
 }

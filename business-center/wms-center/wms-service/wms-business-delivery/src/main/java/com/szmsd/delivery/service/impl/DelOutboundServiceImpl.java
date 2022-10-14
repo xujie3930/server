@@ -1521,8 +1521,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             List<DelOutbound> delOutboundlist2 = baseMapper.selectorderNos(orderNos);
             //更新成功的单号和出库单号做比较，拿到客户code
            for (DelOutboundBatchUpdateTrackingNoDto dto:list1){
-               delOutboundlist2.stream().filter(x->x.getOrderNo().equals(dto.getOrderNo())).map(DelOutbound::getCustomCode).findAny().ifPresent(i -> {
-                   dto.setCustomCode(i);
+               delOutboundlist2.stream().filter(x->x.getOrderNo().equals(dto.getOrderNo())).findFirst().ifPresent(i -> {
+                   if (i.getCustomCode()!=null&&!i.getCustomCode().equals("")){
+                       dto.setCustomCode(i.getCustomCode());
+                   }
+                   if (i.getTrackingNo()!=null&&!i.getTrackingNo().equals("")){
+                       dto.setNoTrackingNo(i.getTrackingNo());
+                   }
+
+
                });
 
 
@@ -1547,6 +1554,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                             BeanUtils.copyProperties(dto,delOutboundBatchUpdateTrackingNoEmailDto);
 
                             delOutboundBatchUpdateTrackingNoEmailDto.setEmpCode(basSeller.getServiceManagerName());
+                            delOutboundBatchUpdateTrackingNoEmailDto.setServiceManagerName(basSeller.getServiceManagerName());
+                            if (basSeller.getServiceStaffName()!=null&&!basSeller.getServiceStaffName().equals("")){
+                                delOutboundBatchUpdateTrackingNoEmailDto.setServiceStaffName(basSeller.getServiceStaffName());
+                            }
                             delOutboundBatchUpdateTrackingNoEmailDtoList.add(delOutboundBatchUpdateTrackingNoEmailDto);
                         }
                     }
@@ -1554,9 +1565,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto=new DelOutboundBatchUpdateTrackingNoEmailDto();
                         BeanUtils.copyProperties(dto,delOutboundBatchUpdateTrackingNoEmailDto);
                         delOutboundBatchUpdateTrackingNoEmailDto.setEmpCode(basSeller.getServiceStaffName());
+                        delOutboundBatchUpdateTrackingNoEmailDto.setServiceStaffName(basSeller.getServiceStaffName());
+                        if (basSeller.getServiceManagerName()!=null&&!basSeller.getServiceManagerName().equals("")){
+                            delOutboundBatchUpdateTrackingNoEmailDto.setServiceManagerName(basSeller.getServiceManagerName());
+                        }
                         delOutboundBatchUpdateTrackingNoEmailDtoList.add(delOutboundBatchUpdateTrackingNoEmailDto);
 
                     }
+
 
                 });
 

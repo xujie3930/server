@@ -22,4 +22,13 @@ public class DelOutboundBatchUpdateTrackingNoEmailDto {
 
     //员工的邮箱
     private String email;
+    //客服
+    private String serviceStaffName;
+
+    //客服经理
+    private String serviceManagerName;
+
+    //原单号
+    private String noTrackingNo;
+
 }
