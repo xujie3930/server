@@ -263,6 +263,27 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
         super.update(exceptionInfo, updateWrapper);
     }
 
+    @Override
+    public void processByOrderNo(@RequestBody ProcessExceptionOrderRequest processExceptionRequest) {
+        QueryWrapper<ExceptionInfo> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("order_no", processExceptionRequest.getOrderNo());
+        if (super.count(queryWrapper) == 0) {
+            return;
+        }
+        String operationOn = processExceptionRequest.getOperateOn();
+        processExceptionRequest.setOperateOn(null);
+        ExceptionInfo exceptionInfo = BeanMapperUtil.map(processExceptionRequest, ExceptionInfo.class);
+        if (StringUtils.isNotEmpty(operationOn)) {
+            Date d = dealUTZTime(operationOn);
+            exceptionInfo.setOperateOn(d);
+        }
+        exceptionInfo.setSolveRemark(processExceptionRequest.getRemark());
+        exceptionInfo.setState(StateSubEnum.YIWANCHENG.getCode());
+        UpdateWrapper<ExceptionInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("order_no", processExceptionRequest.getOrderNo());
+        super.update(exceptionInfo, updateWrapper);
+    }
+
     /**
      * 修改模块
      *

@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.chargerules.mapper.BasProductServiceMapper">
+  <resultMap id="BaseResultMap" type="com.szmsd.chargerules.domain.BasProductService">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="product_code" jdbcType="VARCHAR" property="productCode" />
+    <result column="product_name" jdbcType="VARCHAR" property="productName" />
+    <result column="is_show" jdbcType="BIT" property="isShow" />
+    <result column="in_service" jdbcType="BIT" property="inService" />
+    <result column="tracking_acquire_type" jdbcType="VARCHAR" property="trackingAcquireType" />
+    <result column="logistics_route_id" jdbcType="VARCHAR" property="logisticsRouteId" />
+    <result column="terminal_carrier" jdbcType="VARCHAR" property="terminalCarrier" />
+    <result column="logistics_provider_code" jdbcType="VARCHAR" property="logisticsProviderCode" />
+    <result column="packing_rule" jdbcType="VARCHAR" property="packingRule" />
+    <result column="shipment_rule" jdbcType="VARCHAR" property="shipmentRule" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="create_by_name" jdbcType="VARCHAR" property="createByName" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+    <result column="update_by_name" jdbcType="VARCHAR" property="updateByName" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="del_flag" jdbcType="VARCHAR" property="delFlag" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, product_code, product_name, is_show, in_service, tracking_acquire_type, logistics_route_id, 
+    terminal_carrier, logistics_provider_code, packing_rule, shipment_rule, create_by, 
+    create_by_name, create_time, update_by, update_by_name, update_time, remark, del_flag
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from bas_product_service
+    where product_code = #{productCode,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from bas_product_service
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.szmsd.chargerules.domain.BasProductService">
+    insert into bas_product_service (id, product_code, product_name, 
+      is_show, in_service, tracking_acquire_type, 
+      logistics_route_id, terminal_carrier, logistics_provider_code, 
+      packing_rule, shipment_rule, create_by, 
+      create_by_name, create_time, update_by, 
+      update_by_name, update_time, remark, 
+      del_flag)
+    values (#{id,jdbcType=INTEGER}, #{productCode,jdbcType=VARCHAR}, #{productName,jdbcType=VARCHAR}, 
+      #{isShow,jdbcType=BIT}, #{inService,jdbcType=BIT}, #{trackingAcquireType,jdbcType=VARCHAR}, 
+      #{logisticsRouteId,jdbcType=VARCHAR}, #{terminalCarrier,jdbcType=VARCHAR}, #{logisticsProviderCode,jdbcType=VARCHAR}, 
+      #{packingRule,jdbcType=VARCHAR}, #{shipmentRule,jdbcType=VARCHAR}, #{createBy,jdbcType=VARCHAR}, 
+      #{createByName,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, 
+      #{updateByName,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR}, 
+      #{delFlag,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.szmsd.chargerules.domain.BasProductService">
+    insert into bas_product_service
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="productCode != null">
+        product_code,
+      </if>
+      <if test="productName != null">
+        product_name,
+      </if>
+      <if test="isShow != null">
+        is_show,
+      </if>
+      <if test="inService != null">
+        in_service,
+      </if>
+      <if test="trackingAcquireType != null">
+        tracking_acquire_type,
+      </if>
+      <if test="logisticsRouteId != null">
+        logistics_route_id,
+      </if>
+      <if test="terminalCarrier != null">
+        terminal_carrier,
+      </if>
+      <if test="logisticsProviderCode != null">
+        logistics_provider_code,
+      </if>
+      <if test="packingRule != null">
+        packing_rule,
+      </if>
+      <if test="shipmentRule != null">
+        shipment_rule,
+      </if>
+      <if test="createBy != null">
+        create_by,
+      </if>
+      <if test="createByName != null">
+        create_by_name,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateBy != null">
+        update_by,
+      </if>
+      <if test="updateByName != null">
+        update_by_name,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+      <if test="delFlag != null">
+        del_flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="productCode != null">
+        #{productCode,jdbcType=VARCHAR},
+      </if>
+      <if test="productName != null">
+        #{productName,jdbcType=VARCHAR},
+      </if>
+      <if test="isShow != null">
+        #{isShow,jdbcType=BIT},
+      </if>
+      <if test="inService != null">
+        #{inService,jdbcType=BIT},
+      </if>
+      <if test="trackingAcquireType != null">
+        #{trackingAcquireType,jdbcType=VARCHAR},
+      </if>
+      <if test="logisticsRouteId != null">
+        #{logisticsRouteId,jdbcType=VARCHAR},
+      </if>
+      <if test="terminalCarrier != null">
+        #{terminalCarrier,jdbcType=VARCHAR},
+      </if>
+      <if test="logisticsProviderCode != null">
+        #{logisticsProviderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="packingRule != null">
+        #{packingRule,jdbcType=VARCHAR},
+      </if>
+      <if test="shipmentRule != null">
+        #{shipmentRule,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createByName != null">
+        #{createByName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null">
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateByName != null">
+        #{updateByName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null">
+        #{delFlag,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.chargerules.domain.BasProductService">
+    update bas_product_service
+    <set>
+      <if test="productCode != null">
+        product_code = #{productCode,jdbcType=VARCHAR},
+      </if>
+      <if test="productName != null">
+        product_name = #{productName,jdbcType=VARCHAR},
+      </if>
+      <if test="isShow != null">
+        is_show = #{isShow,jdbcType=BIT},
+      </if>
+      <if test="inService != null">
+        in_service = #{inService,jdbcType=BIT},
+      </if>
+      <if test="trackingAcquireType != null">
+        tracking_acquire_type = #{trackingAcquireType,jdbcType=VARCHAR},
+      </if>
+      <if test="logisticsRouteId != null">
+        logistics_route_id = #{logisticsRouteId,jdbcType=VARCHAR},
+      </if>
+      <if test="terminalCarrier != null">
+        terminal_carrier = #{terminalCarrier,jdbcType=VARCHAR},
+      </if>
+      <if test="logisticsProviderCode != null">
+        logistics_provider_code = #{logisticsProviderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="packingRule != null">
+        packing_rule = #{packingRule,jdbcType=VARCHAR},
+      </if>
+      <if test="shipmentRule != null">
+        shipment_rule = #{shipmentRule,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createByName != null">
+        create_by_name = #{createByName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null">
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateByName != null">
+        update_by_name = #{updateByName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null">
+        del_flag = #{delFlag,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where product_code = #{productCode,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.chargerules.domain.BasProductService">
+    update bas_product_service
+    set product_code = #{productCode,jdbcType=VARCHAR},
+      product_name = #{productName,jdbcType=VARCHAR},
+      is_show = #{isShow,jdbcType=BIT},
+      in_service = #{inService,jdbcType=BIT},
+      tracking_acquire_type = #{trackingAcquireType,jdbcType=VARCHAR},
+      logistics_route_id = #{logisticsRouteId,jdbcType=VARCHAR},
+      terminal_carrier = #{terminalCarrier,jdbcType=VARCHAR},
+      logistics_provider_code = #{logisticsProviderCode,jdbcType=VARCHAR},
+      packing_rule = #{packingRule,jdbcType=VARCHAR},
+      shipment_rule = #{shipmentRule,jdbcType=VARCHAR},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      create_by_name = #{createByName,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_by = #{updateBy,jdbcType=VARCHAR},
+      update_by_name = #{updateByName,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      remark = #{remark,jdbcType=VARCHAR},
+      del_flag = #{delFlag,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+</mapper>
