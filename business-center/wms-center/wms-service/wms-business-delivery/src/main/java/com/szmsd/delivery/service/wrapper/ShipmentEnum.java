@@ -886,7 +886,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 logger.info("冻结费用异常，加锁失败");
                 logger.info("异常信息:" + e.getMessage());
 
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage());
 
             }finally {
                 if (lock.isLocked() && lock.isHeldByCurrentThread()) {
