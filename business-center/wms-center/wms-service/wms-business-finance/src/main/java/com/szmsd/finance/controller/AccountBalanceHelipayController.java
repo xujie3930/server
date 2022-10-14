@@ -1,7 +1,6 @@
 package com.szmsd.finance.controller;
 
 import com.helipay.app.trx.facade.response.pay.APPScanPayResponseForm;
-import com.helipay.component.facade.HeliRequest;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.service.HeliPayService;
 import com.szmsd.finance.vo.helibao.PayRequestVO;
@@ -13,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-
 @Api(tags = {"账户余额-合利宝"})
 @RestController
 @RequestMapping("/helibao")
@@ -25,17 +22,11 @@ public class AccountBalanceHelipayController {
 
     @ApiOperation(value = "/微信-支付宝扫码支付")
     @PostMapping("/pay")
-    public R<APPScanPayResponseForm> pay(@RequestBody @Valid PayRequestVO payRequestVO){
+    public R<APPScanPayResponseForm> pay(@RequestBody PayRequestVO payRequestVO){
 
         return payService.pay(payRequestVO);
     }
 
-    @ApiOperation(value = "/支付回调")
-    @PostMapping("/pay-callback")
-    public String payCallback(@RequestBody @Valid HeliRequest heliRequest){
-
-        return payService.payCallback(heliRequest);
-    }
 
 
 }
