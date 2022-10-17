@@ -33,7 +33,14 @@
     from bas_product_service
     where product_code = #{productCode,jdbcType=VARCHAR}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <select id="selectBasProductService" resultType="com.szmsd.chargerules.domain.BasProductService" parameterType="com.szmsd.chargerules.domain.BasProductService">
+      select
+      <include refid="Base_Column_List" />
+      from bas_product_service
+      where product_code = #{productCode,jdbcType=VARCHAR}
+
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from bas_product_service
     where id = #{id,jdbcType=INTEGER}
   </delete>

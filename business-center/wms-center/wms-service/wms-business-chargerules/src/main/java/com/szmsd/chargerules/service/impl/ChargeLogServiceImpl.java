@@ -4,12 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.dto.ChargeLogDto;
+import com.szmsd.chargerules.mapper.BasProductServiceMapper;
 import com.szmsd.chargerules.mapper.ChargeLogMapper;
 import com.szmsd.chargerules.service.IChargeLogService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +26,8 @@ public class ChargeLogServiceImpl implements IChargeLogService {
 
     @Resource
     private ChargeLogMapper chargeLogMapper;
+    @Autowired
+    private BasProductServiceMapper basProductServiceMapper;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
@@ -74,5 +80,20 @@ public class ChargeLogServiceImpl implements IChargeLogService {
         LambdaUpdateWrapper<ChargeLog> update = Wrappers.lambdaUpdate();
         update.set(ChargeLog::getHasFreeze, false).eq(ChargeLog::getId, id);
         return chargeLogMapper.update(null, update);
+    }
+
+    @Override
+    public R selectBasProductService(BasProductService basProductService) {
+
+        try {
+
+            BasProductService basProductService1   =basProductServiceMapper.selectBasProductService(basProductService);
+
+        return R.ok(basProductService1);
+        }catch (Exception e){
+         e.printStackTrace();
+            return R.failed();
+        }
+
     }
 }
