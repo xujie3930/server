@@ -152,6 +152,13 @@
                 and FASB.payment_time <![CDATA[ <= ]]> (#{billEndTime})
             </if>
 
+            <if test="cusCodes != null">
+                and FASB.cus_code in
+                <foreach collection="cusCodes" close=")" open="(" separator="," item="item">
+                    #{item}
+                </foreach>
+            </if>
+
         </where>
         group by FASB.cus_code,FASB.currency_code
 

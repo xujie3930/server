@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class AccountSerialBillNatureJob {
 
+    @Resource
     private IAccountSerialBillService iAccountSerialBillService;
 
     @Resource

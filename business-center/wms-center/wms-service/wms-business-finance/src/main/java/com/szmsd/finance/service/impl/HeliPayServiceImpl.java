@@ -16,7 +16,6 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.finance.domain.AccountPay;
 import com.szmsd.finance.dto.PreRechargeDTO;
-import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.enums.HeliOrderStatusEnum;
 import com.szmsd.finance.enums.PayEnum;
 import com.szmsd.finance.mapper.AccountPayMapper;
@@ -24,6 +23,7 @@ import com.szmsd.finance.service.HeliPayService;
 import com.szmsd.finance.service.IPreRechargeService;
 import com.szmsd.finance.vo.helibao.PayCallback;
 import com.szmsd.finance.vo.helibao.PayRequestVO;
+import com.szmsd.finance.ws.PayWebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
@@ -321,6 +321,8 @@ public class HeliPayServiceImpl implements HeliPayService {
             log.info("回写更新记录 updAccountPay:{}",updAccountPay);
 
             if(updAccountPay > 0 && orderStatus.equals(HeliOrderStatusEnum.SUCCESS.name())){
+
+                PayWebSocketServer.sendMessage(orderNo,"支付成功");
 
                 PreRechargeDTO preRechargeDTO = this.generatorPreRecharge(accountPay);
 
