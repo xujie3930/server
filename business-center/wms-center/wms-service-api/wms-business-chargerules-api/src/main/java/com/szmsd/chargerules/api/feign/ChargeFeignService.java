@@ -13,6 +13,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+
 @FeignClient(contextId = "FeignClient.ChargeFeignService", name = SpecialOperationInterface.SERVICE_NAME, fallbackFactory = ChargeFeignFallback.class)
 public interface ChargeFeignService {
 
@@ -27,5 +29,5 @@ public interface ChargeFeignService {
     //查询产品服务接口
     @PostMapping("/log/selectBasProductService")
     @ApiOperation(value = "查询产品服务接口")
-    R selectBasProductService(@RequestBody BasProductService basProductService);
+    R selectBasProductService(@RequestBody List<String> list);
 }

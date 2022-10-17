@@ -1,11 +1,14 @@
 package com.szmsd.delivery.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.chargerules.api.feign.ChargeFeignService;
+import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -31,6 +34,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -56,7 +60,8 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
     private BasWarehouseClientService basWarehouseClientService;
     @Autowired
     private BaseProductClientService baseProductClientService;
-
+    @Resource
+    private ChargeFeignService chargeFeignService;
     private List<DelOutboundAddResponse> addResponseList(List<DelOutboundDto> dtoList) {
         List<DelOutboundAddResponse> result = new ArrayList<>();
         int index = 1;
@@ -199,7 +204,33 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
         if (CollectionUtils.isNotEmpty(dto.getProductAttributes())) {
             criteria.setShipmentTypes(dto.getProductAttributes());
         }
-        return this._inService(criteria);
+        List<PricedProduct> list = this._inService(criteria);
+
+
+
+        if(list.size() > 0){
+            //是否可以查询
+            List<String> codes = list.stream().
+                    map(sfcMessage -> sfcMessage.getCode()).collect(Collectors.toList());
+            R<List<BasProductService>> r = chargeFeignService.selectBasProductService(codes);
+            if(r.getCode() == 200 && r.getData()!= null && r.getData().size() > 0){
+
+                Map<String, Boolean> map = r.getData().stream()
+                        .collect(Collectors.toMap(BasProductService::getProductCode, BasProductService::getIsShow, (p1, p2) -> p1));
+                List<PricedProduct> newList = new ArrayList<>();
+                for(PricedProduct product: list){
+                    Boolean isShow = map.get(product.getCode());
+                    if(isShow != null && isShow == false){
+                        continue;
+                    }
+                    newList.add(product);
+                }
+                return newList;
+            }
+
+        }
+
+        return list;
     }
 
     @Override

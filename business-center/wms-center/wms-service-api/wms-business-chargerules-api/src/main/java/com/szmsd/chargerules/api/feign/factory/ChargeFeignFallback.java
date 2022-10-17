@@ -10,6 +10,8 @@ import com.szmsd.finance.vo.QueryChargeVO;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class ChargeFeignFallback implements FallbackFactory<ChargeFeignService> {
 
@@ -27,9 +29,10 @@ public class ChargeFeignFallback implements FallbackFactory<ChargeFeignService> 
             }
 
             @Override
-            public R selectBasProductService(BasProductService basProductService) {
+            public R selectBasProductService(List<String> list) {
                 return R.convertResultJson(throwable);
             }
+
         };
     }
 }

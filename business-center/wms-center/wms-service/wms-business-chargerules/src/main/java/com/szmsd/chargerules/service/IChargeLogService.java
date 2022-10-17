@@ -40,5 +40,5 @@ public interface IChargeLogService {
      */
     int update(Long id);
 
-    R selectBasProductService(BasProductService basProductService);
+    R selectBasProductService(List<String> list);
 }

@@ -5,6 +5,8 @@ import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.common.core.domain.R;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 public interface BasProductServiceMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -18,5 +20,5 @@ public interface BasProductServiceMapper {
 
     int updateByPrimaryKey(BasProductService record);
 
-    BasProductService selectBasProductService(BasProductService basProductService);
+    List<BasProductService> selectBasProductService(@Param("list") List<String> list);
 }
