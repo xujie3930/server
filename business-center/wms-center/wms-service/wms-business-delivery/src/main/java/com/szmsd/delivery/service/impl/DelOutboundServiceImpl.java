@@ -1619,6 +1619,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             }
         }
+        log.info("更新挂号参数：{}",list);
         list.forEach(x->{
             int u = super.baseMapper.updateTrackingNo(x);
 
