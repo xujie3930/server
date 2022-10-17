@@ -76,8 +76,6 @@
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>swagger-bootstrap-ui</artifactId>
             <version>${swagger-bootstrap-ui.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/swagger-bootstrap-ui-1.9.6.jar</systemPath>
         </dependency>
         <!-- szmsd Common Core-->
         <dependency>
