@@ -1576,9 +1576,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
 
                 boolean a = basSellerList.stream().filter(x -> x.getSellerCode().equals(dto.getCustomCode())).findFirst().isPresent();
+               logger.info("匹配客户表：{}",a);
 
                 if (a == false) {
-                        DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto = new DelOutboundBatchUpdateTrackingNoEmailDto();
+                    logger.info("匹配客户表为空传递参数：{}",dto);
+                    DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto = new DelOutboundBatchUpdateTrackingNoEmailDto();
                         delOutboundBatchUpdateTrackingNoEmailDto.setOrderNo(dto.getOrderNo());
                         delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
                         int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
@@ -1600,7 +1602,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 });
 
                boolean a= basEmployeesList.stream().filter(x->x.getEmpCode().equals(dto.getEmpCode())).map(BasEmployees::getEmail).findAny().isPresent();
+                logger.info("匹配员工表：{}",a);
                 if (a==false){
+                    logger.info("匹配员工表为空传递参数：{}",dto);
                     DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto=new DelOutboundBatchUpdateTrackingNoEmailDto();
                     delOutboundBatchUpdateTrackingNoEmailDto.setOrderNo(dto.getOrderNo());
                     delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
