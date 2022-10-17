@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.controller;
 
+import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.service.IChargeLogService;
@@ -50,5 +51,15 @@ public class ChargeLogController extends BaseController {
         List<QueryChargeVO> list = chargeLogService.selectChargeLogList(queryDto);
         return R.ok(getDataTable(list));
     }
+
+    @PostMapping("/selectBasProductService")
+    @ApiOperation(value = "查询产品服务")
+    public R selectBasProductService(@RequestBody BasProductService basProductService) {
+
+        R r = chargeLogService.selectBasProductService(basProductService);
+        return r;
+    }
+
+
 
 }
