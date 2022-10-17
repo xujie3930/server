@@ -11,7 +11,7 @@
 
     <select id="cusPeriodAmount" resultType="com.szmsd.finance.dto.AccountBalanceBillResultDTO">
 
-        select cus_code as cusCode,currency_code as currencyCode,current_balance as periodAmount
+        select cus_code as cusCode,currency_code as currencyCode,total_balance as periodAmount
         from fss_account_balance_log
         <where>
             <if test="cusCodeList != null">
