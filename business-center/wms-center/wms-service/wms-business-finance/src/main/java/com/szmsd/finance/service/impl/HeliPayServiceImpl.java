@@ -16,9 +16,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.finance.domain.AccountPay;
 import com.szmsd.finance.dto.PreRechargeDTO;
-import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.enums.HeliOrderStatusEnum;
-import com.szmsd.finance.enums.PayEnum;
 import com.szmsd.finance.mapper.AccountPayMapper;
 import com.szmsd.finance.service.HeliPayService;
 import com.szmsd.finance.service.IPreRechargeService;
@@ -51,12 +49,6 @@ public class HeliPayServiceImpl implements HeliPayService {
     @Value("${helibao.payaes}")
     private String payaes;
 
-    @Value("${helibao.alipaysign}")
-    private String alipaysign;
-
-    @Value("${helibao.alipayaes}")
-    private String alipayaes;
-
     @Value("${helibao.requestUrl}")
     private String requestUrl;
 
@@ -86,13 +78,12 @@ public class HeliPayServiceImpl implements HeliPayService {
         String orderNo = this.generatorOrderNo();
         appScanPayRequestForm.setOrderNo(orderNo);
 
-        PayEnum payType = payRequestVO.getPayType();
-
-        appScanPayRequestForm.setProductCode(payType.name());
+        appScanPayRequestForm.setProductCode(payRequestVO.getPayType().name());
         //订单金额
         appScanPayRequestForm.setOrderAmount(payRequestVO.getAmount());
 
         String cusCode = payRequestVO.getCusCode();
+
 
         String gname = goodsName +"-"+cusCode+"-"+RandomUtil.randomNumbers(6);
 
@@ -104,9 +95,9 @@ public class HeliPayServiceImpl implements HeliPayService {
 
         //String url = "https://cbptrx.helipay.com/cbtrx/rest/domestic/pay/appScan";
 
-        HeliRequest param = this.encodeAndSign(appScanPayRequestForm,payType);
+        HeliRequest param = this.encodeAndSign(appScanPayRequestForm);
         HeliRequest heliRequest = remoteService.postRemoteInvoke(requestUrl, JSONObject.toJSONString(param), HeliRequest.class);
-        APPScanPayResponseForm appScanPayResponseForm = this.decode(heliRequest,payType);
+        APPScanPayResponseForm appScanPayResponseForm = this.decode(heliRequest);
         log.info("#####解密后的内容为{}", appScanPayResponseForm);
 
         if(!appScanPayResponseForm.getErrorCode().equals("0000")){
@@ -146,22 +137,14 @@ public class HeliPayServiceImpl implements HeliPayService {
      * @param orgRequest
      * @return
      */
-    private HeliRequest encodeAndSign(BaseDTO orgRequest,PayEnum payType){
+    private HeliRequest encodeAndSign(BaseDTO orgRequest){
 
         log.info("未加密原始请求信息:{}", orgRequest);
         Map map = (Map) JSON.toJSON(orgRequest);
         log.info("转换为map集合后的信息：{}", map);
 
-        String sign = "";
-        String aesValue = "";
-
-        if(payType.name().equals("WXPAYSCAN")) {
-             sign = HelipayAPIEncrypt.sign(map, paysign);
-             aesValue = AES.encryptToBase64(map.toString(), payaes);
-        }else if(payType.name().equals("ALIPAYSCAN")){
-             sign = HelipayAPIEncrypt.sign(map, alipaysign);
-             aesValue = AES.encryptToBase64(map.toString(), alipayaes);
-        }
+        String sign = HelipayAPIEncrypt.sign(map, paysign);
+        String aesValue = AES.encryptToBase64(map.toString(), payaes);
 
         HeliRequest heliRequest = new HeliRequest();
         heliRequest.setMerchantNo(orgRequest.getMerchantNo());
@@ -179,25 +162,13 @@ public class HeliPayServiceImpl implements HeliPayService {
      * @param heliRequest
      * @return
      */
-    private APPScanPayResponseForm decode(HeliRequest heliRequest,PayEnum payType) {
+    private APPScanPayResponseForm decode(HeliRequest heliRequest) {
         if (StringUtils.isBlank(heliRequest.getSign())) {
             throw new RuntimeException(heliRequest.getContent());
         } else {
-
-            String sign = "";
-            String jsonMap = "";
-
-            if(payType.name().equals("WXPAYSCAN")) {
-                jsonMap = AES.decryptFromBase64(heliRequest.getContent(), payaes);
-                Map resultMap = JSON.parseObject(jsonMap);
-                sign = HelipayAPIEncrypt.sign(resultMap, paysign);
-
-            }else if(payType.name().equals("ALIPAYSCAN")){
-                jsonMap = AES.decryptFromBase64(heliRequest.getContent(), alipayaes);
-                Map resultMap = JSON.parseObject(jsonMap);
-                sign = HelipayAPIEncrypt.sign(resultMap, alipaysign);
-            }
-
+            String jsonMap = AES.decryptFromBase64(heliRequest.getContent(), payaes);
+            Map resultMap = JSON.parseObject(jsonMap);
+            String sign = HelipayAPIEncrypt.sign(resultMap, paysign);
             if (!StringUtils.equalsIgnoreCase(sign, heliRequest.getSign())) {
                 String msg = String.format("服务端签名:%s,请求签名：%s.验证请求失败,参数可能被劫持篡改,请注意保证接口密钥安全.", sign, heliRequest.getSign());
                 log.error("验签失败!!! {}", msg);
@@ -213,16 +184,7 @@ public class HeliPayServiceImpl implements HeliPayService {
         if (StringUtils.isBlank(heliRequest.getSign())) {
             throw new RuntimeException(heliRequest.getContent());
         } else {
-
-            String productCode  = heliRequest.getProductCode();
-
-            String jsonMap = "";
-
-            if(productCode.equals(PayEnum.WXPAYSCAN.name())) {
-                jsonMap = AES.decryptFromBase64(heliRequest.getContent(), payaes);
-            }else if (productCode.equals(PayEnum.ALIPAYSCAN.name())){
-                jsonMap = AES.decryptFromBase64(heliRequest.getContent(), alipayaes);
-            }
+            String jsonMap = AES.decryptFromBase64(heliRequest.getContent(), payaes);
             //Map resultMap = JSON.parseObject(jsonMap);
 //            String sign = HelipayAPIEncrypt.sign(resultMap, paysign);
 //            if (!StringUtils.equalsIgnoreCase(sign, heliRequest.getSign())) {
