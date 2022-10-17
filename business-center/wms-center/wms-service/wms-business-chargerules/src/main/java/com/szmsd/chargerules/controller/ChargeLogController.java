@@ -53,7 +53,7 @@ public class ChargeLogController extends BaseController {
     }
 
     @PostMapping("/selectBasProductService")
-    @ApiOperation(value = "扣费日志 - 查询操作费用")
+    @ApiOperation(value = "查询产品服务")
     public R selectBasProductService(@RequestBody BasProductService basProductService) {
 
         R r = chargeLogService.selectBasProductService(basProductService);
