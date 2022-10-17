@@ -145,10 +145,9 @@
 
         <resources>
             <resource>
-                <directory>lib</directory>
-                <targetPath>/BOOT-INF/lib/</targetPath>
+                <directory>src/main/resources</directory>
                 <includes>
-                    <include>**/*.jar</include>
+                    <include>**/*.*</include>
                 </includes>
             </resource>
         </resources>
