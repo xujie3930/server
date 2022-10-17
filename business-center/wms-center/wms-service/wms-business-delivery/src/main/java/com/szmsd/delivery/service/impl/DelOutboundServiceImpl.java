@@ -1512,6 +1512,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public void emailBatchUpdateTrackingNo(List<Map<String, Object>> list,String filepath) {
         //拿到成功的单号
+        logger.info("发送邮箱进来-----");
         Map map=list.get(1);
         List<DelOutboundBatchUpdateTrackingNoDto> list1= (List<DelOutboundBatchUpdateTrackingNoDto>) map.get("list1");
         if (list1.size()>0) {
@@ -1598,6 +1599,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             //循环map，得到每一组的数据 然后生产excel
             for (Map.Entry<String, List<DelOutboundBatchUpdateTrackingNoEmailDto>> entry : delOutboundBatchUpdateTrackingNoEmailDtoMap.entrySet()) {
                 System.out.println("key = " + entry.getKey() + ", value = " + entry.getValue());
+                logger.info("组合参数：{}",entry.getValue());
                 ExcleDelOutboundBatchUpdateTracking(entry.getValue(),entry.getKey(),entry.getValue().get(0).getEmail(), filepath);
             }
 
@@ -1606,6 +1608,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     public void ExcleDelOutboundBatchUpdateTracking(List<DelOutboundBatchUpdateTrackingNoEmailDto> list,String empCode,String email,String filepath){
+        logger.info("更新挂号参数1：{}",list);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         EmailDto emailDto=new EmailDto();
         emailDto.setSubject("Notice on Update of Tracking Number-"+list.get(0).getCustomCode()+"-"+simpleDateFormat.format(new Date()));
@@ -1619,7 +1622,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             }
         }
-        log.info("更新挂号参数：{}",list);
+        logger.info("更新挂号参数2：{}",list);
         list.forEach(x->{
             int u = super.baseMapper.updateTrackingNo(x);
 
