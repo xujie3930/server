@@ -39,7 +39,9 @@ import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.dto.EmailDto;
 import com.szmsd.bas.dto.EmailObjectDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
+import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
+import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -88,6 +90,7 @@ import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.api.feign.HtpOutboundFeignService;
+import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpRmiClientService;
 import com.szmsd.http.dto.HttpRequestDto;
@@ -95,6 +98,7 @@ import com.szmsd.http.dto.ShipmentCancelRequestDto;
 import com.szmsd.http.dto.ShipmentTrackingChangeRequestDto;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.vo.HttpResponseVO;
+import com.szmsd.http.vo.PricedProductInfo;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryAvailableQueryDto;
@@ -218,6 +222,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Autowired
     private EmailFeingService emailFeingService;
 
+    @Autowired
+    private HtpPricedProductFeignService htpPricedProductFeignService;
+    @Resource
+    private ChargeFeignService chargeFeignService;
     /**
      * 查询出库单模块
      *
@@ -790,6 +798,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // DOC的验证SKU
             logger.info(">>>>>[创建出库单]2.0 doc校验");
             this.docValid(dto);
+
+
+
+
+
+
             logger.info(">>>>>[创建出库单]2.1 doc校验完成，{}", timer.intervalRestart());
 
             if (!StringUtils.equals(dto.getSourceType(), DelOutboundConstant.SOURCE_TYPE_ADD)) {
@@ -803,6 +817,25 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (null == delOutbound.getCodAmount()) {
                 delOutbound.setCodAmount(BigDecimal.ZERO);
             }
+
+            if(StringUtils.isNotEmpty(dto.getShipmentRule())){
+                //获取发货规则名称
+                R<PricedProductInfo> info = htpPricedProductFeignService.info(dto.getShipmentRule());
+                if(info.getCode() == 200 && info.getData() != null){
+                    delOutbound.setShipmentRuleName(info.getData().getName());
+                }
+                //校验产品服务是否可下单
+                R<List<BasProductService>> r= chargeFeignService.selectBasProductService(Arrays.asList(dto.getShipmentRule()));
+                if(r.getCode() == 200 && r.getData()!= null && r.getData().size() > 0){
+                    Boolean isInService = r.getData().get(0).getInService();
+                    if(isInService != null && isInService == false){
+                        throw new CommonException("400", "Logistics services are not available");
+                    }
+                }
+            }
+
+
+
             // 生成出库单号
             // 流水号规则：CK + 客户代码 + （年月日 + 8位流水）
             String sellerCode;
@@ -1236,6 +1269,22 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         //单数据处理直接抛异常
         this.checkRefNo(dto, dto.getId());
+
+        if(StringUtils.isNotEmpty(dto.getShipmentRule())){
+            //获取发货规则名称
+            R<PricedProductInfo> info = htpPricedProductFeignService.info(dto.getShipmentRule());
+            if(info.getCode() == 200 && info.getData() != null){
+                delOutbound.setShipmentRuleName(info.getData().getName());
+            }
+            //校验产品服务是否可下单
+            R<List<BasProductService>> r= chargeFeignService.selectBasProductService(Arrays.asList(dto.getShipmentRule()));
+            if(r.getCode() == 200 && r.getData()!= null && r.getData().size() > 0){
+                Boolean isInService = r.getData().get(0).getInService();
+                if(isInService != null && isInService == false){
+                    throw new CommonException("400", "Logistics services are not available");
+                }
+            }
+        }
 
         // 先取消冻结，再冻结
         // 取消冻结

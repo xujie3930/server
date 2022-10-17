@@ -83,13 +83,11 @@ public class ChargeLogServiceImpl implements IChargeLogService {
     }
 
     @Override
-    public R selectBasProductService(BasProductService basProductService) {
+    public R selectBasProductService(List<String> list) {
 
         try {
 
-            BasProductService basProductService1   =basProductServiceMapper.selectBasProductService(basProductService);
-
-        return R.ok(basProductService1);
+        return R.ok(basProductServiceMapper.selectBasProductService(list));
         }catch (Exception e){
          e.printStackTrace();
             return R.failed();
