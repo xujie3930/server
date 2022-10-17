@@ -1537,6 +1537,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                }
 
+            logger.info("list1的查询结果:{}",list1);
+
            //查询用户，客户关系表
             List<BasSeller> basSellerList= baseMapper.selectdelsellerCodes();
            List<DelOutboundBatchUpdateTrackingNoEmailDto> delOutboundBatchUpdateTrackingNoEmailDtoList=new ArrayList<>();
