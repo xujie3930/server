@@ -54,9 +54,9 @@ public class ChargeLogController extends BaseController {
 
     @PostMapping("/selectBasProductService")
     @ApiOperation(value = "查询产品服务")
-    public R selectBasProductService(@RequestBody BasProductService basProductService) {
+    public R selectBasProductService(@RequestBody List<String> list) {
 
-        R r = chargeLogService.selectBasProductService(basProductService);
+        R r = chargeLogService.selectBasProductService(list);
         return r;
     }
 
