@@ -69,6 +69,8 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
         dto.setSerialNo(SnowflakeId.getNextId12());
         PreRecharge domain= new PreRecharge();
         BeanUtils.copyProperties(dto,domain);
+        String trimCode = domain.getCurrencyCode().trim();
+        domain.setCurrencyCode(trimCode);
         int insert = preRechargeMapper.insert(domain);
         if(insert>0){
             return R.ok();
@@ -85,8 +87,8 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
             custPayDTO.setAmount(preRecharge.getAmount());
             custPayDTO.setCusCode(preRecharge.getCusCode());
             custPayDTO.setCusName(preRecharge.getCusName());
-            custPayDTO.setCurrencyCode(preRecharge.getCurrencyCode());
-            custPayDTO.setCurrencyName(preRecharge.getCurrencyName());
+            custPayDTO.setCurrencyCode(preRecharge.getCurrencyCode().trim());
+            custPayDTO.setCurrencyName(preRecharge.getCurrencyName().trim());
             custPayDTO.setOrderTime(preRecharge.getRemittanceTime());
             custPayDTO.setNo(preRecharge.getSerialNo());
             R r = accountBalanceService.offlineIncome(custPayDTO);
