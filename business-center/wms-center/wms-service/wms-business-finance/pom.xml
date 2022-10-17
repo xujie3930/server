@@ -16,7 +16,6 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <helipay.version>20200709</helipay.version>
     </properties>
 
     <dependencies>
@@ -118,24 +117,6 @@
         <dependency>
             <groupId>com.szmsd.wms</groupId>
             <artifactId>wms-business-chargerules-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.helipay</groupId>
-            <artifactId>helipay-cross-border-demo-common</artifactId>
-            <version>${helipay.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.helipay</groupId>
-            <artifactId>helipay-component-facade</artifactId>
-            <version>${helipay.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.helipay</groupId>
-            <artifactId>helipay-cross-border-trx-facade</artifactId>
-            <version>${helipay.version}</version>
         </dependency>
 
 
