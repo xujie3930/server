@@ -6,10 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.szmsd.bas.domain.BasSeller;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto;
-import com.szmsd.delivery.dto.DelOutboundExportListDto;
-import com.szmsd.delivery.dto.DelOutboundListQueryDto;
-import com.szmsd.delivery.dto.DelOutboundReassignExportListDto;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.DelOutboundDetailListVO;
 import com.szmsd.delivery.vo.DelOutboundListExceptionMessageExportVO;
 import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
@@ -75,7 +72,7 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
      */
     List<DelOutboundReassignExportListDto> reassignExportList(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundListQueryDto> queryWrapper);
 
-    int updateTrackingNo(DelOutboundBatchUpdateTrackingNoDto dto);
+    int updateTrackingNo(DelOutboundBatchUpdateTrackingNoEmailDto dto);
 
     List<DelOutboundListExceptionMessageVO> exceptionMessageList(@Param("orderNos") List<String> orderNos);
 
