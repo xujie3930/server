@@ -149,8 +149,9 @@
 
         <resources>
             <resource>
-                <directory>lib</directory>
-                <targetPath>/WEB-INF/lib/</targetPath>
+                <directory>${project.basedir}/lib</directory>
+                <targetPath>WEB-INF/lib/</targetPath>
+                <filtering>false</filtering>
                 <includes>
                     <include>**/*.jar</include>
                 </includes>
