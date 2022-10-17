@@ -8,6 +8,10 @@ import com.helipay.app.trx.facade.request.pay.OrderRequestForm;
 import com.helipay.app.trx.facade.response.pay.APPScanPayResponseForm;
 import com.helipay.component.facade.BaseDTO;
 import com.helipay.component.facade.HeliRequest;
+import com.helipay.demo.common.component.util.api.encrypt.HelipayAPIEncrypt;
+import com.helipay.demo.common.component.util.secure.AES;
+import com.helipay.demo.common.service.remote.RemoteService;
+import com.helipay.demo.common.service.remote.RemoteServiceImpl;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.finance.domain.AccountPay;
@@ -17,9 +21,6 @@ import com.szmsd.finance.enums.PayEnum;
 import com.szmsd.finance.mapper.AccountPayMapper;
 import com.szmsd.finance.service.HeliPayService;
 import com.szmsd.finance.service.IPreRechargeService;
-import com.szmsd.finance.service.RemoteService;
-import com.szmsd.finance.util.AES;
-import com.szmsd.finance.util.HelipayAPIEncrypt;
 import com.szmsd.finance.vo.helibao.PayCallback;
 import com.szmsd.finance.vo.helibao.PayRequestVO;
 import com.szmsd.finance.ws.PayWebSocketServer;
@@ -73,11 +74,10 @@ public class HeliPayServiceImpl implements HeliPayService {
     @Resource
     private IPreRechargeService iPreRechargeService;
 
-    @Resource
-    private RemoteService remoteService;
-
     @Override
     public R<APPScanPayResponseForm> pay(PayRequestVO payRequestVO) {
+
+        RemoteService remoteService = new RemoteServiceImpl();
 
         OrderRequestForm appScanPayRequestForm = new OrderRequestForm();
         //必填

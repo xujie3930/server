@@ -121,9 +121,9 @@
         </dependency>
 
         <dependency>
-            <groupId>commons-httpclient</groupId>
-            <artifactId>commons-httpclient</artifactId>
-            <version>3.1</version>
+            <groupId>com.helipay</groupId>
+            <artifactId>helipay-cross-border-demo-common</artifactId>
+            <version>${helipay.version}</version>
         </dependency>
 
         <dependency>
@@ -142,16 +142,6 @@
     </dependencies>
 
     <build>
-
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <includes>
-                    <include>**/*.*</include>
-                </includes>
-            </resource>
-        </resources>
-
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

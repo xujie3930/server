@@ -1,8 +1,8 @@
 package com.szmsd.finance;
 
 import com.alibaba.fastjson.JSON;
-import com.szmsd.finance.util.AES;
-import com.szmsd.finance.util.HelipayAPIEncrypt;
+import com.helipay.demo.common.component.util.api.encrypt.HelipayAPIEncrypt;
+import com.helipay.demo.common.component.util.secure.AES;
 import com.szmsd.finance.vo.helibao.PayCallback;
 
 import java.math.BigDecimal;
