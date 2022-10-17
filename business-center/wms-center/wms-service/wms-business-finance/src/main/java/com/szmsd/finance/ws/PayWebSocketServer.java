@@ -9,16 +9,15 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 @Slf4j
-//@Component
-//@ServerEndpoint("/ws/rechargeCallback/result/{customCode}")
-public class WebSocketServer {
+@Component
+@ServerEndpoint("/ws/pay/result/{orderNo}")
+public class PayWebSocketServer {
 
     /**
      * concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。
      */
-    private static final ConcurrentHashMap<String, WebSocketServer> webSocketMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, PayWebSocketServer> webSocketMap = new ConcurrentHashMap<>();
 
     /**
      * 与某个客户端的连接会话，需要通过它来给客户端发送数据
@@ -26,22 +25,22 @@ public class WebSocketServer {
     private Session session;
 
     /**
-     * 接收customCode
+     * 接收orderNo
      */
-    private final String customCode = "";
+    private final String orderNo = "";
 
     /**
      * 连接建立成功调用的方法
      */
     @OnOpen
-    public void onOpen(Session session, @PathParam(value = "customCode") String customCode) {
+    public void onOpen(Session session, @PathParam(value = "orderNo") String orderNo) {
         //加入map中
         this.session = session;
-        webSocketMap.put(customCode, this);
+        webSocketMap.put(orderNo, this);
         try {
-            sendMessage(customCode, "连接成功");
+            sendMessage(orderNo, "连接成功");
         } catch (IOException e) {
-            log.error("用户:" + customCode + ",网络异常!!!!!!");
+            log.error("用户:" + orderNo + ",网络异常!!!!!!");
         }
     }
 
@@ -49,9 +48,9 @@ public class WebSocketServer {
      * 连接关闭调用的方法
      */
     @OnClose
-    public void onClose(@PathParam(value = "customCode") String customCode) {
+    public void onClose(@PathParam(value = "orderNo") String orderNo) {
         //从map中删除
-        webSocketMap.remove(customCode);
+        webSocketMap.remove(orderNo);
     }
 
     /**
@@ -61,7 +60,7 @@ public class WebSocketServer {
      */
     @OnMessage
     public void onMessage(String message, Session session) {
-        log.info("用户消息:" + customCode + ",报文:" + message);
+        log.info("用户消息:" + orderNo + ",报文:" + message);
     }
 
     /**
@@ -70,25 +69,24 @@ public class WebSocketServer {
      */
     @OnError
     public void onError(Session session, Throwable error) {
-        log.error("用户错误:" + this.customCode + ",原因:" + error.getMessage());
+        log.error("用户错误:" + this.orderNo + ",原因:" + error.getMessage());
         error.printStackTrace();
     }
 
     /**
      * 实现服务器主动推送
      *
-     * @param customCode customCode
-     * @param status     status
+     * @param orderNo orderNo
+     * @param status  status
      * @throws IOException e
      */
-    public void sendMessage(String customCode, String status) throws IOException {
-        WebSocketServer webSocketServer = webSocketMap.get(customCode);
+    public static void sendMessage(String orderNo, String status) throws IOException {
+        PayWebSocketServer webSocketServer = webSocketMap.get(orderNo);
         if (webSocketServer == null) {
-            log.error("用户：{} 未建立ws连接", customCode);
+            log.error("用户：{} 未建立ws连接", orderNo);
             return;
         }
         Session session = webSocketServer.session;
         session.getBasicRemote().sendText(status);
     }
-
 }
