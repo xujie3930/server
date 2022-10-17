@@ -32,5 +32,8 @@ public class EleBillQueryVO extends BaseQueryVO {
     @ApiModelProperty(value = "sheet 页数")
     private Integer sheetNo;
 
+    @ApiModelProperty(value = "客户代码集合")
+    private List<String> cusCodes;
+
 
 }
