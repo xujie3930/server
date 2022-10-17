@@ -130,16 +130,16 @@
             <groupId>com.helipay</groupId>
             <artifactId>helipay-component-facade</artifactId>
             <version>${helipay.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/helipay-component-facade-20200709.jar</systemPath>
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${project.basedir}/lib/helipay-component-facade-20200709.jar</systemPath>-->
         </dependency>
 
         <dependency>
             <groupId>com.helipay</groupId>
             <artifactId>helipay-cross-border-trx-facade</artifactId>
             <version>${helipay.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/helipay-cross-border-trx-facade-20200709.jar</systemPath>
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${project.basedir}/lib/helipay-cross-border-trx-facade-20200709.jar</systemPath>-->
         </dependency>
 
 
@@ -149,12 +149,20 @@
 
         <resources>
             <resource>
-                <directory>${project.basedir}/lib</directory>
-                <targetPath>WEB-INF/lib/</targetPath>
-                <filtering>false</filtering>
+                <directory>src/main/resources</directory>
                 <includes>
-                    <include>**/*.jar</include>
+                    <include>**/*.*</include>
                 </includes>
+            </resource>
+            <resource>
+                <directory>${profile.dir}</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}/classes</targetPath>
+            </resource>
+            <resource>
+                <directory>${profile.dir}</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}/test-classes</targetPath>
             </resource>
         </resources>
 
