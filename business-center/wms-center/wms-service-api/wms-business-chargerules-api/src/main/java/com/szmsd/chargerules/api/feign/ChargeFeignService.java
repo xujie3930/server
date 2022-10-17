@@ -2,6 +2,7 @@ package com.szmsd.chargerules.api.feign;
 
 import com.szmsd.chargerules.api.SpecialOperationInterface;
 import com.szmsd.chargerules.api.feign.factory.ChargeFeignFallback;
+import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -21,4 +22,10 @@ public interface ChargeFeignService {
     @PostMapping("/log/add")
     @ApiOperation(value = "新增扣费")
     R add(@RequestBody ChargeLog chargeLog);
+
+
+    //查询产品服务接口
+    @PostMapping("/log/selectBasProductService")
+    @ApiOperation(value = "查询产品服务接口")
+    R selectBasProductService(@RequestBody BasProductService basProductService);
 }
