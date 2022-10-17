@@ -103,6 +103,7 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         List<String> orderTypeList = new ArrayList<>();
         orderTypeList.add("PackageTransfer");
         directDeliveryQueryVO.setSheetNo(1);
+        directDeliveryQueryVO.setOrderTypeList(orderTypeList);
         List<BillDirectDeliveryTotalVO> directDeliverys = this.selectDirectDelivery(directDeliveryQueryVO);
         sheetAndDataMap.put(1,directDeliverys);
 
