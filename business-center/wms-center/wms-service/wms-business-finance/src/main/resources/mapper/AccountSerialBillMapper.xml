@@ -190,7 +190,7 @@
     <select id="selectDirectDelivery" resultMap="DirectDeliveryVOMap" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
 
         select
-            FASB.business_category,FASB.`no`,FASB.currency_code,FASB.payment_time,
+            FASB.nature as business_category,FASB.`no`,FASB.currency_code,FASB.payment_time,
             FASB.cus_code,
             <if test="sheetNo != null">
                 <if test="sheetNo == 1">
@@ -246,7 +246,7 @@
             </if>
         </where>
 
-        group by FASB.business_category,FASB.no,FASB.currency_code,FASB.payment_time
+        group by FASB.nature,FASB.no,FASB.currency_code,FASB.payment_time
 
     </select>
 

@@ -103,6 +103,7 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         List<String> orderTypeList = new ArrayList<>();
         orderTypeList.add("PackageTransfer");
         directDeliveryQueryVO.setSheetNo(1);
+        directDeliveryQueryVO.setOrderTypeList(orderTypeList);
         List<BillDirectDeliveryTotalVO> directDeliverys = this.selectDirectDelivery(directDeliveryQueryVO);
         sheetAndDataMap.put(1,directDeliverys);
 
@@ -195,10 +196,23 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         for(BillDirectDeliveryTotalVO billDirectDeliveryTotalVO : billDirectDeliveryTotalVOS){
 
             String resultCalaWeight = "";
+            String resultWeight = "";
+            String resultforecastWeight = "";
             if(billDirectDeliveryTotalVO.getCalcWeight() != null && billDirectDeliveryTotalVO.getCalcWeightUnit() != null){
                 resultCalaWeight = billDirectDeliveryTotalVO.getCalcWeight() + billDirectDeliveryTotalVO.getCalcWeightUnit();
             }
+
+            if(billDirectDeliveryTotalVO.getWeight() != null){
+                resultWeight = billDirectDeliveryTotalVO.getWeight() +"g";
+            }
+
+            if(billDirectDeliveryTotalVO.getForecastWeight() != null){
+                resultforecastWeight = billDirectDeliveryTotalVO.getForecastWeight() + "g";
+            }
+
             billDirectDeliveryTotalVO.setResultCalcWeight(resultCalaWeight);
+            billDirectDeliveryTotalVO.setWeight(resultWeight);
+            billDirectDeliveryTotalVO.setForecastWeight(resultforecastWeight);
         }
 
         return billDirectDeliveryTotalVOS;

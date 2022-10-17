@@ -57,10 +57,10 @@ public class BillDirectDeliveryTotalVO implements Serializable {
     private String sku;
 
     @ApiModelProperty(value = "仓库核重重量")
-    private BigDecimal weight;
+    private String weight;
 
     @ApiModelProperty(value = "客户下单重")
-    private BigDecimal forecastWeight;
+    private String forecastWeight;
 
     @ApiModelProperty(value = "计量重")
     private BigDecimal calcWeight;
