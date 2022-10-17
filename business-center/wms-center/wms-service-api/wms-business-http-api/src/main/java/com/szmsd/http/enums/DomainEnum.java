@@ -13,6 +13,8 @@ public enum DomainEnum {
     TrackingYeeDomain,
 
     TJAPIDomain,
+
+    OperationRecord,
     ;
 
     /**
