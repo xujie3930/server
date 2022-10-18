@@ -297,6 +297,11 @@ public class HeliPayServiceImpl implements HeliPayService {
             return "ERROR";
         }
 
+        if(accountPay.getOrderStatus().equals("SUCCESS")){
+            log.error("accountPay 单据已经成功不允许重复提交,{} ",orderNo);
+            return "REPEAT";
+        }
+
         log.info("selectOne :{}",JSON.toJSONString(accountPay));
 
         String orderStatus = payCallback.getOrderStatus();
