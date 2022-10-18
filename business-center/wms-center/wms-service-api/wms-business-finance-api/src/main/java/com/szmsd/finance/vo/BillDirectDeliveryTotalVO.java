@@ -50,6 +50,9 @@ public class BillDirectDeliveryTotalVO implements Serializable {
     @ApiModelProperty(value = "出库产品名称")
     private String shipmentService;
 
+    @ApiModelProperty(value = "出库产品名称")
+    private String shipmentRuleName;
+
     @ApiModelProperty(value = "产品名称")
     private String productName;
 

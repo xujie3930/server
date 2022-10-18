@@ -34,6 +34,7 @@
         <result column="country" property="country"/>
         <result column="shipment_rule" property="shipmentRule"/>
         <result column="shipment_service" property="shipmentService"/>
+        <result column="shipment_rule_name" property="shipmentRuleName"/>
         <result column="calc_weight_unit" property="calcWeightUnit"/>
     </resultMap>
 
@@ -205,6 +206,7 @@
             </if>
             DOB.tracking_no,DOB.ref_no,DOB.warehouse_code,
             DOB.shipment_rule,DOB.shipment_service,
+            DOB.shipment_rule_name,
             DOB.destination_delivery,DOB.weight,DOB.forecast_weight,
             DOB.calc_weight,DOB.calc_weight_unit,
             DOB.create_time,
