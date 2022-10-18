@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -155,6 +156,15 @@ public class DelQueryServiceDto extends BaseEntity{
     @ApiModelProperty(value = "每页大小")
     @TableField(exist = false)
     private int pageSize = 10;
+
+    @ApiModelProperty(value = "轨迹状态")
+    private String trackingStatus;
+
+    @ApiModelProperty(value = "轨迹信息描述")
+    private String trackingDescription;
+
+    @ApiModelProperty(value = "最新轨迹时间")
+    private String trackingTime;
 
 
 

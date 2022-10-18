@@ -85,6 +85,14 @@ public class DelQueryServiceExc {
     @Excel(name="创建时间",width = 30,needMerge = true)
     private String createTime;
 
+    @ApiModelProperty(value = "最新轨迹")
+    @Excel(name="最新轨迹",width = 40,needMerge = true)
+    private String trackingDescription;
+
+    @ApiModelProperty(value = "轨迹时间")
+    @Excel(name="轨迹时间",width = 30,needMerge = true)
+    private String trackingTime;
+
     /**
      集合
      **/
