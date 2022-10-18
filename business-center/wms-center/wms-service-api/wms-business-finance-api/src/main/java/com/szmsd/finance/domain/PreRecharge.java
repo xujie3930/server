@@ -77,4 +77,7 @@ public class PreRecharge extends FssBaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "审核日期")
     private Date verifyDate;
+
+    @ApiModelProperty(value = "收款银行名称")
+    private String dueBankNname;
 }
