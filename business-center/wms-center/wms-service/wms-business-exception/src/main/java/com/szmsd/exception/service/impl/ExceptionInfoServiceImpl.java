@@ -46,6 +46,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -162,20 +164,42 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
         return exceptionInfoList;
     }
 
-    private void handlerQueryCondition(QueryWrapper<ExceptionInfo> where, ExceptionInfoQueryDto dto) {
+    private void handlerQueryCondition(QueryWrapper<ExceptionInfo> where, ExceptionInfoQueryDto dto)  {
 
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "exception_type", dto.getExceptionType());
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "state", dto.getState());
         QueryWrapperUtil.filterDate(where, "create_time", dto.getCreateTimes());
-        if (CollectionUtils.isNotEmpty(dto.getExceptionNos())) {
-            where.in("exception_no", dto.getExceptionNos());
+        if (StringUtils.isNotEmpty(dto.getExceptionNos())) {
+            String  exceptionNo = null;
+            try {
+                exceptionNo = URLDecoder.decode(dto.getExceptionNos(),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            List<String> exceptionNoList = splitToArray(exceptionNo, "[\n,]");
+            where.in("exception_no", exceptionNoList).or().in("order_no",exceptionNoList);
         }
-        if (CollectionUtils.isNotEmpty(dto.getOrderNos())) {
-            where.in("order_no", dto.getOrderNos());
-        }
+//        if (CollectionUtils.isNotEmpty(dto.getOrderNos())) {
+//            where.in("order_no", dto.getOrderNos());
+//        }
         if (CollectionUtils.isNotEmpty(dto.getSellerCodes())){
             where.in("seller_code",dto.getSellerCodes());
         }
+    }
+
+    public static List<String> splitToArray(String text, String split) {
+        String[] arr = text.split(split);
+        if (arr.length == 0) {
+            return Collections.emptyList();
+        }
+        List<String> list = new ArrayList<>();
+        for (String s : arr) {
+            if (StringUtils.isEmpty(s)) {
+                continue;
+            }
+            list.add(s);
+        }
+        return list;
     }
 
     @Override

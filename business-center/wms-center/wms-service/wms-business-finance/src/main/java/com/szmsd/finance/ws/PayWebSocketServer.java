@@ -1,5 +1,6 @@
 package com.szmsd.finance.ws;
 
+import com.szmsd.finance.enums.PayScoketEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -38,9 +39,9 @@ public class PayWebSocketServer {
         this.session = session;
         webSocketMap.put(orderNo, this);
         try {
-            sendMessage(orderNo, "连接成功");
+            sendMessage(orderNo, PayScoketEnum.PAY_CONNECT.name());
         } catch (IOException e) {
-            log.error("用户:" + orderNo + ",网络异常!!!!!!");
+            log.error("订单号:" + orderNo + ",网络异常!!!!!!");
         }
     }
 
@@ -60,7 +61,7 @@ public class PayWebSocketServer {
      */
     @OnMessage
     public void onMessage(String message, Session session) {
-        log.info("用户消息:" + orderNo + ",报文:" + message);
+        log.info("订单号:" + orderNo + ",报文:" + message);
     }
 
     /**

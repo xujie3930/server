@@ -23,7 +23,7 @@ public class ExceptionInfoQueryDto  {
 
     @ApiModelProperty(value = "单号list")
     @Excel(name = "单号list")
-    private List<String> exceptionNos;
+    private  String exceptionNos;
 
     @ApiModelProperty(value = "用户编码")
     @Excel(name = "用户编码")

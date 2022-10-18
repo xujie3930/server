@@ -14,6 +14,7 @@ import com.szmsd.finance.domain.AccountPay;
 import com.szmsd.finance.dto.PreRechargeDTO;
 import com.szmsd.finance.enums.HeliOrderStatusEnum;
 import com.szmsd.finance.enums.PayEnum;
+import com.szmsd.finance.enums.PayScoketEnum;
 import com.szmsd.finance.mapper.AccountPayMapper;
 import com.szmsd.finance.service.HeliPayService;
 import com.szmsd.finance.service.IPreRechargeService;
@@ -322,7 +323,7 @@ public class HeliPayServiceImpl implements HeliPayService {
 
             if(updAccountPay > 0 && orderStatus.equals(HeliOrderStatusEnum.SUCCESS.name())){
 
-                PayWebSocketServer.sendMessage(orderNo,"支付成功");
+                PayWebSocketServer.sendMessage(orderNo, PayScoketEnum.PAY_SUCCESS.name());
 
                 PreRechargeDTO preRechargeDTO = this.generatorPreRecharge(accountPay);
 
