@@ -59,5 +59,9 @@ public class BasProductService extends BaseEntity {
     @ApiModelProperty(value = "有效标识")
     private String delFlag;
 
+    @ApiModelProperty(value = "有效标识")
+    private String compareTrackingno;
+
+
 
 }
