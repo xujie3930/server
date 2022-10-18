@@ -78,8 +78,10 @@ public class PayWebSocketServer {
             String authorization = payMessageDTO.getAuthorization();
 
             if(StringUtils.isNotEmpty(authorization)){
-                session.setMaxIdleTimeout(-1);
+                session.setMaxIdleTimeout(30000);
             }
+
+            sendMessage(payMessageDTO.getOrderNo(), payMessageDTO.getPayStatus().name());
 
         }catch (Exception e){
             e.printStackTrace();
