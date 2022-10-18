@@ -29,7 +29,7 @@ public class ChargeFeignFallback implements FallbackFactory<ChargeFeignService> 
             }
 
             @Override
-            public R selectBasProductService(List<String> list) {
+            public R<List<BasProductService>> selectBasProductService(List<String> list) {
                 return R.convertResultJson(throwable);
             }
 
