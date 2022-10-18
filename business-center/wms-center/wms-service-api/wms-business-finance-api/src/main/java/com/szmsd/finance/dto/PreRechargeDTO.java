@@ -67,4 +67,7 @@ public class PreRechargeDTO {
 
     @ApiModelProperty(value = "结束时间")
     private String endTime;
+
+    @ApiModelProperty(value = "收款银行名称")
+    private String dueBankNname;
 }

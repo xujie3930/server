@@ -1,8 +1,10 @@
 package com.szmsd.finance.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.PreWithdraw;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -64,14 +66,25 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
         if(!accountBalanceService.withDrawBalanceCheck(dto.getCusCode(),dto.getCurrencyCode(),dto.getAmount())){
             return R.failed("Sorry, your credit is running low");
         }
-        dto.setSerialNo(SnowflakeId.getNextId12());
+
+        String serialNo = generatorSerialNo();
+        dto.setSerialNo(serialNo);
+
         PreWithdraw domain= new PreWithdraw();
         BeanUtils.copyProperties(dto,domain);
+        domain.setWithdrawTime(new Date());
         int insert = preWithdrawMapper.insert(domain);
         if(insert>0){
             return R.ok();
         }
         return R.failed("Save Exception");
+    }
+
+    private String generatorSerialNo(){
+
+        String currentTime = DateUtils.dateTime();
+        String rNum = RandomUtil.randomNumbers(8);
+        return currentTime + rNum;
     }
 
     @Override

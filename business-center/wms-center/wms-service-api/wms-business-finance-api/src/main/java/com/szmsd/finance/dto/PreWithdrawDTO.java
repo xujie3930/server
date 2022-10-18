@@ -57,4 +57,17 @@ public class PreWithdrawDTO {
 
     @ApiModelProperty(value = "结束时间")
     private String endTime;
+
+    @ApiModelProperty(value = "收款银行名称")
+    private String dueBankNname;
+
+    @ApiModelProperty(value = "收款银行账号")
+    private String dueBankCode;
+
+    @ApiModelProperty(value = "收款凭证")
+    private String paymentVoucher;
+
+    @ApiModelProperty(value = "收款人姓名")
+    private String dueUserName;
+
 }
