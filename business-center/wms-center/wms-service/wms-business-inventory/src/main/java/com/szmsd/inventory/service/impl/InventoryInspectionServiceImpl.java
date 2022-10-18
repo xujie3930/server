@@ -123,7 +123,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
         int result = iInventoryInspectionMapper.updateById(map);
         if (1 == map.getStatus()) {
             List<String> skuList = list.stream().map(InventoryInspectionDetails::getSku).collect(Collectors.toList());
-            AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(map.getWarehouseCode(), skuList, skuList);
+            AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(map.getWarehouseCode(), skuList, skuList,inventoryInspection.getCustomCode());
             R<ResponseVO> response = htpBasFeignService.inspection(addSkuInspectionRequest);
             if (response.getCode() != 200) {
                 map.setErrorCode(response.getCode());
@@ -247,7 +247,7 @@ public class InventoryInspectionServiceImpl extends ServiceImpl<InventoryInspect
                     .map(sku -> new InventoryInspectionDetailsDTO(sku, dto.getWarehouseCode(), dto.getCusCode())).collect(Collectors.toList()));
         }
         this.saveDetails(inventoryInspectionDetailsDTO, inspectionNo);
-        AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(dto.getWarehouseCode(), dto.getWarehouseNo(), dto.getSkus(), dto.getSkuAttributeInspectionDetails());
+        AddSkuInspectionRequest addSkuInspectionRequest = new AddSkuInspectionRequest(dto.getWarehouseCode(), dto.getWarehouseNo(), dto.getSkus(), dto.getSkuAttributeInspectionDetails(),dto.getCusCode());
         R<ResponseVO> response = htpBasFeignService.inspection(addSkuInspectionRequest);
         if (response.getCode() != 200) {
             inventoryInspection.setErrorCode(response.getCode());
