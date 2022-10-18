@@ -24,6 +24,13 @@
             <if test="cusCode != null and cusCode != ''">
                 and cus_code like concat('%', #{cusCode}, '%')
             </if>
+            <if test="billStartTime != null  and billStartTime !='' ">
+                and bill_start_time <![CDATA[ >= ]]> #{billStartTime}
+            </if>
+
+            <if test="billEndTime != null  and billEndTime != ''">
+                and bill_start_time <![CDATA[ <= ]]> #{billEndTime}
+            </if>
         </where>
 
         order by id desc
