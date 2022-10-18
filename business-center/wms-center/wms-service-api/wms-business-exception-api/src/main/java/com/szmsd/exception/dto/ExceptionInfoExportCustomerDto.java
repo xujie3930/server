@@ -1,16 +1,14 @@
 package com.szmsd.exception.dto;
 
+import cn.afterturn.easypoi.excel.annotation.Excel;
 import cn.afterturn.easypoi.excel.annotation.ExcelCollection;
-import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import cn.afterturn.easypoi.excel.annotation.Excel;
-
 
 import java.util.List;
 
 @Data
-public class ExceptionInfoExportDto {
+public class ExceptionInfoExportCustomerDto {
 
     @Excel(name="异常号",width = 20,needMerge = true)
     @ApiModelProperty(value = "异常号")
@@ -88,9 +86,7 @@ public class ExceptionInfoExportDto {
 
 
 
-    @Excel(name="增值税号",width = 30,needMerge = true)
-    @ApiModelProperty(value = "增值税号")
-    private String ioss;
+
 
 
     @ApiModelProperty(value = "单类类型")

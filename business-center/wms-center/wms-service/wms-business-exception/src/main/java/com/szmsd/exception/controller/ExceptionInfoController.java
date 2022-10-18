@@ -17,6 +17,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.ExcelUtils;
 import com.szmsd.common.core.utils.QueryPage;
 import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -25,6 +26,7 @@ import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.delivery.dto.DelQueryServiceImport;
 import com.szmsd.exception.domain.ExceptionInfo;
 import com.szmsd.exception.dto.*;
 import com.szmsd.exception.enums.StateSubEnum;
@@ -212,11 +214,22 @@ public class ExceptionInfoController extends BaseController {
         });
         ExportParams params = new ExportParams();
 //        params.setTitle("异常通知中心_异常导出");
+        int a=0;
+        Workbook workbook=null;
+        if (dto.getType()==0){
+            List<ExceptionInfoExportCustomerDto> exceptionInfoExportCustomerDtos= BeanMapperUtil.mapList(list, ExceptionInfoExportCustomerDto.class);
+            workbook = ExcelExportUtil.exportExcel(params, ExceptionInfoExportCustomerDto.class, exceptionInfoExportCustomerDtos);
+            a=1;
+
+        }else if (dto.getType()==1){
+            workbook = ExcelExportUtil.exportExcel(params, ExceptionInfoExportDto.class, list);
+
+        }
 
 
 
 
-         Workbook workbook = ExcelExportUtil.exportExcel(params, ExceptionInfoExportDto.class, list);
+
 
 
         Sheet sheet= workbook.getSheet("sheet0");
@@ -224,14 +237,14 @@ public class ExceptionInfoController extends BaseController {
       //获取第一行数据
         Row row2 =sheet.getRow(0);
 
-        for (int i=0;i<19;i++){
+        for (int i=0;i<19-a;i++){
             Cell deliveryTimeCell = row2.getCell(i);
 
             CellStyle styleMain = workbook.createCellStyle();
-            if (i==18){
-                styleMain.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex());
+            if (i==18-a){
+                styleMain.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
             }else {
-                styleMain.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+                styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
 
             }
             Font font = workbook.createFont();
@@ -253,11 +266,11 @@ public class ExceptionInfoController extends BaseController {
 
         //获取第二行数据
         Row row3 =sheet.getRow(1);
-        for (int x=18;x<23;x++) {
+        for (int x=18-a;x<23-a;x++) {
 
             Cell deliveryTimeCell1 = row3.getCell(x);
             CellStyle styleMain1 = workbook.createCellStyle();
-            styleMain1.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+            styleMain1.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
             Font font1 = workbook.createFont();
             //true为加粗，默认为不加粗
             font1.setBold(true);
@@ -279,7 +292,7 @@ public class ExceptionInfoController extends BaseController {
         for (int j=2;j<rowNum;j++) {
             Row row4 = sheet.getRow(j);
             if (row4!=null) {
-                for (int x = 0; x < 23; x++) {
+                for (int x = 0; x < 23-a; x++) {
 
 
                     Cell deliveryTimeCell1 = row4.getCell(x);
@@ -297,7 +310,7 @@ public class ExceptionInfoController extends BaseController {
                         styleMain1.setRightBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
 
                         styleMain1.setAlignment(HorizontalAlignment.CENTER);
-                        if (x == 18||x==19) {
+                        if (x == 18-a||x==19-a) {
 
                             styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
                             styleMain1.setLocked(true);
