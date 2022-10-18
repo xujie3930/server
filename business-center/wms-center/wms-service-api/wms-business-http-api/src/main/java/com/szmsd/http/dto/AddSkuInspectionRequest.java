@@ -32,10 +32,16 @@ public class AddSkuInspectionRequest {
      */
     private List<String> skuAttributeInspectionDetails;
 
-    public AddSkuInspectionRequest(String warehouseCode, List<String> details, List<String> skuAttributeInspectionDetails) {
+    /**
+     * 客户code
+     */
+    private String sellerCode;
+
+    public AddSkuInspectionRequest(String warehouseCode, List<String> details, List<String> skuAttributeInspectionDetails,String sellerCode) {
         this.warehouseCode = warehouseCode;
         this.details = details;
         this.skuAttributeInspectionDetails = skuAttributeInspectionDetails;
+        this.sellerCode=sellerCode;
     }
 
 }
