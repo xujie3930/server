@@ -21,11 +21,12 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="remark" jdbcType="VARCHAR" property="remark" />
     <result column="del_flag" jdbcType="VARCHAR" property="delFlag" />
+    <result column="compare_trackingno" jdbcType="VARCHAR" property="compareTrackingno" />
   </resultMap>
   <sql id="Base_Column_List">
     id, product_code, product_name, is_show, in_service, tracking_acquire_type, logistics_route_id, 
     terminal_carrier, logistics_provider_code, packing_rule, shipment_rule, create_by, 
-    create_by_name, create_time, update_by, update_by_name, update_time, remark, del_flag
+    create_by_name, create_time, update_by, update_by_name, update_time, remark, del_flag,compare_trackingno
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     select 
@@ -122,6 +123,9 @@
       <if test="delFlag != null">
         del_flag,
       </if>
+      <if test="compareTrackingno != null">
+        compare_trackingno,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -181,6 +185,9 @@
       <if test="delFlag != null">
         #{delFlag,jdbcType=VARCHAR},
       </if>
+      <if test="compareTrackingno != null">
+        #{compareTrackingno,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.chargerules.domain.BasProductService">
@@ -239,6 +246,9 @@
       </if>
       <if test="delFlag != null">
         del_flag = #{delFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="compareTrackingno != null">
+        compare_trackingno = #{compareTrackingno,jdbcType=VARCHAR},
       </if>
     </set>
     where product_code = #{productCode,jdbcType=VARCHAR}
