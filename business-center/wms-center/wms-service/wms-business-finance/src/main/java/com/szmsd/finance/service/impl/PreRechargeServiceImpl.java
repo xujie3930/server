@@ -1,9 +1,11 @@
 package com.szmsd.finance.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.PreRecharge;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -12,7 +14,6 @@ import com.szmsd.finance.dto.PreRechargeDTO;
 import com.szmsd.finance.mapper.PreRechargeMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IPreRechargeService;
-import com.szmsd.finance.util.SnowflakeId;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,9 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
         if(StringUtils.isEmpty(dto.getCusCode())){
             return R.failed("Customer code cannot be empty");
         }
-        dto.setSerialNo(SnowflakeId.getNextId12());
+
+        String serialNo = generatorSerialNo();
+        dto.setSerialNo(serialNo);
         PreRecharge domain= new PreRecharge();
         BeanUtils.copyProperties(dto,domain);
         String trimCode = domain.getCurrencyCode().trim();
@@ -77,6 +80,13 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
             return R.ok();
         }
         return R.failed("Save Exception");
+    }
+
+    private String generatorSerialNo(){
+
+        String currentTime = DateUtils.dateTime();
+        String rNum = RandomUtil.randomNumbers(8);
+        return currentTime + rNum;
     }
 
     @Override

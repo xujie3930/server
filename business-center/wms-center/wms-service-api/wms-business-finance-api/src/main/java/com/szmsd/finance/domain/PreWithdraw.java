@@ -22,6 +22,7 @@ import java.util.Date;
 @ApiModel(value = "预提现", description = "预充值")
 @TableName("fss_pre_withdraw")
 public class PreWithdraw extends FssBaseEntity {
+
     @ApiModelProperty(value = "ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -56,4 +57,21 @@ public class PreWithdraw extends FssBaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "审核日期")
     private Date verifyDate;
+
+    @ApiModelProperty(value = "收款银行名称")
+    private String dueBankNname;
+
+    @ApiModelProperty(value = "收款银行账号")
+    private String dueBankCode;
+
+    @ApiModelProperty(value = "收款凭证")
+    private String paymentVoucher;
+
+    @ApiModelProperty(value = "收款人姓名")
+    private String dueUserName;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ApiModelProperty(value = "提现申请日期")
+    private Date withdrawTime;
+
 }
