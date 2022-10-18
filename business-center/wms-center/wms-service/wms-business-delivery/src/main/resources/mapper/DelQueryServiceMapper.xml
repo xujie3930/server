@@ -60,5 +60,9 @@
         SELECT * from del_query_service_feedback where main_id=#{id}
 
     </select>
+    <select id="selectDelOutbounds" resultType="com.szmsd.delivery.dto.DelQueryServiceDto">
+
+        SELECT tracking_status,tracking_description,DATE_FORMAT(tracking_time, '%Y-%m-%d') AS tracking_time from del_outbound where order_no=#{orderNo} ORDER BY create_time DESC LIMIT 1
+    </select>
 
 </mapper>

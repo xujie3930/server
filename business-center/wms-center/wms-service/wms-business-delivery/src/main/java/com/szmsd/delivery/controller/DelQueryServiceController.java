@@ -163,7 +163,7 @@ public class DelQueryServiceController extends BaseController{
          //获取第一行数据
          Row row2 =sheet.getRow(0);
 
-         for (int i=0;i<12;i++){
+         for (int i=0;i<14;i++){
              Cell deliveryTimeCell = row2.getCell(i);
 
              CellStyle styleMain = workbook.createCellStyle();
@@ -193,7 +193,7 @@ public class DelQueryServiceController extends BaseController{
 
          //获取第二行数据
          Row row3 =sheet.getRow(1);
-         for (int x=11;x<14;x++) {
+         for (int x=13;x<16;x++) {
              Cell deliveryTimeCell1 = row3.getCell(x);
              CellStyle styleMain1 = workbook.createCellStyle();
              styleMain1.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex());

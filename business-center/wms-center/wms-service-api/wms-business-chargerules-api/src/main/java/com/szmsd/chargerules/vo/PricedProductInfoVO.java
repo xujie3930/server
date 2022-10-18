@@ -185,6 +185,9 @@ public class PricedProductInfoVO {
     @ApiModelProperty(value = "物流商code")
     private String logisticsProviderCode;
 
+    @ApiModelProperty(value = "0是不比较 1是比较")
+    private String compareTrackingno;
+
 
     public void processDTO() {
         //参数转换

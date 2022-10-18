@@ -103,9 +103,14 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
             delQueryServiceFeedback.setMainId(Integer.parseInt(id));
             dto.setCreateByName(loginUser.getUsername());
             dto.setCreateTime(new Date());
-
+            DelQueryServiceDto delQueryServiceDto=baseMapper.selectDelOutbounds(data.getOrderNo());
             dto.setDelQueryServiceFeedbackList(
                     delQueryServiceFeedbackService.selectDelQueryServiceFeedbackList(delQueryServiceFeedback));
+
+             dto.setTrackingStatus(delQueryServiceDto.getTrackingStatus());
+            dto.setTrackingDescription(delQueryServiceDto.getTrackingDescription());
+            dto.setTrackingTime(delQueryServiceDto.getTrackingTime());
+
              return dto;
         }
 
@@ -362,6 +367,16 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         list1.forEach(s->{
            List<DelQueryServiceFeedbackExc>  list2=delQueryServiceFeedbackMapper.selectLists(s.getId());
            s.setDelQueryServiceFeedbackExcs(list2);
+            DelQueryServiceDto delQueryServiceDto=baseMapper.selectDelOutbounds(s.getOrderNo());
+            if (delQueryServiceDto!=null){
+                if (delQueryServiceDto.getTrackingDescription()!=null) {
+                    s.setTrackingDescription(delQueryServiceDto.getTrackingDescription());
+                }
+                if (delQueryServiceDto.getTrackingTime()!=null) {
+                    s.setTrackingTime(delQueryServiceDto.getTrackingTime());
+                }
+            }
+
         });
 
 

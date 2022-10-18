@@ -1,5 +1,8 @@
 package com.szmsd.finance.ws;
 
+import com.alibaba.fastjson.JSON;
+import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.finance.dto.PayMessageDTO;
 import com.szmsd.finance.enums.PayScoketEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -40,6 +43,7 @@ public class PayWebSocketServer {
         webSocketMap.put(orderNo, this);
         try {
             sendMessage(orderNo, PayScoketEnum.PAY_CONNECT.name());
+            session.setMaxIdleTimeout(30000);
         } catch (IOException e) {
             log.error("订单号:" + orderNo + ",网络异常!!!!!!");
         }
@@ -61,7 +65,26 @@ public class PayWebSocketServer {
      */
     @OnMessage
     public void onMessage(String message, Session session) {
-        log.info("订单号:" + orderNo + ",报文:" + message);
+        log.info("报文:" + message);
+
+        if(StringUtils.isEmpty(message)){
+
+            throw new RuntimeException("onmessage null");
+        }
+
+        try {
+            //TODO 校验 Authorization
+            PayMessageDTO payMessageDTO = JSON.parseObject(message, PayMessageDTO.class);
+            String authorization = payMessageDTO.getAuthorization();
+
+            if(StringUtils.isNotEmpty(authorization)){
+                session.setMaxIdleTimeout(-1);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     /**
