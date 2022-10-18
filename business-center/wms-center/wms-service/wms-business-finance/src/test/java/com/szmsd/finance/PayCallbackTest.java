@@ -22,7 +22,7 @@ public class PayCallbackTest {
 
         payCallback.setBindId("123123");
         payCallback.setMerchantNo("Me10047065");
-        payCallback.setOrderNo("20221013742693");
+        payCallback.setOrderNo("2022101849616285");
         payCallback.setProductCode("WXPAYSCAN");
         payCallback.setSerialNumber("W0722101300006076");
         payCallback.setRemark("备注");
@@ -32,7 +32,7 @@ public class PayCallbackTest {
         payCallback.setConsumeOrderId("215324532532");
         payCallback.setChanlType("WANGLIAN");
         payCallback.setOrderStatus("SUCCESS");
-        payCallback.setOrderAmount(new BigDecimal(2000));
+        payCallback.setOrderAmount(new BigDecimal(121));
 
         Map map = (Map) JSON.toJSON(payCallback);
 

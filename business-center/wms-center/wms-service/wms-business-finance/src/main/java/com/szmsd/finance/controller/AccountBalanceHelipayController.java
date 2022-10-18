@@ -32,7 +32,7 @@ public class AccountBalanceHelipayController {
 
     @ApiOperation(value = "/支付回调")
     @PostMapping("/pay-callback")
-    public String payCallback(@RequestBody @Valid HeliRequest heliRequest){
+    public String payCallback(@RequestBody HeliRequest heliRequest){
 
         return payService.payCallback(heliRequest);
     }
