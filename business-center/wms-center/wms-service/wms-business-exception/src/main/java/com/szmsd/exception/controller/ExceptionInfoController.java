@@ -5,6 +5,7 @@ import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
 import cn.hutool.core.io.IoUtil;
+import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
@@ -36,24 +37,17 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
@@ -259,7 +253,8 @@ public class ExceptionInfoController extends BaseController {
 
         //获取第二行数据
         Row row3 =sheet.getRow(1);
-        for (int x=18;x<22;x++) {
+        for (int x=18;x<23;x++) {
+
             Cell deliveryTimeCell1 = row3.getCell(x);
             CellStyle styleMain1 = workbook.createCellStyle();
             styleMain1.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
@@ -271,12 +266,52 @@ public class ExceptionInfoController extends BaseController {
             //将字体样式设置到单元格样式中
             styleMain1.setFont(font1);
 
+
+
             styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             styleMain1.setAlignment(HorizontalAlignment.CENTER);
             styleMain1.setVerticalAlignment(VerticalAlignment.CENTER);
+
             deliveryTimeCell1.setCellStyle(styleMain1);
         }
+        //总行数
+        int rowNum=sheet.getLastRowNum()+2;
+        for (int j=2;j<rowNum;j++) {
+            Row row4 = sheet.getRow(j);
+            if (row4!=null) {
+                for (int x = 0; x < 23; x++) {
 
+
+                    Cell deliveryTimeCell1 = row4.getCell(x);
+                    if (deliveryTimeCell1 != null) {
+                        CellStyle styleMain1 = workbook.createCellStyle();
+                        styleMain1.setVerticalAlignment(VerticalAlignment.CENTER);//垂直居中
+                         styleMain1.setBorderBottom(BorderStyle.THIN);//下边框
+                         styleMain1.setBorderLeft(BorderStyle.THIN);//左边框
+                         styleMain1.setBorderTop(BorderStyle.THIN);//上边框
+                         styleMain1.setBorderRight(BorderStyle.THIN);//右边框
+                        //设置边框颜色黑色
+                        styleMain1.setTopBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+                        styleMain1.setBottomBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+                        styleMain1.setLeftBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+                        styleMain1.setRightBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+
+                        styleMain1.setAlignment(HorizontalAlignment.CENTER);
+                        if (x == 18||x==19) {
+
+                            styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                            styleMain1.setLocked(true);
+                        } else {
+                            styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                            styleMain1.setLocked(false);
+                        }
+
+                        deliveryTimeCell1.setCellStyle(styleMain1);
+                    }
+                }
+            }
+        }
+        sheet.protectSheet("123456");
         try {
             String fileName="异常通知中心_异常导出"+System.currentTimeMillis();
             URLEncoder.encode(fileName, "UTF-8");
@@ -466,7 +501,7 @@ public class ExceptionInfoController extends BaseController {
                 } else {
                     for (int i = 0; i < list.size(); i++) {
                         ExceptionInfoExportDto dto = list.get(i);
-                        if (StringUtils.isEmpty(dto.getCountry())) {
+                        if (StringUtils.isEmpty(dto.getExceptionNo())) {
                             errorList.add("第" + (i + 1) + "行，异常号不能为空");
                             failSize.incrementAndGet();
                             continue;
