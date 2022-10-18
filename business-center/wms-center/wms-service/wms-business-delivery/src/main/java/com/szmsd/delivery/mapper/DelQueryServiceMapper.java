@@ -4,6 +4,7 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelQueryService;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.delivery.domain.DelQueryServiceFeedback;
+import com.szmsd.delivery.dto.DelQueryServiceDto;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -29,4 +30,7 @@ public interface DelQueryServiceMapper extends BaseMapper<DelQueryService> {
     List<DelQueryService> selectListJobs(@Param("orderNo") String orderNo);
 
     List<DelQueryServiceFeedback>  selectDelQueryServiceFeedbackLists(Integer id);
+
+    DelQueryServiceDto selectDelOutbounds(@Param("orderNo") String orderNo);
+
 }
