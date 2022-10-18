@@ -16,6 +16,7 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <helipay.version>20200709</helipay.version>
     </properties>
 
     <dependencies>
@@ -119,10 +120,33 @@
             <artifactId>wms-business-chargerules-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.helipay</groupId>
+            <artifactId>helipay-component-facade</artifactId>
+            <version>${helipay.version}</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/helipay-component-facade-20200709.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.helipay</groupId>
+            <artifactId>helipay-cross-border-trx-facade</artifactId>
+            <version>${helipay.version}</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/helipay-cross-border-trx-facade-20200709.jar</systemPath>
+        </dependency>
+
 
     </dependencies>
 
     <build>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -134,7 +158,27 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <includeSystemScope>true</includeSystemScope>
+                </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>lib</directory>
+                            <targetPath>WEB-INF/lib</targetPath>
+                            <includes>
+                                <include>**/*.jar</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>

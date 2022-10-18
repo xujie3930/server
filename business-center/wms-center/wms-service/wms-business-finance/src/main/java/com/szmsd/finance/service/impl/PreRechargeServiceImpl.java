@@ -16,6 +16,7 @@ import com.szmsd.finance.util.SnowflakeId;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -100,5 +101,35 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
         preRecharge.setVerifyDate(new Date());
         preRechargeMapper.updateById(preRecharge);
         return R.ok();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R pay(PreRechargeDTO dto) {
+
+        if(StringUtils.isEmpty(dto.getCusCode())){
+            return R.failed("Customer code cannot be empty");
+        }
+
+        PreRecharge domain= new PreRecharge();
+        BeanUtils.copyProperties(dto,domain);
+        int insert = preRechargeMapper.insert(domain);
+
+        if(insert > 0) {
+            CustPayDTO custPayDTO = new CustPayDTO();
+            custPayDTO.setAmount(dto.getAmount());
+            custPayDTO.setCusCode(dto.getCusCode());
+            custPayDTO.setCusName(dto.getCusName());
+            custPayDTO.setCurrencyCode(dto.getCurrencyCode());
+            custPayDTO.setCurrencyName(dto.getCurrencyName());
+            custPayDTO.setOrderTime(dto.getRemittanceTime());
+            custPayDTO.setNo(dto.getSerialNo());
+            R r = accountBalanceService.offlineIncome(custPayDTO);
+            if (Constants.SUCCESS != r.getCode()) {
+                return r;
+            }
+        }
+
+        return R.failed("异常");
     }
 }
