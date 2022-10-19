@@ -827,129 +827,192 @@ public class DelOutboundController extends BaseController {
                 }
             }
 
-            // 查询出库类型数据
-            Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066,099,059");
-            DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService, len);
-            exportContext.setStateCacheAdapter(listMap.get("065"));
-            exportContext.setOrderTypeCacheAdapter(listMap.get("063"));
-            exportContext.setExceptionStateCacheAdapter(listMap.get("066"));
-            exportContext.setTrackingStatusCache(listMap.get("099"));
-            String filepath=this.filepath;
+
             Integer   DelOutboundExportTotal=delOutboundService.selectDelOutboundCount(queryDto);
+            if (DelOutboundExportTotal>2000) {
+                // 查询出库类型数据
+                Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066,099,059");
+                DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService, len);
+                exportContext.setStateCacheAdapter(listMap.get("065"));
+                exportContext.setOrderTypeCacheAdapter(listMap.get("063"));
+                exportContext.setExceptionStateCacheAdapter(listMap.get("066"));
+                exportContext.setTrackingStatusCache(listMap.get("099"));
+                String filepath=this.filepath;
 //            Integer DelOutboundExportTotal = basFileMapper.selectDelOutboundCount();
-            Integer pageSize = 100000;
-            if (len.equals("zh")) {
-                QueryDto queryDto1 = new QueryDto();
+                Integer pageSize = 100000;
+                if (len.equals("zh")) {
+                    QueryDto queryDto1 = new QueryDto();
 
-                //QueryList<DelOutboundExportListVO>  queryList = new DelOutboundExportQueryPage(queryDto, exportContext, this.delOutboundService);
-                // 单文件总数据量
+                    //QueryList<DelOutboundExportListVO>  queryList = new DelOutboundExportQueryPage(queryDto, exportContext, this.delOutboundService);
+                    // 单文件总数据量
 
-                // 数据分页==导出excel文件数量
-                int pageTotal = DelOutboundExportTotal % pageSize == 0 ? DelOutboundExportTotal / pageSize : DelOutboundExportTotal / pageSize + 1;
-                log.info("导出数据总量：{}条, 预计导出文件数量：{}件", DelOutboundExportTotal, pageTotal);
-                CountDownLatch countDownLatch = new CountDownLatch(pageTotal);
-                long start = System.currentTimeMillis();
+                    // 数据分页==导出excel文件数量
+                    int pageTotal = DelOutboundExportTotal % pageSize == 0 ? DelOutboundExportTotal / pageSize : DelOutboundExportTotal / pageSize + 1;
+                    log.info("导出数据总量：{}条, 预计导出文件数量：{}件", DelOutboundExportTotal, pageTotal);
+                    CountDownLatch countDownLatch = new CountDownLatch(pageTotal);
+                    long start = System.currentTimeMillis();
 
-                for (int i = 1; i <= pageTotal; i++) {
+                    for (int i = 1; i <= pageTotal; i++) {
 
 //                ExParams exParams = new ExParams();
 //                exParams.setFileName("包裹异常-"+i);
 //                exParams.setSheetName("出库单详情");
 //                exParams.setDataNumsOfSheet(2<<15);
-                    queryDto1.setPageNum(i);
-                    queryDto1.setPageSize(pageSize);
-                    QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
-                    QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto1, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
-                   String fileName="出库单详情-" + System.currentTimeMillis();
-                    BasFile basFile=new BasFile();
-                    basFile.setState("0");
-                    basFile.setFileRoute(filepath);
-                    basFile.setCreateBy(SecurityUtils.getUsername());
-                    basFile.setFileName(fileName+".xls");
-                    basFile.setModularType(0);
-                    basFile.setModularNameZh("包裹查询");
-                    basFile.setModularNameEn("OutboundOrderInformation");
-                    basFileMapper.insertSelective(basFile);
+                        queryDto1.setPageNum(i);
+                        queryDto1.setPageSize(pageSize);
+                        QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
+                        QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto1, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
+                        String fileName = "出库单详情-" + System.currentTimeMillis();
+                        BasFile basFile = new BasFile();
+                        basFile.setState("0");
+                        basFile.setFileRoute(filepath);
+                        basFile.setCreateBy(SecurityUtils.getUsername());
+                        basFile.setFileName(fileName + ".xls");
+                        basFile.setModularType(0);
+                        basFile.setModularNameZh("包裹查询");
+                        basFile.setModularNameEn("OutboundOrderInformation");
+                        basFileMapper.insertSelective(basFile);
 
-                    EasyPoiExportTask<DelOutboundExportListVO, DelOutboundExportItemListVO> delOutboundExportExTask = new EasyPoiExportTask<DelOutboundExportListVO, DelOutboundExportItemListVO>()
-                            .setExportParams(new ExportParams(fileName, "出库单详情(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, DelOutboundExportTotal)) + ")", ExcelType.XSSF))
-                            .setData(queryPage.getPage())
-                            .setClazz(DelOutboundExportListVO.class)
-                            .setData2(itemQueryPage.getPage())
-                            .setClazz2(DelOutboundExportItemListVO.class)
-                            .setFilepath(filepath)
-                            .setCountDownLatch(countDownLatch);
+                        EasyPoiExportTask<DelOutboundExportListVO, DelOutboundExportItemListVO> delOutboundExportExTask = new EasyPoiExportTask<DelOutboundExportListVO, DelOutboundExportItemListVO>()
+                                .setExportParams(new ExportParams(fileName, "出库单详情(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, DelOutboundExportTotal)) + ")", ExcelType.XSSF))
+                                .setData(queryPage.getPage())
+                                .setClazz(DelOutboundExportListVO.class)
+                                .setData2(itemQueryPage.getPage())
+                                .setClazz2(DelOutboundExportItemListVO.class)
+                                .setFilepath(filepath)
+                                .setCountDownLatch(countDownLatch);
 
-                    basFile.setState("1");
-                    basFileMapper.updateByPrimaryKeySelective(basFile);
+                        basFile.setState("1");
+                        basFileMapper.updateByPrimaryKeySelective(basFile);
 
-                    //threadPoolTaskExecutor.execute(delOutboundExportExTask);
-                    new Thread(delOutboundExportExTask,"export-"+i).start();
+                        //threadPoolTaskExecutor.execute(delOutboundExportExTask);
+                        new Thread(delOutboundExportExTask, "export-" + i).start();
+                    }
+                    countDownLatch.await();
+                    log.info("所有导出任务完成，总计耗时：{}ms", System.currentTimeMillis() - start);
+
+                } else if (len.equals("en")) {
+                    QueryDto queryDto1 = new QueryDto();
+                    // 数据分页==导出excel文件数量
+                    int pageTotal = DelOutboundExportTotal % pageSize == 0 ? DelOutboundExportTotal / pageSize : DelOutboundExportTotal / pageSize + 1;
+                    log.info("导出数据总量：{}条, 预计导出文件数量：{}件", DelOutboundExportTotal, pageTotal);
+                    CountDownLatch countDownLatch = new CountDownLatch(pageTotal);
+                    long start = System.currentTimeMillis();
+
+                    for (int i = 1; i <= pageTotal; i++) {
+//                ExParams exParams = new ExParams();
+//                exParams.setFileName("包裹异常-"+i);
+//                exParams.setSheetName("出库单详情");
+//                exParams.setDataNumsOfSheet(2<<15);
+                        queryDto1.setPageNum(i);
+                        queryDto1.setPageSize(pageSize);
+                        QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
+                        Page<DelOutboundExportListEnVO> page = new Page<>();
+                        if (CollectionUtils.isNotEmpty(queryPage.getPage())) {
+                            for (DelOutboundExportListVO dto : queryPage.getPage()) {
+                                DelOutboundExportListEnVO vo = BeanMapperUtil.map(dto, DelOutboundExportListEnVO.class);
+                                page.add(vo);
+                            }
+                        }
+
+                        QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto1, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
+                        Page<DelOutboundExportItemListEnVO> page1 = new Page<>();
+                        if (CollectionUtils.isNotEmpty(itemQueryPage.getPage())) {
+                            for (DelOutboundExportItemListVO dto : itemQueryPage.getPage()) {
+                                DelOutboundExportItemListEnVO vo = BeanMapperUtil.map(dto, DelOutboundExportItemListEnVO.class);
+                                page1.add(vo);
+                            }
+                        }
+                        String fileName = "OutboundOrderInformation-" + System.currentTimeMillis();
+
+                        BasFile basFile = new BasFile();
+                        basFile.setState("1");
+                        basFile.setFileRoute(filepath);
+                        basFile.setCreateBy(SecurityUtils.getUsername());
+                        basFile.setFileName(fileName + ".xls");
+                        basFile.setModularType(0);
+                        basFile.setModularNameZh("包裹查询");
+                        basFile.setModularNameEn("OutboundOrderInformation");
+                        basFileMapper.insertSelective(basFile);
+
+                        EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO> delOutboundExportExTask = new EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO>()
+                                .setExportParams(new ExportParams(fileName, "OutboundOrderInformation(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, DelOutboundExportTotal)) + ")", ExcelType.XSSF))
+                                .setData(page)
+                                .setClazz(DelOutboundExportListEnVO.class)
+                                .setData2(page1)
+                                .setClazz2(DelOutboundExportItemListEnVO.class)
+                                .setFilepath(filepath)
+                                .setCountDownLatch(countDownLatch);
+
+                        basFile.setState("1");
+                        basFileMapper.updateByPrimaryKeySelective(basFile);
+
+
+                        //threadPoolTaskExecutor.execute(delOutboundExportExTask);
+                        new Thread(delOutboundExportExTask, "export-" + i).start();
+                    }
+                    countDownLatch.await();
+                    log.info("所有导出任务完成，总计耗时：{}ms", System.currentTimeMillis() - start);
+
                 }
-                countDownLatch.await();
-                log.info("所有导出任务完成，总计耗时：{}ms", System.currentTimeMillis() - start);
+            }else if (DelOutboundExportTotal<=2000){
+                // 查询出库类型数据
+                Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066,099,059");
+                DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService, len);
+                exportContext.setStateCacheAdapter(listMap.get("065"));
+                exportContext.setOrderTypeCacheAdapter(listMap.get("063"));
+                exportContext.setExceptionStateCacheAdapter(listMap.get("066"));
+                exportContext.setTrackingStatusCache(listMap.get("099"));
 
-            }else if (len.equals("en")){
                 QueryDto queryDto1 = new QueryDto();
-                // 数据分页==导出excel文件数量
-                int pageTotal = DelOutboundExportTotal % pageSize == 0 ? DelOutboundExportTotal / pageSize : DelOutboundExportTotal / pageSize + 1;
-                log.info("导出数据总量：{}条, 预计导出文件数量：{}件", DelOutboundExportTotal, pageTotal);
-                CountDownLatch countDownLatch = new CountDownLatch(pageTotal);
-                long start = System.currentTimeMillis();
+                queryDto1.setPageNum(1);
+                queryDto1.setPageSize(500);
+                QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
+                QueryDto queryDto2 = new QueryDto();
+                queryDto2.setPageNum(1);
+                queryDto2.setPageSize(500);
+                QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
+                ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("en".equals(len) ? "Outbound_order" : "出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
+                            @Override
+                            public String sheetName() {
 
-                for (int i = 1; i <= pageTotal; i++) {
-//                ExParams exParams = new ExParams();
-//                exParams.setFileName("包裹异常-"+i);
-//                exParams.setSheetName("出库单详情");
-//                exParams.setDataNumsOfSheet(2<<15);
-                    queryDto1.setPageNum(i);
-                    queryDto1.setPageSize(pageSize);
-                    QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
-                    Page<DelOutboundExportListEnVO> page = new Page<>();
-                    if (CollectionUtils.isNotEmpty(queryPage.getPage())) {
-                        for (DelOutboundExportListVO dto : queryPage.getPage()) {
-                            DelOutboundExportListEnVO vo = BeanMapperUtil.map(dto, DelOutboundExportListEnVO.class);
-                            page.add(vo);
-                        }
-                    }
+                                if("en".equals(len)){
+                                    return "Outbound Order Information";
+                                }else{
+                                    return "出库单详情";
+                                }
+                            }
 
-                    QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto1, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
-                    Page<DelOutboundExportItemListEnVO> page1 = new Page<>();
-                    if (CollectionUtils.isNotEmpty(itemQueryPage.getPage())) {
-                        for (DelOutboundExportItemListVO dto : itemQueryPage.getPage()) {
-                            DelOutboundExportItemListEnVO vo = BeanMapperUtil.map(dto, DelOutboundExportItemListEnVO.class);
-                            page1.add(vo);
-                        }
-                    }
-                    String fileName="OutboundOrderInformation-" + System.currentTimeMillis();
+                            @Override
+                            public Class<DelOutboundExportListVO> classType() {
+                                return DelOutboundExportListVO.class;
+                            }
 
-                    BasFile basFile=new BasFile();
-                    basFile.setState("1");
-                    basFile.setFileRoute(filepath);
-                    basFile.setCreateBy(SecurityUtils.getUsername());
-                    basFile.setFileName(fileName+".xls");
-                    basFile.setModularType(0);
-                    basFile.setModularNameZh("包裹查询");
-                    basFile.setModularNameEn("OutboundOrderInformation");
-                    basFileMapper.insertSelective(basFile);
+                            @Override
+                            public QueryPage<DelOutboundExportListVO> query(ExcelUtils.ExportContext exportContext) {
+                                return queryPage;
+                            }
+                        },
+                        new ExcelUtils.ExportSheet<DelOutboundExportItemListVO>() {
+                            @Override
+                            public String sheetName() {
+                                if("en".equals(len)){
+                                    return "SKU list";
+                                }else{
+                                    return "包裹明细";
+                                }
+                            }
 
-                    EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO> delOutboundExportExTask = new EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO>()
-                            .setExportParams(new ExportParams(fileName, "OutboundOrderInformation(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, DelOutboundExportTotal)) + ")", ExcelType.XSSF))
-                            .setData(page)
-                            .setClazz(DelOutboundExportListEnVO.class)
-                            .setData2(page1)
-                            .setClazz2(DelOutboundExportItemListEnVO.class)
-                            .setFilepath(filepath)
-                            .setCountDownLatch(countDownLatch);
+                            @Override
+                            public Class<DelOutboundExportItemListVO> classType() {
+                                return DelOutboundExportItemListVO.class;
+                            }
 
-                    basFile.setState("1");
-                    basFileMapper.updateByPrimaryKeySelective(basFile);
-
-
-                    //threadPoolTaskExecutor.execute(delOutboundExportExTask);
-                    new Thread(delOutboundExportExTask,"export-"+i).start();                }
-                countDownLatch.await();
-                log.info("所有导出任务完成，总计耗时：{}ms", System.currentTimeMillis() - start);
+                            @Override
+                            public QueryPage<DelOutboundExportItemListVO> query(ExcelUtils.ExportContext exportContext) {
+                                return itemQueryPage;
+                            }
+                        }));
             }
 
 //            QueryDto queryDto2 = new QueryDto();
@@ -1004,6 +1067,7 @@ public class DelOutboundController extends BaseController {
             log.error("导出异常:" + e.getMessage(), e);
         }
     }
+
 
     @AutoValue
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundCharge')")

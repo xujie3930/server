@@ -1699,10 +1699,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         List<EmailObjectDto> emailObjectDtoList= BeanMapperUtil.mapList(list, EmailObjectDto.class);
         emailDto.setList(emailObjectDtoList);
         if(email!=null&&!email.equals("")){
-            R r= emailFeingService.sendEmail(emailDto);
-            if (r.getCode()== HttpStatus.SUCCESS){
-
-            }
+            //注释发送邮箱方法，明天发版不上
+//            R r= emailFeingService.sendEmail(emailDto);
+//            if (r.getCode()== HttpStatus.SUCCESS){
+//
+//            }
         }
         logger.info("更新挂号参数2：{}",list);
         list.forEach(x->{
