@@ -125,4 +125,8 @@
         </where>
         ORDER BY audit_status ASC, id DESC
     </select>
+
+    <select id="selectOutbounds" resultType="java.util.Map" parameterType="java.lang.String">
+        SELECT tracking_no as trackingNo,shipment_rule as shipmentRule from del_outbound where order_no=#{orderNo}
+    </select>
 </mapper>
