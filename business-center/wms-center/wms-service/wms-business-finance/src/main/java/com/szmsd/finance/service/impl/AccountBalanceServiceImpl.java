@@ -690,6 +690,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 if (StringUtils.isBlank(accountBalance.getCreditType())) {
                     accountBalance.setCreditType(CreditConstant.CreditTypeEnum.QUOTA.getValue().toString());
                 }
+                accountBalance.setVersion(0L);
                 accountBalanceMapper.insert(accountBalance);
             }
             return accountBalance;
@@ -872,6 +873,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             return accountBalance.getCurrentBalance();
         }
         accountBalance = new AccountBalance(cusCode, currencyCode, getCurrencyName(currencyCode));
+        accountBalance.setVersion(0L);
         accountBalanceMapper.insert(accountBalance);
         return BigDecimal.ZERO;
     }
