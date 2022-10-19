@@ -29,5 +29,5 @@ public interface ChargeFeignService {
     //查询产品服务接口
     @PostMapping("/log/selectBasProductService")
     @ApiOperation(value = "查询产品服务接口")
-    R selectBasProductService(@RequestBody List<String> list);
+    R<List<BasProductService>> selectBasProductService(@RequestBody List<String> list);
 }

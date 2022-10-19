@@ -1,7 +1,6 @@
 package com.szmsd.finance.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -96,7 +95,7 @@ public class AccountSerialBill extends FssBaseEntity {
     private String payMethod;
     @AutoFieldI18n
     @ApiModelProperty(value = "业务类别（性质）")
-    @Excel(name = "性质")
+
     private String businessCategory;
     @ApiModelProperty(value = "产品代码")
     @Excel(name = "产品代码")
@@ -130,9 +129,8 @@ public class AccountSerialBill extends FssBaseEntity {
     @Excel(name = "结算时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date paymentTime;
 
-
-
     @ApiModelProperty(value = "性质")
+    @Excel(name = "性质")
     private String nature;
 
     @ApiModelProperty(value = "业务类型")
