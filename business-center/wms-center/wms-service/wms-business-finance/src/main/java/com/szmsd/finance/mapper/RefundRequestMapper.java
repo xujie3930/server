@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.finance.dto.RefundRequestQueryDTO;
 import com.szmsd.finance.vo.RefundRequestListVO;
 import com.szmsd.finance.vo.RefundRequestVO;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -19,4 +21,6 @@ import java.util.List;
 public interface RefundRequestMapper extends BaseMapper<FssRefundRequest> {
 
     List<RefundRequestListVO> selectRequestList(RefundRequestQueryDTO queryDTO);
+
+    List<Map> selectOutbounds(@Param("orderNo") String orderNo);
 }
