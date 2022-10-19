@@ -101,6 +101,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
     @Override
     //@DataScope("seller_code")
     public List<ExceptionInfo> selectExceptionInfoPage(ExceptionInfoQueryDto dto) {
+        log.info("开始执行selectExceptionInfoPage查询：{}",dto);
         List<ExceptionInfo> exceptionInfoList=new ArrayList<>();
         //客户端
         if (dto.getType()==0) {
@@ -119,7 +120,9 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             List<String> sellerCodeList=null;
             if (null != loginUser && !loginUser.getUsername().equals("admin")) {
                 String username = loginUser.getUsername();
+                log.info("开始执行sellerCode查询表----------");
                 sellerCodeList=baseMapper.selectsellerCode(username);
+                log.info("结束执行sellerCode查询表----------：{}",sellerCodeList.size());
 
                 if (sellerCodeList.size()>0){
                     dto.setSellerCodes(sellerCodeList);
@@ -146,14 +149,17 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             }
             this.handlerQueryCondition(where, dto);
             where.orderByDesc("create_time");
-
+            log.info("开始执行查询异常表----------");
             exceptionInfoList = baseMapper.selectList(where);
+            log.info("结束执行查询异常表----------：{}",exceptionInfoList.size());
         }
 
         if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
             // 查询异常描述信息
             List<String> orderNos = exceptionInfoList.stream().map(ExceptionInfo::getOrderNo).collect(Collectors.toList());
+            log.info("开始执行查询DelOutboundListExceptionMessageVO----------");
             List<DelOutboundListExceptionMessageVO> exceptionMessageList = this.delOutboundClientService.exceptionMessageList(orderNos);
+            log.info("结束执行查询DelOutboundListExceptionMessageVO----------");
             if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
                 Map<String, String> exceptionMessageMap = exceptionMessageList.stream().collect(Collectors.toMap(DelOutboundListExceptionMessageVO::getOrderNo, DelOutboundListExceptionMessageVO::getExceptionMessage));
                 for (ExceptionInfo exceptionInfo : exceptionInfoList) {
