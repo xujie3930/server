@@ -231,6 +231,9 @@ public class BasSeller extends BaseEntity {
 
 
 
+    @ApiModelProperty(value = "自定义尺寸")
+    private String rulerCustomized;
+
 
 
 }
