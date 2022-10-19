@@ -208,4 +208,14 @@ public class FssRefundRequest extends BaseEntity {
     @Excel(name = "审核驳回原因")
     private String reviewRemark;
 
+
+    @ApiModelProperty(value = "跟踪号")
+    @TableField(exist = false)
+    private String trackingNo;
+
+
+    @ApiModelProperty(value = "产品代码")
+    @TableField(exist = false)
+    private String shipmentRule;
+
 }

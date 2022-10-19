@@ -355,6 +355,17 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         if (RefundStatusEnum.COMPLETE != status) return;
         log.info("审核通过-进行相应的越扣减 {}", idList);
         List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>lambdaQuery().in(FssRefundRequest::getId, idList));
+        fssRefundRequests.forEach(x->{
+          List<Map> list =baseMapper.selectOutbounds(x.getOrderNo());
+          if (list.size()>0){
+              if (String.valueOf(list.get(0).get("trackingNo"))!=null&&!String.valueOf(list.get(0).get("trackingNo")).equals(""));{
+                  x.setTrackingNo(String.valueOf(list.get(0).get("trackingNo")));
+              }
+              if (String.valueOf(list.get(0).get("shipmentRule"))!=null&&!String.valueOf(list.get(0).get("shipmentRule")).equals(""));{
+                  x.setShipmentRule(String.valueOf(list.get(0).get("shipmentRule")));
+              }
+          }
+        });
         Map<RefundProcessEnum, List<FssRefundRequest>> collect = fssRefundRequests.stream().collect(Collectors.groupingBy(x -> {
             ConfigData.MainSubCode mainSubCode = configData.getMainSubCode();
             BasSub subCodeObj = remoteApi.getSubCodeObj(mainSubCode.getTreatmentProperties(), x.getTreatmentProperties());
@@ -418,6 +429,8 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         accountSerialBillDTO.setCusName(x.getCusName());
         accountSerialBillDTO.setCurrencyCode(x.getCurrencyCode());
         accountSerialBillDTO.setCurrencyName(x.getCurrencyName());
+        accountSerialBillDTO.setTrackingNo(x.getTrackingNo());
+        accountSerialBillDTO.setProductCode(x.getShipmentRule());
         accountSerialBillDTO.setRemark(x.getRemark());
         accountSerialBillList.add(accountSerialBillDTO);
         custPayDTO.setSerialBillInfoList(accountSerialBillList);
