@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -226,6 +227,9 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
     public int shipmentPackingMeasure(ShipmentPackingMaterialRequestDto dto) {
         try {
             LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
+            if (dto.getWeight() != null) {
+                dto.setWeight(new BigDecimal(dto.getWeight()).add(new BigDecimal(2)).doubleValue());
+            }
             String orderNo = dto.getOrderNo();
             queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
             DelOutbound delOutbound = this.delOutboundService.getOne(queryWrapper);

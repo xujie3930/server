@@ -22,7 +22,7 @@ public class PayCallbackTest {
 
         payCallback.setBindId("123123");
         payCallback.setMerchantNo("Me10047065");
-        payCallback.setOrderNo("2022101893718463");
+        payCallback.setOrderNo("2022101819378245");
         payCallback.setProductCode("WXPAYSCAN");
         payCallback.setSerialNumber("W0722101300006076");
         payCallback.setRemark("备注");
