@@ -1693,17 +1693,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         logger.info("更新挂号参数1：{}",list);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         EmailDto emailDto=new EmailDto();
-        emailDto.setSubject("Notice on Update of Tracking Number-"+list.get(0).getCustomCode()+"-"+simpleDateFormat.format(new Date()));
+        //功能模块
+        emailDto.setModularType(0);
+        //emailDto.setSubject("Notice on Update of Tracking Number-"+list.get(0).getCustomCode()+"-"+simpleDateFormat.format(new Date()));
+        //邮箱接收人
         emailDto.setTo(email);
-        emailDto.setText("customer:"+list.get(0).getCustomCode()+"on"+"["+simpleDateFormat.format(new Date())+"]"+"Total number of updated tracking numbers"+"["+list.size()+"]"+"Please download the attachment for details");
+        emailDto.setEmpCode(empCode);
+        //emailDto.setText("customer:"+list.get(0).getCustomCode()+"on"+"["+simpleDateFormat.format(new Date())+"]"+"Total number of updated tracking numbers"+"["+list.size()+"]"+"Please download the attachment for details");
         List<EmailObjectDto> emailObjectDtoList= BeanMapperUtil.mapList(list, EmailObjectDto.class);
         emailDto.setList(emailObjectDtoList);
         if(email!=null&&!email.equals("")){
-            //注释发送邮箱方法，明天发版不上
-//            R r= emailFeingService.sendEmail(emailDto);
-//            if (r.getCode()== HttpStatus.SUCCESS){
-//
-//            }
+            R r= emailFeingService.sendEmail(emailDto);
+            if (r.getCode()== HttpStatus.SUCCESS){
+
+            }
         }
         logger.info("更新挂号参数2：{}",list);
         list.forEach(x->{
