@@ -1,6 +1,7 @@
 package com.szmsd.exception.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.exception.domain.ExceptionInfo;
 import com.szmsd.exception.dto.*;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +40,7 @@ public interface IExceptionInfoService extends IService<ExceptionInfo> {
      * @param dto 模块
      * @return 模块集合
      */
-    List<ExceptionInfo> selectExceptionInfoPage(ExceptionInfoQueryDto dto);
+    TableDataInfo<ExceptionInfo> selectExceptionInfoPage(ExceptionInfoQueryDto dto);
 
     /**
      * 导出列表
