@@ -79,5 +79,5 @@ public class PreRecharge extends FssBaseEntity {
     private Date verifyDate;
 
     @ApiModelProperty(value = "收款银行名称")
-    private String dueBankNname;
+    private String dueBankName;
 }
