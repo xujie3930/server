@@ -90,9 +90,9 @@ public class ExceptionInfoController extends BaseController {
     @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
     @AutoValue
     public TableDataInfo list(ExceptionInfoQueryDto dto) {
-        startPage();
-        List<ExceptionInfo> list = exceptionInfoService.selectExceptionInfoPage(dto);
-        return getDataTable(list);
+
+        return exceptionInfoService.selectExceptionInfoPage(dto);
+
     }
 
     @PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:list')")
