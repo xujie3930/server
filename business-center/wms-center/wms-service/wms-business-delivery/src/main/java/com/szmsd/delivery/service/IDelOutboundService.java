@@ -464,5 +464,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
 
     //导出挂号失败的数据
     List<DelOutboundTarckError> selectbatchTrackingexport();
+
+    void carrierRegister(DelOutbound delOutbound);
 }
 

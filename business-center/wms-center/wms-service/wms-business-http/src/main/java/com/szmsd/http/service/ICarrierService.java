@@ -1,5 +1,6 @@
 package com.szmsd.http.service;
 
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.http.dto.*;
 
@@ -32,4 +33,7 @@ public interface ICarrierService {
      * @return ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails>
      */
     ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails> label(CreateShipmentOrderCommand command);
+
+
+    R<ShipmentOrderResult> shipmentOrderRealResult(String referenceNumber);
 }

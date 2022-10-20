@@ -287,4 +287,6 @@ public interface DelOutboundFeignService {
     @PostMapping(value = "/api/outbound/open/notifyDelOutboundTransferTimer2")
     R<String> notifyDelOutboundTransferTimer2();
 
+    @PostMapping(value = "/api/outbound/open/delOutboundCarrierTimer")
+    R<String> delOutboundCarrierTimer();
 }

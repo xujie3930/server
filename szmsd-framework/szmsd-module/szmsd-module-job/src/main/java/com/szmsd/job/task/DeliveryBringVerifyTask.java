@@ -64,4 +64,9 @@ public class DeliveryBringVerifyTask {
     {
         R<String> notifyBringVerify = feignService.notifyDelOutboundTransferTimer2();
     }
+
+    public void delOutboundCarrierTimer()
+    {
+        feignService.delOutboundCarrierTimer();
+    }
 }

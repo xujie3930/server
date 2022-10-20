@@ -9,10 +9,7 @@ import com.szmsd.http.vo.ResponseVO;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author zhangyuyuan
@@ -29,6 +26,9 @@ public interface HtpOutboundFeignService {
 
     @PutMapping("/api/outbound/http/shipment/tracking")
     R<ResponseVO>   shipmentTracking(@RequestBody ShipmentTrackingChangeRequestDto dto);
+
+    @GetMapping("/api/outbound/http/shipment/shipmentOrderRealResult")
+    R<ShipmentOrderResult>   shipmentOrderRealResult(@RequestBody String referenceNumber);
 
     @PutMapping("/api/outbound/http/shipment/label")
     R<ResponseVO> shipmentLabel(@RequestBody ShipmentLabelChangeRequestDto dto);

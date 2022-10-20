@@ -1,12 +1,14 @@
 package com.szmsd.http.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.service.ICarrierService;
 import com.szmsd.http.service.http.SaaSCarrierServiceAdminRequest;
+import com.szmsd.http.util.HttpResponseVOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Value;
@@ -79,5 +81,22 @@ public class CarrierServiceImpl extends SaaSCarrierServiceAdminRequest implement
             }
         }
         return responseObject;
+    }
+
+    @Override
+    public R<ShipmentOrderResult> shipmentOrderRealResult(String referenceNumber) {
+        HttpResponseBody hrb = httpGetBody("", "shipment-order.shipmentOrderRealResult", null, referenceNumber);
+        if (HttpStatus.SC_OK == hrb.getStatus()) {
+            return HttpResponseVOUtils.transformation(hrb, ShipmentOrderResult.class);
+        }else{
+            ShipmentOrderResult shipmentOrderResult = new ShipmentOrderResult();
+            shipmentOrderResult.setSuccess(false);
+            ErrorDto errorDto = new ErrorDto();
+            errorDto.setMessage(hrb.getBody());
+            shipmentOrderResult.setError(errorDto);
+            R<ShipmentOrderResult> r = R.ok(shipmentOrderResult);
+            return r;
+
+        }
     }
 }
