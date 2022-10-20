@@ -98,6 +98,17 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                 dto.setCusCode(cusCode);
             }
         }
+
+        if(StringUtils.isNotBlank(dto.getCreateTimeStart())) {
+            String billStartTime = dto.getCreateTimeStart() + " 00:00:00";
+            dto.setCreateTimeStart(billStartTime);
+        }
+
+        if(StringUtils.isNotBlank(dto.getCreateTimeEnd())) {
+            String billEndTime = dto.getCreateTimeEnd() + " 23:59:59";
+            dto.setCreateTimeEnd(billEndTime);
+        }
+
         List<AccountSerialBill> accountSerialBills = accountSerialBillMapper.selectPageList(dto);
         // 修改下单时间等信息
         showProcess(accountSerialBills);
@@ -358,6 +369,16 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     @Override
     public void exportBillTotal(HttpServletResponse response, AccountSerialBillDTO dto) {
+
+        if(StringUtils.isNotBlank(dto.getCreateTimeStart())) {
+            String billStartTime = dto.getCreateTimeStart() + " 00:00:00";
+            dto.setCreateTimeStart(billStartTime);
+        }
+
+        if(StringUtils.isNotBlank(dto.getCreateTimeEnd())) {
+            String billEndTime = dto.getCreateTimeEnd() + " 23:59:59";
+            dto.setCreateTimeEnd(billEndTime);
+        }
 
         List<AccountSerialBillTotalVO> accountSerialBillTotalVOS = accountSerialBillMapper.selectBillTotal(dto);
 

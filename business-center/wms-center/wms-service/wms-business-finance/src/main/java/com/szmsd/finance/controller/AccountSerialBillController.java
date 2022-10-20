@@ -47,6 +47,8 @@ public class AccountSerialBillController extends BaseController {
     @GetMapping("/listPage")
     public TableDataInfo<AccountSerialBill> listPage(AccountSerialBillDTO dto) {
         startPage();
+
+
         return getDataTable(accountSerialBillService.listPage(dto));
     }
 
