@@ -84,8 +84,11 @@ public class DelOutboundExportItemQueryPage implements QueryPage<DelOutboundExpo
 
                 if (StringUtils.isEmpty(dto.getProductName())) {
                     vo.setDeclaredNameEn(Objects.nonNull(product) ? product.getProductName() : "");
+                    vo.setProductNameChinese(Objects.nonNull(product) ? product.getProductNameChinese() : "");
+
                 } else {
                     vo.setDeclaredNameEn(dto.getProductName());
+                    vo.setProductNameChinese(dto.getProductNameChinese());
                 }
                 if (StringUtils.isEmpty(dto.getProductAttribute())) {
                     vo.setProductAttributeName(Objects.nonNull(product) ? product.getProductAttributeName() : "");

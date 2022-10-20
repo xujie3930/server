@@ -956,63 +956,301 @@ public class DelOutboundController extends BaseController {
 
                 }
             }else if (DelOutboundExportTotal<=2000){
-                // 查询出库类型数据
-                Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066,099,059");
-                DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService, len);
-                exportContext.setStateCacheAdapter(listMap.get("065"));
-                exportContext.setOrderTypeCacheAdapter(listMap.get("063"));
-                exportContext.setExceptionStateCacheAdapter(listMap.get("066"));
-                exportContext.setTrackingStatusCache(listMap.get("099"));
+                if (len.equals("zh")){
+                    // 查询出库类型数据
+                    Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066,099,059");
+                    DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService, len);
+                    exportContext.setStateCacheAdapter(listMap.get("065"));
+                    exportContext.setOrderTypeCacheAdapter(listMap.get("063"));
+                    exportContext.setExceptionStateCacheAdapter(listMap.get("066"));
+                    exportContext.setTrackingStatusCache(listMap.get("099"));
 
-                QueryDto queryDto1 = new QueryDto();
-                queryDto1.setPageNum(1);
-                queryDto1.setPageSize(500);
-                QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
-                QueryDto queryDto2 = new QueryDto();
-                queryDto2.setPageNum(1);
-                queryDto2.setPageSize(500);
-                QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
-                ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("en".equals(len) ? "Outbound_order" : "出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
-                            @Override
-                            public String sheetName() {
+                    QueryDto queryDto1 = new QueryDto();
+                    queryDto1.setPageNum(1);
+                    queryDto1.setPageSize(500);
+                    QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
+                    QueryDto queryDto2 = new QueryDto();
+                    queryDto2.setPageNum(1);
+                    queryDto2.setPageSize(500);
+                    QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
 
-                                if("en".equals(len)){
-                                    return "Outbound Order Information";
-                                }else{
-                                    return "出库单详情";
-                                }
-                            }
+                    ExportParams params = new ExportParams();
+                    // 设置sheet得名称
+                    params.setSheetName("出库单详情");
+                    ExportParams exportParams2 = new ExportParams();
+                    exportParams2.setSheetName("包裹明细");
+                    // 创建sheet1使用得map
+                    Map<String, Object>  DelOutboundExportMap = new HashMap<>(4);
+                    // title的参数为ExportParams类型
+                    DelOutboundExportMap.put("title", params);
+                    // 模版导出对应得实体类型
+                    DelOutboundExportMap.put("entity", DelOutboundExportListVO.class);
+                    // sheet中要填充得数据
+                    DelOutboundExportMap.put("data", queryPage.getPage());
+                    // 创建sheet2使用得map
+                    Map<String, Object>  DelOutboundExportItemListMap = new HashMap<>(4);
+                    DelOutboundExportItemListMap.put("title", exportParams2);
+                    DelOutboundExportItemListMap.put("entity", DelOutboundExportItemListVO.class);
+                    DelOutboundExportItemListMap.put("data", itemQueryPage.getPage());
+                    // 将sheet1和sheet2使用得map进行包装
+                    List<Map<String, Object>> sheetsList = new ArrayList<>();
+                    sheetsList.add(DelOutboundExportMap);
+                    sheetsList.add(DelOutboundExportItemListMap);
 
-                            @Override
-                            public Class<DelOutboundExportListVO> classType() {
-                                return DelOutboundExportListVO.class;
-                            }
+                    Workbook workbook = ExcelExportUtil.exportExcel(sheetsList, ExcelType.HSSF);
+                    Sheet sheet= workbook.getSheet("出库单详情");
 
-                            @Override
-                            public QueryPage<DelOutboundExportListVO> query(ExcelUtils.ExportContext exportContext) {
-                                return queryPage;
-                            }
-                        },
-                        new ExcelUtils.ExportSheet<DelOutboundExportItemListVO>() {
-                            @Override
-                            public String sheetName() {
-                                if("en".equals(len)){
-                                    return "SKU list";
-                                }else{
-                                    return "包裹明细";
-                                }
-                            }
+                    //获取第一行数据
+                    Row row2 =sheet.getRow(0);
 
-                            @Override
-                            public Class<DelOutboundExportItemListVO> classType() {
-                                return DelOutboundExportItemListVO.class;
-                            }
+                    for (int i=0;i<31;i++){
+                        Cell deliveryTimeCell = row2.getCell(i);
 
-                            @Override
-                            public QueryPage<DelOutboundExportItemListVO> query(ExcelUtils.ExportContext exportContext) {
-                                return itemQueryPage;
-                            }
-                        }));
+                        CellStyle styleMain = workbook.createCellStyle();
+
+                        styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+
+
+                        Font font = workbook.createFont();
+                        //true为加粗，默认为不加粗
+                        font.setBold(true);
+                        //设置字体颜色，颜色和上述的颜色对照表是一样的
+                        font.setColor(IndexedColors.WHITE.getIndex());
+                        //将字体样式设置到单元格样式中
+                        styleMain.setFont(font);
+
+                        styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                        styleMain.setAlignment(HorizontalAlignment.CENTER);
+                        styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+
+                        deliveryTimeCell.setCellStyle(styleMain);
+                    }
+
+                    Sheet sheet1= workbook.getSheet("包裹明细");
+                    //获取第一行数据
+                    Row row3 =sheet1.getRow(0);
+
+                    for (int i=0;i<7;i++){
+                        Cell deliveryTimeCell = row3.getCell(i);
+
+                        CellStyle styleMain = workbook.createCellStyle();
+
+                        styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+
+
+                        Font font = workbook.createFont();
+                        //true为加粗，默认为不加粗
+                        font.setBold(true);
+                        //设置字体颜色，颜色和上述的颜色对照表是一样的
+                        font.setColor(IndexedColors.WHITE.getIndex());
+                        //将字体样式设置到单元格样式中
+                        styleMain.setFont(font);
+
+                        styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                        styleMain.setAlignment(HorizontalAlignment.CENTER);
+                        styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+
+                        deliveryTimeCell.setCellStyle(styleMain);
+                    }
+
+                    try {
+                        String fileName="出库单"+System.currentTimeMillis();
+                        URLEncoder.encode(fileName, "UTF-8");
+                        //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
+                        response.setContentType("application/vnd.ms-excel");
+                        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+
+                        response.addHeader("Pargam", "no-cache");
+                        response.addHeader("Cache-Control", "no-cache");
+
+                        ServletOutputStream outStream = null;
+                        try {
+                            outStream = response.getOutputStream();
+                            workbook.write(outStream);
+                            outStream.flush();
+                        } finally {
+                            outStream.close();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+                if (len.equals("en")){
+                    // 查询出库类型数据
+                    Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("063,065,066,099,059");
+                    DelOutboundExportContext exportContext = new DelOutboundExportContext(this.basWarehouseClientService, this.basRegionFeignService, len);
+                    exportContext.setStateCacheAdapter(listMap.get("065"));
+                    exportContext.setOrderTypeCacheAdapter(listMap.get("063"));
+                    exportContext.setExceptionStateCacheAdapter(listMap.get("066"));
+                    exportContext.setTrackingStatusCache(listMap.get("099"));
+
+                    QueryDto queryDto1 = new QueryDto();
+                    queryDto1.setPageNum(1);
+                    queryDto1.setPageSize(500);
+                    QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
+                    Page<DelOutboundExportListEnVO> page = new Page<>();
+                    if (CollectionUtils.isNotEmpty(queryPage.getPage())) {
+                        for (DelOutboundExportListVO dto : queryPage.getPage()) {
+                            DelOutboundExportListEnVO vo = BeanMapperUtil.map(dto, DelOutboundExportListEnVO.class);
+                            page.add(vo);
+                        }
+                    }
+                    QueryDto queryDto2 = new QueryDto();
+                    queryDto2.setPageNum(1);
+                    queryDto2.setPageSize(500);
+                    QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
+                    Page<DelOutboundExportItemListEnVO> page1 = new Page<>();
+                    if (CollectionUtils.isNotEmpty(itemQueryPage.getPage())) {
+                        for (DelOutboundExportItemListVO dto : itemQueryPage.getPage()) {
+                            DelOutboundExportItemListEnVO vo = BeanMapperUtil.map(dto, DelOutboundExportItemListEnVO.class);
+                            page1.add(vo);
+                        }
+                    }
+                    ExportParams params = new ExportParams();
+                    // 设置sheet得名称
+                    params.setSheetName("出库单详情");
+                    ExportParams exportParams2 = new ExportParams();
+                    exportParams2.setSheetName("包裹明细");
+                    // 创建sheet1使用得map
+                    Map<String, Object>  DelOutboundExportMap = new HashMap<>(4);
+                    // title的参数为ExportParams类型
+                    DelOutboundExportMap.put("title", params);
+                    // 模版导出对应得实体类型
+                    DelOutboundExportMap.put("entity", DelOutboundExportListEnVO.class);
+                    // sheet中要填充得数据
+                    DelOutboundExportMap.put("data", page);
+                    // 创建sheet2使用得map
+                    Map<String, Object>  DelOutboundExportItemListMap = new HashMap<>(4);
+                    DelOutboundExportItemListMap.put("title", exportParams2);
+                    DelOutboundExportItemListMap.put("entity", DelOutboundExportItemListEnVO.class);
+                    DelOutboundExportItemListMap.put("data", page1);
+                    // 将sheet1和sheet2使用得map进行包装
+                    List<Map<String, Object>> sheetsList = new ArrayList<>();
+                    sheetsList.add(DelOutboundExportMap);
+                    sheetsList.add(DelOutboundExportItemListMap);
+
+                    Workbook workbook = ExcelExportUtil.exportExcel(sheetsList, ExcelType.HSSF);
+                    Sheet sheet= workbook.getSheet("出库单详情");
+
+                    //获取第一行数据
+                    Row row2 =sheet.getRow(0);
+
+                    for (int i=0;i<31;i++){
+                        Cell deliveryTimeCell = row2.getCell(i);
+
+                        CellStyle styleMain = workbook.createCellStyle();
+
+                        styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+
+
+                        Font font = workbook.createFont();
+                        //true为加粗，默认为不加粗
+                        font.setBold(true);
+                        //设置字体颜色，颜色和上述的颜色对照表是一样的
+                        font.setColor(IndexedColors.WHITE.getIndex());
+                        //将字体样式设置到单元格样式中
+                        styleMain.setFont(font);
+
+                        styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                        styleMain.setAlignment(HorizontalAlignment.CENTER);
+                        styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+
+                        deliveryTimeCell.setCellStyle(styleMain);
+                    }
+
+                    Sheet sheet1= workbook.getSheet("包裹明细");
+                    //获取第一行数据
+                    Row row3 =sheet1.getRow(0);
+
+                    for (int i=0;i<7;i++){
+                        Cell deliveryTimeCell = row3.getCell(i);
+
+                        CellStyle styleMain = workbook.createCellStyle();
+
+                        styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+
+
+                        Font font = workbook.createFont();
+                        //true为加粗，默认为不加粗
+                        font.setBold(true);
+                        //设置字体颜色，颜色和上述的颜色对照表是一样的
+                        font.setColor(IndexedColors.WHITE.getIndex());
+                        //将字体样式设置到单元格样式中
+                        styleMain.setFont(font);
+
+                        styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                        styleMain.setAlignment(HorizontalAlignment.CENTER);
+                        styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+
+                        deliveryTimeCell.setCellStyle(styleMain);
+                    }
+
+                    try {
+                        String fileName="Outbound Order Information"+System.currentTimeMillis();
+                        URLEncoder.encode(fileName, "UTF-8");
+                        //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
+                        response.setContentType("application/vnd.ms-excel");
+                        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+
+                        response.addHeader("Pargam", "no-cache");
+                        response.addHeader("Cache-Control", "no-cache");
+
+                        ServletOutputStream outStream = null;
+                        try {
+                            outStream = response.getOutputStream();
+                            workbook.write(outStream);
+                            outStream.flush();
+                        } finally {
+                            outStream.close();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
+//                ExcelUtils.export(response, null, ExcelUtils.ExportExcel.build("en".equals(len) ? "Outbound_order" : "出库单", len,  null, new ExcelUtils.ExportSheet<DelOutboundExportListVO>() {
+//                            @Override
+//                            public String sheetName() {
+//
+//                                if("en".equals(len)){
+//                                    return "Outbound Order Information";
+//                                }else{
+//                                    return "出库单详情";
+//                                }
+//                            }
+//
+//                            @Override
+//                            public Class<DelOutboundExportListVO> classType() {
+//                                return DelOutboundExportListVO.class;
+//                            }
+//
+//                            @Override
+//                            public QueryPage<DelOutboundExportListVO> query(ExcelUtils.ExportContext exportContext) {
+//                                return queryPage;
+//                            }
+//                        },
+//                        new ExcelUtils.ExportSheet<DelOutboundExportItemListVO>() {
+//                            @Override
+//                            public String sheetName() {
+//                                if("en".equals(len)){
+//                                    return "SKU list";
+//                                }else{
+//                                    return "包裹明细";
+//                                }
+//                            }
+//
+//                            @Override
+//                            public Class<DelOutboundExportItemListVO> classType() {
+//                                return DelOutboundExportItemListVO.class;
+//                            }
+//
+//                            @Override
+//                            public QueryPage<DelOutboundExportItemListVO> query(ExcelUtils.ExportContext exportContext) {
+//                                return itemQueryPage;
+//                            }
+//                        }));
             }
 
 //            QueryDto queryDto2 = new QueryDto();

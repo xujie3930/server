@@ -15,23 +15,29 @@ import java.io.Serializable;
 @ColumnWidth(15)
 public class DelOutboundExportItemListEnVO implements Serializable {
 
-    @Excel(name = "Outbound Order Number",width = 30)
+    @Excel(name = "Outbound Order Number",width = 28)
     private String orderNo;
 
-    @Excel(name = "Tracking Number",width = 30)
+    @Excel(name = "Tracking Number",width = 28)
     private String trackingNo;
 
     @ExcelProperty(value = {"SKU", "SKU"})
-    @Excel(name = "SKU",width = 15)
+    @Excel(name = "SKU",width = 14)
     private String sku;
 
-    @Excel(name = "Declared Name (English)",width = 30)
+    @Excel(name = "Declared Name (English)",width = 28)
     private String declaredNameEn;
 
-    @Excel(name = "Qty",width = 15)
+    @ExcelProperty(value = {"Declared Name (Chinese)", "Declared Name (Chinese)"})
+    @Excel(name = "Declared Name (Chinese)",width = 28)
+    private String productNameChinese;
+
+    @Excel(name = "Qty",width = 4)
     private Long qty;
 
-    @Excel(name = "Product Attribute",width = 30)
+    @Excel(name = "Product Attribute",width = 28)
     private String productAttributeName;
+
+
 
 }
