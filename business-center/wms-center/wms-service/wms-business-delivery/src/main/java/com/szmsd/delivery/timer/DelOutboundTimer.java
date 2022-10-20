@@ -203,38 +203,14 @@ public class DelOutboundTimer {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         String key = applicationName + ":DelOutboundTimer:bringVerify";
-        final List<String> uuidList = new ArrayList<>();
-        uuidList.add(UUID.fastUUID().toString());
         this.doWorker(key, () -> {
+            // 查询初始化的任务执行
             LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
             queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.INIT.getCode());
             queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
-            queryWrapper.isNull(DelOutboundCompleted::getUuid);
-            queryWrapper.last("LIMIT "+trialLimit);
-            List<DelOutboundCompleted> delOutboundCompletedList = this.delOutboundCompletedService.list(queryWrapper);
-            if(delOutboundCompletedList.size() == 0){
-                uuidList.set(0, null);
-                return;
-            }
-            List<Long> ids = delOutboundCompletedList.stream().map( DelOutboundCompleted::getId).collect(Collectors.toList());
-            LambdaUpdateWrapper<DelOutboundCompleted> updateQueryWrapper = Wrappers.lambdaUpdate();
-            updateQueryWrapper.set(DelOutboundCompleted::getUuid, uuidList.get(0));
-            updateQueryWrapper.in(DelOutboundCompleted::getId, ids);
-            this.delOutboundCompletedService.update(updateQueryWrapper);
+            handleBringVerify(queryWrapper);
         });
-        stopWatch.stop();
-        logger.info(">>>>>[创建出库单]bringVerify处理200条数据{}"+stopWatch.getLastTaskTimeMillis(), uuidList);
 
-        if(uuidList.get(0) == null){
-            return;
-        }
-        logger.debug("开始执行任务 - 提审 版本"+uuidList.get(0));
-        // 查询初始化的任务执行
-        LambdaQueryWrapper<DelOutboundCompleted> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(DelOutboundCompleted::getState, DelOutboundCompletedStateEnum.INIT.getCode());
-        queryWrapper.eq(DelOutboundCompleted::getOperationType, DelOutboundOperationTypeEnum.BRING_VERIFY.getCode());
-        queryWrapper.eq(DelOutboundCompleted::getUuid, uuidList.get(0));
-        handleBringVerify(queryWrapper);
     }
 
     /**

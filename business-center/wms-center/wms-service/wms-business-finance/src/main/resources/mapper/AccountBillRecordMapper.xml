@@ -29,7 +29,7 @@
             </if>
 
             <if test="billEndTime != null  and billEndTime != ''">
-                and bill_start_time <![CDATA[ <= ]]> #{billEndTime}
+                and bill_end_time <![CDATA[ <= ]]> #{billEndTime}
             </if>
         </where>
 
