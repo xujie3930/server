@@ -122,7 +122,7 @@
                 case when
                 (
                 FASB.pay_method in ('ONLINE_INCOME','OFFLINE_INCOME','EXCHANGE_INCOME')
-                or (FASB.pay_method = 'REFUND' and (FASB.business_category in ('优惠','赔偿','退费')))
+                or FASB.business_category in ('优惠','赔偿','退费')
                 )
                 then abs(FASB.amount) else 0 end
             ) as currentIncomeAmount,
@@ -132,7 +132,7 @@
                 case when
                 (
                 FASB.pay_method in ('EXCHANGE_PAYMENT','WITHDRAW_PAYMENT','BALANCE_DEDUCTIONS','WAREHOUSE_RENT','BUSINESS_OPERATE','SPECIAL_OPERATE')
-                or (FASB.pay_method = 'REFUND' and (FASB.business_category in ('补收','增值消费')))
+                or FASB.business_category in ('补收','增值消费')
                 )
                 then abs(FASB.amount) else 0 end
             ) as currentExpenditureAmount
