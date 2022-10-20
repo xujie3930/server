@@ -1594,23 +1594,26 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 basSellerList.stream().filter(x -> x.getSellerCode().equals(dto.getCustomCode())).findFirst().ifPresent(basSeller -> {
 
-
+                    DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto = new DelOutboundBatchUpdateTrackingNoEmailDto();
+                    BeanUtils.copyProperties(dto, delOutboundBatchUpdateTrackingNoEmailDto);
+                    delOutboundBatchUpdateTrackingNoEmailDto.setSellerEmail(basSeller.getEmail());
+                    List<String> serviceManagerStaff=new ArrayList<>();
                     if (basSeller.getServiceManagerName() != null && !basSeller.getServiceManagerName().equals("")) {
                         if (!basSeller.getServiceManagerName().equals(basSeller.getServiceStaffName())) {
-                            DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto = new DelOutboundBatchUpdateTrackingNoEmailDto();
-                            BeanUtils.copyProperties(dto, delOutboundBatchUpdateTrackingNoEmailDto);
 
-                            delOutboundBatchUpdateTrackingNoEmailDto.setEmpCode(basSeller.getServiceManagerName());
-                            delOutboundBatchUpdateTrackingNoEmailDto.setServiceManagerName(basSeller.getServiceManagerName());
+
+                            serviceManagerStaff.add(basSeller.getServiceManagerName());
+
+//                            delOutboundBatchUpdateTrackingNoEmailDto.setEmpCode(basSeller.getServiceManagerName());
+//                            delOutboundBatchUpdateTrackingNoEmailDto.setServiceManagerName(basSeller.getServiceManagerName());
                             if (basSeller.getServiceStaffName() != null && !basSeller.getServiceStaffName().equals("")) {
                                 delOutboundBatchUpdateTrackingNoEmailDto.setServiceStaffName(basSeller.getServiceStaffName());
                             }
-                            delOutboundBatchUpdateTrackingNoEmailDtoList.add(delOutboundBatchUpdateTrackingNoEmailDto);
+
                         }
                     }
                     if (basSeller.getServiceStaffName() != null && !basSeller.getServiceStaffName().equals("")) {
-                        DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto = new DelOutboundBatchUpdateTrackingNoEmailDto();
-                        BeanUtils.copyProperties(dto, delOutboundBatchUpdateTrackingNoEmailDto);
+
                         delOutboundBatchUpdateTrackingNoEmailDto.setEmpCode(basSeller.getServiceStaffName());
                         delOutboundBatchUpdateTrackingNoEmailDto.setServiceStaffName(basSeller.getServiceStaffName());
                         if (basSeller.getServiceManagerName() != null && !basSeller.getServiceManagerName().equals("")) {
@@ -1619,6 +1622,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         delOutboundBatchUpdateTrackingNoEmailDtoList.add(delOutboundBatchUpdateTrackingNoEmailDto);
 
                     }
+
+                    delOutboundBatchUpdateTrackingNoEmailDtoList.add(delOutboundBatchUpdateTrackingNoEmailDto);
 
 
                 });
