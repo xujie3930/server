@@ -139,7 +139,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" >
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.domain.BasEmail">
     update bas_email
     set
       send_type = 1
