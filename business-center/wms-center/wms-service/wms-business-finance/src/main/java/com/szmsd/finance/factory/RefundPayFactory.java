@@ -53,6 +53,9 @@ public class RefundPayFactory extends AbstractPayFactory {
         try {
             boolean success = false;
             if (lock.tryLock(time, unit)) {
+
+                log.info("【退费】dto-- {}",JSONObject.toJSONString(dto));
+
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
 
                 String mKey = key + oldBalance.getVersion();
@@ -64,7 +67,8 @@ public class RefundPayFactory extends AbstractPayFactory {
 
                     Thread.sleep(100);
 
-                    log.info("balance 重新执行 {}",mKey);
+                    log.info("【退费】重新执行-- {}",JSONObject.toJSONString(dto));
+                    log.info("【退费】重新执行-- {}",mKey);
                     return updateBalance(dto);
                 }
 
@@ -85,6 +89,7 @@ public class RefundPayFactory extends AbstractPayFactory {
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), result, true);
                 recordOpLogAsync(dto, result.getCurrentBalance());
                 recordDetailLogAsync(dto, oldBalance);
+                log.info("【退费】setSerialBillLog-- {}",JSONObject.toJSONString(dto));
                 setSerialBillLog(dto);
 
                 concurrentHashMap.put(mKey,oldBalance.getVersion());

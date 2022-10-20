@@ -59,7 +59,7 @@ public class PreWithdraw extends FssBaseEntity {
     private Date verifyDate;
 
     @ApiModelProperty(value = "收款银行名称")
-    private String dueBankNname;
+    private String dueBankName;
 
     @ApiModelProperty(value = "收款银行账号")
     private String dueBankCode;
