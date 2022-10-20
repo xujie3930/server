@@ -31,6 +31,13 @@ public class EmailDto {
     @ApiModelProperty(value = "文件资源")
     private String filePath;
 
+    @ApiModelProperty(value = "0表示包裹查询导入更新挂号，1（其他功能）")
+    private Integer modularType;
+
+
+    @ApiModelProperty(value = "员工编号")
+    private String empCode;
+
     @ApiModelProperty(value = "数据集合")
     List<EmailObjectDto> list ;
 }
