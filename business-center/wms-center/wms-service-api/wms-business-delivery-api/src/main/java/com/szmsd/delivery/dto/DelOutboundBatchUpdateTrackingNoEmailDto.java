@@ -31,4 +31,8 @@ public class DelOutboundBatchUpdateTrackingNoEmailDto {
     //原单号
     private String noTrackingNo;
 
+    //客服邮箱
+
+    private String sellerEmail;
+
 }
