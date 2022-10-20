@@ -5,6 +5,7 @@ import com.szmsd.bas.dto.EmailObjectDto;
 import com.szmsd.bas.mapper.BasEmailMapper;
 import com.szmsd.bas.util.EmailUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import lombok.Synchronized;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -14,7 +15,9 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 
 import javax.annotation.Resource;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +31,12 @@ public class EmailJob extends QuartzJobBean {
     @Resource
     private EmailUtil emailUtil;
 
+   @Synchronized
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
          List<BasEmail> list=basEmailMapper.selectByPrimaryKey();
-//        BasEmail basEmail = new BasEmail();
-//        basEmail.setEmpTo(entry.getKey());
-        basEmailMapper.updateByPrimaryKey();
+       BasEmail basEmail = new BasEmail();
+       basEmailMapper.updateByPrimaryKey(basEmail);
         //将组合的数据 分解成Map<List> (邮箱为key,组合这个邮箱下的所有信息)
         Map<String,List<BasEmail>> basMap=list.stream().collect(Collectors.groupingBy(BasEmail::getEmpTo));
         //循环map，得到每一组的数据 然后生成excel
@@ -42,13 +45,21 @@ public class EmailJob extends QuartzJobBean {
             for (Map.Entry<String, List<BasEmail>> entry : basMap.entrySet()) {
 
                 List<EmailObjectDto> emailObjectDtoList = BeanMapperUtil.mapList(entry.getValue(), EmailObjectDto.class);
-                logger.info("组合参数：{}", entry.getValue());
+               String empTO= entry.getKey();
+               String empTOs[] =empTO.split(",");
+               List<String> list1= Arrays.asList(empTOs);
 
-                emailUtil.sendAttachmentMail(entry.getKey(), "【DM】挂号更新/" + simpleDateFormat.format(new Date()) + "", "您好，\n" +
+                list1.forEach(x->{
+
+
+                emailUtil.sendAttachmentMail(x, "【DM】挂号更新/" + simpleDateFormat.format(new Date()) + "", "您好，\n" +
                         "\n" +
                         "请查收昨天中午12:00至今天中午12:00订单挂号的更新情况，如附件所示。\n" +
                         "\n" +
                         "谢谢！", emailObjectDtoList);
+
+
+                });
 
             }
         }
