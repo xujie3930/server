@@ -75,30 +75,29 @@
             </if>
 
             <if test="chargeType != null  and chargeType!=''">
-                and a.charge_type =#{chargeType}
+                and a.charge_type = #{chargeType}
             </if>
             <if test="warehouseCode != null  and warehouseCode!=''">
-                and a.warehouse_code =#{warehouseCode}
+                and a.warehouse_code = #{warehouseCode}
             </if>
 
             <if test="currencyCode != null  and currencyCode!=''">
-                and a.currency_code =#{currencyCode}
+                and a.currency_code = #{currencyCode}
             </if>
             <if test="businessCategory != null  and businessCategory!=''">
-                and a.business_category =#{businessCategory}
+                and a.business_category = #{businessCategory}
             </if>
             <if test="productCategory != null  and productCategory!=''">
-                and a.product_category =#{productCategory}
+                and a.product_category = #{productCategory}
             </if>
             <if test="chargeCategory != null  and chargeCategory!=''">
-                and a.charge_category =#{chargeCategory}
+                and a.charge_category = #{chargeCategory}
             </if>
             <if test="createTimeStart != null  and createTimeStart!=''">
-                and date_format(a.create_time,'%y%m%d') &gt;= date_format(#{createTimeStart},'%y%m%d')
-
+                and a.create_time <![CDATA[ >= ]]> #{createTimeStart}
             </if>
             <if test="createTimeEnd != null  and createTimeEnd!=''">
-                and date_format(a.create_time,'%y%m%d') &lt;= date_format(#{createTimeEnd},'%y%m%d')
+                and a.create_time <![CDATA[ <= ]]> #{createTimeEnd}
             </if>
             <if test="ids != null  and ids!=''">
                 and FIND_IN_SET(a.id,#{ids})
