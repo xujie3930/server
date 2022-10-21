@@ -24,10 +24,7 @@ import com.szmsd.bas.api.domain.dto.AttachmentDataDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
-import com.szmsd.bas.api.feign.BasFeignService;
-import com.szmsd.bas.api.feign.BasRegionFeignService;
-import com.szmsd.bas.api.feign.EmailFeingService;
-import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.api.feign.*;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.api.service.SerialNumberClientService;
@@ -39,6 +36,7 @@ import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.dto.EmailDto;
 import com.szmsd.bas.dto.EmailObjectDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
+import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.chargerules.domain.BasProductService;
@@ -95,6 +93,7 @@ import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpRmiClientService;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.ShipmentCancelRequestDto;
+import com.szmsd.http.dto.ShipmentOrderResult;
 import com.szmsd.http.dto.ShipmentTrackingChangeRequestDto;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.vo.HttpResponseVO;
@@ -226,6 +225,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private HtpPricedProductFeignService htpPricedProductFeignService;
     @Resource
     private ChargeFeignService chargeFeignService;
+    @Resource
+    private BasSellerFeignService basSellerFeignService;
     /**
      * 查询出库单模块
      *
@@ -2499,7 +2500,67 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         delOutboundTarckErrorMapper.deleteByPrimaryKey();
         return list;
     }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void carrierRegister(DelOutbound delOutbound) {
+        //查询最新的挂号数据
+        try {
+            R<ShipmentOrderResult> r = htpOutboundFeignService.shipmentOrderRealResult(String.valueOf(delOutbound.getId()));
+            if (r.getCode() == 200 && r.getData() != null) {
+                if(!r.getData().getSuccess()){
+                    throw new RuntimeException(r.getData().getError().getMessage());
+                }
+                ShipmentOrderResult data = r.getData();
+                if (!StringUtils.equals(delOutbound.getTrackingNo(), data.getMainTrackingNumber())) {
+                    //新老挂号不一样，更新数据库
+                    DelOutbound dataDelOutbound = this.getById(delOutbound.getId());
+                    dataDelOutbound.setTrackingNo(data.getMainTrackingNumber());
+                    this.updateById(dataDelOutbound);
 
+
+                    //新增挂号修改记录
+                    DelOutboundTarckOn delOutboundTarckOn = new DelOutboundTarckOn();
+                    delOutboundTarckOn.setOrderNo(dataDelOutbound.getOrderNo());
+                    delOutboundTarckOn.setTrackingNo(delOutbound.getTrackingNo());
+                    delOutboundTarckOn.setUpdateTime(new Date());
+                    delOutboundTarckOn.setTrackingNoNew(data.getMainTrackingNumber());
+                    delOutboundTarckOnMapper.insertSelective(delOutboundTarckOn);
+
+
+                    List<String> orders = new ArrayList<String>();
+                    orders.add(dataDelOutbound.getOrderNo());
+                    // 推送ty系统
+                    manualTrackingYee(orders);
+
+
+                    //推邮箱
+                    R<BasSellerInfoVO> info = basSellerFeignService.getInfoBySellerCode(dataDelOutbound.getSellerCode());
+                    if(info.getData() == null) {
+                        throw new RuntimeException("客户信息获取失败");
+                    }
+                    BasSellerInfoVO userInfo = R.getDataAndException(info);
+
+                    EmailDto emailDto=new EmailDto();
+                    emailDto.setModularType(1);
+                    emailDto.setTo(userInfo.getEmail());
+                    EmailObjectDto emailDtoDetail=new EmailObjectDto();
+                    emailDtoDetail.setCustomCode(dataDelOutbound.getSellerCode());
+                    emailDtoDetail.setOrderNo(dataDelOutbound.getOrderNo());
+                    emailDtoDetail.setServiceManagerName(userInfo.getServiceManagerName());
+                    emailDtoDetail.setServiceStaffName(userInfo.getServiceStaffName());
+                    emailDtoDetail.setNoTrackingNo(delOutbound.getTrackingNo());
+                    emailDtoDetail.setTrackingNo(data.getMainTrackingNumber());
+                    emailDto.setList(Arrays.asList(emailDtoDetail));
+                    emailFeingService.sendEmail(emailDto);
+
+
+                }
+            }
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
+    }
     public static List<String> splitToArray(String text, String split) {
         String[] arr = text.split(split);
         if (arr.length == 0) {

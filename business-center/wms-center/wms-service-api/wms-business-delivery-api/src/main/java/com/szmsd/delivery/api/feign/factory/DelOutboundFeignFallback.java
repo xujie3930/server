@@ -246,6 +246,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R<String> notifyDelOutboundTransferTimer2() {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<String> delOutboundCarrierTimer() {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

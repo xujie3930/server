@@ -33,6 +33,11 @@ public class HtpOutboundFeignFallback implements FallbackFactory<HtpOutboundFeig
             }
 
             @Override
+            public R<ShipmentOrderResult> shipmentOrderRealResult(String referenceNumber) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
             public R<ResponseVO> shipmentLabel(ShipmentLabelChangeRequestDto dto) {
                 return R.convertResultJson(throwable);
             }
