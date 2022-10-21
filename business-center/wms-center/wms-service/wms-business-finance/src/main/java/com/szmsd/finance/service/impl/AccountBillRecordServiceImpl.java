@@ -186,7 +186,12 @@ public class AccountBillRecordServiceImpl implements AccountBillRecordService {
             throw new RuntimeException(e);
         }
 
-        ExcelUtil.fillReportWithEasyExcel(response,null,null,"bill",map,null,null,fileName,inputStream);
+        //需要合并的列
+        int [] mergeCollindex = {0,1,2};
+        //从第一行开始
+        int mergeRowIndex = 20;
+
+        ExcelUtil.fillReportWithEasyExcel(response,null,null,"bill",map,null,null,fileName,inputStream,mergeRowIndex,mergeCollindex);
 
     }
 

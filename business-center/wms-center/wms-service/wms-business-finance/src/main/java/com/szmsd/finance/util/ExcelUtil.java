@@ -36,13 +36,41 @@ public class ExcelUtil {
                                                String businessKey,
                                                Map<Integer,List<?>> otherMapData,
                                                String filename, InputStream inputStream){
+        //需要合并的列
+        int [] mergeCollindex = {0,1,2};
+        //从第一行开始
+        int mergeRowIndex = 1;
+
+        fillReportWithEasyExcel(response,title,titleDataMap,sheetKey,sheetAndDataMap,businessKey,otherMapData,filename,inputStream,mergeRowIndex,mergeCollindex);
+    }
+
+    /**
+     * EasyExcel 填充报表
+     * @param response
+     * @param map              单数据
+     * @param sheetKey         第一个表数据集合key
+     * @param sheetAndDataMap  第一个表数据集合
+     * @param businessKey      第二个表数据集合key
+     * @param otherMapData     第二个表数据集合
+     * @param filename         文件名称
+     * @param inputStream
+     */
+    public static void fillReportWithEasyExcel(HttpServletResponse response,
+                                               String title,
+                                               Map<Integer,List<?>> titleDataMap,
+                                               String sheetKey,
+                                               Map<Integer, List<?>> sheetAndDataMap,
+                                               String businessKey,
+                                               Map<Integer,List<?>> otherMapData,
+                                               String filename, InputStream inputStream,
+                                               int mergeRowIndex,int[] mergeCollindex){
         ExcelWriter excelWriter = null;
 
         //需要合并的列
-        int [] mergeCollindex = {0,1,2};
+        //int [] mergeCollindex = {0,1,2};
 
         //从第一行开始
-        int mergeRowIndex = 1;
+        //int mergeRowIndex = 1;
 
         try {
             OutputStream outputStream = response.getOutputStream();
@@ -111,13 +139,38 @@ public class ExcelUtil {
                                                ConcurrentHashMap<Integer, List<?>> sheetAndDataMap,
                                                String businessKey,
                                                ConcurrentHashMap<Integer,List<?>> otherMapData, InputStream inputStream){
+        //需要合并的列
+        int [] mergeCollindex = {0,1,2};
+        //从第一行开始
+        int mergeRowIndex = 1;
+
+        exportFile(file,title,titleDataMap,sheetKey,sheetAndDataMap,businessKey,otherMapData,inputStream,mergeRowIndex,mergeCollindex);
+    }
+
+    /**
+     * 导出file
+     * @param file
+     * @param title
+     * @param titleDataMap
+     * @param sheetKey
+     * @param sheetAndDataMap
+     * @param businessKey
+     * @param otherMapData
+     * @param inputStream
+     */
+    public static void exportFile(File file,String title,
+                                  ConcurrentHashMap<Integer,List<?>> titleDataMap,
+                                  String sheetKey,
+                                  ConcurrentHashMap<Integer, List<?>> sheetAndDataMap,
+                                  String businessKey,
+                                  ConcurrentHashMap<Integer,List<?>> otherMapData, InputStream inputStream,int mergeRowIndex,int[] mergeCollindex){
         ExcelWriter excelWriter = null;
 
         //需要合并的列
-        int [] mergeCollindex = {0,1,2};
+        //int [] mergeCollindex = {0,1,2};
 
         //从第一行开始
-        int mergeRowIndex = 1;
+        //int mergeRowIndex = 1;
 
         try {
             excelWriter = EasyExcel.write(file).withTemplate(inputStream).registerWriteHandler(new MergeStrategy(mergeCollindex,mergeRowIndex)).build();
