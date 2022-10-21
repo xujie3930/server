@@ -324,6 +324,10 @@ abstract class AbstractRequest extends BaseRequest {
         return this.httpRequestBody(warehouseCode, api, object, HttpMethod.GET, pathVariable);
     }
 
+    protected HttpResponseBody httpGetBody(String warehouseCode, String api,Integer timeout, Object object, Object... pathVariable) {
+        return this.httpRequestBody(warehouseCode, api, object,timeout,HttpMethod.GET, pathVariable);
+    }
+
     protected HttpResponseBody httpPutBody(String warehouseCode, String api, Object object,  Object... pathVariable) {
         return this.httpRequestBody(warehouseCode, api, object, HttpMethod.PUT, pathVariable);
     }

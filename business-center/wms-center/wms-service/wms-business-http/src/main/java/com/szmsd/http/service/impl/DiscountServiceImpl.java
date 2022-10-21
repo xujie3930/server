@@ -17,10 +17,14 @@ import com.szmsd.http.service.IHttpDiscountService;
 import com.szmsd.http.service.http.SaaSPricedRequest;
 import com.szmsd.http.util.HttpResponseVOUtils;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DiscountServiceImpl extends SaaSPricedRequest implements IHttpDiscountService {
+
+    @Value("${thread.carrierTimes}")
+    private int carrierTimes;
 
     public DiscountServiceImpl(HttpConfig httpConfig) {
         super(httpConfig);
@@ -29,7 +33,7 @@ public class DiscountServiceImpl extends SaaSPricedRequest implements IHttpDisco
 
     @Override
     public R<DiscountMainDto> detailResult(String id) {
-        R<DiscountMainDto> r = HttpResponseVOUtils.transformation(httpGetBody("", "discount.detailResult", null, id), DiscountMainDto.class);
+        R<DiscountMainDto> r = HttpResponseVOUtils.transformation(httpGetBody("", "discount.detailResult", carrierTimes,null, id), DiscountMainDto.class);
         if(r.getCode() == 200 && r.getData() != null && r.getData().getPricingDiscountRules() != null){
             for(DiscountDetailDto dto: r.getData().getPricingDiscountRules()){
                 if(dto.getPackageLimit() != null) {
