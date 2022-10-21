@@ -331,4 +331,8 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "货币金额描述")
     private String currencyDescribe;
+
+     //汪经理要我加的字段（出库业务调整）
+    @ApiModelProperty(value = "预报单号")
+    private String expectedNo;
 }

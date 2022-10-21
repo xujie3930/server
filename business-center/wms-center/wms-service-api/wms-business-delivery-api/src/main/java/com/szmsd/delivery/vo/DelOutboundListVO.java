@@ -176,4 +176,8 @@ public class DelOutboundListVO implements Serializable {
 
     @ApiModelProperty(value = "货币金额描述")
     private String currencyDescribe;
+
+    //预报单号 汪经理要我加的
+    @ApiModelProperty(value = "预报单号")
+    private String expectedNo;
 }
