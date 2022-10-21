@@ -67,7 +67,8 @@
             o.shipments_time,
             o.amazon_logistics_route_id,
             o.house_no,
-            o.currency_describe
+            o.currency_describe,
+            o.expected_no
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
