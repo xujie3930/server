@@ -271,7 +271,8 @@ public final class DelOutboundServiceImplUtil {
                     if (CollectionUtils.isNotEmpty(otherQueryNoList)) {
                         wrapper.in("o.tracking_no", otherQueryNoList)
                                 .or().in("o.ref_no", otherQueryNoList)
-                                .or().in("o.amazon_logistics_route_id", otherQueryNoList);
+                                .or().in("o.amazon_logistics_route_id", otherQueryNoList)
+                                .or().in("o.expected_no", otherQueryNoList);
 
                     }
                     // [or] order_no in (xxx)
