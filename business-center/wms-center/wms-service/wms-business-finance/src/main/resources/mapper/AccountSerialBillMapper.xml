@@ -131,7 +131,7 @@
                 case when
                 (
                 FASB.pay_method in ('EXCHANGE_PAYMENT','WITHDRAW_PAYMENT','BALANCE_DEDUCTIONS','WAREHOUSE_RENT','BUSINESS_OPERATE','SPECIAL_OPERATE')
-                or FASB.business_category in ('补收','增值消费')
+                or FASB.business_category in ('补收','增值消费','仓租')
                 )
                 then abs(FASB.amount) else 0 end
             ) as currentExpenditureAmount
