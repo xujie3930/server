@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.plugin.BasSubCommonPlugin;
 import com.szmsd.bas.plugin.BasSubValueCommonParameter;
+import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.List;
@@ -59,6 +62,8 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
     @Autowired
     private IDelTrackService delTrackService;
 
+    @Resource
+    private BasSellerFeignService basSellerFeignService;
     @Override
     public int shipmentPacking(ShipmentPackingMaterialRequestDto dto) {
         try {
@@ -236,6 +241,22 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             if (null == delOutbound) {
                 throw new CommonException("400", "单据不存在");
             }
+
+
+            //判断是否有自定义尺寸
+            R<BasSellerInfoVO> info = basSellerFeignService.getInfoBySellerCode(delOutbound.getSellerCode());
+            if(info.getData() != null) {
+                BasSellerInfoVO userInfo = R.getDataAndException(info);
+                if(StringUtils.isNotEmpty(userInfo.getDiscountUserType())){
+                    String[] lwh = StringUtils.split(userInfo.getDiscountUserType(), "*");
+                    if(lwh.length >= 3){
+                        dto.setLength(Double.parseDouble(lwh[0]));
+                        dto.setWidth(Double.parseDouble(lwh[1]));
+                        dto.setHeight(Double.parseDouble(lwh[2]));
+                    }
+                }
+            }
+
             if (logger.isInfoEnabled()) {
                 logger.info("======出库单据信息：{}", delOutbound);
             }

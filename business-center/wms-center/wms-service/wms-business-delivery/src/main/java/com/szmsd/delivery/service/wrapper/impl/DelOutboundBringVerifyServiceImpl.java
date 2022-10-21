@@ -599,9 +599,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
         String orderNo = delOutbound.getOrderNo();
         String shipmentService = delOutbound.getShipmentService();
-        if (StringUtils.isEmpty(shipmentService)) {
+       /* if (StringUtils.isEmpty(shipmentService)) {
             throw new CommonException("400", MessageUtil.to("发货服务名称为空", "The delivery service name is empty"));
-        }
+        }*/
         // 查询地址信息
         DelOutboundAddress address = delOutboundWrapperContext.getAddress();
         // 查询sku信息
@@ -806,9 +806,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
         String orderNo = delOutbound.getOrderNo();
         String shipmentService = delOutbound.getAmazonLogisticsRouteId();
-        if (StringUtils.isEmpty(shipmentService)) {
+        /*if (StringUtils.isEmpty(shipmentService)) {
             throw new CommonException("400", MessageUtil.to("发货服务名称为空", "The delivery service name is empty"));
-        }
+        }*/
         // 查询地址信息
         DelOutboundAddress address = delOutboundWrapperContext.getAddress();
         // 查询sku信息

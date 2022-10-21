@@ -8,7 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ExceptionInfoQueryDto  {
+public class ExceptionInfoQueryDto extends QueryDto {
     @ApiModelProperty(value = "异常类型")
     @Excel(name = "异常类型")
     private String exceptionType;
