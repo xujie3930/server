@@ -5,6 +5,8 @@ import cn.afterturn.easypoi.excel.annotation.Excel;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @ApiModel(value = "DelOutboundBatchUpdateTrackingNoEmailDto", description = "DelOutboundBatchUpdateTrackingNoEmailDto")
 public class DelOutboundBatchUpdateTrackingNoEmailDto {
@@ -30,5 +32,11 @@ public class DelOutboundBatchUpdateTrackingNoEmailDto {
 
     //原单号
     private String noTrackingNo;
+
+    //客服邮箱
+
+    private String sellerEmail;
+
+
 
 }

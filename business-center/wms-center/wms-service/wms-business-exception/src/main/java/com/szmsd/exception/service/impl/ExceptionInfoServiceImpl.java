@@ -16,6 +16,7 @@ import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -100,21 +101,42 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
 
     @Override
     //@DataScope("seller_code")
-    public List<ExceptionInfo> selectExceptionInfoPage(ExceptionInfoQueryDto dto) {
-        log.info("开始执行selectExceptionInfoPage查询：{}",dto);
-        List<ExceptionInfo> exceptionInfoList=new ArrayList<>();
+    public TableDataInfo<ExceptionInfo> selectExceptionInfoPage(ExceptionInfoQueryDto dto) {
+
         //客户端
         if (dto.getType()==0) {
+            log.info("开始执行selectExceptionInfoPage查询：{}",dto);
+            List<ExceptionInfo> exceptionInfoList=new ArrayList<>();
             QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
             if (dto.getSellerCode() != null) {
                 List<String> list = Arrays.asList(dto.getSellerCode().split(","));
                 dto.setSellerCodes(list);
             }
             this.handlerQueryCondition(where, dto);
+            int count=baseMapper.selectCount(where);
             where.orderByDesc("create_time");
+            where.last("limit "+(dto.getPageNum()-1)*dto.getPageSize()+","+dto.getPageSize());
 
             exceptionInfoList = baseMapper.selectList(where);
+            if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
+                // 查询异常描述信息
+                List<String> orderNos = exceptionInfoList.stream().map(ExceptionInfo::getOrderNo).collect(Collectors.toList());
+                log.info("开始执行查询DelOutboundListExceptionMessageVO----------");
+                List<DelOutboundListExceptionMessageVO> exceptionMessageList = this.delOutboundClientService.exceptionMessageList(orderNos);
+                log.info("结束执行查询DelOutboundListExceptionMessageVO----------");
+                if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
+                    Map<String, String> exceptionMessageMap = exceptionMessageList.stream().collect(Collectors.toMap(DelOutboundListExceptionMessageVO::getOrderNo, DelOutboundListExceptionMessageVO::getExceptionMessage));
+                    for (ExceptionInfo exceptionInfo : exceptionInfoList) {
+                        exceptionInfo.setExceptionMessage(exceptionMessageMap.get(exceptionInfo.getOrderNo()));
+                    }
+                }
+            }
+            TableDataInfo<ExceptionInfo> table = new TableDataInfo(exceptionInfoList,count);
+            table.setCode(200);
+            return table;
         }else if (dto.getType()==1){
+            log.info("开始执行selectExceptionInfoPage查询：{}",dto);
+            List<ExceptionInfo> exceptionInfoList=new ArrayList<>();
             //pc端
             LoginUser loginUser = SecurityUtils.getLoginUser();
             List<String> sellerCodeList=null;
@@ -134,40 +156,59 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
                 }
 
             }
-//            if (null != loginUser && loginUser.getUsername().equals("admin")){
-//                sellerCodeList=baseMapper.selectsellerCodes();
-//                if (sellerCodeList.size()>0){
-//                    dto.setSellerCodes(sellerCodeList);
-//
-//                }
-//            }
+            if (null != loginUser && loginUser.getUsername().equals("admin")){
+                sellerCodeList=baseMapper.selectsellerCodes();
+                if (sellerCodeList.size()>0){
+                    dto.setSellerCodes(sellerCodeList);
+
+                }
+            }
 
             QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
             if (dto.getSellerCode() != null) {
                 List<String> list = Arrays.asList(dto.getSellerCode().split(","));
                 dto.setSellerCodes(list);
             }
+
             this.handlerQueryCondition(where, dto);
+            int count=baseMapper.selectCount(where);
             where.orderByDesc("create_time");
+            //框架分页失效，手动设置分页值
+            where.last("limit "+(dto.getPageNum()-1)*dto.getPageSize()+","+dto.getPageSize());
             log.info("开始执行查询异常表----------");
             exceptionInfoList = baseMapper.selectList(where);
-            log.info("结束执行查询异常表----------：{}",exceptionInfoList.size());
-        }
-
-        if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
-            // 查询异常描述信息
-            List<String> orderNos = exceptionInfoList.stream().map(ExceptionInfo::getOrderNo).collect(Collectors.toList());
-            log.info("开始执行查询DelOutboundListExceptionMessageVO----------");
-            List<DelOutboundListExceptionMessageVO> exceptionMessageList = this.delOutboundClientService.exceptionMessageList(orderNos);
-            log.info("结束执行查询DelOutboundListExceptionMessageVO----------");
             if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
-                Map<String, String> exceptionMessageMap = exceptionMessageList.stream().collect(Collectors.toMap(DelOutboundListExceptionMessageVO::getOrderNo, DelOutboundListExceptionMessageVO::getExceptionMessage));
-                for (ExceptionInfo exceptionInfo : exceptionInfoList) {
-                    exceptionInfo.setExceptionMessage(exceptionMessageMap.get(exceptionInfo.getOrderNo()));
+                // 查询异常描述信息
+                List<String> orderNos = exceptionInfoList.stream().map(ExceptionInfo::getOrderNo).collect(Collectors.toList());
+                log.info("开始执行查询DelOutboundListExceptionMessageVO----------");
+                List<DelOutboundListExceptionMessageVO> exceptionMessageList = this.delOutboundClientService.exceptionMessageList(orderNos);
+                log.info("结束执行查询DelOutboundListExceptionMessageVO----------");
+                if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
+                    Map<String, String> exceptionMessageMap = exceptionMessageList.stream().collect(Collectors.toMap(DelOutboundListExceptionMessageVO::getOrderNo, DelOutboundListExceptionMessageVO::getExceptionMessage));
+                    for (ExceptionInfo exceptionInfo : exceptionInfoList) {
+                        exceptionInfo.setExceptionMessage(exceptionMessageMap.get(exceptionInfo.getOrderNo()));
+                    }
                 }
             }
+            TableDataInfo<ExceptionInfo> table = new TableDataInfo(exceptionInfoList,count);
+            table.setCode(200);
+            return table;
         }
-        return exceptionInfoList;
+
+//        if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
+//            // 查询异常描述信息
+//            List<String> orderNos = exceptionInfoList.stream().map(ExceptionInfo::getOrderNo).collect(Collectors.toList());
+//            log.info("开始执行查询DelOutboundListExceptionMessageVO----------");
+//            List<DelOutboundListExceptionMessageVO> exceptionMessageList = this.delOutboundClientService.exceptionMessageList(orderNos);
+//            log.info("结束执行查询DelOutboundListExceptionMessageVO----------");
+//            if (CollectionUtils.isNotEmpty(exceptionInfoList)) {
+//                Map<String, String> exceptionMessageMap = exceptionMessageList.stream().collect(Collectors.toMap(DelOutboundListExceptionMessageVO::getOrderNo, DelOutboundListExceptionMessageVO::getExceptionMessage));
+//                for (ExceptionInfo exceptionInfo : exceptionInfoList) {
+//                    exceptionInfo.setExceptionMessage(exceptionMessageMap.get(exceptionInfo.getOrderNo()));
+//                }
+//            }
+//        }
+        return null;
     }
 
     private void handlerQueryCondition(QueryWrapper<ExceptionInfo> where, ExceptionInfoQueryDto dto)  {

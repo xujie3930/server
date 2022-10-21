@@ -187,5 +187,9 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "houseNo")
     private String houseNo;
 
+    //汪经理要我加的字段（出库业务调整）
+    @ApiModelProperty(value = "预报单号")
+    private String expectedNo;
+
 
 }

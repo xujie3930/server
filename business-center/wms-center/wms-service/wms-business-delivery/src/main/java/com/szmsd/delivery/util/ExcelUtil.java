@@ -8,9 +8,7 @@ import com.szmsd.delivery.vo.DelOutboundExportItemListVO;
 import com.szmsd.delivery.vo.DelOutboundExportListVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +110,60 @@ public class ExcelUtil {
         sheetsList.add(DelOutboundExportItemListMap);
 
         Workbook workbook = ExcelExportUtil.exportExcel(sheetsList, ExcelType.HSSF);
+        Sheet sheet= workbook.getSheet("出库单详情");
+
+        //获取第一行数据
+        Row row2 =sheet.getRow(0);
+
+        for (int i=0;i<31;i++){
+            Cell deliveryTimeCell = row2.getCell(i);
+
+            CellStyle styleMain = workbook.createCellStyle();
+
+                styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+
+
+            Font font = workbook.createFont();
+            //true为加粗，默认为不加粗
+            font.setBold(true);
+            //设置字体颜色，颜色和上述的颜色对照表是一样的
+            font.setColor(IndexedColors.WHITE.getIndex());
+            //将字体样式设置到单元格样式中
+            styleMain.setFont(font);
+
+            styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            styleMain.setAlignment(HorizontalAlignment.CENTER);
+            styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+
+            deliveryTimeCell.setCellStyle(styleMain);
+        }
+
+        Sheet sheet1= workbook.getSheet("包裹明细");
+        //获取第一行数据
+        Row row3 =sheet1.getRow(0);
+
+        for (int i=0;i<7;i++){
+            Cell deliveryTimeCell = row3.getCell(i);
+
+            CellStyle styleMain = workbook.createCellStyle();
+
+            styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+
+
+            Font font = workbook.createFont();
+            //true为加粗，默认为不加粗
+            font.setBold(true);
+            //设置字体颜色，颜色和上述的颜色对照表是一样的
+            font.setColor(IndexedColors.WHITE.getIndex());
+            //将字体样式设置到单元格样式中
+            styleMain.setFont(font);
+
+            styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            styleMain.setAlignment(HorizontalAlignment.CENTER);
+            styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+
+            deliveryTimeCell.setCellStyle(styleMain);
+        }
         if (workbook != null){
             downLoadExcel(entity.getTitle(), workbook,filepath);
         }

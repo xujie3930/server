@@ -80,7 +80,7 @@ public class EmailUtil {
      * @param filePath  文件路径
      * @throws MessagingException
      */
-    public void sendAttachmentMail(String to, String subject, String text, String filePath, List<EmailObjectDto> list){
+    public void sendAttachmentMail(String to, String subject, String text, List<EmailObjectDto> list){
 
 
             //邮件对象
@@ -112,7 +112,7 @@ public class EmailUtil {
 
             //发送
             javaMailSender.send(mimeMessage);
-            log.info("【单附件邮件发送成功】收件人：{} 主题：{} 文本内容：{} 文件路径：{}",to,subject,text,filePath);
+            log.info("【单附件邮件发送成功】收件人：{} 主题：{} 文本内容：{} 文件路径：{}",to,subject,text);
 
     }
 

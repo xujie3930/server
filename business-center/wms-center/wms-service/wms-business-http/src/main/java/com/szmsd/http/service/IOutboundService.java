@@ -54,4 +54,5 @@ public interface IOutboundService {
     ResponseVO shipmentMultiboxrelation(ShipmentMultiboxrelationRequestDto dto);
 
     R shipmentBoxtransfer(BulkOrderRequestDto dto);
+
 }

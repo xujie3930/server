@@ -4,6 +4,7 @@ package com.szmsd.bas.dto;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
@@ -29,5 +30,10 @@ public class EmailObjectDto {
     @ColumnWidth(30)
     @ExcelProperty(index = 5, value = "New TrackingNo")
     private String trackingNo;
+
+
+
+
+
 
 }
