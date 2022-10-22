@@ -247,8 +247,8 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
             R<BasSellerInfoVO> info = basSellerFeignService.getInfoBySellerCode(delOutbound.getSellerCode());
             if(info.getData() != null) {
                 BasSellerInfoVO userInfo = R.getDataAndException(info);
-                if(StringUtils.isNotEmpty(userInfo.getDiscountUserType())){
-                    String[] lwh = StringUtils.split(userInfo.getDiscountUserType(), "*");
+                if(StringUtils.isNotEmpty(userInfo.getRulerCustomized())){
+                    String[] lwh = StringUtils.split(userInfo.getRulerCustomized(), "*");
                     if(lwh.length >= 3){
                         dto.setLength(Double.parseDouble(lwh[0]));
                         dto.setWidth(Double.parseDouble(lwh[1]));
