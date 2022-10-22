@@ -218,4 +218,20 @@ public class FssRefundRequest extends BaseEntity {
     @TableField(exist = false)
     private String shipmentRule;
 
+    @ApiModelProperty(value = "计费重")
+    @TableField(exist = false)
+    private BigDecimal calcWeight;
+
+    @ApiModelProperty(value = "实重")
+    @TableField(exist = false)
+    private Double weight;
+
+    @ApiModelProperty(value = "尺寸")
+    @TableField(exist = false)
+    private String specifications;
+
+    @ApiModelProperty(value = "创建时间")
+    @TableField(exist = false)
+    private Date delOucreateTime;
+
 }
