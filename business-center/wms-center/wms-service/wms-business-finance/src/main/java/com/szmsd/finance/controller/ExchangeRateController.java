@@ -37,6 +37,8 @@ public class ExchangeRateController extends FssBaseController {
     @GetMapping("/listPage")
     public TableDataInfo listPage(ExchangeRateDTO dto){
         startPage();
+        String len=getLen();
+        dto.setLen(len);
         List<ExchangeRate> list =exchangeRateService.listPage(dto);
         return getDataTable(list);
     }
