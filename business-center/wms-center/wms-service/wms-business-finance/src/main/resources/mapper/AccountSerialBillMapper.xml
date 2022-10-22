@@ -121,6 +121,14 @@
             <if test="createTimeEnd != null  and createTimeEnd!=''">
                 and a.create_time <![CDATA[ <= ]]> #{createTimeEnd}
             </if>
+
+            <if test="paymentTimeStart != null  and paymentTimeStart!=''">
+                and a.payment_time <![CDATA[ >= ]]> #{paymentTimeStart}
+            </if>
+            <if test="paymentTimeEnd != null  and paymentTimeEnd!=''">
+                and a.payment_time <![CDATA[ <= ]]> #{paymentTimeEnd}
+            </if>
+
             <if test="ids != null  and ids!=''">
                 and FIND_IN_SET(a.id,#{ids})
             </if>

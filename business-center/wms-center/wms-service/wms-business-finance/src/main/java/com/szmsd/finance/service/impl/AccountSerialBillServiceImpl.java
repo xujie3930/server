@@ -110,6 +110,15 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             dto.setCreateTimeEnd(billEndTime);
         }
 
+        if(StringUtils.isNotBlank(dto.getPaymentTimeStart())) {
+            String billStartTime = dto.getPaymentTimeStart() + " 00:00:00";
+            dto.setPaymentTimeStart(billStartTime);
+        }
+        if(StringUtils.isNotBlank(dto.getPaymentTimeEnd())) {
+            String billEndTime = dto.getPaymentTimeEnd() + " 23:59:59";
+            dto.setPaymentTimeEnd(billEndTime);
+        }
+
         List<AccountSerialBill> accountSerialBills = accountSerialBillMapper.selectPageList(dto);
         // 修改下单时间等信息
         showProcess(accountSerialBills);
@@ -379,6 +388,15 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             dto.setCreateTimeEnd(billEndTime);
         }
 
+        if(StringUtils.isNotBlank(dto.getPaymentTimeStart())) {
+            String billStartTime = dto.getPaymentTimeStart() + " 00:00:00";
+            dto.setPaymentTimeStart(billStartTime);
+        }
+        if(StringUtils.isNotBlank(dto.getPaymentTimeEnd())) {
+            String billEndTime = dto.getPaymentTimeEnd() + " 23:59:59";
+            dto.setPaymentTimeEnd(billEndTime);
+        }
+
         return accountSerialBillMapper.findBillCurrencyData(dto);
     }
 
@@ -393,6 +411,15 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         if(StringUtils.isNotBlank(dto.getCreateTimeEnd())) {
             String billEndTime = dto.getCreateTimeEnd() + " 23:59:59";
             dto.setCreateTimeEnd(billEndTime);
+        }
+
+        if(StringUtils.isNotBlank(dto.getPaymentTimeStart())) {
+            String billStartTime = dto.getPaymentTimeStart() + " 00:00:00";
+            dto.setPaymentTimeStart(billStartTime);
+        }
+        if(StringUtils.isNotBlank(dto.getPaymentTimeEnd())) {
+            String billEndTime = dto.getPaymentTimeEnd() + " 23:59:59";
+            dto.setPaymentTimeEnd(billEndTime);
         }
 
         List<AccountSerialBillTotalVO> accountSerialBillTotalVOS = accountSerialBillMapper.selectBillTotal(dto);
@@ -413,6 +440,15 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         if(StringUtils.isNotBlank(dto.getCreateTimeEnd())) {
             String billEndTime = dto.getCreateTimeEnd() + " 23:59:59";
             dto.setCreateTimeEnd(billEndTime);
+        }
+
+        if(StringUtils.isNotBlank(dto.getPaymentTimeStart())) {
+            String billStartTime = dto.getPaymentTimeStart() + " 00:00:00";
+            dto.setPaymentTimeStart(billStartTime);
+        }
+        if(StringUtils.isNotBlank(dto.getPaymentTimeEnd())) {
+            String billEndTime = dto.getPaymentTimeEnd() + " 23:59:59";
+            dto.setPaymentTimeEnd(billEndTime);
         }
 
         List<AccountSerialBillExcelVO> accountSerialBillTotalVOS = accountSerialBillMapper.exportData(dto);

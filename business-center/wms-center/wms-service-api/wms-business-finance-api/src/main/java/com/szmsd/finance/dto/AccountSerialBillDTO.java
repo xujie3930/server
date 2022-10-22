@@ -113,11 +113,17 @@ public class AccountSerialBillDTO {
     @ApiModelProperty(value = "结算时间")
     private Date paymentTime;
 
-    @ApiModelProperty(value = "计算时间开始")
+    @ApiModelProperty(value = "时间开始")
     private String createTimeStart;
 
-    @ApiModelProperty(value = "计算时间结束")
+    @ApiModelProperty(value = "时间结束")
     private String createTimeEnd;
+
+    @ApiModelProperty(value = "结算开始时间")
+    private String paymentTimeStart;
+
+    @ApiModelProperty(value = "结算结束时间")
+    private String paymentTimeEnd;
 
     @ApiModelProperty(value = "备注")
     private String remark;
