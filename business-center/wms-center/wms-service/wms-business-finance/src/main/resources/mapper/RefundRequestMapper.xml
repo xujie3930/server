@@ -127,6 +127,6 @@
     </select>
 
     <select id="selectOutbounds" resultType="java.util.Map" parameterType="java.lang.String">
-        SELECT tracking_no as trackingNo,shipment_rule as shipmentRule from del_outbound where order_no=#{orderNo}
+        SELECT tracking_no as trackingNo,shipment_rule as shipmentRule,calc_weight as calcWeight,weight,specifications,create_time as createTime  from del_outbound where order_no=#{orderNo}
     </select>
 </mapper>
