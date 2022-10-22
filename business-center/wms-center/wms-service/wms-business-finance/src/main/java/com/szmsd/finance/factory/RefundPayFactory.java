@@ -1,7 +1,9 @@
 package com.szmsd.finance.factory;
 
+import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.domain.AccountSerialBill;
@@ -153,9 +155,18 @@ public class RefundPayFactory extends AbstractPayFactory {
                 }
             }
 
+                String serialNumber = createSerialNumber();
+                accountSerialBill.setSerialNumber(serialNumber);
+
                 accountSerialBillService.save(accountSerialBill);
-            //accountSerialBillService.add(serialBill);
         });
+    }
+
+    private String createSerialNumber(){
+
+        String s = DateUtils.dateTime();
+        String randomNums = RandomUtil.randomNumbers(8);
+        return s + randomNums;
     }
 
 }
