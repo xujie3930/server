@@ -476,7 +476,8 @@
 
     <select id="findBillCurrencyData"  resultType="com.szmsd.finance.dto.AccountBalanceBillCurrencyVO" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
         select  a.currency_code as currencyCode,
-                sum(a.amount) as amount
+            sum(
+            case when (a.business_category like '%费%' or a.charge_type like '%费%' or a.business_category like '%税%' or a.charge_type like '%税%' or a.charge_type like '%包材%') then 0-a.amount else a.amount end) as amount
         from fss_account_serial_bill as a
         <include refid="SelectSerialBillWhere"/>
         group by a.currency_code

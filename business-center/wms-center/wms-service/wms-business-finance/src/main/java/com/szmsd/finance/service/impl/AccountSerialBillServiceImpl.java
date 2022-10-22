@@ -364,6 +364,16 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             }
         }
 
+        if(StringUtils.isNotBlank(dto.getCreateTimeStart())) {
+            String billStartTime = dto.getCreateTimeStart() + " 00:00:00";
+            dto.setCreateTimeStart(billStartTime);
+        }
+
+        if(StringUtils.isNotBlank(dto.getCreateTimeEnd())) {
+            String billEndTime = dto.getCreateTimeEnd() + " 23:59:59";
+            dto.setCreateTimeEnd(billEndTime);
+        }
+
         return accountSerialBillMapper.findBillCurrencyData(dto);
     }
 
