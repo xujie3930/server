@@ -37,7 +37,7 @@ import java.util.*;
  */
 @Service
 @Slf4j
-public class ExchangeRateServiceImpl implements IExchangeRateService {
+public class ExchangeRateServiceImpl implements IExchangeRateService  {
 
     @Autowired
     private ExchangeRateMapper exchangeRateMapper;
@@ -50,6 +50,7 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
 
     @Override
     public List<ExchangeRate> listPage(ExchangeRateDTO dto) {
+
         LambdaQueryWrapper<ExchangeRate> queryWrapper = Wrappers.lambdaQuery();
         if(StringUtils.isNotEmpty(dto.getExchangeFromCode())) {
             queryWrapper.eq(ExchangeRate::getExchangeFromCode, dto.getExchangeFromCode());
@@ -59,7 +60,19 @@ public class ExchangeRateServiceImpl implements IExchangeRateService {
         }
 //        queryWrapper.and(v -> v.gt(ExchangeRate::getExpireTime,new Date()).or().isNull(ExchangeRate::getExpireTime));
 //        queryWrapper.orderByDesc(ExchangeRate::getCreateTime);
-        return exchangeRateMapper.listPage(queryWrapper);
+
+        List<ExchangeRate> list=exchangeRateMapper.listPage(queryWrapper);
+        list.forEach(x-> {
+            if (dto.getLen().equals("en")) {
+                x.setExchangeFrom(x.getExchangeFromCode());
+                x.setExchangeTo(x.getExchangeToCode());
+            } else if (dto.getLen().equals("zh")) {
+                x.setExchangeFrom(x.getExchangeFrom());
+                x.setExchangeTo(x.getExchangeTo());
+            }
+        });
+
+        return list;
     }
 
     @Override

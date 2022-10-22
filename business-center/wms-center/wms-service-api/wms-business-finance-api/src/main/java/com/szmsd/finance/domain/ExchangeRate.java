@@ -28,11 +28,11 @@ public class ExchangeRate extends FssBaseEntity {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, nameField = "exchangeFrom", code = "008", cp = BasSubValueCommonParameter.class)
+//    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, nameField = "exchangeFrom", code = "008", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "原币别id")
     private String exchangeFromCode;
 
-    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, nameField = "exchangeTo", code = "008", cp = BasSubValueCommonParameter.class)
+//    @AutoFieldValue(supports = BasSubCommonPlugin.SUPPORTS, nameField = "exchangeTo", code = "008", cp = BasSubValueCommonParameter.class)
     @ApiModelProperty(value = "现币别id")
     private String exchangeToCode;
 
