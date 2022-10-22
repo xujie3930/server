@@ -42,4 +42,7 @@ public class ExchangeRateDTO implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "失效时间")
     private Date expireTime;
+
+    @ApiModelProperty(value = "语言")
+   private String len;
 }

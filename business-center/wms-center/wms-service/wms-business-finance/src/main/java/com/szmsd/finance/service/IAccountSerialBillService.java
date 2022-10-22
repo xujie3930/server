@@ -5,6 +5,7 @@ import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountBalanceBillCurrencyVO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.finance.vo.AccountSerialBillExcelVO;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -35,4 +36,6 @@ public interface IAccountSerialBillService extends IService<AccountSerialBill> {
     List<AccountBalanceBillCurrencyVO> findBillCurrencyData(AccountSerialBillDTO dto);
 
     void exportBillTotal(HttpServletResponse response, AccountSerialBillDTO dto);
+
+    List<AccountSerialBillExcelVO> exportData(AccountSerialBillDTO dto);
 }
