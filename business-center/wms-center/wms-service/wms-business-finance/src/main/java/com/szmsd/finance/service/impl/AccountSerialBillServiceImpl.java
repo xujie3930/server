@@ -26,6 +26,7 @@ import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.mapper.ChargeRelationMapper;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.service.ISysDictDataService;
+import com.szmsd.finance.vo.AccountSerialBillExcelVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
@@ -395,6 +396,24 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         ExcelUtil<AccountSerialBillTotalVO> util = new ExcelUtil<>(AccountSerialBillTotalVO.class);
         util.exportExcel(response,accountSerialBillTotalVOS,"业务明细汇总");
 
+    }
+
+    @Override
+    public List<AccountSerialBillExcelVO> exportData(AccountSerialBillDTO dto) {
+
+        if(StringUtils.isNotBlank(dto.getCreateTimeStart())) {
+            String billStartTime = dto.getCreateTimeStart() + " 00:00:00";
+            dto.setCreateTimeStart(billStartTime);
+        }
+
+        if(StringUtils.isNotBlank(dto.getCreateTimeEnd())) {
+            String billEndTime = dto.getCreateTimeEnd() + " 23:59:59";
+            dto.setCreateTimeEnd(billEndTime);
+        }
+
+        List<AccountSerialBillExcelVO> accountSerialBillTotalVOS = accountSerialBillMapper.exportData(dto);
+
+        return accountSerialBillTotalVOS;
     }
 
 

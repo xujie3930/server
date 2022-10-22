@@ -8,6 +8,7 @@ import com.szmsd.finance.dto.AccountBalanceBillCurrencyVO;
 import com.szmsd.finance.dto.AccountBalanceBillResultDTO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.AccountSerialBillNatureDTO;
+import com.szmsd.finance.vo.AccountSerialBillExcelVO;
 import com.szmsd.finance.vo.BillBusinessTotalVO;
 import com.szmsd.finance.vo.BillDirectDeliveryTotalVO;
 import com.szmsd.finance.vo.EleBillQueryVO;
@@ -49,4 +50,6 @@ public interface AccountSerialBillMapper extends BaseMapper<AccountSerialBill> {
     List<AccountBalanceBillCurrencyVO> findBillCurrencyData(AccountSerialBillDTO dto);
 
     List<AccountSerialBillTotalVO> selectBillTotal(AccountSerialBillDTO dto);
+
+    List<AccountSerialBillExcelVO> exportData(AccountSerialBillDTO dto);
 }
