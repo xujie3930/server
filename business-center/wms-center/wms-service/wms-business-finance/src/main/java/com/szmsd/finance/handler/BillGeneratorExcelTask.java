@@ -166,7 +166,12 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
 
             String f = filePath + fileName;
             File file = new File(f);
-            ExcelUtil.exportFile(file,"bas",titleDataMap,"bill",sheetAndDataMap,"business",otherAndDataMap,inputStream);
+
+            //需要合并的列
+            int [] mergeCollindex = {0,1,2};
+            //从第一行开始
+            int mergeRowIndex = 20;
+            ExcelUtil.exportFile(file,"bas",titleDataMap,"bill",sheetAndDataMap,"business",otherAndDataMap,inputStream,mergeRowIndex,mergeCollindex);
 
             String fileUrl = requestUrl + f;
 

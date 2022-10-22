@@ -3,6 +3,7 @@ package com.szmsd.http.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.http.dto.*;
+import com.szmsd.http.service.ICarrierService;
 import com.szmsd.http.service.IOutboundService;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
 import com.szmsd.http.vo.ResponseVO;
@@ -26,6 +27,9 @@ public class OutboundController extends BaseController {
     @Autowired
     private IOutboundService outboundService;
 
+    @Autowired
+    private ICarrierService carrierService;
+
     @PostMapping("/shipment")
     @ApiOperation(value = "出库管理 - HTTP - #C1 创建出库单", position = 100)
     @ApiImplicitParam(name = "dto", value = "CreateShipmentRequestDto", dataType = "CreateShipmentRequestDto")
@@ -46,6 +50,15 @@ public class OutboundController extends BaseController {
     public R<ResponseVO> shipmentTracking(@RequestBody ShipmentTrackingChangeRequestDto dto) {
         return R.ok(outboundService.shipmentTracking(dto));
     }
+
+
+    @GetMapping("/shipment/shipmentOrderRealResult")
+    @ApiOperation(value = "出库管理 - HTTP - # 根据参考号返回真实的挂号和标签数据", position = 300)
+    @ApiImplicitParam(name = "dto", value = "referenceNumber", dataType = "referenceNumber")
+    public R<ShipmentOrderResult> shipmentOrderRealResult(@RequestBody String referenceNumber) {
+        return carrierService.shipmentOrderRealResult(referenceNumber);
+    }
+
 
     @PutMapping("/shipment/label")
     @ApiOperation(value = "出库管理 - HTTP - #C4 更新出库单标签", position = 400)

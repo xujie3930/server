@@ -45,6 +45,7 @@ public class ThreadPoolExecutorConfiguration {
     public static final String THREADPOOLEXECUTOR_THIRDPARTY = "ThreadPoolExecutor-ThirdParty";
 
     public static final String THREADPOOLEXECUTOR_WMS = "ThreadPoolExecutor-WMS";
+    public static final String THREADPOOLEXECUTOR_CARRIER = "ThreadPoolExecutor-Carrier";
 
 
     /**
@@ -237,6 +238,23 @@ public class ThreadPoolExecutorConfiguration {
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         return threadPoolExecutor;
     }
+    @Bean(THREADPOOLEXECUTOR_CARRIER)
+    public ThreadPoolExecutor threadPoolExecutorCARRIER() {
+        // 核心线程数量
+        int corePoolSize = availableProcessors * 4;
+        int maximumPoolSize = availableProcessors * 4;
+        // 队列
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(2048);
+        // 核心和最大一致
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 10, TimeUnit.SECONDS, queue);
+        // 线程池工厂
+        NamedThreadFactory threadFactory = new NamedThreadFactory("DelOutbound-Carrier", false);
+        threadPoolExecutor.setThreadFactory(threadFactory);
+        // 丢弃任务并抛出RejectedExecutionException异常
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        return threadPoolExecutor;
+    }
+
 
 
     @Bean(THREADPOOLEXECUTOR_DELOUTBOUND_SHIPPED)

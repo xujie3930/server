@@ -16,11 +16,17 @@ import com.szmsd.http.dto.grade.GradeMainDto;
 import com.szmsd.http.service.IHttpDiscountService;
 import com.szmsd.http.service.http.SaaSPricedRequest;
 import com.szmsd.http.util.HttpResponseVOUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class DiscountServiceImpl extends SaaSPricedRequest implements IHttpDiscountService {
+
+    @Value("${thread.carrierTimes}")
+    private int carrierTimes;
 
     public DiscountServiceImpl(HttpConfig httpConfig) {
         super(httpConfig);
@@ -29,8 +35,20 @@ public class DiscountServiceImpl extends SaaSPricedRequest implements IHttpDisco
 
     @Override
     public R<DiscountMainDto> detailResult(String id) {
-        R<DiscountMainDto> r = HttpResponseVOUtils.transformation(httpGetBody("", "discount.detailResult", null, id), DiscountMainDto.class);
+
+        log.info("开始访问 discount.detailResult : {} ",id);
+
+        long current = System.currentTimeMillis();
+
+        R<DiscountMainDto> r = HttpResponseVOUtils.transformation(httpGetBody("", "discount.detailResult", carrierTimes,null, id), DiscountMainDto.class);
+        long end = System.currentTimeMillis();
+        long su = current - end;
+        log.info("结束访问 discount.detailResult : {},{} ",id,r.getCode());
+        log.info("结束执行时间 : {} 毫秒",su);
         if(r.getCode() == 200 && r.getData() != null && r.getData().getPricingDiscountRules() != null){
+
+            log.info("discount.detailResult : {}",r.getData());
+
             for(DiscountDetailDto dto: r.getData().getPricingDiscountRules()){
                 if(dto.getPackageLimit() != null) {
                     if (dto.getPackageLimit().getMinPackingLimit() != null) {
