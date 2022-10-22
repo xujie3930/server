@@ -515,7 +515,8 @@
             a.warehouse_name AS warehouseName,
             a.`business_category` AS businessCategory,
             a.charge_category AS chargeCategory,
-            SUM( a.amount ) AS amount,
+        sum(
+        case when (a.business_category like '%费%' or a.charge_type like '%费%' or a.business_category like '%税%' or a.charge_type like '%税%' or a.charge_type like '%包材%') then 0-a.amount else a.amount end) as amount,
             a.currency_code AS currencyCode,
             a.currency_name as currencyName
         FROM
