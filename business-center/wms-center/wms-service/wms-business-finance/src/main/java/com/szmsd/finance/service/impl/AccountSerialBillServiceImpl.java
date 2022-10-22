@@ -287,6 +287,10 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                     }
                 }
             }
+
+            String serialNumber = this.createSerialNumber();
+            value.setSerialNumber(serialNumber);
+
             return value;
         }).collect(Collectors.toList());
         boolean b = this.saveBatch(collect);
