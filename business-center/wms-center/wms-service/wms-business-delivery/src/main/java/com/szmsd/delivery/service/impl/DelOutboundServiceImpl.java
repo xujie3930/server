@@ -44,6 +44,7 @@ import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
@@ -61,14 +62,7 @@ import com.szmsd.delivery.mapper.BasFileMapper;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.mapper.DelOutboundTarckErrorMapper;
 import com.szmsd.delivery.mapper.DelOutboundTarckOnMapper;
-import com.szmsd.delivery.service.IDelOutboundAddressService;
-import com.szmsd.delivery.service.IDelOutboundChargeService;
-import com.szmsd.delivery.service.IDelOutboundCombinationService;
-import com.szmsd.delivery.service.IDelOutboundCompletedService;
-import com.szmsd.delivery.service.IDelOutboundDetailService;
-import com.szmsd.delivery.service.IDelOutboundDocService;
-import com.szmsd.delivery.service.IDelOutboundPackingService;
-import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
@@ -227,6 +221,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private ChargeFeignService chargeFeignService;
     @Resource
     private BasSellerFeignService basSellerFeignService;
+
+    @Autowired
+    private BasShipmenRulesService basShipmenRulesService;
     /**
      * 查询出库单模块
      *
@@ -2237,7 +2234,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 DelOutboundOperationLogEnum.HANDLER.listener(delOutbound);
                 if (DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(delOutbound.getState())) {
                     // 仓库发货，调用完成的接口
-                    this.delOutboundAsyncService.completed(delOutbound.getOrderNo());
+                    this.delOutboundAsyncService.completed(delOutbound.getOrderNo(), null);
                     result++;
                 } else if (DelOutboundStateEnum.WHSE_CANCELLED.getCode().equals(delOutbound.getState())) {
                     // 仓库取消，调用取消的接口
@@ -2263,7 +2260,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         int result;
         if (DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(delOutbound.getState())) {
             // 仓库发货，调用完成的接口
-            this.delOutboundAsyncService.completed(delOutbound.getOrderNo());
+            this.delOutboundAsyncService.completed(delOutbound.getOrderNo(), null);
             result = 1;
         } else if (DelOutboundStateEnum.WHSE_CANCELLED.getCode().equals(delOutbound.getState())) {
             // 仓库取消，调用取消的接口
@@ -2561,6 +2558,58 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
 
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean serviceChannelNamePushWMS(DelOutbound delOutbound, DelOutbound updateDelOutbound) {
+
+
+        BasShipmentRulesDto paramBasShipmentRulesDto = new BasShipmentRulesDto();
+        paramBasShipmentRulesDto.setCustomCode(delOutbound.getSellerCode());
+        paramBasShipmentRulesDto.setServiceChannelName(delOutbound.getShipmentService());
+        paramBasShipmentRulesDto.setDelFlag("1");
+        List<BasShipmentRules> list = basShipmenRulesService.selectBasShipmentRules(paramBasShipmentRulesDto);
+        if(list.isEmpty()){
+            return false;
+        }
+
+        //直接变成仓库发货状态
+        updateDelOutbound.setState(DelOutboundStateEnum.WHSE_COMPLETED.getCode());
+        updateDelOutbound.setExceptionState(DelOutboundExceptionStateEnum.NORMAL.getCode());
+        // 清空异常信息
+        updateDelOutbound.setExceptionMessage("");
+        // 设置提审时间
+        updateDelOutbound.setBringVerifyTime(new Date());
+
+
+
+        updateDelOutbound.setOperationTime(new Date());
+        updateDelOutbound.setOperationType(DelOutboundOperationTypeEnum.SHIPPED.getCode());
+
+        this.updateById(updateDelOutbound);
+        // 增加出库单已完成记录，异步处理，定时任务
+
+        Date pushDate = DateUtils.parseDate(DateUtil.format(new Date(), "yyyy-MM-dd") + " " + list.get(0).getPushDate());
+        if(pushDate.getTime() > System.currentTimeMillis()){
+            //推送时间大于当前时间的明日推送
+            pushDate = DateUtils.parseDate(DateUtil.format(tomorrow(new Date()), "yyyy-MM-dd") + " " + list.get(0).getPushDate());
+        }
+        this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPPED.getCode(), pushDate);
+
+        return true;
+    }
+    public static Date tomorrow(Date today) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(today);
+        calendar.set(Calendar.DATE, calendar.get(Calendar.DATE) + 1);
+        return calendar.getTime();
+    }
+    public static void main(String[] args) {
+        System.out.println(DateUtil.format(new Date(), "yyyy-MM-dd"));
+        System.out.println(DateUtils.parseDate(("2022-10-24 08:20")));
+
+    }
+
     public static List<String> splitToArray(String text, String split) {
         String[] arr = text.split(split);
         if (arr.length == 0) {

@@ -310,10 +310,14 @@ public class ExceptionInfoController extends BaseController {
                         styleMain1.setRightBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
 
                         styleMain1.setAlignment(HorizontalAlignment.CENTER);
-                        if (x == 18-a||x==19-a) {
+                        if (x==18-a){
+                            styleMain1.setHidden(true);
+                        }
+                        if (x==19-a) {
 
                             styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
                             styleMain1.setLocked(true);
+
                         } else {
                             styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
                             styleMain1.setLocked(false);
@@ -325,6 +329,7 @@ public class ExceptionInfoController extends BaseController {
             }
         }
         sheet.protectSheet("123456");
+        sheet.setColumnHidden(18,true);
         try {
             String fileName="异常通知中心_异常导出"+System.currentTimeMillis();
             URLEncoder.encode(fileName, "UTF-8");
@@ -492,7 +497,7 @@ public class ExceptionInfoController extends BaseController {
 
                                     }
                                 } else {
-                                    errorList.add("第" + (finalI + 1) + "行，" + dto.getExceptionNo() + "操作失败，不符合条件");
+                                    errorList.add("第" + (finalI + 1) + "行，" + dto.getExceptionNo() + "导入数据在异常表里面必须类型为待处理，单类型为出库单，异常类型可以为（出库-获取挂号失败，出库-超重件，出库-超规格件）");
                                     failSize.incrementAndGet();
                                 }
                             } catch (Exception e) {
@@ -551,7 +556,7 @@ public class ExceptionInfoController extends BaseController {
 
                                 }
                             } else {
-                                errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "操作失败，不符合条件");
+                                errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "导入数据在异常表里面必须类型为待处理，单类型为出库单，异常类型可以为（出库-获取挂号失败，出库-超重件，出库-超规格件）");
                                 failSize.incrementAndGet();
                             }
 

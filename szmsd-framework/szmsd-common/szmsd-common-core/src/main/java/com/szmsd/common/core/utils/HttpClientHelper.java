@@ -295,6 +295,35 @@ public class HttpClientHelper {
         return execute(new HttpGet(url), requestBody, headerMap);
     }
 
+    public static HttpResponseBody httpGets(String url, String requestBody, Map<String, String> headerMap) {
+        // get参数兼容
+//        if (null != requestBody) {
+//            StringBuilder paramsBuilder = new StringBuilder();
+//            if (url.lastIndexOf("?") == -1) {
+//                paramsBuilder.append("?");
+//            }
+//            JSONObject jsonObject = JSON.parseObject(requestBody);
+//            if (null != jsonObject) {
+//                for (String key : jsonObject.keySet()) {
+//                    try {
+//                        paramsBuilder.append(key)
+//                                .append("=")
+//                                .append(URLEncoder.encode(jsonObject.getString(key), "utf-8"))
+//                                .append("&");
+//                    } catch (UnsupportedEncodingException e) {
+//                        log.error(e.getMessage(), e);
+//                    }
+//                }
+//                paramsBuilder.deleteCharAt(paramsBuilder.length() - 1);
+//                url = url + paramsBuilder.toString();
+//            }
+//        }
+        log.error("获取token的地址,用于页面登录：{}",url);
+        return execute(new HttpGet(url), requestBody, headerMap);
+    }
+
+
+
     public static String builderGetParams(String requestBody) {
         // get参数兼容
         if (null != requestBody) {

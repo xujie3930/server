@@ -7,7 +7,7 @@
     <result column="product_code" property="productCode" jdbcType="VARCHAR" />
     <result column="product_name" property="productName" jdbcType="VARCHAR" />
     <result column="service_channel_name" property="serviceChannelName" jdbcType="VARCHAR" />
-    <result column="push_date" property="pushDate" jdbcType="TIMESTAMP" />
+    <result column="push_date" property="pushDate" jdbcType="VARCHAR" />
     <result column="create_by" property="createBy" jdbcType="VARCHAR" />
     <result column="create_by_name" property="createByName" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
@@ -39,6 +39,9 @@
       <if test="productCode !=null">
       and  product_code =#{productCode}
       </if>
+      <if test="serviceChannelName !=null">
+        and  service_channel_name =#{serviceChannelName}
+      </if>
     </where>
 
   </select>
@@ -56,7 +59,7 @@
       update_by, update_by_name, update_time, 
       remark, del_flag)
     values (#{id,jdbcType=INTEGER}, #{customCode,jdbcType=VARCHAR}, #{productCode,jdbcType=VARCHAR}, 
-      #{productName,jdbcType=VARCHAR}, #{serviceChannelName,jdbcType=VARCHAR}, #{pushDate,jdbcType=TIMESTAMP}, 
+      #{productName,jdbcType=VARCHAR}, #{serviceChannelName,jdbcType=VARCHAR}, #{pushDate,jdbcType=VARCHAR},
       #{createBy,jdbcType=VARCHAR}, #{createByName,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
       #{updateBy,jdbcType=VARCHAR}, #{updateByName,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP}, 
       #{remark,jdbcType=VARCHAR}, #{delFlag,jdbcType=CHAR})
@@ -124,7 +127,7 @@
         #{serviceChannelName,jdbcType=VARCHAR},
       </if>
       <if test="pushDate != null" >
-        #{pushDate,jdbcType=TIMESTAMP},
+        #{pushDate,jdbcType=VARCHAR},
       </if>
       <if test="createBy != null" >
         #{createBy,jdbcType=VARCHAR},
@@ -168,7 +171,7 @@
         service_channel_name = #{serviceChannelName,jdbcType=VARCHAR},
       </if>
       <if test="pushDate != null" >
-        push_date = #{pushDate,jdbcType=TIMESTAMP},
+        push_date = #{pushDate,jdbcType=VARCHAR},
       </if>
       <if test="createBy != null" >
         create_by = #{createBy,jdbcType=VARCHAR},
@@ -203,7 +206,7 @@
       product_code = #{productCode,jdbcType=VARCHAR},
       product_name = #{productName,jdbcType=VARCHAR},
       service_channel_name = #{serviceChannelName,jdbcType=VARCHAR},
-      push_date = #{pushDate,jdbcType=TIMESTAMP},
+      push_date = #{pushDate,jdbcType=VARCHAR},
       create_by = #{createBy,jdbcType=VARCHAR},
       create_by_name = #{createByName,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=TIMESTAMP},
