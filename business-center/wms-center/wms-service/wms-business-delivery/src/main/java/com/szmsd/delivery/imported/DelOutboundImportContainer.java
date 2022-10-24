@@ -2,6 +2,7 @@ package com.szmsd.delivery.imported;
 
 import cn.hutool.core.date.DateUtil;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundConstant;
@@ -24,6 +25,7 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
     private final Map<Integer, List<DelOutboundDetailImportDto2>> detailMapList;
     private final ImportValidationData importValidationData;
     private final String sellerCode;
+    private final Map<String, BaseProduct> productMap;
 
     public DelOutboundImportContainer(List<DelOutboundImportDto> dataList,
                                       List<BasSubWrapperVO> orderTypeList,
@@ -31,12 +33,14 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
                                       List<BasSubWrapperVO> deliveryMethodList,
                                       List<DelOutboundDetailImportDto2> detailList,
                                       ImportValidationData importValidationData,
-                                      String sellerCode) {
+                                      String sellerCode
+            , Map<String, BaseProduct> productMap) {
         super(dataList, orderTypeList, countryList, deliveryMethodList);
         this.detailList = detailList;
         this.detailMapList = this.detailToMapList();
         this.importValidationData = importValidationData;
         this.sellerCode = sellerCode;
+        this.productMap = productMap;
     }
 
     public List<DelOutboundDto> get() {
@@ -114,6 +118,15 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
         for (DelOutboundDetailImportDto2 dto2 : list) {
             DelOutboundDetailDto detail = new DelOutboundDetailDto();
             String sku = dto2.getSku();
+
+            if(productMap !=null && productMap.containsKey(detail.getSku())){
+                // 一件代发带出sku 的中英文，以及申报价值
+                BaseProduct product =  productMap.get(detail.getSku());
+                detail.setProductName(product.getProductName());
+                detail.setProductNameChinese(product.getProductNameChinese());
+                detail.setDeclaredValue(product.getDeclaredValue());
+            }
+
             detail.setSku(sku);
             detail.setQty(Long.valueOf(dto2.getQty()));
             InventoryAvailableListVO vo = this.importValidationData.get(warehouseCode, sku);

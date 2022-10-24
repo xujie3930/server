@@ -99,4 +99,14 @@ public class CarrierServiceImpl extends SaaSCarrierServiceAdminRequest implement
 
         }
     }
+
+    @Override
+    public R submission(ShipmentOrderSubmissionParam submission) {
+        HttpResponseBody hrb = httpPostBody("", "shipment-order.submission", submission);
+        if (HttpStatus.SC_OK == hrb.getStatus()) {
+            return HttpResponseVOUtils.transformation(hrb, ShipmentOrderSubmission.class);
+        }else{
+            return HttpResponseVOUtils.transformation(hrb, ErrorDataDto.class);
+        }
+    }
 }
