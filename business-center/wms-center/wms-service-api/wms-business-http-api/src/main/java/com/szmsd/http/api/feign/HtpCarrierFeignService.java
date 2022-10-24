@@ -25,4 +25,8 @@ public interface HtpCarrierFeignService {
 
     @GetMapping("/api/carrier/http/label")
     R<ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails>> label(@RequestBody CreateShipmentOrderCommand command);
+
+
+    @PostMapping("/api/carrier/http/submission")
+    R submission(@RequestBody ShipmentOrderSubmissionParam param);
 }

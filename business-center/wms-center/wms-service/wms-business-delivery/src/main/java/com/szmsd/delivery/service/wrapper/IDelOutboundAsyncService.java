@@ -55,7 +55,7 @@ public interface IDelOutboundAsyncService {
      *
      * @param orderNo orderNo
      */
-    void completed(String orderNo);
+    void completed(String orderNo, String type);
 
     /**
      * 出库单取消

@@ -9,6 +9,7 @@ import com.szmsd.http.dto.discount.MergeDiscountDto;
 import com.szmsd.http.dto.discount.UpdateDiscountCustomDto;
 import com.szmsd.http.dto.discount.UpdateDiscountDetailDto;
 import com.szmsd.http.service.IHttpDiscountService;
+import com.szmsd.http.dto.discount.DiscountPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +41,12 @@ public class HttpDiscountController extends BaseController {
     @ApiOperation(value = "获取折扣方案明细信息")
     public R detailResult(@RequestBody String id) {
         return httpDiscountService.detailResult(id);
+    }
+
+    @PostMapping("/detailResultPage")
+    @ApiOperation(value = "获取折扣方案明细信息分页")
+    public R detailResultPage(@RequestBody DiscountPage discountPage) {
+        return httpDiscountService.detailResultPage(discountPage);
     }
 
 

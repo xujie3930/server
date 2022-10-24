@@ -39,7 +39,7 @@ public class BasShipmentRules extends BaseEntity {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "推送时间")
-    private Date pushDate;
+    private String pushDate;
 
     @ApiModelProperty(value = "创建人编号")
     private String createBy;

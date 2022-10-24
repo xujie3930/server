@@ -2,6 +2,7 @@ package com.szmsd.delivery.service.wrapper.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TimeInterval;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -36,6 +37,8 @@ import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.http.api.feign.HtpCarrierFeignService;
+import com.szmsd.http.dto.ShipmentOrderSubmissionParam;
 import com.szmsd.http.dto.TaskConfigInfo;
 import com.szmsd.http.enums.HttpRechargeConstants;
 import com.szmsd.http.util.DomainInterceptorUtil;
@@ -120,6 +123,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private IDelTrackService delTrackService;
     @Autowired
     private ExceptionInfoFeignService exceptionInfoFeignService;
+
+    @Autowired
+    private HtpCarrierFeignService htpCarrierFeignService;
     @Override
     public int shipmentPacking(Long id) {
         return this.shipmentPacking(id, true);
@@ -286,7 +292,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     }
 
     @Override
-    public void completed(String orderNo) {
+    public void completed(String orderNo, String type) {
         // 处理阶段
         // 1.扣减库存              DE
         // 2.1扣减费用             FEE_DE
@@ -567,6 +573,21 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             .setTrackingStatus("WarehouseShipped")
                             .setDescription("DMF, Departure Scan"));
 
+                    if(StringUtils.equals(type, "pushDate")){
+                        //不调用wms的订单
+                        ShipmentOrderSubmissionParam param = new ShipmentOrderSubmissionParam();
+                        param.setReferenceNumber(""+delOutbound.getId());
+                        try {
+                            //回写状态提交承运商物流订单（客户端）
+                            R r = htpCarrierFeignService.submission(param);
+                            if(r == null || r.getCode() != 200){
+                                logger.error("{}订单完成同步状态失败{}", delOutbound.getOrderNo(), JSONUtil.toJsonStr(r.getData()));
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+
+                    }
                 }
             }
         } catch (Exception e) {

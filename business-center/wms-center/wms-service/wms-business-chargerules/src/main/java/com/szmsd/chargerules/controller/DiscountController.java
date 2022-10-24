@@ -79,6 +79,13 @@ public class DiscountController extends BaseController{
         return DiscountService.detailResult(id);
     }
 
+    @PostMapping("/detailResultPage")
+    @ApiOperation(value = "获取折扣方案明细信息")
+    //@PreAuthorize("@ss.hasPermi('Discount:Discount:detailResult')")
+    public R detailResultPage(@RequestBody DiscountPage discountPage) {
+        return DiscountService.detailResultPage(discountPage);
+    }
+
 
     @PostMapping("/operationRecord")
     @ApiOperation(value = "获取操作日记")

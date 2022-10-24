@@ -9,9 +9,9 @@ import lombok.experimental.Accessors;
 public class PageDTO {
 
    @ApiModelProperty(value = "当前页码")
-   private Integer pageNumber;
+   private Integer pageNumber = 1;
 
    @ApiModelProperty(value = "页面大小")
-   private Integer pageSize;
+   private Integer pageSize = 20;
 
 }

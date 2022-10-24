@@ -37,8 +37,8 @@ public class DelOutboundDtoTest {
     }
     @Resource
     IDelOutboundAsyncService iDelOutboundAsyncService;
-    @Test
+    /*@Test
     public void testCo() {
         iDelOutboundAsyncService.completed("CKCNID7321110100000016");
-    }
+    }*/
 }

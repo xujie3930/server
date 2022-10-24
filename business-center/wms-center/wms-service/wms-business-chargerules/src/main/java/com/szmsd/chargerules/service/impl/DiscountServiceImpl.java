@@ -12,12 +12,11 @@ import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpDiscountFeignService;
 import com.szmsd.http.dto.OperationRecordDto;
-import com.szmsd.http.dto.Packing;
 import com.szmsd.http.dto.UserIdentity;
 import com.szmsd.http.dto.discount.*;
-import com.szmsd.http.dto.grade.GradeMainDto;
 import com.szmsd.http.vo.Operation;
 import com.szmsd.http.vo.Operator;
+import com.szmsd.http.dto.discount.DiscountPage;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +40,11 @@ public class DiscountServiceImpl implements IDiscountService {
     @Override
     public R<DiscountMainDto> detailResult(String id) {
         return htpDiscountFeignService.detailResult(id);
+    }
+
+    @Override
+    public R<DiscountMainDto> detailResultPage(DiscountPage discountPage) {
+        return htpDiscountFeignService.detailResultPage(discountPage);
     }
 
     @Override

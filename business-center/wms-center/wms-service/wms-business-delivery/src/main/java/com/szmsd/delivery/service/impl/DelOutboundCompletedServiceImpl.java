@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -121,6 +122,25 @@ public class DelOutboundCompletedServiceImpl extends ServiceImpl<DelOutboundComp
         delOutboundCompleted.setOrderNo(orderNo);
         delOutboundCompleted.setState(DelOutboundCompletedStateEnum.INIT.getCode());
         delOutboundCompleted.setOperationType(operationType);
+        this.save(delOutboundCompleted);
+    }
+
+    @Override
+    @Transactional
+    public void add(String orderNo, String operationType, Date pushDate) {
+        if (StringUtils.isEmpty(orderNo)) {
+            throw new CommonException("999", "出库单号不能为空");
+        }
+        DelOutboundCompleted delOutboundCompleted = new DelOutboundCompleted();
+        delOutboundCompleted.setOrderNo(orderNo);
+        delOutboundCompleted.setState(DelOutboundCompletedStateEnum.INIT.getCode());
+        delOutboundCompleted.setOperationType(operationType);
+        if(pushDate != null){
+            delOutboundCompleted.setCreateByName("pushDate");
+            delOutboundCompleted.setCreateBy("");
+            delOutboundCompleted.setCreateTime(new Date());
+            delOutboundCompleted.setNextHandleTime(pushDate);
+        }
         this.save(delOutboundCompleted);
     }
 

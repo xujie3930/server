@@ -18,6 +18,7 @@ import com.szmsd.common.core.utils.MessageUtil;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.*;
+import com.szmsd.delivery.dto.BasShipmentRulesDto;
 import com.szmsd.delivery.dto.DelOutboundLabelDto;
 import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
@@ -1028,9 +1029,14 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
                 updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
                 updateDelOutbound.setShipmentOrderLabelUrl(delOutbound.getShipmentOrderLabelUrl());
-                delOutboundService.bringVerifySuccess(updateDelOutbound);
 
                 if(!DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())){
+                    //判断物流服务是否推送WMS
+                    if(delOutboundService.serviceChannelNamePushWMS(delOutbound, updateDelOutbound)){
+                        return;
+                    }
+
+
                     // 提交一个WMS任务
                     stopWatch.start();
                     IDelOutboundThirdPartyService delOutboundThirdPartyService = SpringUtils.getBean(IDelOutboundThirdPartyService.class);
@@ -1042,6 +1048,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     stopWatch.stop();
                     logger.info(">>>>>[创建出库单{}]提交一个WMS订单任务,耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
                 }
+            delOutboundService.bringVerifySuccess(updateDelOutbound);
 
 
 

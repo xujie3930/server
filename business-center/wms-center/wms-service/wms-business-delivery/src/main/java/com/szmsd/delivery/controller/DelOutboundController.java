@@ -20,6 +20,8 @@ import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
+import com.szmsd.bas.domain.BaseProduct;
+import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
@@ -708,8 +710,24 @@ public class DelOutboundController extends BaseController {
             if (!importResult1.isStatus()) {
                 return R.ok(importResult1);
             }
+            List<String> detailSkuList = new ArrayList<>();
+            for(DelOutboundDetailImportDto2 detailImportDto2: detailList){
+                if(StringUtils.isNotEmpty(detailImportDto2.getSku())){
+                    detailSkuList.add(detailImportDto2.getSku());
+                }
+            }
+            Map<String, BaseProduct> productMap = new HashMap<>();
+            if(!detailSkuList.isEmpty()){
+                BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
+                conditionQueryDto.setSkus(detailSkuList);
+                List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+                if (CollectionUtils.isNotEmpty(productList)) {
+                    productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v, v2) -> v));
+                }
+            }
+
             // 获取导入的数据
-            List<DelOutboundDto> dtoList = new DelOutboundImportContainer(dataList, orderTypeList, countryList, deliveryMethodList, detailList, importValidationData, sellerCode).get();
+            List<DelOutboundDto> dtoList = new DelOutboundImportContainer(dataList, orderTypeList, countryList, deliveryMethodList, detailList, importValidationData, sellerCode, productMap).get();
             // 批量新增
             // 批量新增
             List<DelOutboundAddResponse> outboundAddResponseList = this.delOutboundService.insertDelOutbounds(dtoList);

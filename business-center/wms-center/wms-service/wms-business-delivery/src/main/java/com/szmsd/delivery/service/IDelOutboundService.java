@@ -466,5 +466,7 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     List<DelOutboundTarckError> selectbatchTrackingexport();
 
     void carrierRegister(DelOutbound delOutbound);
+
+    boolean serviceChannelNamePushWMS(DelOutbound delOutbound, DelOutbound updateDelOutbound);
 }
 

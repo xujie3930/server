@@ -3,23 +3,25 @@ package com.szmsd.http.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.HttpResponseBody;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.web.page.PageVO;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.OperationRecordDto;
-import com.szmsd.http.dto.Packing;
 import com.szmsd.http.dto.discount.*;
-import com.szmsd.http.dto.discount.*;
-import com.szmsd.http.dto.grade.GradeMainDto;
 import com.szmsd.http.service.IHttpDiscountService;
 import com.szmsd.http.service.http.SaaSPricedRequest;
 import com.szmsd.http.util.HttpResponseVOUtils;
+import com.szmsd.http.dto.discount.DiscountPage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -66,6 +68,52 @@ public class DiscountServiceImpl extends SaaSPricedRequest implements IHttpDisco
 
 
         return r;
+    }
+
+    @Override
+    public R<PageVO<DiscountDetailDto>> detailResultPage(DiscountPage discountPage) {
+
+        if(discountPage == null){
+            return R.failed("参数异常");
+        }
+
+        String id = discountPage.getId();
+
+        if(StringUtils.isEmpty(id)){
+            return R.failed("折扣ID不允许为空");
+        }
+
+        Integer pageNumber = discountPage.getPageNumber();
+        Integer pageSize = discountPage.getPageSize();
+
+        R<DiscountMainDto> discountMainDtoR = this.detailResult(id);
+
+        if(discountMainDtoR.getCode() != 200){
+            return R.failed(discountMainDtoR.getMsg());
+        }
+
+        DiscountMainDto discountMainDto = discountMainDtoR.getData();
+
+        List<DiscountDetailDto> discountDetailDtos = discountMainDto.getPricingDiscountRules();
+
+        if(CollectionUtils.isEmpty(discountDetailDtos)){
+            return R.ok(PageVO.empty());
+        }
+
+        Integer totalRecords = discountDetailDtos.size();
+        Integer pages = totalRecords % pageSize == 0 ? totalRecords / pageSize: totalRecords / pageSize+ 1 ;
+
+        List<DiscountDetailDto> pageDiscount = discountDetailDtos.stream().skip((pageNumber-1)*pageSize).limit(pageSize).
+                collect(Collectors.toList());
+
+        PageVO<DiscountDetailDto> pageVO = new PageVO<>();
+        pageVO.setPageNumber(pageNumber);
+        pageVO.setData(pageDiscount);
+        pageVO.setPageSize(pageSize);
+        pageVO.setTotalPages(pages);
+        pageVO.setTotalRecords(totalRecords);
+
+        return R.ok(pageVO);
     }
 
     @Override
