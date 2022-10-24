@@ -89,6 +89,9 @@ public class BasShopifyHelperController extends BaseController {
         String encryptHex = ShopifyUtil.encryptParameter(parameterMap, this.shopifyAppConfig.getClientSecret());
         // https://{shop}.myshopify.com/admin/oauth/authorize?client_id={api_key}&scope={scopes}&redirect_uri={redirect_uri}&state={nonce}&grant_options[]={access_mode}
         String oauthAuthorize = this.shopifyAppConfig.getOauthAuthorize();
+
+        log.info("oauthAuthorize a {}",oauthAuthorize);
+
         Map<String, String> variableMap = new HashMap<>();
         // replace .myshopify.com
         String shopName = shop.replace(".myshopify.com", "");
@@ -102,6 +105,8 @@ public class BasShopifyHelperController extends BaseController {
         for (String key : variableMap.keySet()) {
             oauthAuthorize = oauthAuthorize.replaceAll("\\{" + key + "}", variableMap.get(key));
         }
+
+        log.info("oauthAuthorize b {}",oauthAuthorize);
         // 记录日志
         BasCk1ShopifyLog ck1ShopifyLog = new BasCk1ShopifyLog();
         ck1ShopifyLog.setType("1");
