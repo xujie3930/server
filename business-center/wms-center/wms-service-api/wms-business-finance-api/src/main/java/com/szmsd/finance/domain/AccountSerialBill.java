@@ -139,6 +139,8 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "费用类别转换后")
     private String chargeCategoryChange;
 
+
+
     public void setRemark(String remark) {
         this.remark = remark;
     }
