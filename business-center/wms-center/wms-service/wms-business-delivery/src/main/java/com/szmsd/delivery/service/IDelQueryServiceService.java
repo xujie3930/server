@@ -4,9 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.delivery.domain.DelQueryService;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.szmsd.delivery.dto.DelQueryServiceDto;
-import com.szmsd.delivery.dto.DelQueryServiceExc;
-import com.szmsd.delivery.dto.DelQueryServiceImport;
+import com.szmsd.delivery.dto.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -80,5 +78,9 @@ public interface IDelQueryServiceService extends IService<DelQueryService> {
         R importData(List<DelQueryServiceImport> list);
 
         int  insertDelQueryServiceList(List<DelQueryService> delQueryServiceList);
+
+        R importDatafk(List<DelQueryServiceImportFkExcle> list1);
+
+        List<DelQueryServiceExcErroe>  selectDelQueryServiceExcErroe();
 }
 
