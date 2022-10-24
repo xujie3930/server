@@ -136,7 +136,7 @@ public class BasRegionServiceImpl extends ServiceImpl<BasRegionMapper, BasRegion
         }
         queryWrapper.eq(BasRegion::getType, queryDto.getType());
         if (StringUtils.isNotEmpty(queryDto.getName())) {
-            queryWrapper.like(BasRegion::getName, queryDto.getName().trim()).or().like(BasRegion::getAddressCode,queryDto.getName().trim()).or().like(BasRegion::getEnName,queryDto.getName().trim());
+            queryWrapper.eq(BasRegion::getName, queryDto.getName().trim()).or().eq(BasRegion::getAddressCode,queryDto.getName().trim()).or().eq(BasRegion::getEnName,queryDto.getName().trim());
         }
         if (StringUtils.isNotEmpty(queryDto.getAddressCode())) {
             queryWrapper.like(BasRegion::getAddressCode, queryDto.getAddressCode().trim());
