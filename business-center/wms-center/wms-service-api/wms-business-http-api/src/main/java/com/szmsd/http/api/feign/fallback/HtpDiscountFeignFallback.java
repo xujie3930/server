@@ -35,6 +35,11 @@ public class HtpDiscountFeignFallback implements FallbackFactory<HtpDiscountFeig
             }
 
             @Override
+            public R detailResultPage(DiscountPage discountPage) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
             public R create(MergeDiscountDto dto) {
                 return R.convertResultJson(throwable);
             }

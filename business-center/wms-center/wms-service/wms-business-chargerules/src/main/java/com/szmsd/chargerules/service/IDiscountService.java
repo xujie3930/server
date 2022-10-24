@@ -20,4 +20,5 @@ public interface IDiscountService {
 
     R update(MergeDiscountDto dto);
 
+    R detailResultPage(DiscountPage discountPage);
 }

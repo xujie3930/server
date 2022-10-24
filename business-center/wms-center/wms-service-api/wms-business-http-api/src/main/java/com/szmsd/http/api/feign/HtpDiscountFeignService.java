@@ -25,6 +25,9 @@ public interface HtpDiscountFeignService {
     @PostMapping("/api/discount/http/detailResult")
     R detailResult(@RequestBody String id);
 
+    @PostMapping("/api/discount/http/detailResultPage")
+    R detailResultPage(@RequestBody DiscountPage discountPage);
+
     @PostMapping("/api/discount/http/create")
     R create(@RequestBody MergeDiscountDto dto);
 

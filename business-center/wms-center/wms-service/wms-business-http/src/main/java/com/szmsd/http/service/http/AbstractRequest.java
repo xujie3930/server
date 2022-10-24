@@ -182,7 +182,8 @@ abstract class AbstractRequest extends BaseRequest {
     }
 
     HttpResponseBody httpResponseBodySingle(String warehouseCode, String urlGroupName, UrlConfig urlConfig, String api, Object object, Integer timeout, HttpMethod httpMethod, Object... pathVariable) {
-        String url = urlConfig.getUrl() + this.getApi(urlConfig, api);
+        //http://pricedproduct-internalapi.dmfcn.net
+        String url = "http://pricedproduct-internalapi.dmfcn.net" + this.getApi(urlConfig, api);
         if (url.contains("{")) {
             url = MessageFormat.format(url, pathVariable);
         }
