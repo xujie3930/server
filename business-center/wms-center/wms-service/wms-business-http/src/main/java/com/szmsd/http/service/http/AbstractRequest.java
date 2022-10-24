@@ -182,7 +182,8 @@ abstract class AbstractRequest extends BaseRequest {
     }
 
     HttpResponseBody httpResponseBodySingle(String warehouseCode, String urlGroupName, UrlConfig urlConfig, String api, Object object, Integer timeout, HttpMethod httpMethod, Object... pathVariable) {
-        String url = urlConfig.getUrl() + this.getApi(urlConfig, api);
+        //http://pricedproduct-internalapi.dmfcn.net
+        String url = urlConfig.getUrl() + getApi(urlConfig, api);
         if (url.contains("{")) {
             url = MessageFormat.format(url, pathVariable);
         }
@@ -197,6 +198,8 @@ abstract class AbstractRequest extends BaseRequest {
         } else if (HttpMethod.DELETE.equals(httpMethod)) {
             responseBody = HttpClientHelper.httpDelete(url, requestBody, headerMap);
         } else if (HttpMethod.GET.equals(httpMethod)) {
+            //拼接成符合的格式
+
             responseBody = HttpClientHelper.httpGet(url, requestBody, headerMap);
         }else {
             throw new CommonException("999", "未处理的请求方式");
@@ -236,10 +239,72 @@ abstract class AbstractRequest extends BaseRequest {
         return responseBody;
     }
 
+
+
+    HttpResponseBody httpResponseBodySinglees(String warehouseCode, String urlGroupName, UrlConfig urlConfig, String api, Object object, Integer timeout, HttpMethod httpMethod, Object... pathVariable) {
+        //http://pricedproduct-internalapi.dmfcn.net
+        String url = urlConfig.getUrl() + getApi(urlConfig, api);
+        if (url.contains("{")) {
+            url = MessageFormat.format(url, object);
+        }
+        String requestBody = JSON.toJSONString(object);
+        Map<String, String> headerMap = urlConfig.getHeaders();
+        Date requestTime = new Date();
+        HttpResponseBody responseBody;
+        if (HttpMethod.POST.equals(httpMethod)) {
+            responseBody = HttpClientHelper.httpPost(url, requestBody, headerMap, timeout);
+        } else if (HttpMethod.PUT.equals(httpMethod)) {
+            responseBody = HttpClientHelper.httpPut(url, requestBody, headerMap);
+        } else if (HttpMethod.DELETE.equals(httpMethod)) {
+            responseBody = HttpClientHelper.httpDelete(url, requestBody, headerMap);
+        } else if (HttpMethod.GET.equals(httpMethod)) {
+            //拼接成符合的格式
+
+            responseBody = HttpClientHelper.httpGets(url, object.toString(), headerMap);
+        }else {
+            throw new CommonException("999", "未处理的请求方式");
+        }
+        String logRequestBody;
+        if (null != object && object.getClass().isAnnotationPresent(LogIgnore.class)) {
+            LogIgnore logIgnore = object.getClass().getAnnotation(LogIgnore.class);
+            String[] value = logIgnore.value();
+            if (logIgnore.abbr()) {
+                Set<String> fieldSet = Arrays.stream(value).collect(Collectors.toSet());
+                logRequestBody = JSON.toJSONString(object, new ValueFilter() {
+                    @Override
+                    public Object process(Object o, String s, Object o1) {
+                        if (Objects.isNull(o1)) {
+                            return o1;
+                        }
+                        if (!fieldSet.contains(s)) {
+                            return o1;
+                        }
+                        if (o1 instanceof String) {
+                            return "String(length=" + ((String) o1).length() + ")";
+                        } else if (o1 instanceof byte[]) {
+                            return "String(byte[]=" + ((byte[]) o1).length + ")";
+                        }
+                        return "Object(No Math Java Bean Type [" + o1.getClass() + "])";
+                    }
+                });
+            } else {
+                SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+                filter.getExcludes().addAll(Arrays.asList(value));
+                logRequestBody = JSON.toJSONString(object, filter);
+            }
+        } else {
+            logRequestBody = requestBody;
+        }
+        this.addLog(warehouseCode, urlGroupName, url, httpMethod.name(), headerMap, logRequestBody, requestTime, responseBody.getBody(), responseBody.getStatus());
+        return responseBody;
+    }
+
+
     boolean hasMultipleChannelUrlSet(String api) {
         String formatApi = Utils.formatApi(api);
         return this.httpConfig.getMultipleChannelUrlSet().contains(formatApi);
     }
+
 
     HttpResponseBody httpRequestBodyAdapter(String warehouseCode, String api, ReFunction<String, UrlConfig, HttpResponseBody> reFunction) {
         // 先调用自己的服务，自己的服务调用成功之后再去调用其它的服务
@@ -284,6 +349,11 @@ abstract class AbstractRequest extends BaseRequest {
         return this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> httpResponseBodySingle(warehouseCode, urlGroupName, urlConfig, api, object, timeout, httpMethod, pathVariable));
     }
 
+
+    HttpResponseBody httpRequestBodyes(String warehouseCode, String api, Object object, Integer timeout, HttpMethod httpMethod, Object... pathVariable) {
+        return this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> httpResponseBodySinglees(warehouseCode, urlGroupName, urlConfig, api, object, timeout, httpMethod, pathVariable));
+    }
+
     protected String httpRequest(String warehouseCode, String api, Object object, HttpMethod httpMethod, Object... pathVariable) {
         return this.httpRequestBody(warehouseCode, api, object, httpMethod, pathVariable).getBody();
     }
@@ -326,6 +396,10 @@ abstract class AbstractRequest extends BaseRequest {
 
     protected HttpResponseBody httpGetBody(String warehouseCode, String api,Integer timeout, Object object, Object... pathVariable) {
         return this.httpRequestBody(warehouseCode, api, object,timeout,HttpMethod.GET, pathVariable);
+    }
+
+    protected HttpResponseBody httpGetBodyes(String warehouseCode, String api,Integer timeout, Object object, Object... pathVariable) {
+        return this.httpRequestBodyes(warehouseCode, api, object,timeout,HttpMethod.GET, pathVariable);
     }
 
     protected HttpResponseBody httpPutBody(String warehouseCode, String api, Object object,  Object... pathVariable) {

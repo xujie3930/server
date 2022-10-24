@@ -31,7 +31,7 @@ public class HttpCustomPricesServiceImpl extends SaaSPricedRequest implements IH
 
     @Override
     public R<CustomPricesPageDto> page(String clientCode) {
-        return HttpResponseVOUtils.transformation(httpGetBody("", "customPrices.page", null, clientCode), CustomPricesPageDto.class);
+        return HttpResponseVOUtils.transformation(httpGetBodyes("", "customPrices.page", null, clientCode), CustomPricesPageDto.class);
     }
 
     @Override
