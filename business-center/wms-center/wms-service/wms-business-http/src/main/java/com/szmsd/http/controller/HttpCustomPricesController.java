@@ -1,5 +1,6 @@
 package com.szmsd.http.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.http.dto.OperationRecordDto;
@@ -10,6 +11,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 @Api(tags = {"客户等级/折扣报价维护"})
 @RestController
@@ -28,6 +31,9 @@ public class HttpCustomPricesController extends BaseController {
     @PostMapping("/result/{clientCode}")
     @ApiOperation(value = "获取折扣/等级方案数据")
     public R<CustomPricesPageDto> result(@PathVariable("clientCode") String clientCode) {
+//        Map map=new HashMap();
+//        map.put("clientCode",clientCode);
+//        String clientCodes= JSON.toJSONString(map);
         return httpCustomPricesService.page(clientCode);
     }
 
