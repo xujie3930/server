@@ -13,10 +13,7 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.security.utils.SecurityUtils;
-import com.szmsd.delivery.dto.DelQueryServiceDto;
-import com.szmsd.delivery.dto.DelQueryServiceExc;
-import com.szmsd.delivery.dto.DelQueryServiceImport;
-import com.szmsd.delivery.dto.DelQueryServiceImportExcle;
+import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.exception.dto.ExceptionInfoExportDto;
 import com.szmsd.finance.domain.AccountBalance;
@@ -100,7 +97,7 @@ public class DelQueryServiceController extends BaseController{
     }
 
     @PostMapping("/importTemplatefk")
-    @ApiOperation(httpMethod = "POST", value = "导入模板")
+    @ApiOperation(httpMethod = "POST", value = "反馈模板")
     public void importTemplatefk(HttpServletResponse response) throws IOException {
         String len=getLen().toLowerCase(Locale.ROOT);
         if (len.equals("zh")){
@@ -152,6 +149,17 @@ public class DelQueryServiceController extends BaseController{
 
         });
         return delQueryServiceService.importData(list);
+    }
+
+    @PostMapping("/importDatafk")
+    @ApiOperation(httpMethod = "POST", value = "导入查件服务反馈数据")
+    public R importDatafk(MultipartFile file, HttpServletRequest httpServletRequest) throws Exception {
+
+        List<DelQueryServiceImportFkExcle> list1 = EasyExcel.read(file.getInputStream(), DelQueryServiceImportFkExcle.class, new SyncReadListener()).sheet().doReadSync();
+
+
+
+        return delQueryServiceService.importDatafk(list1);
     }
 
     /**
@@ -248,6 +256,84 @@ public class DelQueryServiceController extends BaseController{
          }
 
      }
+
+
+    /**
+     * 导出查件服务模块列表
+     */
+    @PreAuthorize("@ss.hasPermi('DelQueryService:DelQueryService:exporterror')")
+    @Log(title = "导出查件服务反馈失败数据", businessType = BusinessType.EXPORT)
+    @GetMapping("/exporterror")
+    @ApiOperation(value = "导出查件服务反馈失败数据",notes = "导出查件服务反馈失败数据")
+    public void exporterror(HttpServletResponse response) throws IOException {
+        List<DelQueryServiceExcErroe> list = delQueryServiceService.selectDelQueryServiceExcErroe();
+        ExportParams params = new ExportParams();
+
+
+
+
+
+        Workbook workbook = ExcelExportUtil.exportExcel(params, DelQueryServiceExcErroe.class, list);
+
+
+        Sheet sheet= workbook.getSheet("sheet0");
+
+        //获取第一行数据
+        Row row2 =sheet.getRow(0);
+
+        for (int i=0;i<3;i++){
+            Cell deliveryTimeCell = row2.getCell(i);
+
+            CellStyle styleMain = workbook.createCellStyle();
+//             if (i==18){
+//                 styleMain.setFillForegroundColor(IndexedColors.PALE_BLUE.getIndex());
+//             }else {
+//                 styleMain.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+//
+//             }
+            styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+            Font font = workbook.createFont();
+            //true为加粗，默认为不加粗
+            font.setBold(true);
+            //设置字体颜色，颜色和上述的颜色对照表是一样的
+            font.setColor(IndexedColors.WHITE.getIndex());
+            //将字体样式设置到单元格样式中
+            styleMain.setFont(font);
+
+            styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            styleMain.setAlignment(HorizontalAlignment.CENTER);
+            styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+//        CellStyle style =  workbook.createCellStyle();
+//        style.setFillPattern(HSSFColor.HSSFColorPredefined.valueOf(""));
+//        style.setFillForegroundColor(IndexedColors.RED.getIndex());
+            deliveryTimeCell.setCellStyle(styleMain);
+        }
+
+
+
+        try {
+            String fileName="反馈类容失败导出"+System.currentTimeMillis();
+            URLEncoder.encode(fileName, "UTF-8");
+            //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
+            response.setContentType("application/vnd.ms-excel");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+
+            response.addHeader("Pargam", "no-cache");
+            response.addHeader("Cache-Control", "no-cache");
+
+            ServletOutputStream outStream = null;
+            try {
+                outStream = response.getOutputStream();
+                workbook.write(outStream);
+                outStream.flush();
+            } finally {
+                outStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
     /**
     * 获取查件服务模块详细信息

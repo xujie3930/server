@@ -64,5 +64,13 @@
 
         SELECT tracking_status,tracking_description,DATE_FORMAT(tracking_time, '%Y-%m-%d') AS tracking_time from del_outbound where order_no=#{orderNo} ORDER BY create_time DESC LIMIT 1
     </select>
+    <select id="selectOrderNo" resultType="com.szmsd.delivery.domain.DelQueryService"
+            parameterType="java.lang.String">
+        SELECT * from del_query_service where   (order_no =#{orderNoTraceId} or trace_id=#{orderNoTraceId}) LIMIT 0,1
+    </select>
+    <select id="selectDelQueryServiceExcErroe" resultType="com.szmsd.delivery.dto.DelQueryServiceExcErroe">
+
+      select  * from del_query_service_error
+    </select>
 
 </mapper>
