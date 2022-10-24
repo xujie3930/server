@@ -36,4 +36,7 @@ public interface ICarrierService {
 
 
     R<ShipmentOrderResult> shipmentOrderRealResult(String referenceNumber);
+
+    R submission(ShipmentOrderSubmissionParam submission);
+
 }

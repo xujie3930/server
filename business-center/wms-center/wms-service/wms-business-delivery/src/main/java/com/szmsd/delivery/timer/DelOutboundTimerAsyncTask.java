@@ -1,6 +1,7 @@
 package com.szmsd.delivery.timer;
 
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
+import com.szmsd.delivery.domain.DelOutboundCompleted;
 import com.szmsd.delivery.service.IDelOutboundBringVerifyAsyncService;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundAsyncService;
@@ -29,8 +30,8 @@ public class DelOutboundTimerAsyncTask {
     }
 
     @Async(ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_DELOUTBOUND_SHIPPED)
-    public void asyncHandleCompleted(String orderNo, Long id) {
-        this.handle(s -> this.delOutboundAsyncService.completed(orderNo), id);
+    public void asyncHandleCompleted(DelOutboundCompleted completed) {
+        this.handle(s -> this.delOutboundAsyncService.completed(completed.getOrderNo(), completed.getCreateByName()), completed.getId());
     }
 
     @Async(ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_DELOUTBOUND_CANCELED)

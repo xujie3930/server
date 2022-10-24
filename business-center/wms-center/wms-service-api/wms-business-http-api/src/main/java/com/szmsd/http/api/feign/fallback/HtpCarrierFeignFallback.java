@@ -31,6 +31,11 @@ public class HtpCarrierFeignFallback implements FallbackFactory<HtpCarrierFeignS
             public R<ResponseObject.ResponseObjectWrapper<FileStream, ProblemDetails>> label(CreateShipmentOrderCommand command) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R submission(ShipmentOrderSubmissionParam param) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

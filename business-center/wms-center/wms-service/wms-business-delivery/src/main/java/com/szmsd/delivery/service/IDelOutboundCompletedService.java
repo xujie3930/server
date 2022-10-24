@@ -3,6 +3,7 @@ package com.szmsd.delivery.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutboundCompleted;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -78,6 +79,9 @@ public interface IDelOutboundCompletedService extends IService<DelOutboundComple
      * @param operationType operationType
      */
     void add(String orderNo, String operationType);
+    void add(String orderNo, String operationType, Date pushDate);
+
+
 
     /**
      * 处理失败

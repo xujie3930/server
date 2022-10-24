@@ -99,6 +99,20 @@ public class DelQueryServiceController extends BaseController{
 //        util.importTemplateExcel(response, "DelQueryService");
     }
 
+    @PostMapping("/importTemplatefk")
+    @ApiOperation(httpMethod = "POST", value = "导入模板")
+    public void importTemplatefk(HttpServletResponse response) throws IOException {
+        String len=getLen().toLowerCase(Locale.ROOT);
+        if (len.equals("zh")){
+            commonExport(response, "管理端反馈模板");
+        }else if (len.equals("en")){
+            commonExport(response, "CombinedParcelOutboundTemplate");
+        }
+
+//        ExcelUtil<DelQueryServiceImport> util = new ExcelUtil<DelQueryServiceImport>(DelQueryServiceImport.class);
+//        util.importTemplateExcel(response, "DelQueryService");
+    }
+
     private String getFileName(String fileName) {
         return String.format("/template/%s_%s.xlsx", fileName, getLen().toLowerCase(Locale.ROOT));
     }
