@@ -2604,11 +2604,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         calendar.set(Calendar.DATE, calendar.get(Calendar.DATE) + 1);
         return calendar.getTime();
     }
-    public static void main(String[] args) {
-        System.out.println(DateUtil.format(new Date(), "yyyy-MM-dd"));
-        System.out.println(DateUtils.parseDate(("2022-10-24 08:20")));
-
-    }
 
     public static List<String> splitToArray(String text, String split) {
         String[] arr = text.split(split);
