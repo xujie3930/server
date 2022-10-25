@@ -329,7 +329,13 @@ public class ExceptionInfoController extends BaseController {
             }
         }
         sheet.protectSheet("123456");
-        sheet.setColumnHidden(18,true);
+
+        if (dto.getType()==1){
+            sheet.setColumnHidden(18,true);
+        }else {
+            sheet.setColumnHidden(17,true);
+
+        }
         try {
             String fileName="异常通知中心_异常导出"+System.currentTimeMillis();
             URLEncoder.encode(fileName, "UTF-8");
@@ -587,7 +593,8 @@ public class ExceptionInfoController extends BaseController {
         R<BasRegionSelectListVO> listVOR = this.basRegionFeignService.queryByCountryName(country);
         BasRegionSelectListVO vo = R.getDataAndException(listVOR);
         if (null != vo) {
-            return vo.getAddressCode();
+            //汪俊余要改的
+            return vo.getEnName();
         }
         return null;
     }

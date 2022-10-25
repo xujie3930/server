@@ -40,6 +40,12 @@ public class AccountPay extends FssBaseEntity {
     @ApiModelProperty(value = "支付金额")
     private BigDecimal amount;
 
+    @ApiModelProperty(value = "手续费")
+    private BigDecimal procedureAmount;
+
+    @ApiModelProperty(value = "实际支付金额")
+    private BigDecimal acturlAmount;
+
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
 

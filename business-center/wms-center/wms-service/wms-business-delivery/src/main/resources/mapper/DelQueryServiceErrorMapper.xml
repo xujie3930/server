@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.szmsd.delivery.mapper.DelQueryServiceErrorMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.delivery.domain.DelQueryServiceError" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="order_no_traceId" property="orderNoTraceid" jdbcType="VARCHAR" />
+    <result column="feed_reason" property="feedReason" jdbcType="VARCHAR" />
+    <result column="error_message" property="errorMessage" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, order_no_traceId, feed_reason, error_message
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from del_query_service_error
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from del_query_service_error
+  </delete>
+  <insert id="insert" parameterType="com.szmsd.delivery.domain.DelQueryServiceError" >
+    insert into del_query_service_error (id, order_no_traceId, feed_reason, 
+      error_message)
+    values (#{id,jdbcType=INTEGER}, #{orderNoTraceid,jdbcType=VARCHAR}, #{feedReason,jdbcType=VARCHAR}, 
+      #{errorMessage,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.szmsd.delivery.domain.DelQueryServiceError" >
+    insert into del_query_service_error
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="orderNoTraceid != null" >
+        order_no_traceId,
+      </if>
+      <if test="feedReason != null" >
+        feed_reason,
+      </if>
+      <if test="errorMessage != null" >
+        error_message,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="orderNoTraceid != null" >
+        #{orderNoTraceid,jdbcType=VARCHAR},
+      </if>
+      <if test="feedReason != null" >
+        #{feedReason,jdbcType=VARCHAR},
+      </if>
+      <if test="errorMessage != null" >
+        #{errorMessage,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.delivery.domain.DelQueryServiceError" >
+    update del_query_service_error
+    <set >
+      <if test="orderNoTraceid != null" >
+        order_no_traceId = #{orderNoTraceid,jdbcType=VARCHAR},
+      </if>
+      <if test="feedReason != null" >
+        feed_reason = #{feedReason,jdbcType=VARCHAR},
+      </if>
+      <if test="errorMessage != null" >
+        error_message = #{errorMessage,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.delivery.domain.DelQueryServiceError" >
+    update del_query_service_error
+    set order_no_traceId = #{orderNoTraceid,jdbcType=VARCHAR},
+      feed_reason = #{feedReason,jdbcType=VARCHAR},
+      error_message = #{errorMessage,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

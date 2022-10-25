@@ -20,11 +20,10 @@ import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.*;
-import com.szmsd.delivery.dto.DelQueryServiceDto;
-import com.szmsd.delivery.dto.DelQueryServiceExc;
-import com.szmsd.delivery.dto.DelQueryServiceFeedbackExc;
-import com.szmsd.delivery.dto.DelQueryServiceImport;
+import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.enums.DelQueryServiceFeedbackEnum;
 import com.szmsd.delivery.enums.DelQueryServiceStateEnum;
+import com.szmsd.delivery.mapper.DelQueryServiceErrorMapper;
 import com.szmsd.delivery.mapper.DelQueryServiceFeedbackMapper;
 import com.szmsd.delivery.mapper.DelQueryServiceMapper;
 import com.szmsd.delivery.service.*;
@@ -42,10 +41,7 @@ import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
 * <p>
@@ -83,6 +79,10 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
     private DelQueryServiceFeedbackMapper delQueryServiceFeedbackMapper;
     @Autowired
     private BasTranslateFeignService basTranslateFeignService;
+
+    @Autowired
+    private DelQueryServiceErrorMapper delQueryServiceErrorMapper;
+
 
 
 
@@ -847,6 +847,83 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
         }
         log.info("跳出循环");
         return 1;
+    }
+
+    @Override
+    public R importDatafk(List<DelQueryServiceImportFkExcle> list1) {
+        try {
+            int error=0;
+            int success=0;
+            for (int i=0;i<list1.size();i++){
+
+
+
+                if (list1.get(i).getOrderNoTraceid()==null){
+                    DelQueryServiceError delQueryServiceError=new DelQueryServiceError();
+                    BeanUtils.copyProperties(list1.get(i),delQueryServiceError);
+                    delQueryServiceError.setErrorMessage("订单号/跟踪号");
+                    delQueryServiceErrorMapper.insertSelective(delQueryServiceError);
+                    error=error+1;
+                    continue;
+                }
+                if (list1.get(i).getFeedReason()==null){
+                    DelQueryServiceError delQueryServiceError=new DelQueryServiceError();
+                    BeanUtils.copyProperties(list1.get(i),delQueryServiceError);
+                    delQueryServiceError.setErrorMessage("反馈类容为空");
+                    delQueryServiceErrorMapper.insertSelective(delQueryServiceError);
+                    error=error+1;
+                    continue;
+
+                }
+                if (list1.get(i).getFeedReason()==null&&list1.get(i).getOrderNoTraceid()==null){
+                    DelQueryServiceError delQueryServiceError=new DelQueryServiceError();
+                    BeanUtils.copyProperties(list1.get(i),delQueryServiceError);
+                    delQueryServiceError.setErrorMessage("订单号/跟踪号和反馈类容都为空");
+                    delQueryServiceErrorMapper.insertSelective(delQueryServiceError);
+                    error=error+1;
+                    continue;
+                }
+                DelQueryService delQueryService= baseMapper.selectOrderNo(list1.get(i).getOrderNoTraceid());
+                if (delQueryService==null){
+                    DelQueryServiceError delQueryServiceError=new DelQueryServiceError();
+                    BeanUtils.copyProperties(list1.get(i),delQueryServiceError);
+                    delQueryServiceError.setErrorMessage("查不到对应的查件");
+
+                    delQueryServiceErrorMapper.insertSelective(delQueryServiceError);
+                    error=error+1;
+                  continue;
+                }
+                DelQueryServiceFeedback paramDelQueryServiceFeedback = new DelQueryServiceFeedback();
+                paramDelQueryServiceFeedback.setMainId(delQueryService.getId());
+                paramDelQueryServiceFeedback.setType(DelQueryServiceFeedbackEnum.FEEDBACK.getName());
+                paramDelQueryServiceFeedback.setReason(list1.get(i).getFeedReason());
+
+                int a =delQueryServiceFeedbackMapper.insert(paramDelQueryServiceFeedback);
+
+                    DelQueryService delQueryService1=new DelQueryService();
+                    delQueryService.setId(delQueryService.getId());
+                    delQueryService.setState(DelQueryServiceStateEnum.COMPLETED.getCode());
+                    delQueryService.setStateName(DelQueryServiceStateEnum.COMPLETED.getName());
+                    baseMapper.updateById(delQueryService1);
+                success=success+1;
+
+            }
+            Map map=new HashMap();
+            map.put("success",success);
+            map.put("error",error);
+            map.put("total",error+success);
+            return   R.ok(map);
+        }catch (Exception e){
+            e.printStackTrace();
+          return   R.failed("异常");
+        }
+    }
+
+    @Override
+    public List<DelQueryServiceExcErroe> selectDelQueryServiceExcErroe() {
+        List<DelQueryServiceExcErroe> list=baseMapper.selectDelQueryServiceExcErroe();
+        delQueryServiceErrorMapper.deleteByPrimaryKey();
+        return list;
     }
 
 }
