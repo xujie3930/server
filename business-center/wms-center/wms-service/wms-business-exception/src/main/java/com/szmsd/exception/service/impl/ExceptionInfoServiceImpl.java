@@ -461,6 +461,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
             addressDto.setCity(dto.getCity());
             addressDto.setStateOrProvince(dto.getStateOrProvince());
             addressDto.setCountryCode(countryCode);
+            //汪俊余说Country都传英文名
             addressDto.setCountry(dto.getCountry());
             addressDto.setPostCode(dto.getPostCode());
             addressDto.setPhoneNo(dto.getPhoneNo());
