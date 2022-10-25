@@ -220,6 +220,11 @@ public class RefundRequestDTO {
     @Excel(name = "备注")
     private String remark;
 
+    @ExcelProperty(  index = 20)
+    @ApiModelProperty(value = "附注")
+    @Excel(name = "附注")
+    private String noteAppended;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
