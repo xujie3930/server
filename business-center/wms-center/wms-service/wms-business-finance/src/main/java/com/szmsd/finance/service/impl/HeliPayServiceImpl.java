@@ -88,7 +88,7 @@ public class HeliPayServiceImpl implements HeliPayService {
 
         BigDecimal amount = payRequestVO.getAmount();
         BigDecimal procedureAmount = payRequestVO.getProcedureAmount();
-        BigDecimal proceAmount = amount.multiply(RATE);
+        BigDecimal proceAmount = amount.multiply(RATE).setScale(2,BigDecimal.ROUND_UP);
 
         if(procedureAmount.compareTo(proceAmount) != 0){
             return R.failed("手续费计算错误");
