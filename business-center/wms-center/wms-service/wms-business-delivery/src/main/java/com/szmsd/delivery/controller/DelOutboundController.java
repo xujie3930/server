@@ -985,11 +985,11 @@ public class DelOutboundController extends BaseController {
 
                     QueryDto queryDto1 = new QueryDto();
                     queryDto1.setPageNum(1);
-                    queryDto1.setPageSize(500);
+                    queryDto1.setPageSize(2000);
                     QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
                     QueryDto queryDto2 = new QueryDto();
                     queryDto2.setPageNum(1);
-                    queryDto2.setPageSize(500);
+                    queryDto2.setPageSize(20000);
                     QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto2, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
 
                     ExportParams params = new ExportParams();
