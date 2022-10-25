@@ -147,6 +147,9 @@
         IFNULL(t.remark, '') remark,
         IFNULL(t.vat, '') vat
     </sql>
+    <update id="updateInboundReceipt" parameterType="java.lang.String">
+        UPDATE inbound_receipt SET `status`='2'  where  warehouse_no=#{warehouseNo}
+    </update>
     <select id="selectListByCondiction" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO" resultType="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
         SELECT <include refid="Column_List_VO"/>
         FROM inbound_receipt t left join  inbound_receipt_detail a on t.warehouse_no=a.warehouse_no

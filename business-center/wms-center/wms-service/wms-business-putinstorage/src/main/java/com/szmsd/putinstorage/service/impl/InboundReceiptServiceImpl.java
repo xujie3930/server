@@ -13,6 +13,7 @@ import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.constant.Constants;
+import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
@@ -35,6 +36,7 @@ import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.enums.RemoteConstant;
 import com.szmsd.http.util.DomainInterceptorUtil;
+import com.szmsd.http.vo.CreateReceiptResponse;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
@@ -816,9 +818,15 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             try {
                 if (CheckTag.get()) {
                     log.info("-----转运单不推送wms，由调用发起方推送 转运入库-提交 里面直接调用B3接口-----");
+                    this.updateByWarehouseNo(inboundReceipt);
                 } else {
-                    remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+                    this.updateByWarehouseNo(inboundReceipt);
+                    R<CreateReceiptResponse> createReceiptResponseR = remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
                     // 创建入库单物流信息列表
+                    if (createReceiptResponseR.getCode()== HttpStatus.ERROR){
+                     baseMapper.updateInboundReceipt(warehouseNo);
+                    }
+
 
                     CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
                     BeanUtils.copyProperties(inboundReceiptInfoVO, createInboundReceiptDTO);
@@ -828,7 +836,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
                     remoteComponent.createTracking(createInboundReceiptDTO);
                 }
-                this.updateByWarehouseNo(inboundReceipt);
+
 //                this.inbound(inboundReceiptInfoVO);
             } catch (Exception e) {
                 log.error(e.getMessage());
