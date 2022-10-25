@@ -118,6 +118,7 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
         for (DelOutboundDetailImportDto2 dto2 : list) {
             DelOutboundDetailDto detail = new DelOutboundDetailDto();
             String sku = dto2.getSku();
+            detail.setSku(sku);
 
             if(productMap !=null && productMap.containsKey(detail.getSku())){
                 // 一件代发带出sku 的中英文，以及申报价值
@@ -127,7 +128,6 @@ public class DelOutboundImportContainer extends DelOutboundCacheImportContext {
                 detail.setDeclaredValue(product.getDeclaredValue());
             }
 
-            detail.setSku(sku);
             detail.setQty(Long.valueOf(dto2.getQty()));
             InventoryAvailableListVO vo = this.importValidationData.get(warehouseCode, sku);
             detail.setBindCode(vo.getBindCode());
