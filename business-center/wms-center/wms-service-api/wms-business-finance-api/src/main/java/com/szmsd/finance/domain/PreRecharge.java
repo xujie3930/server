@@ -56,6 +56,12 @@ public class PreRecharge extends FssBaseEntity {
     @ApiModelProperty(value = "金额")
     private BigDecimal amount;
 
+    @ApiModelProperty(value = "手续费")
+    private BigDecimal procedureAmount;
+
+    @ApiModelProperty(value = "实际支付金额")
+    private BigDecimal acturlAmount;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "汇款日期")
     private Date remittanceTime;
