@@ -4,6 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fasterxml.jackson.datatype.jsr310.DecimalUtils;
 import com.helipay.app.trx.facade.request.pay.OrderRequestForm;
 import com.helipay.app.trx.facade.response.pay.APPScanPayResponseForm;
 import com.helipay.component.facade.BaseDTO;
@@ -77,10 +78,22 @@ public class HeliPayServiceImpl implements HeliPayService {
     @Resource
     private RemoteService remoteService;
 
+    //手续费 千分之三
+    private final static BigDecimal RATE = new BigDecimal("0.003");
+
     @Override
     public R<APPScanPayResponseForm> pay(PayRequestVO payRequestVO) {
 
         OrderRequestForm appScanPayRequestForm = new OrderRequestForm();
+
+        BigDecimal amount = payRequestVO.getAmount();
+        BigDecimal procedureAmount = payRequestVO.getProcedureAmount();
+        BigDecimal proceAmount = amount.multiply(RATE);
+
+        if(procedureAmount.compareTo(proceAmount) != 0){
+            return R.failed("手续费计算错误");
+        }
+
         //必填
         appScanPayRequestForm.setMerchantNo(merchantNo);
 
@@ -115,6 +128,8 @@ public class HeliPayServiceImpl implements HeliPayService {
         }
 
         AccountPay accountPay = this.generatorAccountPay(appScanPayResponseForm,cusCode,gname,payRequestVO.getAmount());
+        accountPay.setProcedureAmount(proceAmount);
+        accountPay.setActurlAmount(payRequestVO.getActurlAmount());
         accountPayMapper.insert(accountPay);
 
         return R.ok(appScanPayResponseForm);
@@ -306,7 +321,7 @@ public class HeliPayServiceImpl implements HeliPayService {
 
         String orderStatus = payCallback.getOrderStatus();
         
-        accountPay.setAmount(payCallback.getOrderAmount());
+        //accountPay.setAmount(payCallback.getOrderAmount());
         accountPay.setBindId(payCallback.getBindId());
         accountPay.setCreateDate(payCallback.getCreateDate());
         accountPay.setChanlType(payCallback.getChanlType());
@@ -317,6 +332,9 @@ public class HeliPayServiceImpl implements HeliPayService {
         accountPay.setRemark(payCallback.getRemark());
         accountPay.setFinishDate(payCallback.getFinishDate());
         accountPay.setSerialNumber(payCallback.getSerialNumber());
+
+        accountPay.setActurlAmount(payCallback.getOrderAmount());
+
         Long cNumber = accountPay.getCallbackNumber();
         accountPay.setCallbackNumber(cNumber+1);
 
