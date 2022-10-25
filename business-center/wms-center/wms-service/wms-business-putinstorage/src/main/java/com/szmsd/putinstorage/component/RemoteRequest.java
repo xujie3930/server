@@ -1,5 +1,6 @@
 package com.szmsd.putinstorage.component;
 
+import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.http.api.feign.HtpInboundFeignService;
@@ -30,7 +31,7 @@ public class RemoteRequest {
      * 创建入库单
      * @param inboundReceiptInfoVO
      */
-    public void createInboundReceipt(InboundReceiptInfoVO inboundReceiptInfoVO) {
+    public  R<CreateReceiptResponse> createInboundReceipt(InboundReceiptInfoVO inboundReceiptInfoVO) {
 
         String orderType = inboundReceiptInfoVO.getOrderType();
         InboundReceiptEnum.InboundReceiptEnumMethods orderTypeEnum = InboundReceiptEnum.InboundReceiptEnumMethods.getEnum(InboundReceiptEnum.OrderType.class, orderType);
@@ -51,7 +52,9 @@ public class RemoteRequest {
             return receiptDetailInfo;
         }).collect(Collectors.toList()));
         R<CreateReceiptResponse> createReceiptResponseR = htpInboundFeignService.create(createInboundReceipt);
+
         ResponseVO.resultAssert(createReceiptResponseR, "创建入库单");
+        return createReceiptResponseR;
     }
 
     /**
