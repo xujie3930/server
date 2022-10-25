@@ -27,4 +27,6 @@ public interface ReturnExpressMapper extends BaseMapper<ReturnExpressDetail> {
     List<DelOutbound>  selectRetunDleoutbound(@Param("sn") String sn);
 
     void updateReturnBasRetreat(Integer id);
+
+    void  updateDelOutbound(@Param("fromOrderNo") String fromOrderNo);
 }
