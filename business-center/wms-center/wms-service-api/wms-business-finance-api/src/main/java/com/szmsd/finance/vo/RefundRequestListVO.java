@@ -94,9 +94,15 @@ public class RefundRequestListVO {
 
     @ApiModelProperty(value = "费用类别编码")
     private String feeCategoryCode;
+
+    @Excel(name = "备注")
+    @ApiModelProperty(value = "备注")
+    private String remark;
+
+
     @Excel(name = "附注")
     @ApiModelProperty(value = "附注")
-    private String remark;
+    private String noteAppended;
 
     @ApiModelProperty(value = "金额")
     @Excel(name = "金额")
