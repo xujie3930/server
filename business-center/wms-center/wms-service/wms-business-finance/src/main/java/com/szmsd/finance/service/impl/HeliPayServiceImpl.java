@@ -94,17 +94,18 @@ public class HeliPayServiceImpl implements HeliPayService {
             return R.failed("手续费计算错误");
         }
 
+        BigDecimal acturlAmount = payRequestVO.getActurlAmount();
+
         //必填
         appScanPayRequestForm.setMerchantNo(merchantNo);
 
         String orderNo = this.generatorOrderNo();
         appScanPayRequestForm.setOrderNo(orderNo);
-
         PayEnum payType = payRequestVO.getPayType();
 
         appScanPayRequestForm.setProductCode(payType.name());
         //订单金额
-        appScanPayRequestForm.setOrderAmount(payRequestVO.getAmount());
+        appScanPayRequestForm.setOrderAmount(acturlAmount);
 
         String cusCode = payRequestVO.getCusCode();
 
@@ -129,7 +130,7 @@ public class HeliPayServiceImpl implements HeliPayService {
 
         AccountPay accountPay = this.generatorAccountPay(appScanPayResponseForm,cusCode,gname,payRequestVO.getAmount());
         accountPay.setProcedureAmount(proceAmount);
-        accountPay.setActurlAmount(payRequestVO.getActurlAmount());
+        accountPay.setActurlAmount(acturlAmount);
         accountPayMapper.insert(accountPay);
 
         return R.ok(appScanPayResponseForm);
@@ -379,6 +380,8 @@ public class HeliPayServiceImpl implements HeliPayService {
         preRechargeDTO.setRemittanceTime(accountPay.getFinishDate());
         preRechargeDTO.setVerifyDate(accountPay.getFinishDate());
         preRechargeDTO.setAmount(accountPay.getAmount());
+        preRechargeDTO.setProcedureAmount(accountPay.getProcedureAmount());
+        preRechargeDTO.setActurlAmount(accountPay.getActurlAmount());
 
         return preRechargeDTO;
     }
