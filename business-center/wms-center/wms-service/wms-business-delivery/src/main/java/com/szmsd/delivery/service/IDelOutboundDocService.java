@@ -21,7 +21,7 @@ public interface IDelOutboundDocService {
      * @param dto dto
      * @return PricedProduct
      */
-    List<PricedProduct> inService(DelOutboundOtherInServiceDto dto);
+    List<PricedProduct> inService(DelOutboundOtherInServiceDto dto, boolean isShow);
 
     /**
      * 产品服务列表2, 不根据传参国家查询  根据仓库国家查询
