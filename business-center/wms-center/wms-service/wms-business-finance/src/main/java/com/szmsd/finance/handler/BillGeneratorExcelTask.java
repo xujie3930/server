@@ -360,7 +360,7 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         String billStartTime = billRequestVO.getBillStartTime();
         String billEndTime = billRequestVO.getBillEndTime();
 
-        String billTime = billStartTime + "/" + billEndTime;
+        String billTime = billStartTime + "/\n" + billEndTime;
 
 
         List<BasSellerExcelInfoVO> basSellerInfoVOS = new ArrayList<>();
