@@ -489,6 +489,7 @@ public class ExceptionInfoController extends BaseController {
                         int finalI = i;
                         fixedThreadPool.execute(() -> {
                             try {
+                                dto.setCountry(getCountryCodeS(countryCode));
                                 if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
                                     successSize.incrementAndGet();
                                     if(dto.getOrderTypeName().equals("出库单")){
@@ -548,6 +549,7 @@ public class ExceptionInfoController extends BaseController {
                             continue;
                         }
                         try {
+                            dto.setCountry(getCountryCodeS(countryCode));
                             if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
                                 successSize.incrementAndGet();
                                 if(dto.getOrderTypeName().equals("出库单")){
@@ -590,6 +592,16 @@ public class ExceptionInfoController extends BaseController {
 
 
     private String getCountryCode(String country) {
+        R<BasRegionSelectListVO> listVOR = this.basRegionFeignService.queryByCountryName(country);
+        BasRegionSelectListVO vo = R.getDataAndException(listVOR);
+        if (null != vo) {
+
+            return vo.getAddressCode();
+        }
+        return null;
+    }
+
+    private String getCountryCodeS(String country) {
         R<BasRegionSelectListVO> listVOR = this.basRegionFeignService.queryByCountryName(country);
         BasRegionSelectListVO vo = R.getDataAndException(listVOR);
         if (null != vo) {
