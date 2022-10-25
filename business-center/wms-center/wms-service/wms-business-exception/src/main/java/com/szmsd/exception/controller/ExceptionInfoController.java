@@ -593,7 +593,8 @@ public class ExceptionInfoController extends BaseController {
         R<BasRegionSelectListVO> listVOR = this.basRegionFeignService.queryByCountryName(country);
         BasRegionSelectListVO vo = R.getDataAndException(listVOR);
         if (null != vo) {
-            return vo.getAddressCode();
+            //汪俊余要改的
+            return vo.getEnName();
         }
         return null;
     }
