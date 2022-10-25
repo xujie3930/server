@@ -689,6 +689,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     || DelOutboundOrderTypeEnum.BATCH.getCode().equals(dto.getOrderType())
                     || DelOutboundOrderTypeEnum.DESTROY.getCode().equals(dto.getOrderType())) {
 
+
                 InventoryAvailableQueryDto inventoryAvailableQueryDto = new InventoryAvailableQueryDto();
                 String warehouseCode = dto.getWarehouseCode();
                 inventoryAvailableQueryDto.setWarehouseCode(warehouseCode);
@@ -736,6 +737,24 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         }
                         if (outQty > vo.getAvailableInventory()) {
                             throw new CommonException("400", "SKU[" + sku + "]的包材[" + bindCode + "]库存数量不足，出库数量：" + outQty + "，库存数量：" + vo.getAvailableInventory());
+                        }
+                    }
+                }
+                if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(dto.getOrderType())
+                        || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(dto.getOrderType())
+                        || DelOutboundOrderTypeEnum.DESTROY.getCode().equals(dto.getOrderType())) {
+
+                    //设置产品名称，英文名称，货物价值
+                    for (DelOutboundDetailDto detail : details) {
+                        BaseProduct product = productMap.get(detail.getSku());
+                        if(StringUtils.isEmpty(detail.getProductName())){
+                            detail.setProductName(product.getProductName());
+                        }
+                        if(StringUtils.isEmpty(detail.getProductName())){
+                            detail.setProductNameChinese(product.getProductNameChinese());
+                        }
+                        if(detail.getDeclaredValue() != null){
+                            detail.setDeclaredValue(product.getDeclaredValue());
                         }
                     }
                 }
