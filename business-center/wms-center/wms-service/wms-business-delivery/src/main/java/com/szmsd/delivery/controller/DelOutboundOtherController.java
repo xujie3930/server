@@ -40,6 +40,6 @@ public class DelOutboundOtherController extends BaseController {
     @ApiImplicitParam(name = "dto", value = "参数", dataType = "DelOutboundOtherInServiceDto")
     public R<List<PricedProduct>> inService(@RequestBody @Validated DelOutboundOtherInServiceDto dto) {
 
-        return R.ok(this.delOutboundDocService.inService(dto));
+        return R.ok(this.delOutboundDocService.inService(dto, false));
     }
 }

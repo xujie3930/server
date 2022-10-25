@@ -55,6 +55,9 @@
         UPDATE  bas_retreat_piece SET state=0 where id=#{id}
 
     </update>
+    <update id="updateDelOutbound" parameterType="java.lang.String">
+        UPDATE  del_outbound  SET state='Returned_toWarehouse' where order_no=#{fromOrderNo}
+    </update>
 
     <select id="selectPageList" resultType="com.szmsd.returnex.vo.ReturnExpressListVO">
         select
