@@ -1325,6 +1325,42 @@ public class DelOutboundController extends BaseController {
     }
 
 
+
+
+
+
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:exportselect')")
+    @Log(title = "出库管理 - 导出查询", businessType = BusinessType.OTHER)
+    @PostMapping("/exportselect")
+    @ApiOperation(value = "出库管理 - 导出", position = 1600)
+    @SneakyThrows
+    public R exportselect(HttpServletResponse response, @RequestBody DelOutboundListQueryDto queryDto) {
+        try {
+
+            String len = getLen();
+
+            if (Objects.nonNull(SecurityUtils.getLoginUser())) {
+                String cusCode = StringUtils.isNotEmpty(SecurityUtils.getLoginUser().getSellerCode()) ? SecurityUtils.getLoginUser().getSellerCode() : "";
+                if (StringUtils.isEmpty(queryDto.getCustomCode())) {
+                    queryDto.setCustomCode(cusCode);
+                }
+            }
+
+
+            Integer   DelOutboundExportTotal=delOutboundService.selectDelOutboundCount(queryDto);
+
+         return R.ok(DelOutboundExportTotal);
+
+        } catch (Exception e) {
+            log.error("查询参数:" + e.getMessage(), e);
+           return R.failed("操作失败");
+        }
+    }
+
+
+
+
+
     @AutoValue
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:delOutboundCharge')")
     @PostMapping("/delOutboundCharge/page")
