@@ -441,6 +441,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
     @Transactional(rollbackFor = Exception.class)
     public int saveArrivalInfoFormWms(ReturnArrivalReqDTO returnArrivalReqDTO) {
         log.info("接收wms 仓库到件信息{}", returnArrivalReqDTO);
+         if(StringUtils.isNotBlank(returnArrivalReqDTO.getFromOrderNo())){
+             returnExpressMapper.updateDelOutbound(returnArrivalReqDTO.getFromOrderNo());
+        }
         if (StringUtils.isNotBlank(returnArrivalReqDTO.getExpectedNo())) {
             //到货 拆包检查的 需要接收商品详情
             ReturnExpressDetail returnExpressDetailCheck = returnExpressMapper.selectOne(Wrappers.<ReturnExpressDetail>lambdaUpdate()
@@ -477,7 +480,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                     .set(ReturnExpressDetail::getDealStatusStr, dealStatusStr)
             );
             return update;
-        } else {
+        }else {
             // 新增无主件 状态待指派
             ReturnExpressDetail returnExpressDetail = returnArrivalReqDTO.convertThis(ReturnExpressDetail.class);
             returnExpressDetail.setReturnSource(configStatus.getReturnSource().getWmsReturn());
@@ -495,6 +498,9 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             return insert;
         }
     }
+
+
+
 
     /**
      * 接收VMS仓库退件处理结果
