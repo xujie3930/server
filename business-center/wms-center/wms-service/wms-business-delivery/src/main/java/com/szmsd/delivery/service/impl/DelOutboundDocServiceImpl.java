@@ -147,7 +147,7 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
     }
 
     @Override
-    public List<PricedProduct> inService(DelOutboundOtherInServiceDto dto) {
+    public List<PricedProduct> inService(DelOutboundOtherInServiceDto dto, boolean isShow) {
         // 查询仓库信息
         String warehouseCode = dto.getWarehouseCode();
         BasWarehouse warehouse = null;
@@ -208,7 +208,7 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
 
 
 
-        if(list.size() > 0){
+        if(list.size() > 0 && !isShow){
             //是否可以查询
             List<String> codes = list.stream().
                     map(sfcMessage -> sfcMessage.getCode()).collect(Collectors.toList());
@@ -219,8 +219,8 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
                         .collect(Collectors.toMap(BasProductService::getProductCode, BasProductService::getIsShow, (p1, p2) -> p1));
                 List<PricedProduct> newList = new ArrayList<>();
                 for(PricedProduct product: list){
-                    Boolean isShow = map.get(product.getCode());
-                    if(isShow != null && isShow == false){
+                    Boolean isShowVal = map.get(product.getCode());
+                    if(isShowVal != null && isShowVal == false){
                         continue;
                     }
                     newList.add(product);
@@ -276,7 +276,7 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
         if (StringUtils.isEmpty(shipmentRule)) {
             return false;
         }
-        List<PricedProduct> productList = this.inService(dto);
+        List<PricedProduct> productList = this.inService(dto, true);
         if (CollectionUtils.isEmpty(productList)) {
             return false;
         }
