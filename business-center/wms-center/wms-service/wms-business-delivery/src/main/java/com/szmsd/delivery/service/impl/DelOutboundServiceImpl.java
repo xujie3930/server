@@ -2617,6 +2617,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         return true;
     }
+
+    @Override
+    public void doDirectExpressOrders() {
+
+        R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder("CKCNFGZ622101800000018");
+
+    }
+
     public static Date tomorrow(Date today) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(today);
