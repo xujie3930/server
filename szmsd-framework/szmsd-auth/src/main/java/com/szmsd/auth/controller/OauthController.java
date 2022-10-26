@@ -1,5 +1,6 @@
 package com.szmsd.auth.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.szmsd.auth.util.LoginResponse;
 import com.szmsd.common.core.utils.IdUtils;
 import org.slf4j.Logger;
@@ -32,6 +33,11 @@ public class OauthController {
         paramsMap.set("client_secret", map.get("client_secret"));
         paramsMap.set("grant_type", map.get("grant_type"));
         paramsMap.set("scope", map.get("scope"));
+        paramsMap.set("matcher",map.get("matcher"));
+        paramsMap.set("shopifyUUID",map.get("shopifyUUID"));
+
+        logger.info("loginApp params {}", JSON.toJSONString(paramsMap));
+
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(map.get("client_id").toString(), map.get("client_secret").toString()));
         OAuth2AccessToken token = restTemplate.postForObject("http://localhost/dev-api/auth/oauth/token", paramsMap, OAuth2AccessToken.class);
@@ -47,6 +53,11 @@ public class OauthController {
         loginMap.put("token_type", token.getTokenType());
         loginMap.put("user_id", token.getAdditionalInformation().get("user_id"));
         loginMap.put("username", token.getAdditionalInformation().get("username"));
+        loginMap.put("matcher",map.get("matcher"));
+        loginMap.put("shopifyUUID",map.get("shopifyUUID"));
+
+        logger.info("LoginResponse loginMap {}", JSON.toJSONString(loginMap));
+
         //返回的封装
         return new LoginResponse(200, loginMap);
     }
