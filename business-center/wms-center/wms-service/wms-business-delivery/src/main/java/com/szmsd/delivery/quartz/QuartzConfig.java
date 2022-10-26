@@ -26,6 +26,23 @@ public class QuartzConfig {
     }
 
     @Bean
+    public JobDetail DeleTrackingPushJob() {
+        return JobBuilder.newJob(DeleTrackingPushJob.class).withIdentity("DeleTrackingPushJob").storeDurably().build();
+    }
+
+
+    @Bean
+    public Trigger DeleTrackingPushJobTrigger() {
+        //cron方式，每周一凌晨1点刷0 0 1 ? * MON
+        //0 0 */1 * * ? 一个小时
+        return TriggerBuilder.newTrigger().forJob(DeleTrackingPushJob())
+                .withIdentity("DeleTrackingPushJob")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */10 * * * ?"))
+                .build();
+    }
+
+
+    @Bean
     public Trigger DelOutboundJobTrigger() {
         //cron方式，每周一凌晨1点刷0 0 1 ? * MON
         //0/3 * * * * ? 3秒测试
