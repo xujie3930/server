@@ -288,47 +288,48 @@ public class ExceptionInfoController extends BaseController {
             deliveryTimeCell1.setCellStyle(styleMain1);
         }
         //总行数
-        int rowNum=sheet.getLastRowNum()+2;
-        for (int j=2;j<rowNum;j++) {
-            Row row4 = sheet.getRow(j);
-            if (row4!=null) {
-                for (int x = 0; x < 23-a; x++) {
-
-
-                    Cell deliveryTimeCell1 = row4.getCell(x);
-                    if (deliveryTimeCell1 != null) {
-                        CellStyle styleMain1 = workbook.createCellStyle();
-                        styleMain1.setVerticalAlignment(VerticalAlignment.CENTER);//垂直居中
-                         styleMain1.setBorderBottom(BorderStyle.THIN);//下边框
-                         styleMain1.setBorderLeft(BorderStyle.THIN);//左边框
-                         styleMain1.setBorderTop(BorderStyle.THIN);//上边框
-                         styleMain1.setBorderRight(BorderStyle.THIN);//右边框
-                        //设置边框颜色黑色
-                        styleMain1.setTopBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
-                        styleMain1.setBottomBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
-                        styleMain1.setLeftBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
-                        styleMain1.setRightBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
-
-                        styleMain1.setAlignment(HorizontalAlignment.CENTER);
-                        if (x==18-a){
-                            styleMain1.setHidden(true);
-                        }
-                        if (x==19-a) {
-
-                            styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-                            styleMain1.setLocked(true);
-
-                        } else {
-                            styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-                            styleMain1.setLocked(false);
-                        }
-
-                        deliveryTimeCell1.setCellStyle(styleMain1);
-                    }
-                }
-            }
-        }
-        sheet.protectSheet("123456");
+//        int rowNum=sheet.getLastRowNum()+2;
+//        for (int j=2;j<rowNum;j++) {
+//            Row row4 = sheet.getRow(j);
+//            if (row4!=null) {
+//                for (int x = 0; x < 23-a; x++) {
+//
+//
+//                    Cell deliveryTimeCell1 = row4.getCell(x);
+//                    if (deliveryTimeCell1 != null) {
+//                        CellStyle styleMain1 = workbook.createCellStyle();
+//                        styleMain1.setVerticalAlignment(VerticalAlignment.CENTER);//垂直居中
+//                         styleMain1.setBorderBottom(BorderStyle.THIN);//下边框
+//                         styleMain1.setBorderLeft(BorderStyle.THIN);//左边框
+//                         styleMain1.setBorderTop(BorderStyle.THIN);//上边框
+//                         styleMain1.setBorderRight(BorderStyle.THIN);//右边框
+//                        //设置边框颜色黑色
+//                        styleMain1.setTopBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+//                        styleMain1.setBottomBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+//                        styleMain1.setLeftBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+//                        styleMain1.setRightBorderColor(IndexedColors.GREY_25_PERCENT.getIndex());
+//
+//                        styleMain1.setAlignment(HorizontalAlignment.CENTER);
+////                        if (x==18-a){
+////                            styleMain1.setHidden(true);
+////                        }
+//
+////                        if (x==19-a) {
+////
+////                            styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+////                            styleMain1.setLocked(true);
+////
+////                        } else {
+////                            styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+////                            styleMain1.setLocked(false);
+////                        }
+//
+//                        deliveryTimeCell1.setCellStyle(styleMain1);
+//                    }
+//                }
+//            }
+//        }
+//        sheet.protectSheet("123456");
 
         if (dto.getType()==1){
             sheet.setColumnHidden(18,true);
