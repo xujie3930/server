@@ -6,6 +6,7 @@ import com.szmsd.bas.domain.BasSeller;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.bas.dto.BasSellerQueryDto;
 import com.szmsd.bas.dto.BasSellerSysDto;
+import com.szmsd.finance.domain.AccountBalance;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -28,4 +29,6 @@ public interface BasSellerMapper extends BaseMapper<BasSeller> {
     List<Map>  selectfssAccountBalance(BasSellerQueryDto basSeller);
 
     List<BasSellerSysDto> selectBasSellers(@Param(Constants.WRAPPER) QueryWrapper<BasSeller> queryWrapper,@Param("reviewState")Boolean reviewState);
+
+    void insertAccountBalance(AccountBalance accountBalance);
 }
