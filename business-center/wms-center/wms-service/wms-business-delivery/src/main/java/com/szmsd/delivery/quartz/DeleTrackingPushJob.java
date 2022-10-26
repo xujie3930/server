@@ -57,6 +57,7 @@ public class DeleTrackingPushJob extends QuartzJobBean {
                  R<ResponseVO> r = htpOutboundFeignService.shipmentTracking(shipmentTrackingChangeRequestDto);
 
                  manualTrackingYees(shipmentTrackingChangeRequestDto.getOrderNo());
+
              });
          }
 
@@ -146,6 +147,7 @@ public class DeleTrackingPushJob extends QuartzJobBean {
             try {
                 // 解析响应报文，获取响应参数信息
                 JSONObject jsonObject = JSON.parseObject(responseBody);
+                basTrackingPushMapper.deleteByPrimaryKey(delOutboundListQueryDto.getOrderNo());
                 // 判断状态是否为OK
                 if ("OK".equals(jsonObject.getString("status"))) {
                     // 判断结果明细是不是成功的
@@ -165,7 +167,7 @@ public class DeleTrackingPushJob extends QuartzJobBean {
                         }
                     }
                 }
-                basTrackingPushMapper.deleteByPrimaryKey(delOutboundListQueryDto.getOrderNo());
+
 
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
