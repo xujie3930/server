@@ -56,6 +56,7 @@ public class BasSellerController extends BaseController{
     private AuthClientService authClient;
     @Resource
     private IBasSysOperationLogService basSysOperationLogService;
+
      /**
        * 查询模块列表
      */
