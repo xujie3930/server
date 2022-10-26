@@ -95,6 +95,15 @@ public class EmailController extends BaseController {
         return r;
     }
 
+    @PreAuthorize("@ss.hasPermi('bas:email:sendEmailError')")
+    @PostMapping("/sendEmailError")
+    @ApiOperation(value = "发送邮件(异常500发送)", notes = "发送邮件(异常500发送)")
+    public R sendEmailError(@RequestBody EmailDto emailDto) throws Exception {
+//        emailUtil.sendAttachmentMail(emailDto.getTo(), emailDto.getSubject(), emailDto.getText(),emailDto.getFilePath(),emailDto.getList());
+        emailUtil.sendEmailError(emailDto.getTo(), "错误异常提示：", emailDto.getText());
+        return R.ok();
+    }
+
     /**
      * 获取所有定时任务
      *
