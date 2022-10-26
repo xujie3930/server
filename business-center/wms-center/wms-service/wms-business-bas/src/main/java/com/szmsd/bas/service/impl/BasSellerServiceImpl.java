@@ -8,10 +8,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.code.kaptcha.Producer;
 import com.szmsd.bas.api.domain.BasAttachment;
+import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.domain.dto.AttachmentDTO;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.enums.BaseMainEnum;
+import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.config.DefaultBasConfig;
 import com.szmsd.bas.config.StateConfig;
@@ -39,6 +41,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.dto.UserCreditDTO;
 import com.szmsd.finance.enums.CreditConstant;
 import com.szmsd.finance.vo.UserCreditInfoVO;
@@ -65,6 +68,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -102,6 +106,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
     private RemoteAttachmentService remoteAttachmentService;
     @Resource
     private RechargesFeignService rechargesFeignService;
+    @Autowired
+    private BasSubFeignService basSubFeignService;
 
         /**
         * 查询模块
@@ -391,6 +397,21 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                     }
                 }
             }
+
+            R<List<BasSub>> r1= basSubFeignService.listByMain("008","币别");
+            List<BasSub> basSubList=r1.getData();
+            basSubList.forEach(u->{
+                AccountBalance accountBalance=new AccountBalance();
+                accountBalance.setCusId(basSeller.getId());
+                accountBalance.setCusCode(basSeller.getSellerCode());
+                accountBalance.setCurrencyName(basSeller.getUserName());
+                accountBalance.setCurrentBalance(BigDecimal.valueOf(0));
+                accountBalance.setFreezeBalance(BigDecimal.valueOf(0));
+                accountBalance.setTotalBalance(BigDecimal.valueOf(0));
+                accountBalance.setCurrencyCode(u.getSubNameEn());
+                accountBalance.setCurrencyName(u.getSubName());
+                baseMapper.insertAccountBalance(accountBalance);
+            });
 
             r.setData(true);
             r.setMsg("注册成功");
