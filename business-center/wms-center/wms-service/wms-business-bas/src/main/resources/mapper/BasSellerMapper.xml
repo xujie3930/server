@@ -32,6 +32,193 @@
                 remark,
             id, create_by, update_by, del_flag, account, init_email, cus_no, password, state, is_active, salt, service _manager
         </sql>
+    <insert id="insertAccountBalance" parameterType="com.szmsd.finance.domain.AccountBalance">
+        insert into fss_account_balance
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="cusId != null">
+                cus_id,
+            </if>
+            <if test="cusCode != null">
+                cus_code,
+            </if>
+            <if test="cusName != null">
+                cus_name,
+            </if>
+            <if test="currencyCode != null">
+                currency_code,
+            </if>
+            <if test="currencyName != null">
+                currency_name,
+            </if>
+            <if test="currentBalance != null">
+                current_balance,
+            </if>
+            <if test="freezeBalance != null">
+                freeze_balance,
+            </if>
+            <if test="totalBalance != null">
+                total_balance,
+            </if>
+            <if test="creditType != null">
+                credit_type,
+            </if>
+            <if test="creditStatus != null">
+                credit_status,
+            </if>
+            <if test="creditLine != null">
+                credit_line,
+            </if>
+            <if test="creditUseAmount != null">
+                credit_use_amount,
+            </if>
+            <if test="creditBeginTime != null">
+                credit_begin_time,
+            </if>
+            <if test="creditEndTime != null">
+                credit_end_time,
+            </if>
+            <if test="creditTimeInterval != null">
+                credit_time_interval,
+            </if>
+            <if test="creditTimeFlag != null">
+                credit_time_flag,
+            </if>
+            <if test="creditTimeUnit != null">
+                credit_time_unit,
+            </if>
+            <if test="creditBufferTime != null">
+                credit_buffer_time,
+            </if>
+            <if test="creditBufferTimeInterval != null">
+                credit_buffer_time_interval,
+            </if>
+            <if test="creditBufferTimeUnit != null">
+                credit_buffer_time_unit,
+            </if>
+            <if test="creditRepaidAmount != null">
+                credit_repaid_amount,
+            </if>
+            <if test="createByName != null">
+                create_by_name,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateByName != null">
+                update_by_name,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+            <if test="createBy != null">
+                create_by,
+            </if>
+            <if test="updateBy != null">
+                update_by,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="version != null">
+                version,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="cusId != null">
+                #{cusId,jdbcType=INTEGER},
+            </if>
+            <if test="cusCode != null">
+                #{cusCode,jdbcType=VARCHAR},
+            </if>
+            <if test="cusName != null">
+                #{cusName,jdbcType=VARCHAR},
+            </if>
+            <if test="currencyCode != null">
+                #{currencyCode,jdbcType=VARCHAR},
+            </if>
+            <if test="currencyName != null">
+                #{currencyName,jdbcType=VARCHAR},
+            </if>
+            <if test="currentBalance != null">
+                #{currentBalance,jdbcType=DECIMAL},
+            </if>
+            <if test="freezeBalance != null">
+                #{freezeBalance,jdbcType=DECIMAL},
+            </if>
+            <if test="totalBalance != null">
+                #{totalBalance,jdbcType=DECIMAL},
+            </if>
+            <if test="creditType != null">
+                #{creditType,jdbcType=TINYINT},
+            </if>
+            <if test="creditStatus != null">
+                #{creditStatus,jdbcType=TINYINT},
+            </if>
+            <if test="creditLine != null">
+                #{creditLine,jdbcType=DECIMAL},
+            </if>
+            <if test="creditUseAmount != null">
+                #{creditUseAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="creditBeginTime != null">
+                #{creditBeginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creditEndTime != null">
+                #{creditEndTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creditTimeInterval != null">
+                #{creditTimeInterval,jdbcType=INTEGER},
+            </if>
+            <if test="creditTimeFlag != null">
+                #{creditTimeFlag,jdbcType=TINYINT},
+            </if>
+            <if test="creditTimeUnit != null">
+                #{creditTimeUnit,jdbcType=VARCHAR},
+            </if>
+            <if test="creditBufferTime != null">
+                #{creditBufferTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creditBufferTimeInterval != null">
+                #{creditBufferTimeInterval,jdbcType=INTEGER},
+            </if>
+            <if test="creditBufferTimeUnit != null">
+                #{creditBufferTimeUnit,jdbcType=VARCHAR},
+            </if>
+            <if test="creditRepaidAmount != null">
+                #{creditRepaidAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="createByName != null">
+                #{createByName,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateByName != null">
+                #{updateByName,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="version != null">
+                #{version,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
     <select id="selectBasSeller" resultType="com.szmsd.bas.dto.BasSellerSysDto">
         SELECT o.id,o.init_email,o.user_name,o.service_manager,o.service_manager_name,o.service_manager_nick_name,o.service_staff,
         o.service_staff_name,o.service_staff_nick_name,o.seller_code,if(count(s.vaild = '0' or null)=0,1,0) as reviewState,o.is_active
