@@ -85,10 +85,7 @@ import com.szmsd.http.api.feign.HtpOutboundFeignService;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpRmiClientService;
-import com.szmsd.http.dto.HttpRequestDto;
-import com.szmsd.http.dto.ShipmentCancelRequestDto;
-import com.szmsd.http.dto.ShipmentOrderResult;
-import com.szmsd.http.dto.ShipmentTrackingChangeRequestDto;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.http.vo.PricedProductInfo;
@@ -224,6 +221,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Autowired
     private BasShipmenRulesService basShipmenRulesService;
+
     /**
      * 查询出库单模块
      *
@@ -2617,6 +2615,36 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         return true;
     }
+
+    @Override
+    public void doDirectExpressOrders() {
+
+//        List<DelOutbound> delOutboundList = baseMapper.selectList(Wrappers.<DelOutbound>query().lambda()
+//                .eq(DelOutbound::getState,"DELIVERED")
+//        );
+//
+//        if(CollectionUtils.isEmpty(delOutboundList)){
+//            return;
+//        }
+//
+//        for(DelOutbound delOutbound : delOutboundList){
+//
+//            String orderNo = delOutbound.getOrderNo();
+//
+//            R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder(orderNo);
+//
+//            if(directExpressOrderApiDTOR.getCode() != 200){
+//                continue;
+//            }
+//
+//            DirectExpressOrderApiDTO directExpressOrderApiDTO = directExpressOrderApiDTOR.getData();
+//        }
+
+        R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder("CKCNFGZ622101800000018");
+
+        System.out.println(JSON.toJSONString(directExpressOrderApiDTOR));
+    }
+
     public static Date tomorrow(Date today) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(today);

@@ -468,5 +468,9 @@ public interface IDelOutboundService extends IService<DelOutbound> {
     void carrierRegister(DelOutbound delOutbound);
 
     boolean serviceChannelNamePushWMS(DelOutbound delOutbound, DelOutbound updateDelOutbound);
+
+
+    public void doDirectExpressOrders();
+
 }
 
