@@ -37,7 +37,7 @@ public class QuartzConfig {
         //0 0 */1 * * ? 一个小时
         return TriggerBuilder.newTrigger().forJob(DeleTrackingPushJob())
                 .withIdentity("DeleTrackingPushJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 */10 * * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */30 * * * ?"))
                 .build();
     }
 

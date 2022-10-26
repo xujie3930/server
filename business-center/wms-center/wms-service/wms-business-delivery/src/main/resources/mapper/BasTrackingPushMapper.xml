@@ -17,7 +17,7 @@
     from bas_tracking_push
    where type='1'
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from bas_tracking_push
     where order_no = #{orderNo,jdbcType=VARCHAR}
   </delete>
