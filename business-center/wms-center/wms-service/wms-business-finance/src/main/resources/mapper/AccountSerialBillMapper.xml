@@ -244,7 +244,7 @@
             DOA.country,DOA.country_code,
             sum(FASB.amount) as total_amount,
             sum(case when FASB.charge_category = '物流基础费' then abs(FASB.amount) else 0 end ) as freight_fee,
-            sum(case when FASB.charge_category in ('操作费','特殊操作费','业务操作') then abs(FASB.amount) else 0 end) as ex_warehourse_fee,
+            sum(case when FASB.charge_category in ('操作费','业务操作') then abs(FASB.amount) else 0 end) as ex_warehourse_fee,
             sum(case when FASB.charge_category = '物料费' then abs(FASB.amount) else 0 end) as package_fee,
             sum(case when FASB.charge_category = '处理费' then abs(FASB.amount) else 0 end) as hander_fee,
             sum(case when FASB.charge_category = '燃油附加费' then abs(FASB.amount) else 0 end) as fuel_fee,
