@@ -20,6 +20,12 @@ public class EmailFeingFallback implements FallbackFactory<EmailFeingService> {
                 log.info("邮件发送失败: {}", throwable.getMessage());
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R sendEmailError(EmailDto emailDto) {
+                log.info("邮件发送失败: {}", throwable.getMessage());
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

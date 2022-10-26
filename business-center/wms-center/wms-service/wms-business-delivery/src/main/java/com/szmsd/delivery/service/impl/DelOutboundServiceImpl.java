@@ -58,10 +58,7 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundPackingTypeConstant;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
-import com.szmsd.delivery.mapper.BasFileMapper;
-import com.szmsd.delivery.mapper.DelOutboundMapper;
-import com.szmsd.delivery.mapper.DelOutboundTarckErrorMapper;
-import com.szmsd.delivery.mapper.DelOutboundTarckOnMapper;
+import com.szmsd.delivery.mapper.*;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.PackageInfo;
@@ -221,6 +218,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Autowired
     private BasShipmenRulesService basShipmenRulesService;
+
+    @Autowired
+    private BasTrackingPushMapper basTrackingPushMapper;
 
     /**
      * 查询出库单模块
@@ -1526,12 +1526,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 delOutboundTarckOn.setUpdateTime(new Date());
                 delOutboundTarckOn.setTrackingNoNew(updateTrackingNoDto.getTrackingNo());
                 delOutboundTarckOnMapper.insertSelective(delOutboundTarckOn);
-                ShipmentTrackingChangeRequestDto shipmentTrackingChangeRequestDto=new ShipmentTrackingChangeRequestDto();
-                shipmentTrackingChangeRequestDto.setTrackingNo(updateTrackingNoDto.getTrackingNo());
-                shipmentTrackingChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
-                shipmentTrackingChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
+                BasTrackingPush basTrackingPush=new BasTrackingPush();
+                basTrackingPush.setTrackingNo(updateTrackingNoDto.getTrackingNo());
+                basTrackingPush.setOrderNo(delOutbound.getOrderNo());
+                basTrackingPush.setWarehouseCode(delOutbound.getWarehouseCode());
+                basTrackingPushMapper.insertSelective(basTrackingPush);
                 list1.add(updateTrackingNoDto);
-                R<ResponseVO> r= htpOutboundFeignService.shipmentTracking(shipmentTrackingChangeRequestDto);
+//                ShipmentTrackingChangeRequestDto
+//                R<ResponseVO> r= htpOutboundFeignService.shipmentTracking(shipmentTrackingChangeRequestDto);
             }else if (delOutbound==null){
                 b=b+1;
                 DelOutboundTarckError delOutboundTarckError=new DelOutboundTarckError();
@@ -1654,7 +1656,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         delOutboundBatchUpdateTrackingNoEmailDto.setOrderNo(dto.getOrderNo());
                         delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
                         int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
-                    manualTrackingYees(dto.getOrderNo());
+                    //manualTrackingYees(dto.getOrderNo());
 
 
                 }
@@ -1663,7 +1665,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     delOutboundBatchUpdateTrackingNoEmailDto.setOrderNo(dto.getOrderNo());
                     delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
                     int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
-                    manualTrackingYees(dto.getOrderNo());
+                    //manualTrackingYees(dto.getOrderNo());
                 }
 
             }
@@ -1702,7 +1704,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
                     int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
 
-                    manualTrackingYees(dto.getOrderNo());
+                    //manualTrackingYees(dto.getOrderNo());
                 }
                 if (dto.getEmail()==null){
                     DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto=new DelOutboundBatchUpdateTrackingNoEmailDto();
@@ -1710,7 +1712,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
                     int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
 
-                    manualTrackingYees(dto.getOrderNo());
+                    //manualTrackingYees(dto.getOrderNo());
                 }
             }
 
@@ -1748,7 +1750,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         list.forEach(x->{
             int u = super.baseMapper.updateTrackingNo(x);
 
-            manualTrackingYees(x.getOrderNo());
+            //manualTrackingYees(x.getOrderNo());
 
         });
 
@@ -2615,36 +2617,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         return true;
     }
-
-    @Override
-    public void doDirectExpressOrders() {
-
-//        List<DelOutbound> delOutboundList = baseMapper.selectList(Wrappers.<DelOutbound>query().lambda()
-//                .eq(DelOutbound::getState,"DELIVERED")
-//        );
-//
-//        if(CollectionUtils.isEmpty(delOutboundList)){
-//            return;
-//        }
-//
-//        for(DelOutbound delOutbound : delOutboundList){
-//
-//            String orderNo = delOutbound.getOrderNo();
-//
-//            R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder(orderNo);
-//
-//            if(directExpressOrderApiDTOR.getCode() != 200){
-//                continue;
-//            }
-//
-//            DirectExpressOrderApiDTO directExpressOrderApiDTO = directExpressOrderApiDTOR.getData();
-//        }
-
-        R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder("CKCNFGZ622101800000018");
-
-        System.out.println(JSON.toJSONString(directExpressOrderApiDTOR));
-    }
-
     public static Date tomorrow(Date today) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(today);
