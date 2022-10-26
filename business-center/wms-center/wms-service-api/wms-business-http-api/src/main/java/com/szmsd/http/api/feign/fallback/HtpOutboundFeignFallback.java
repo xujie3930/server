@@ -56,6 +56,11 @@ public class HtpOutboundFeignFallback implements FallbackFactory<HtpOutboundFeig
             public R<ResponseVO> shipmentBoxtransfer(BulkOrderRequestDto dto) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<DirectExpressOrderApiDTO> getDirectExpressOrder(String orderNo) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

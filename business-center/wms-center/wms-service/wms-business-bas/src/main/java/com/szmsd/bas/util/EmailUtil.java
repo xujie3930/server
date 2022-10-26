@@ -72,6 +72,22 @@ public class EmailUtil {
         }
     }
 
+
+    public void sendEmailError(String to, String subject, String content) throws Exception {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true);
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            log.error("发送邮件时发生异常！", e);
+            throw e;
+        }
+    }
+
     /**
      * 发送 带附件 邮件 - 单附件发送
      * @param to        收件人

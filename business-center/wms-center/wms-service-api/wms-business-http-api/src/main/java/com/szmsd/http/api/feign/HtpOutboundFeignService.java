@@ -43,4 +43,9 @@ public interface HtpOutboundFeignService {
     @PostMapping("/api/outbound/http/shipment/boxtransfer")
     R shipmentBoxtransfer(@RequestBody BulkOrderRequestDto dto);
 
+
+    @GetMapping("/api/outbound/http/getDirectExpressOrder")
+    @ApiOperation(value = "获取中国直发订单状态")
+    R<DirectExpressOrderApiDTO> getDirectExpressOrder(@RequestParam("orderNo") String orderNo);
+
 }
