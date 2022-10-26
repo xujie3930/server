@@ -89,4 +89,11 @@ public class OutboundController extends BaseController {
         return outboundService.shipmentBoxtransfer(dto);
     }
 
+    @GetMapping("/getDirectExpressOrder")
+    @ApiOperation(value = "获取中国直发订单状态")
+    public R<DirectExpressOrderApiDTO> getDirectExpressOrder(@RequestParam("orderNo") String orderNo) {
+
+        return outboundService.getDirectExpressOrder(orderNo);
+    }
+
 }

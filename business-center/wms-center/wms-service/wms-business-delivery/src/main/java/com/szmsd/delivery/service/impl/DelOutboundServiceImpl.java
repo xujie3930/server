@@ -82,10 +82,7 @@ import com.szmsd.http.api.feign.HtpOutboundFeignService;
 import com.szmsd.http.api.feign.HtpPricedProductFeignService;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpRmiClientService;
-import com.szmsd.http.dto.HttpRequestDto;
-import com.szmsd.http.dto.ShipmentCancelRequestDto;
-import com.szmsd.http.dto.ShipmentOrderResult;
-import com.szmsd.http.dto.ShipmentTrackingChangeRequestDto;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.http.vo.PricedProductInfo;
@@ -2619,6 +2616,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         return true;
     }
+
+    @Override
+    public void doDirectExpressOrders() {
+
+    }
+
     public static Date tomorrow(Date today) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(today);

@@ -468,5 +468,9 @@ void emailBatchUpdateTrackingNo(List<Map<String, Object>> list,String filepath);
     void carrierRegister(DelOutbound delOutbound);
 
     boolean serviceChannelNamePushWMS(DelOutbound delOutbound, DelOutbound updateDelOutbound);
+
+
+    public void doDirectExpressOrders();
+
 }
 

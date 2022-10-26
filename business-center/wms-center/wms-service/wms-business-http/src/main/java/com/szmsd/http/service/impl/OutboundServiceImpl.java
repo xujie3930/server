@@ -2,7 +2,10 @@ package com.szmsd.http.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.HttpClientHelper;
+import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.service.IOutboundService;
@@ -11,7 +14,11 @@ import com.szmsd.http.util.HttpResponseVOUtils;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
 import com.szmsd.http.vo.ResponseVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author zhangyuyuan
@@ -73,5 +80,22 @@ public class OutboundServiceImpl extends WmsRequest implements IOutboundService 
     @Override
     public R shipmentBoxtransfer(BulkOrderRequestDto dto) {
         return HttpResponseVOUtils.transformation(httpPostBody(null, "outbound.boxtransfer", dto));
+    }
+
+    @Override
+    public R<DirectExpressOrderApiDTO> getDirectExpressOrder(String orderNo) {
+
+        String url = "https://openapi.chukou1.cn/v1/directExpressOrders/"+orderNo+"/status";
+
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("Authorization", "Bearer ZWIwZTM5NDItOTllYi00NGVkLTgwYWUtYzJlMzJmYjk3YzQ0");
+
+        HttpResponseBody httpResponseBody = HttpClientHelper.httpGet(url, null, headerMap);
+
+        String body = httpResponseBody.getBody();
+
+        DirectExpressOrderApiDTO directExpressOrderApiDTO = JSON.parseObject(body,new TypeReference<DirectExpressOrderApiDTO>() {}.getType());
+
+        return R.ok(directExpressOrderApiDTO);
     }
 }

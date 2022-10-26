@@ -43,7 +43,7 @@ public class HttpChaLevelMaintenanceServiceImpl extends SaaSPricedRequest implem
 
     @Override
     public R<ChaLevelMaintenanceDto> get(String id) {
-        return HttpResponseVOUtils.transformation(httpGetBody("", "pricedGrade.get", null, id), ChaLevelMaintenanceDto.class);
+        return HttpResponseVOUtils.transformation(httpGetBodyes("", "pricedGrade.get", null, id), ChaLevelMaintenanceDto.class);
     }
 
     @Override
