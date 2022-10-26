@@ -2,15 +2,18 @@ package com.szmsd.delivery.mapper;
 
 
 import com.szmsd.delivery.domain.BasTrackingPush;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface BasTrackingPushMapper {
-    int deleteByPrimaryKey(Integer id);
+    int deleteByPrimaryKey(@Param("orderNo") String orderNo);
 
     int insert(BasTrackingPush record);
 
     int insertSelective(BasTrackingPush record);
 
-    BasTrackingPush selectByPrimaryKey(Integer id);
+    List<BasTrackingPush> selectByPrimaryKey();
 
     int updateByPrimaryKeySelective(BasTrackingPush record);
 
