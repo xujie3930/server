@@ -51,7 +51,7 @@ public class QuartzHttpTjConfig {
         //0 0 */1 * * ? 一个小时
         return TriggerBuilder.newTrigger().forJob(CustomPricesgradeJob())
                 .withIdentity("CustomPricesgradeJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */50 * * * ?"))
                 .build();
     }
 
