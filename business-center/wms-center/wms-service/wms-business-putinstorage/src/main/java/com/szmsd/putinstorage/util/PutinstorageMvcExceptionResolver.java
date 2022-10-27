@@ -29,8 +29,7 @@ public class PutinstorageMvcExceptionResolver implements HandlerExceptionResolve
         System.out.println("通过判断错误类型来做邮件的处理 = ");
         EmailDto emailDto=new EmailDto();
         EmailFeingService bean = SpringUtils.getBean(EmailFeingService.class);
-        //邮箱接收人
-        emailDto.setTo("1402476569@qq.com");
+
 
            if (((CommonException) ex).getCode().equals("500")) {
                emailDto.setText(ex.getStackTrace()[0].getMethodName()+":"+((CommonException) ex).getMessage());
