@@ -33,7 +33,7 @@ public class HttpMvcExceptionResolver implements HandlerExceptionResolver {
 
            if (((CommonException) ex).getCode().equals("500")) {
                emailDto.setText(ex.getStackTrace()[0].getMethodName()+":"+((CommonException) ex).getMessage());
-               R r = bean.sendEmailError(emailDto);
+               //R r = bean.sendEmailError(emailDto);
            }
         return null;
     }

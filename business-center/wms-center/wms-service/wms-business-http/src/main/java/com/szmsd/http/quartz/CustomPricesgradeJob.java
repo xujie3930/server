@@ -1,6 +1,8 @@
 package com.szmsd.http.quartz;
 
 import com.szmsd.bas.api.feign.BasSellerFeignService;
+import com.szmsd.bas.domain.BasSeller;
+import com.szmsd.bas.dto.BasSellerEmailDto;
 import com.szmsd.bas.dto.ServiceConditionDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.http.api.feign.HtpCustomPricesFeignService;
@@ -17,6 +19,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CustomPricesgradeJob extends QuartzJobBean {
          @Autowired
@@ -27,8 +30,9 @@ public class CustomPricesgradeJob extends QuartzJobBean {
          private BasSellerFeignService basSellerFeignService;
          @Override
         protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-             R<List<String>> r= basSellerFeignService.queryByServiceCondition(new ServiceConditionDto());
-             List<String> sellerCodeList=r.getData();
+             R<List<BasSellerEmailDto>> r= basSellerFeignService.queryAllSellerCodeAndEmail();
+             List<BasSellerEmailDto> basSellerEmailDtoList=r.getData();
+             List<String> sellerCodeList=basSellerEmailDtoList.stream().map(BasSellerEmailDto::getSellerCode).collect(Collectors.toList());
              sellerCodeList.forEach(s->{
                  R<CustomPricesPageDto> r1 = htpCustomPricesFeignService.page(s);
                  CustomPricesPageDto customPricesPageDto=r1.getData();
@@ -43,6 +47,8 @@ public class CustomPricesgradeJob extends QuartzJobBean {
                          basCustomPricesgrade.setCustomprType("1");
                          basCustomPricesgrade.setCreateByName("系统自动创建");
                          basCustomPricesgrade.setShowTime(new Date());
+                         basCustomPricesgrade.setOrderOn(i.getOrder());
+                         basCustomPricesgrade.setSellerCode(s);
                          BasCustomPricesgrade   basCustomPricesgrade1 =basCustomPricesgradeMapper.selectByPrimaryKey(basCustomPricesgrade);
                          if (basCustomPricesgrade1!=null){
                              basCustomPricesgradeMapper.deleteByPrimaryKey(basCustomPricesgrade1.getId());
@@ -67,8 +73,10 @@ public class CustomPricesgradeJob extends QuartzJobBean {
                          BeanUtils.copyProperties(q,basCustomPricesgrade);
                          basCustomPricesgrade.setId(null);
                          basCustomPricesgrade.setCustomprType("0");
+                         basCustomPricesgrade.setOrderOn(q.getOrder());
                          basCustomPricesgrade.setCreateByName("系统自动创建");
                          basCustomPricesgrade.setShowTime(new Date());
+                         basCustomPricesgrade.setSellerCode(s);
                          BasCustomPricesgrade   basCustomPricesgrade1 =basCustomPricesgradeMapper.selectByPrimaryKey(basCustomPricesgrade);
                          if (basCustomPricesgrade1!=null){
                              basCustomPricesgradeMapper.deleteByPrimaryKey(basCustomPricesgrade1.getId());
