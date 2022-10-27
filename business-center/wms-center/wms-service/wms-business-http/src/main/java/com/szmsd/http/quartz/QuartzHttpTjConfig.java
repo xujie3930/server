@@ -20,6 +20,12 @@ public class QuartzHttpTjConfig {
         return JobBuilder.newJob(TjJob.class).withIdentity("TjJob").storeDurably().build();
     }
 
+
+    @Bean
+    public JobDetail CustomPricesgradeJob() {
+        return JobBuilder.newJob(CustomPricesgradeJob.class).withIdentity("CustomPricesgradeJob").storeDurably().build();
+    }
+
     @Bean
     public Trigger DelOutboundJobTrigger() {
         //cron方式，每周一凌晨1点刷0 0 1 ? * MON
@@ -35,6 +41,17 @@ public class QuartzHttpTjConfig {
         return TriggerBuilder.newTrigger().forJob(TjJob())
                 .withIdentity("TjJob")
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
+                .build();
+    }
+
+
+    @Bean
+    public Trigger CustomPricesgradeJobTrigger() {
+        //cron方式，每周一凌晨1点刷0 0 1 ? * MON
+        //0 0 */1 * * ? 一个小时
+        return TriggerBuilder.newTrigger().forJob(CustomPricesgradeJob())
+                .withIdentity("CustomPricesgradeJob")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * * * ?"))
                 .build();
     }
 
