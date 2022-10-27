@@ -168,6 +168,6 @@ public class DiscountServiceImpl extends SaaSPricedRequest implements IHttpDisco
 
     @Override
     public R<OperationRecordDto> operationRecord(String id) {
-        return HttpResponseVOUtils.transformation(httpGetBody("", "discount.operationRecord", null, id), OperationRecordDto.class);
+        return HttpResponseVOUtils.transformation(httpGetBodyes("", "discount.operationRecord", null, id), OperationRecordDto.class);
     }
 }

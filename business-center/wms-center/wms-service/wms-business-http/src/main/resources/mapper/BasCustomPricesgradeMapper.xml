@@ -6,16 +6,17 @@
     <result column="template_id" property="templateId" jdbcType="VARCHAR" />
     <result column="template_name" property="templateName" jdbcType="VARCHAR" />
     <result column="is_self_template" property="isSelfTemplate" jdbcType="VARCHAR" />
-    <result column="order" property="order" jdbcType="INTEGER" />
+    <result column="order_on" property="orderOn" jdbcType="INTEGER" />
     <result column="remark" property="remark" jdbcType="VARCHAR" />
     <result column="begin_time" property="beginTime" jdbcType="TIMESTAMP" />
     <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
     <result column="create_by_name" property="createByName" jdbcType="VARCHAR" />
     <result column="custompr_type" property="customprType" jdbcType="CHAR" />
+    <result column="seller_code" property="sellerCode" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, template_id, template_name, is_self_template, order, remark, begin_time, end_time, 
-    create_by_name, custompr_type
+    id, template_id, template_name, is_self_template, order_on, remark, begin_time, end_time,
+    create_by_name, custompr_type,seller_code
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.szmsd.http.domain.BasCustomPricesgrade" >
     select 
@@ -27,7 +28,7 @@
       and  end_time &lt; #{showTime}
       </if>
       <if test="templateId != null" >
-        and  template_id = #{template_id}
+        and  template_id = #{templateId}
       </if>
       <if test="customprType != null" >
         and  custompr_type = #{customprType}
@@ -46,11 +47,11 @@
   </delete>
   <insert id="insert" parameterType="com.szmsd.http.domain.BasCustomPricesgrade" >
     insert into bas_custom_pricesgrade (id, template_id, template_name, 
-      is_self_template, order, remark, 
+      is_self_template, order_on, remark,
       begin_time, end_time, create_by_name, 
       custompr_type)
     values (#{id,jdbcType=INTEGER}, #{templateId,jdbcType=VARCHAR}, #{templateName,jdbcType=VARCHAR}, 
-      #{isSelfTemplate,jdbcType=VARCHAR}, #{order,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, 
+      #{isSelfTemplate,jdbcType=VARCHAR}, #{orderOn,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR},
       #{beginTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{createByName,jdbcType=VARCHAR}, 
       #{customprType,jdbcType=CHAR})
   </insert>
@@ -69,8 +70,8 @@
       <if test="isSelfTemplate != null" >
         is_self_template,
       </if>
-      <if test="order != null" >
-        order,
+      <if test="orderOn != null" >
+        order_on,
       </if>
       <if test="remark != null" >
         remark,
@@ -87,6 +88,9 @@
       <if test="customprType != null" >
         custompr_type,
       </if>
+      <if test="sellerCode != null" >
+        seller_code,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -101,8 +105,8 @@
       <if test="isSelfTemplate != null" >
         #{isSelfTemplate,jdbcType=VARCHAR},
       </if>
-      <if test="order != null" >
-        #{order,jdbcType=INTEGER},
+      <if test="orderOn != null" >
+        #{orderOn,jdbcType=INTEGER},
       </if>
       <if test="remark != null" >
         #{remark,jdbcType=VARCHAR},
@@ -119,6 +123,9 @@
       <if test="customprType != null" >
         #{customprType,jdbcType=CHAR},
       </if>
+      <if test="sellerCode != null" >
+        #{sellerCode,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.http.domain.BasCustomPricesgrade" >
@@ -133,8 +140,8 @@
       <if test="isSelfTemplate != null" >
         is_self_template = #{isSelfTemplate,jdbcType=VARCHAR},
       </if>
-      <if test="order != null" >
-        order = #{order,jdbcType=INTEGER},
+      <if test="orderOn != null" >
+        order_on = #{orderOn,jdbcType=INTEGER},
       </if>
       <if test="remark != null" >
         remark = #{remark,jdbcType=VARCHAR},
@@ -151,6 +158,9 @@
       <if test="customprType != null" >
         custompr_type = #{customprType,jdbcType=CHAR},
       </if>
+      <if test="sellerCode != null" >
+        seller_code= #{sellerCode,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -159,7 +169,7 @@
     set template_id = #{templateId,jdbcType=VARCHAR},
       template_name = #{templateName,jdbcType=VARCHAR},
       is_self_template = #{isSelfTemplate,jdbcType=VARCHAR},
-      order = #{order,jdbcType=INTEGER},
+       order_on = #{orderOn,jdbcType=INTEGER},
       remark = #{remark,jdbcType=VARCHAR},
       begin_time = #{beginTime,jdbcType=TIMESTAMP},
       end_time = #{endTime,jdbcType=TIMESTAMP},
