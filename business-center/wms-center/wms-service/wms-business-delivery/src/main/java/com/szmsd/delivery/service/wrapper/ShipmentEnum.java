@@ -820,7 +820,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
         public static final TimeUnit unit = TimeUnit.SECONDS;
 
-        public static final long time = 180L;
+        public static final long time = 3L;
 
         @Override
         public void handle(ApplicationContext context) {
