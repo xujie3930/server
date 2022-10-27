@@ -65,7 +65,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         RLock lock = redissonClient.getLock(key);
 
         try {
-            if (lock.tryLock()) {
+            if (lock.tryLock(time, unit)) {
 
                 final String currencyCode = dto.getCurrencyCode();
 
