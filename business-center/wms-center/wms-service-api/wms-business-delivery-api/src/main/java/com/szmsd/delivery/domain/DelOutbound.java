@@ -318,8 +318,6 @@ public class DelOutbound extends BaseEntity {
     private String amazonLogisticsRouteId;
 
 
-
-
     @ApiModelProperty(value = "houseNo")
     private String houseNo;
 
@@ -327,12 +325,13 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "计泡重量")
     private Double forecastWeight;
 
-
-
     @ApiModelProperty(value = "货币金额描述")
     private String currencyDescribe;
 
      //汪经理要我加的字段（出库业务调整）
     @ApiModelProperty(value = "预报单号")
     private String expectedNo;
+
+    @ApiModelProperty(value = "第三方更新状态")
+    private Integer thridPartStatus;
 }
