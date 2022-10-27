@@ -25,7 +25,7 @@ public class GradeServiceImpl extends SaaSPricedRequest implements IHttpGradeSer
 
     @Override
     public R<GradeMainDto> detailResult(String id) {
-        return HttpResponseVOUtils.transformation(httpGetBody("", "grade.detailResult", null, id), GradeMainDto.class);
+        return HttpResponseVOUtils.transformation(httpGetBodyes("", "grade.detailResult", null, id), GradeMainDto.class);
     }
 
     @Override

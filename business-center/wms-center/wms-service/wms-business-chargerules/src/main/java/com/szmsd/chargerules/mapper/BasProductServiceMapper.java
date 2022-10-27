@@ -3,6 +3,7 @@ package com.szmsd.chargerules.mapper;
 
 import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.http.dto.custom.BasCustomPricesgradeDto;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -21,4 +22,6 @@ public interface BasProductServiceMapper {
     int updateByPrimaryKey(BasProductService record);
 
     List<BasProductService> selectBasProductService(@Param("list") List<String> list);
+
+    List<BasCustomPricesgradeDto>  selectbasCustomPricesgradeList(BasCustomPricesgradeDto basCustomPricesgradeDto);
 }

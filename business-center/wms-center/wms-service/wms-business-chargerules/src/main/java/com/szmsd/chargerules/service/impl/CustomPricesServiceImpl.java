@@ -1,8 +1,10 @@
 package com.szmsd.chargerules.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import com.szmsd.chargerules.mapper.BasProductServiceMapper;
 import com.szmsd.chargerules.service.ICustomPricesService;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpCustomPricesFeignService;
@@ -14,10 +16,14 @@ import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.dto.discount.DiscountDetailDto;
 import com.szmsd.http.vo.Operation;
 import com.szmsd.http.vo.Operator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
 * <p>
@@ -40,6 +46,9 @@ public class CustomPricesServiceImpl implements ICustomPricesService {
 
     @Resource
     private HtpDiscountFeignService htpDiscountFeignService;
+
+    @Autowired
+    private BasProductServiceMapper basProductServiceMapper;
 
     @Override
     public R<OperationRecordDto> operationRecord(String id) {
@@ -83,8 +92,30 @@ public class CustomPricesServiceImpl implements ICustomPricesService {
     }
 
     @Override
-    public R<CustomPricesPageDto> result(String clientCode) {
-        return htpCustomPricesFeignService.page(clientCode);
+    public List<BasCustomPricesgradeDto> result(BasCustomPricesgradeDto basCustomPricesgradeDto) {
+        if (basCustomPricesgradeDto.getSellerCode()!=null&&!basCustomPricesgradeDto.getSellerCode().equals("")){
+            List<String> sellerCodeList = splitToArray(basCustomPricesgradeDto.getSellerCode(), "[\n,]");
+            if (sellerCodeList.size()>0){
+                basCustomPricesgradeDto.setSellerCodeList(sellerCodeList);
+            }
+        }
+        List<BasCustomPricesgradeDto> basCustomPricesgradeDtoList=basProductServiceMapper.selectbasCustomPricesgradeList(basCustomPricesgradeDto);
+        return basCustomPricesgradeDtoList;
+    }
+
+    public  List<String> splitToArray(String text, String split) {
+        String[] arr = text.split(split);
+        if (arr.length == 0) {
+            return Collections.emptyList();
+        }
+        List<String> list = new ArrayList<>();
+        for (String s : arr) {
+            if (StringUtils.isEmpty(s)) {
+                continue;
+            }
+            list.add(s);
+        }
+        return list;
     }
 
     @Override
