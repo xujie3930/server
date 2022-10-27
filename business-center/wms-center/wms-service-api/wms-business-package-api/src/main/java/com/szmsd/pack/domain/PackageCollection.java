@@ -228,4 +228,10 @@ public class PackageCollection extends BaseEntity {
 
     @ApiModelProperty(value = "提货服务名称")
     private String pickupPackageServiceName;
+
+    @ApiModelProperty(value = "收税人税号")
+    private String taxNumber;
+
+    @ApiModelProperty(value = "身份证")
+    private String idNumber;
 }

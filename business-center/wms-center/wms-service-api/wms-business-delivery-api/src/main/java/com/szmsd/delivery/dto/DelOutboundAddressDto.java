@@ -54,4 +54,10 @@ public class DelOutboundAddressDto implements Serializable {
 
     @ApiModelProperty(value = "邮箱")
     private String email;
+
+    @ApiModelProperty(value = "收税人税号")
+    private String taxNumber;
+
+    @ApiModelProperty(value = "身份证")
+    private String idNumber;
 }

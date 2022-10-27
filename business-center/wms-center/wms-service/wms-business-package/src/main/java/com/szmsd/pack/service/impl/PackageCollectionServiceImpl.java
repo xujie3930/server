@@ -278,7 +278,10 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                     packageCollection.getReceiverCity(),
                     packageCollection.getReceiverProvince(),
                     packageCollection.getReceiverPostCode(),
-                    packageCollection.getReceiverCountry()));
+                    packageCollection.getReceiverCountry(),
+                    packageCollection.getTaxNumber(),
+                    packageCollection.getIdNumber()
+            ));
             createShipmentOrderCommand.setReturnAddress(new AddressCommand(packageCollection.getCollectionName(),
                     packageCollection.getCollectionPhone(),
                     "",
@@ -288,7 +291,11 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                     packageCollection.getCollectionCity(),
                     packageCollection.getCollectionProvince(),
                     packageCollection.getCollectionPostCode(),
-                    packageCollection.getCollectionCountry()));
+                    packageCollection.getCollectionCountry(),
+                    packageCollection.getTaxNumber(),
+                    packageCollection.getIdNumber()
+                    )
+            );
             // 包裹信息
             List<Package> packages = new ArrayList<>();
             List<PackageItem> packageItems = new ArrayList<>();

@@ -631,7 +631,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 address.getCity(),
                 address.getStateOrProvince(),
                 address.getPostCode(),
-                country.getEnName()));
+                country.getEnName(),
+                address.getTaxNumber(),
+                address.getIdNumber()
+        ));
         createShipmentOrderCommand.setReturnAddress(new AddressCommand(warehouse.getContact(),
                 warehouse.getTelephone(),
                 null,
@@ -641,7 +644,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 warehouse.getCity(),
                 warehouse.getProvince(),
                 warehouse.getPostcode(),
-                warehouse.getCountryName()));
+                warehouse.getCountryName(),
+                address.getTaxNumber(),
+                address.getIdNumber()
+                ));
         // 税号信息
         String ioss = delOutbound.getIoss();
         if (StringUtils.isNotEmpty(ioss)) {
@@ -839,7 +845,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 address.getCity(),
                 address.getStateOrProvince(),
                 address.getPostCode(),
-                country.getEnName()));
+                country.getEnName(),
+                address.getTaxNumber(),
+                address.getIdNumber()
+        ));
         createShipmentOrderCommand.setReturnAddress(new AddressCommand(warehouse.getContact(),
                 warehouse.getTelephone(),
                 null,
@@ -849,7 +858,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 warehouse.getCity(),
                 warehouse.getProvince(),
                 warehouse.getPostcode(),
-                warehouse.getCountryName()));
+                warehouse.getCountryName(),
+                address.getTaxNumber(),
+                address.getIdNumber()
+            ));
         // 税号信息
         String ioss = delOutbound.getIoss();
         if (StringUtils.isNotEmpty(ioss)) {

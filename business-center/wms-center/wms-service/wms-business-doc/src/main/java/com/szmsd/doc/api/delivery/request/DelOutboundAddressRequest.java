@@ -73,4 +73,12 @@ public class DelOutboundAddressRequest {
     @ApiModelProperty(value = "区域", dataType = "String", example = "xxx")
     private String zone;
 
+    @ApiModelProperty(value = "收税人税号")
+    @Size(max = 50, message = "收税人税号不能超过50个字符", groups = {DelOutboundGroup.Default.class})
+    private String taxNumber;
+
+    @ApiModelProperty(value = "身份证")
+    @Size(max = 20, message = "身份证不能超过20个字符", groups = {DelOutboundGroup.Default.class})
+    private String idNumber;
+
 }
