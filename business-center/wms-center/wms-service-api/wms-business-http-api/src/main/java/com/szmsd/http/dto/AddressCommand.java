@@ -37,4 +37,9 @@ public class AddressCommand {
     private String postCode;
     // 国家
     private String country;
+
+    //税号
+    private String taxNumber;
+    //身份证
+    private String idNumber;
 }

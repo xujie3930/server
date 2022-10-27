@@ -16,7 +16,7 @@ public class DirectExpressOrdersTimer {
     private IDelOutboundService iDelOutboundService;
 
 
-    @Scheduled(cron = "0 0 23 * * ?")
+    //@Scheduled(cron = "0 0 23 * * ?")
     public void doDirectExpressOrders() {
         iDelOutboundService.doDirectExpressOrders();
     }
