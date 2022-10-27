@@ -208,6 +208,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Autowired
     private BasTrackingPushMapper basTrackingPushMapper;
 
+    @Autowired
+    private RedissonClient redissonClient;
+
     /**
      * 查询出库单模块
      *
