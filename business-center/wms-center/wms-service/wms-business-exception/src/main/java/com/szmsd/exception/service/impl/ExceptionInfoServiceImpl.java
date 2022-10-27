@@ -361,48 +361,94 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
      * @param exceptionInfo 模块
      * @return 结果
      */
-    @Override
-    public int updateExceptionInfo(List<ExceptionInfoDto> exceptionInfo) {
+//    @Override
+//    public int updateExceptionInfo(List<ExceptionInfoDto> exceptionInfo) {
+//
+//        for (int i=0;i<exceptionInfo.size();i++) {
+//            ExceptionInfo exception = super.getById(exceptionInfo.get(i).getId());
+//            ExceptionProcessRequest exceptionProcessRequest = BeanMapperUtil.map(exceptionInfo, ExceptionProcessRequest.class);
+//            exceptionProcessRequest.setWarehouseCode(exception.getWarehouseCode());
+//            exceptionProcessRequest.setExceptionNo(exception.getExceptionNo());
+//            if (exceptionInfo.get(i).getProcessType().equals(ProcessTypeEnum.GOONSHIPPING.getCode())) {
+//                try {
+//                    DelOutboundFurtherHandlerDto delOutboundFurtherHandlerDto = new DelOutboundFurtherHandlerDto();
+//                    delOutboundFurtherHandlerDto.setOrderNo(exception.getOrderNo());
+//                    delOutboundClientService.furtherHandler(delOutboundFurtherHandlerDto);
+//                } catch (Exception e) {
+//                    log.info(exception.getOrderNo());
+//                }
+//            }
+//            R<ResponseVO> r = htpExceptionFeignService.processing(exceptionProcessRequest);
+//            if (r == null) {
+//                throw new BaseException("wms服务调用失败");
+//            }
+//            if (r.getData() == null) {
+//                throw new BaseException("wms服务调用失败");
+//            }
+//            if (r.getData().getSuccess() == null) {
+//                if (r.getData().getErrors() != null) {
+//                    throw new BaseException("传wms失败" + r.getData().getErrors());
+//                }
+//            } else {
+//                if (!r.getData().getSuccess()) {
+//                    throw new BaseException("传wms失败" + r.getData().getMessage());
+//                }
+//            }
+//            exceptionInfo.get(i).setProcessTypeName(ProcessTypeEnum.get(exceptionInfo.get(i).getProcessType()).getName());
+//            exceptionInfo.get(i).setState(StateSubEnum.YICHULI.getCode());
+//            if (CollectionUtils.isNotEmpty(exceptionInfo.get(i).getDocumentsFiles())) {
+//                AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(exception.getExceptionNo()).businessItemNo(null).fileList(exceptionInfo.get(i).getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.EXCEPTION_DOCUMENT).build();
+//                this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+//            }
+//            int a= baseMapper.updateById(exceptionInfo.get(i));
+//        }
+//        return 1;
+//    }
 
-        for (int i=0;i<exceptionInfo.size();i++) {
-            ExceptionInfo exception = super.getById(exceptionInfo.get(i).getId());
-            ExceptionProcessRequest exceptionProcessRequest = BeanMapperUtil.map(exceptionInfo, ExceptionProcessRequest.class);
-            exceptionProcessRequest.setWarehouseCode(exception.getWarehouseCode());
-            exceptionProcessRequest.setExceptionNo(exception.getExceptionNo());
-            if (exceptionInfo.get(i).getProcessType().equals(ProcessTypeEnum.GOONSHIPPING.getCode())) {
-                try {
-                    DelOutboundFurtherHandlerDto delOutboundFurtherHandlerDto = new DelOutboundFurtherHandlerDto();
-                    delOutboundFurtherHandlerDto.setOrderNo(exception.getOrderNo());
-                    delOutboundClientService.furtherHandler(delOutboundFurtherHandlerDto);
-                } catch (Exception e) {
-                    log.info(exception.getOrderNo());
-                }
+    /**
+     * 修改模块
+     *
+     * @param exceptionInfo 模块
+     * @return 结果
+     */
+    @Override
+    public int updateExceptionInfo(ExceptionInfoDto exceptionInfo) {
+        ExceptionInfo exception = super.getById(exceptionInfo.getId());
+        ExceptionProcessRequest exceptionProcessRequest = BeanMapperUtil.map(exceptionInfo, ExceptionProcessRequest.class);
+        exceptionProcessRequest.setWarehouseCode(exception.getWarehouseCode());
+        exceptionProcessRequest.setExceptionNo(exception.getExceptionNo());
+        if (exceptionInfo.getProcessType().equals(ProcessTypeEnum.GOONSHIPPING.getCode())) {
+            try {
+                DelOutboundFurtherHandlerDto delOutboundFurtherHandlerDto = new DelOutboundFurtherHandlerDto();
+                delOutboundFurtherHandlerDto.setOrderNo(exception.getOrderNo());
+                delOutboundClientService.furtherHandler(delOutboundFurtherHandlerDto);
+            } catch (Exception e) {
+                log.info(exception.getOrderNo());
             }
-            R<ResponseVO> r = htpExceptionFeignService.processing(exceptionProcessRequest);
-            if (r == null) {
-                throw new BaseException("wms服务调用失败");
-            }
-            if (r.getData() == null) {
-                throw new BaseException("wms服务调用失败");
-            }
-            if (r.getData().getSuccess() == null) {
-                if (r.getData().getErrors() != null) {
-                    throw new BaseException("传wms失败" + r.getData().getErrors());
-                }
-            } else {
-                if (!r.getData().getSuccess()) {
-                    throw new BaseException("传wms失败" + r.getData().getMessage());
-                }
-            }
-            exceptionInfo.get(i).setProcessTypeName(ProcessTypeEnum.get(exceptionInfo.get(i).getProcessType()).getName());
-            exceptionInfo.get(i).setState(StateSubEnum.YICHULI.getCode());
-            if (CollectionUtils.isNotEmpty(exceptionInfo.get(i).getDocumentsFiles())) {
-                AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(exception.getExceptionNo()).businessItemNo(null).fileList(exceptionInfo.get(i).getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.EXCEPTION_DOCUMENT).build();
-                this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
-            }
-            int a= baseMapper.updateById(exceptionInfo.get(i));
         }
-        return 1;
+        R<ResponseVO> r = htpExceptionFeignService.processing(exceptionProcessRequest);
+        if (r == null) {
+            throw new BaseException("wms服务调用失败");
+        }
+        if (r.getData() == null) {
+            throw new BaseException("wms服务调用失败");
+        }
+        if (r.getData().getSuccess() == null) {
+            if (r.getData().getErrors() != null) {
+                throw new BaseException("传wms失败" + r.getData().getErrors());
+            }
+        } else {
+            if (!r.getData().getSuccess()) {
+                throw new BaseException("传wms失败" + r.getData().getMessage());
+            }
+        }
+        exceptionInfo.setProcessTypeName(ProcessTypeEnum.get(exceptionInfo.getProcessType()).getName());
+        exceptionInfo.setState(StateSubEnum.YICHULI.getCode());
+        if (CollectionUtils.isNotEmpty(exceptionInfo.getDocumentsFiles())) {
+            AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(exception.getExceptionNo()).businessItemNo(null).fileList(exceptionInfo.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.EXCEPTION_DOCUMENT).build();
+            this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
+        }
+        return baseMapper.updateById(exceptionInfo);
     }
 
     /**
