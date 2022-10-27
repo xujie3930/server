@@ -127,7 +127,7 @@ public class ExceptionInfoController extends BaseController {
             exportContext.setStateCacheAdapter(listMap.get("085"));
             QueryDto queryDto1 = new QueryDto();
             queryDto1.setPageNum(1);
-            queryDto1.setPageSize(300);
+            queryDto1.setPageSize(80000);
             QueryPage<ExceptionInfoExportDto> queryPage = new ExceptionInfoExportQueryPage(dto, queryDto1, exportContext, this.exceptionInfoService);
             String pathName = "/temp/exception_export_template.xlsx";
             org.springframework.core.io.Resource resource = new ClassPathResource(pathName);
