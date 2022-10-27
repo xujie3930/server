@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -180,4 +181,10 @@ public class DelOutboundListVO implements Serializable {
     //预报单号 汪经理要我加的
     @ApiModelProperty(value = "预报单号")
     private String expectedNo;
+
+    @ApiModelProperty(value = "收税人税号")
+    private String taxNumber;
+
+    @ApiModelProperty(value = "身份证")
+    private String idNumber;
 }
