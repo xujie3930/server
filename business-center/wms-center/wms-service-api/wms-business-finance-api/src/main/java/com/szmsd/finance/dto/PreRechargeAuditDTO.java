@@ -12,6 +12,9 @@ public class PreRechargeAuditDTO {
     @ApiModelProperty(value = "ID")
     private Long id;
 
+    @ApiModelProperty(value = "凭据")
+    private String paymentVoucher;
+
     @ApiModelProperty(value = "审核状态(默认0=未审核，1=审核通过，2=审核未通过)")
     private String verifyStatus;
 
