@@ -14,13 +14,14 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class WmsBasMvcExceptionResolver implements HandlerExceptionResolver {
     private Logger logger = LoggerFactory.getLogger(WmsBasMvcExceptionResolver.class);
 
-
+    ExecutorService service= Executors.newFixedThreadPool(5);
 
 
     @Override
@@ -33,9 +34,34 @@ public class WmsBasMvcExceptionResolver implements HandlerExceptionResolver {
 
            if (((CommonException) ex).getCode().equals("500")) {
                emailDto.setText(ex.getStackTrace()[0].getMethodName()+":"+((CommonException) ex).getMessage());
-               R r = bean.sendEmailError(emailDto);
+               Email email=new Email().setEmailDto(emailDto).setEmailFeingService(bean);
+
+               service.execute(email);
+               //2.关闭连接
+               //service.shutdown();
            }
         return null;
+    }
+
+}
+class  Email implements Runnable {
+    private EmailDto emailDto;
+    private EmailFeingService emailFeingService;
+    @Override
+    public void run() {
+
+        emailFeingService.sendEmailError(emailDto);
+
+    }
+
+
+    public Email setEmailDto(EmailDto emailDto) {
+        this.emailDto = emailDto;
+        return this;
+    }
+    public Email setEmailFeingService(EmailFeingService emailFeingService) {
+        this.emailFeingService = emailFeingService;
+        return this;
     }
 
 
