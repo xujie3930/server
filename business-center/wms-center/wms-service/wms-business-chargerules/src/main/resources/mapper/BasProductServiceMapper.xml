@@ -43,7 +43,20 @@
           #{v}
       </foreach>)
     </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+  <select id="selectbasCustomPricesgradeList" resultType="com.szmsd.http.dto.custom.BasCustomPricesgradeDto"
+          parameterType="com.szmsd.http.dto.custom.BasCustomPricesgradeDto">
+    SELECT * from bas_custom_pricesgrade
+   <where>
+     custompr_type=#{customprType}
+     <if test="sellerCodeList != null and sellerCodeList.size() > 0">
+       AND seller_code IN
+       <foreach collection="sellerCodeList" open="(" separator="," close=")" item="sellerCode">
+         #{sellerCode}
+       </foreach>
+     </if>
+   </where>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from bas_product_service
     where id = #{id,jdbcType=INTEGER}
   </delete>

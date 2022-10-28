@@ -19,6 +19,7 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.dto.CustomPricesDiscountImportDto;
 import com.szmsd.delivery.dto.DiscountCustomImportDto;
 import com.szmsd.delivery.dto.DiscountDetailImportDto;
@@ -70,10 +71,12 @@ public class CustomPricesController extends BaseController{
     private BasSubClientService basSubClientService;
 
     @PreAuthorize("@ss.hasPermi('CustomPrices:CustomPrices:result')")
-    @PostMapping("/result/{clientCode}")
+    @PostMapping("/result")
     @ApiOperation(value = "获取折扣/等级方案数据")
-    public R<CustomPricesPageDto> result(@PathVariable("clientCode") String clientCode) {
-        return customPricesService.result(clientCode);
+    public TableDataInfo result(@RequestBody BasCustomPricesgradeDto basCustomPricesgradeDto) {
+        startPage(basCustomPricesgradeDto);
+        List<BasCustomPricesgradeDto> list=customPricesService.result(basCustomPricesgradeDto);
+        return getDataTable(list);
     }
 
     @PostMapping("/operationRecord")
