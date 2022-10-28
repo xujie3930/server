@@ -104,6 +104,7 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
         }
         preWithdraw.setVerifyRemark(dto.getVerifyRemark());
         preWithdraw.setVerifyDate(new Date());
+        preWithdraw.setPaymentVoucher(dto.getPaymentVoucher());
         preWithdrawMapper.updateById(preWithdraw);
         return R.ok();
     }
