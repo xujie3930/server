@@ -275,6 +275,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         Map<String, String> map = listMap.get("065").stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue,
                 BasSubWrapperVO::getSubName, (key1, key2) -> key2));
         delOutboundThirdPartyVO.setStateName(map.get(delOutboundThirdPartyVO.getState()));
+
+        String amazonLogisticsRouteId = delOutboundThirdPartyVO.getAmazonLogisticsRouteId();
+
+        if(StringUtils.isNotEmpty(amazonLogisticsRouteId)){
+            delOutboundThirdPartyVO.setTrackingNo(amazonLogisticsRouteId);
+        }
+
         return delOutboundThirdPartyVO;
     }
 
