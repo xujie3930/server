@@ -366,7 +366,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
 
         for (int i=0;i<exceptionInfo.size();i++) {
             ExceptionInfo exception = super.getById(exceptionInfo.get(i).getId());
-            ExceptionProcessRequest exceptionProcessRequest = BeanMapperUtil.map(exceptionInfo, ExceptionProcessRequest.class);
+            ExceptionProcessRequest exceptionProcessRequest = BeanMapperUtil.map(exceptionInfo.get(i), ExceptionProcessRequest.class);
             exceptionProcessRequest.setWarehouseCode(exception.getWarehouseCode());
             exceptionProcessRequest.setExceptionNo(exception.getExceptionNo());
             if (exceptionInfo.get(i).getProcessType().equals(ProcessTypeEnum.GOONSHIPPING.getCode())) {
