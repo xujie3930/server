@@ -544,16 +544,16 @@
     <select id="exportData" resultMap="AccountSerialBillExcelVOMap" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
 
         SELECT
-            a.id,a.no,a.tracking_no,a.cus_code,a.cus_name,a.currency_code,a.currency_name,a.amount,
+            a.id,a.no,a.tracking_no,a.cus_code,a.cus_name,a.currency_code,a.currency_name,
+            (case when (a.business_category like '%费%' or a.charge_type like '%费%' or a.business_category like '%税%' or a.charge_type like '%税%' or a.charge_type like '%包材%') then 0-a.amount else a.amount end) as amount,
             a.warehouse_code,a.warehouse_name,a.pay_method,a.business_category,a.product_code,a.product_category,
             a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
             a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
             a.calc_weight,a.specifications,a.nature,a.serial_number,
-            a.charge_type,DOB.shipment_rule_name,DOB.shipment_rule
+            a.charge_type
         FROM `fss_account_serial_bill` a
-        left join del_outbound as DOB on DOB.order_no =  a.no
         <include refid="SelectSerialBillWhere"/>
-        ORDER BY a.payment_time DESC
+        ORDER BY a.id DESC
 
     </select>
 
