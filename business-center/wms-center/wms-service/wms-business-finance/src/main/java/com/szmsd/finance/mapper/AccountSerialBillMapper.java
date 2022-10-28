@@ -45,7 +45,9 @@ public interface AccountSerialBillMapper extends BaseMapper<AccountSerialBill> {
 
     List<BillBusinessTotalVO> balanceConversion(EleBillQueryVO queryVO);
 
-    List<AccountSerialBillNatureDTO> selectBillOutbount();
+    List<AccountSerialBillNatureDTO> selectBillOutbount(@Param("pageNum")Integer pageNum,@Param("pageSize") Integer pageSize);
+
+    Integer selectBillOutbountCount();
 
     List<AccountBalanceBillCurrencyVO> findBillCurrencyData(AccountSerialBillDTO dto);
 
