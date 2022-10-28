@@ -4,13 +4,15 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.*;
 
+import java.util.List;
+
 public interface ICustomPricesService {
     R<OperationRecordDto> operationRecord(String id);
     R updateDiscountDetail(CustomDiscountMainDto dto);
 
     R updateGradeDetail(CustomGradeMainDto dto);
 
-    R<CustomPricesPageDto> result(String clientCode);
+    List<BasCustomPricesgradeDto> result(BasCustomPricesgradeDto basCustomPricesgradeDto);
 
     R updateDiscount(UpdateCustomMainDto dto);
 
