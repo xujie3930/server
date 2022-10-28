@@ -659,22 +659,11 @@ public class ExceptionInfoController extends BaseController {
     /**
      * 修改模块
      */
-//    @PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:edit')")
-//    @Log(title = "模块", businessType = BusinessType.UPDATE)
-//    @PutMapping("edit")
-//    @ApiOperation(value = " 修改模块", notes = "修改模块")
-//    public R edit(@RequestBody List<ExceptionInfoDto> exceptionInfo) {
-//        return toOk(exceptionInfoService.updateExceptionInfo(exceptionInfo));
-//    }
-
-    /**
-     * 修改模块
-     */
     @PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:edit')")
     @Log(title = "模块", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = " 修改模块", notes = "修改模块")
-    public R edit(@RequestBody ExceptionInfoDto exceptionInfo) {
+    public R edit(@RequestBody List<ExceptionInfoDto> exceptionInfo) {
         return toOk(exceptionInfoService.updateExceptionInfo(exceptionInfo));
     }
 
