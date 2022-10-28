@@ -6,6 +6,7 @@ import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.controller.QueryDto;
@@ -85,6 +86,14 @@ public class AccountSerialBillController extends BaseController {
     @ApiOperation(value = "流水账单 - 列表导出")
     @PostMapping ("/export")
     public void export(HttpServletResponse response, @RequestBody AccountSerialBillDTO dto) {
+
+        String paymentTimeStart = dto.getPaymentTimeStart();
+        String paymentTimeEnd = dto.getPaymentTimeEnd();
+
+        if(StringUtils.isEmpty(paymentTimeStart) || StringUtils.isEmpty(paymentTimeEnd)){
+            throw new RuntimeException("请选择结算时间导出");
+        }
+
         List<AccountSerialBillExcelVO> list = accountSerialBillService.exportData(dto);
 
         String len = getLen();

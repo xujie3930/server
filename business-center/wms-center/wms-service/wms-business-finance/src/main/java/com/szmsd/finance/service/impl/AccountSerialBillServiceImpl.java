@@ -337,33 +337,47 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     @Override
     public void executeSerialBillNature() {
 
-        List<AccountSerialBillNatureDTO> accountSerialBillDTOList = accountSerialBillMapper.selectBillOutbount();
+        Integer count = accountSerialBillMapper.selectBillOutbountCount();
 
-        for(AccountSerialBillNatureDTO billNatureDTO : accountSerialBillDTOList){
+        if(count == 0){
+            return;
+        }
 
-            String chargeCategory = billNatureDTO.getChargeCategory();
-            String businessCategory = billNatureDTO.getBusinessCategory();
-            String orderType = billNatureDTO.getOrderType();
-            Long id = billNatureDTO.getId();
+        Integer pageSize = 5000;
 
-            if(StringUtils.isBlank(businessCategory) || StringUtils.isBlank(orderType)){
-                continue;
+        Integer totalPage = (count + pageSize -1) / pageSize;
+
+        for(int i = 0;i<totalPage;i++){
+
+            List<AccountSerialBillNatureDTO> accountSerialBillDTOList = accountSerialBillMapper.selectBillOutbount(i,pageSize);
+
+            for(AccountSerialBillNatureDTO billNatureDTO : accountSerialBillDTOList){
+
+                String chargeCategory = billNatureDTO.getChargeCategory();
+                String businessCategory = billNatureDTO.getBusinessCategory();
+                String orderType = billNatureDTO.getOrderType();
+                Long id = billNatureDTO.getId();
+
+                if(StringUtils.isBlank(businessCategory) || StringUtils.isBlank(orderType)){
+                    continue;
+                }
+
+                List<ChargeRelation> chargeRelationList = chargeRelationMapper.findChargeRelation(businessCategory,orderType);
+
+                if(CollectionUtils.isNotEmpty(chargeRelationList)){
+
+                    ChargeRelation chargeRelation = chargeRelationList.get(0);
+
+                    AccountSerialBill accountSerialBill = new AccountSerialBill();
+                    accountSerialBill.setId(id);
+                    accountSerialBill.setNature(chargeRelation.getNature());
+                    accountSerialBill.setBusinessType(chargeRelation.getBusinessType());
+                    accountSerialBill.setChargeCategoryChange(chargeRelation.getChargeCategoryChange());
+
+                    accountSerialBillMapper.updateById(accountSerialBill);
+                }
             }
 
-            List<ChargeRelation> chargeRelationList = chargeRelationMapper.findChargeRelation(businessCategory,orderType);
-
-            if(CollectionUtils.isNotEmpty(chargeRelationList)){
-
-                ChargeRelation chargeRelation = chargeRelationList.get(0);
-
-                AccountSerialBill accountSerialBill = new AccountSerialBill();
-                accountSerialBill.setId(id);
-                accountSerialBill.setNature(chargeRelation.getNature());
-                accountSerialBill.setBusinessType(chargeRelation.getBusinessType());
-                accountSerialBill.setChargeCategoryChange(chargeRelation.getChargeCategoryChange());
-
-                accountSerialBillMapper.updateById(accountSerialBill);
-            }
         }
 
     }
