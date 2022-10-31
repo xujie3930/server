@@ -57,6 +57,12 @@ public class ExchangePayFactory extends AbstractPayFactory {
 
                 if(concurrentHashMap.get(mKey) != null){
                     concurrentHashMap.remove(mKey);
+
+                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                        log.info("释放redis锁 {}",dto.getNo());
+                        lock.unlock();
+                    }
+
                     log.info("ExchangePayFactory balance 重新执行 {}",mKey);
 
                     Thread.sleep(100);
