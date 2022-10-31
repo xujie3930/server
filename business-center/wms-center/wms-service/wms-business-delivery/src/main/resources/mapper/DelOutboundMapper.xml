@@ -324,4 +324,13 @@
 
         SELECT * from bas_seller where del_flag=0
     </select>
+
+
+    <select id="selectByState" resultType="com.szmsd.delivery.domain.DelOutbound">
+
+        SELECT * from del_outbound
+        where state = #{state}
+        limit #{pageNumber},#{pageSize}
+
+    </select>
 </mapper>
