@@ -79,6 +79,11 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 if(concurrentHashMap.get(mKey) != null){
                     concurrentHashMap.remove(mKey);
 
+                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                        log.info("释放redis锁 {}",dto.getNo());
+                        lock.unlock();
+                    }
+
                     Thread.sleep(100);
 
                     log.info("balance 重新执行 {}",mKey);
