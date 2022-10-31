@@ -67,6 +67,11 @@ public class RefundPayFactory extends AbstractPayFactory {
                 if(concurrentHashMap.get(mKey) != null){
                     concurrentHashMap.remove(mKey);
 
+                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                        log.info("释放redis锁 {}",dto.getNo());
+                        lock.unlock();
+                    }
+
                     Thread.sleep(100);
 
                     log.info("【退费】重新执行-- {}",JSONObject.toJSONString(dto));
