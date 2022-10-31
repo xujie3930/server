@@ -91,4 +91,6 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     List<DelOutbound>  selectorderNos(@Param("orderNos") List<String> orderNos);
 
     List<BasSeller> selectdelsellerCodes();
+
+    List<DelOutbound> selectByState(@Param("state") String state, @Param("pageNumber") int pageNumber,  @Param("pageSize")Integer pageSize);
 }

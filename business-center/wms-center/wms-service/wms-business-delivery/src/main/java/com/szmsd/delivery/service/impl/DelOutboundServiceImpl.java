@@ -13,6 +13,8 @@ import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.itextpdf.text.PageSize;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.BasEmployees;
@@ -2617,58 +2619,73 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public void doDirectExpressOrders() {
 
-        List<DelOutbound> delOutbounds = baseMapper.selectList(Wrappers.<DelOutbound>query().lambda()
-                .eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode())
-        );
+        Integer totalRecord = baseMapper.selectCount(Wrappers.<DelOutbound>query().lambda()
+                        .eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode()));
 
-        //R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder("CKCNFGZ622101800000018");
-
-        List<DelOutbound> updateData = new ArrayList<>();
-
-        for(DelOutbound delOutbound : delOutbounds){
-
-            R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder(delOutbound.getOrderNo());
-
-            if(directExpressOrderApiDTOR.getCode() != 200){
-                continue;
-            }
-
-            DirectExpressOrderApiDTO directExpressOrderApiDTO = directExpressOrderApiDTOR.getData();
-
-            String handleStatus = directExpressOrderApiDTO.getHandleStatus();
-
-            if(handleStatus.equals(DelOutboundOperationTypeEnum.SHIPPED.getCode())){
-
-                this.bringThridPartyAsync(delOutbound);
-
-                DelOutbound updatedata = new DelOutbound();
-                updatedata.setId(delOutbound.getId());
-
-                Double length = directExpressOrderApiDTO.getPacking().getLength().doubleValue();
-                Double width =  directExpressOrderApiDTO.getPacking().getWidth().doubleValue();
-                Double height =  directExpressOrderApiDTO.getPacking().getHeight().doubleValue();
-
-                Double weight = null;
-                Integer w = directExpressOrderApiDTO.getWeight();
-                if(w != null){
-                    weight = Double.parseDouble(w.toString());
-                }
-
-                String specifications = length + "*" + width + "*" + height;
-
-                updatedata.setLength(length);
-                updatedata.setWidth(width);
-                updatedata.setHeight(height);
-                updatedata.setWeight(weight);
-                updatedata.setSpecifications(specifications);
-                updatedata.setThridPartStatus(1);
-
-                updateData.add(updatedata);
-            }
+        if(totalRecord == 0){
+            return ;
         }
 
-        if(CollectionUtils.isNotEmpty(updateData)){
-            super.updateBatchById(updateData);
+        Integer pageSize = 500;
+
+        Integer totalPage = (totalRecord + pageSize -1) / pageSize;
+
+        for(int i= 0;i<totalPage;i++) {
+
+
+            List<DelOutbound> delOutbounds = baseMapper.selectByState(DelOutboundStateEnum.DELIVERED.getCode(), i, pageSize);
+
+
+            //R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder("CKCNFGZ622101800000018");
+
+            List<DelOutbound> updateData = new ArrayList<>();
+
+            for (DelOutbound delOutbound : delOutbounds) {
+
+                R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder(delOutbound.getOrderNo());
+
+                if (directExpressOrderApiDTOR.getCode() != 200) {
+                    continue;
+                }
+
+                DirectExpressOrderApiDTO directExpressOrderApiDTO = directExpressOrderApiDTOR.getData();
+
+                String handleStatus = directExpressOrderApiDTO.getHandleStatus();
+
+                if (handleStatus.equals(DelOutboundOperationTypeEnum.SHIPPED.getCode())) {
+
+                    this.bringThridPartyAsync(delOutbound);
+
+                    DelOutbound updatedata = new DelOutbound();
+                    updatedata.setId(delOutbound.getId());
+
+                    Double length = directExpressOrderApiDTO.getPacking().getLength().doubleValue();
+                    Double width = directExpressOrderApiDTO.getPacking().getWidth().doubleValue();
+                    Double height = directExpressOrderApiDTO.getPacking().getHeight().doubleValue();
+
+                    Double weight = null;
+                    Integer w = directExpressOrderApiDTO.getWeight();
+                    if (w != null) {
+                        weight = Double.parseDouble(w.toString());
+                    }
+
+                    String specifications = length + "*" + width + "*" + height;
+
+                    updatedata.setLength(length);
+                    updatedata.setWidth(width);
+                    updatedata.setHeight(height);
+                    updatedata.setWeight(weight);
+                    updatedata.setSpecifications(specifications);
+                    updatedata.setThridPartStatus(1);
+
+                    updateData.add(updatedata);
+                }
+            }
+
+            if (CollectionUtils.isNotEmpty(updateData)) {
+                super.updateBatchById(updateData);
+            }
+
         }
 
     }
