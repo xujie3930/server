@@ -23,6 +23,10 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      */
     public List<SysUser> selectUserList(SysUser sysUser);
 
+
+
+    List<SysUser> selectUserListsu(SysUser sysUser);
+
     /**
      * 通过用户名查询用户
      *
@@ -145,4 +149,6 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @return 结果
      */
     public SysUser checkEmailUniqueCus(String email);
+
+
 }
