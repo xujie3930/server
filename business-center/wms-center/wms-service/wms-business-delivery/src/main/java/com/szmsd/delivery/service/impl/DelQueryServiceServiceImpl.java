@@ -288,13 +288,20 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 where.in(DelQueryService::getSellerCode, sellerCodeList);
 
             }
-            if (StringUtils.isNotEmpty(delQueryService.getCurrencyCode())) {
+            if (StringUtils.isNotEmpty(delQueryService.getCurrencyCode())&&StringUtils.isEmpty(delQueryService.getSellerCode())) {
                 where.eq(DelQueryService::getSellerCode, delQueryService.getCurrencyCode());
+            }
+            if (StringUtils.isNotEmpty(delQueryService.getSellerCode())) {
+                where.eq(DelQueryService::getSellerCode, delQueryService.getSellerCode());
             }
 
         }
         if (null != loginUser && loginUser.getUsername().equals("admin")){
             sellerCodeList=baseMapper.selectsellerCodes();
+
+            if (StringUtils.isNotEmpty(delQueryService.getSellerCode())) {
+                where.eq(DelQueryService::getSellerCode, delQueryService.getSellerCode());
+            }
 
         }
 
