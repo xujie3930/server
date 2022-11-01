@@ -1,6 +1,7 @@
 package com.szmsd.finance.dto;
 
 import com.alibaba.fastjson.JSONObject;
+import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.finance.enums.BillEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -77,6 +78,16 @@ public class CustPayDTO {
 
     @ApiModelProperty(value = "详情")
     private List<AccountSerialBillDTO> serialBillInfoList;
+
+    @ApiModelProperty(value = "性质")
+    @Excel(name = "性质")
+    private String nature;
+
+    @ApiModelProperty(value = "业务类型")
+    private String businessType;
+
+    @ApiModelProperty(value = "费用类别转换后")
+    private String chargeCategoryChange;
 
     @Override
     public String toString() {

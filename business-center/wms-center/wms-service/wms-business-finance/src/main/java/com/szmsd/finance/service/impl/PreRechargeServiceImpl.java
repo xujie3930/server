@@ -7,15 +7,20 @@ import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.domain.PreRecharge;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.dto.PreRechargeAuditDTO;
+import com.szmsd.finance.dto.PreRechargeAuditVO;
 import com.szmsd.finance.dto.PreRechargeDTO;
+import com.szmsd.finance.enums.PreRechargeVerifyStatusEnum;
 import com.szmsd.finance.mapper.PreRechargeMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IPreRechargeService;
+import lombok.val;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -141,5 +146,57 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
         }
 
         return R.failed("异常");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R reject(PreRechargeAuditVO auditVO) {
+
+        PreRechargeVerifyStatusEnum verifyStatus = auditVO.getVerifyStatus();
+
+        if(!verifyStatus.name().equals(PreRechargeVerifyStatusEnum.REJECT.name())){
+            return R.failed("审核驳回状态异常");
+        }
+
+        Long id = auditVO.getId();
+        PreRecharge preRecharge = preRechargeMapper.selectById(id);
+
+        if(preRecharge == null){
+            return R.failed("无法获取充值信息");
+        }
+
+        try {
+
+            CustPayDTO custPayDTO = new CustPayDTO();
+            custPayDTO.setAmount(preRecharge.getAmount());
+            custPayDTO.setCurrencyCode(preRecharge.getCurrencyCode());
+            custPayDTO.setNo(preRecharge.getSerialNo());
+            custPayDTO.setCusCode(preRecharge.getCusCode());
+            custPayDTO.setNature("充值");
+            custPayDTO.setChargeCategoryChange("充值退回");
+            custPayDTO.setBusinessType("充值退回");
+
+            R rs = accountBalanceService.feeDeductions(custPayDTO);
+
+            if (rs.getCode() != 200) {
+                return R.failed(rs.getMsg());
+            }
+
+            PreRecharge preRechargeUpd = new PreRecharge();
+            preRechargeUpd.setId(id);
+            preRechargeUpd.setVerifyStatus(verifyStatus.getValue().toString());
+            preRechargeUpd.setVerifyRemark(auditVO.getVerifyRemark());
+            preRechargeUpd.setUpdateBy(SecurityUtils.getLoginUser().getUsername());
+            preRechargeUpd.setUpdateByName(SecurityUtils.getLoginUser().getUsername());
+            preRechargeUpd.setUpdateTime(new Date());
+
+            preRechargeMapper.updateById(preRechargeUpd);
+
+            return R.ok();
+
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
     }
 }

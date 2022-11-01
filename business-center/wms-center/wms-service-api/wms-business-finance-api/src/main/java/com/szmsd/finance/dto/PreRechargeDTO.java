@@ -27,7 +27,7 @@ public class PreRechargeDTO {
     @ApiModelProperty(value = "请求参数唯一标识/流水号")
     private String serialNo;
 
-    @ApiModelProperty(value = "汇款方式 0电汇 1转账 2支票")
+    @ApiModelProperty(value = "汇款方式 0电汇 1转账 2支票 3 合利宝-微信 4 合利宝-支付宝")
     private String remittanceMethod;
 
     @ApiModelProperty(value = "币种id")
