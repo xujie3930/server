@@ -375,7 +375,13 @@ public class HeliPayServiceImpl implements HeliPayService {
         preRechargeDTO.setRemark(accountPay.getRemark());
         preRechargeDTO.setCusName(accountPay.getCusCode());
         preRechargeDTO.setCusCode(accountPay.getCusCode());
-        preRechargeDTO.setRemittanceMethod("3");
+        String productCode = accountPay.getProductCode();
+
+        if(productCode.equals(PayEnum.WXPAYSCAN.name())){
+            preRechargeDTO.setRemittanceMethod("3");
+        }else if(productCode.equals(PayEnum.ALIPAYSCAN.name())){
+            preRechargeDTO.setRemittanceMethod("4");
+        }
         preRechargeDTO.setVerifyStatus("1");
         preRechargeDTO.setRemittanceTime(accountPay.getFinishDate());
         preRechargeDTO.setVerifyDate(accountPay.getFinishDate());
