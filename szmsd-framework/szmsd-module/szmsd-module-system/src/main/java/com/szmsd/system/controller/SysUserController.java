@@ -181,7 +181,7 @@ public class SysUserController extends BaseController {
         SysUser sysUser = new SysUser();
         sysUser.setNickName(sysUserByTypeAndUserType.getNickName());
         sysUser.setUserName(sysUserByTypeAndUserType.getUsername());
-        List<SysUser> list = userService.selectUserList(sysUser);
+        List<SysUser> list = userService.selectUserListsu(sysUser);
         if (CollectionUtils.isNotEmpty(list) && list.size() == 1) {
             return R.ok(list.get(0));
         } else {
