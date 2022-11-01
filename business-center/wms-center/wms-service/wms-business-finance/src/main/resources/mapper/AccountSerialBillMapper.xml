@@ -515,7 +515,7 @@
     <select id="findBillCurrencyData"  resultType="com.szmsd.finance.dto.AccountBalanceBillCurrencyVO" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
         select  a.currency_code as currencyCode,
         sum(
-        case when ((a.business_category like '%费%' or a.charge_type like '%费%' or a.business_category like '%税%' or a.charge_type like '%税%' or a.charge_type like '%包材%') and a.business_category not in ('退费') ) then 0-a.amount else a.amount end) as amount
+        case when ((a.business_category like '%费%' or a.charge_type like '%费%' or a.business_category like '%税%' or a.business_category like '%提现%' or a.charge_type like '%税%' or a.charge_type like '%包材%') and a.business_category not in ('退费') ) then 0-a.amount else a.amount end) as amount
         from fss_account_serial_bill as a
         <include refid="SelectSerialBillWhere"/>
         group by a.currency_code
@@ -532,7 +532,7 @@
             a.`business_category` AS businessCategory,
             a.charge_category AS chargeCategory,
         sum(
-        case when ((a.business_category like '%费%' or a.charge_type like '%费%' or a.business_category like '%税%' or a.charge_type like '%税%' or a.charge_type like '%包材%') and a.business_category not in ('退费') ) then 0-a.amount else a.amount end) as amount,
+        case when ((a.business_category like '%费%' or a.charge_type like '%费%' or a.business_category like '%税%' or a.business_category like '%提现%' or a.charge_type like '%税%' or a.charge_type like '%包材%') and a.business_category not in ('退费') ) then 0-a.amount else a.amount end) as amount,
             a.currency_code AS currencyCode,
             a.currency_name as currencyName
         FROM
@@ -553,7 +553,7 @@
 
         SELECT
             a.id,a.no,a.tracking_no,a.cus_code,a.cus_name,a.currency_code,a.currency_name,
-            (case when ((a.business_category like '%费%' or a.charge_type like '%费%' or a.business_category like '%税%' or a.charge_type like '%税%' or a.charge_type like '%包材%') and a.business_category not in ('退费') ) then 0-a.amount else a.amount end) as amount,
+            (case when ((a.business_category like '%费%' or a.charge_type like '%费%' or a.business_category like '%税%' or a.business_category like '%提现%' or a.charge_type like '%税%' or a.charge_type like '%包材%') and a.business_category not in ('退费') ) then 0-a.amount else a.amount end) as amount,
             a.warehouse_code,a.warehouse_name,a.pay_method,a.business_category,a.product_code,a.product_category,
             a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
             a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
