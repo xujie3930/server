@@ -31,7 +31,7 @@ public class IBasEmailServiceImpl implements IBasEmailService {
                 BasEmail basEmail=new BasEmail();
                 BeanUtils.copyProperties(x,basEmail);
                 basEmail.setModularType(emailDto.getModularType());
-                basEmail.setEmpTo(emailDto.getTo());
+                basEmail.setEmpTo(x.getEmail());
                 basEmail.setEmpCode(emailDto.getEmpCode());
                 basEmail.setCreateTime(new Date());
                 basEmailMapper.insertSelective(basEmail);
