@@ -17,4 +17,6 @@ public interface BasEmailMapper {
     int updateByPrimaryKeySelective(BasEmail record);
 
     int updateByPrimaryKey(BasEmail basEmail);
+
+    void  deleteByPrimaryKeys();
 }
