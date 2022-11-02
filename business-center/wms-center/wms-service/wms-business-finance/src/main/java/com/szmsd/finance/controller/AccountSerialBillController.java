@@ -5,6 +5,7 @@ import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
@@ -91,7 +92,7 @@ public class AccountSerialBillController extends BaseController {
         String paymentTimeEnd = dto.getPaymentTimeEnd();
 
         if(StringUtils.isEmpty(paymentTimeStart) || StringUtils.isEmpty(paymentTimeEnd)){
-            throw new RuntimeException("请选择结算时间导出");
+            throw new CommonException("请选择结算时间导出");
         }
 
         List<AccountSerialBillExcelVO> list = accountSerialBillService.exportData(dto);
