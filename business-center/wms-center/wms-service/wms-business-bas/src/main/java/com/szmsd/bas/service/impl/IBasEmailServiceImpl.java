@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -32,7 +33,9 @@ public class IBasEmailServiceImpl implements IBasEmailService {
                 basEmail.setModularType(emailDto.getModularType());
                 basEmail.setEmpTo(emailDto.getTo());
                 basEmail.setEmpCode(emailDto.getEmpCode());
+                basEmail.setCreateTime(new Date());
                 basEmailMapper.insertSelective(basEmail);
+
             });
 
 

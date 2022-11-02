@@ -1543,6 +1543,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 basTrackingPush.setOrderNo(delOutbound.getOrderNo());
                 basTrackingPush.setWarehouseCode(delOutbound.getWarehouseCode());
                 basTrackingPushMapper.insertSelective(basTrackingPush);
+                updateTrackingNoDto.setRefNo(delOutbound.getRefNo());
                 list1.add(updateTrackingNoDto);
 //                ShipmentTrackingChangeRequestDto
 //                R<ResponseVO> r= htpOutboundFeignService.shipmentTracking(shipmentTrackingChangeRequestDto);
@@ -1625,7 +1626,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                     DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto = new DelOutboundBatchUpdateTrackingNoEmailDto();
                     BeanUtils.copyProperties(dto, delOutboundBatchUpdateTrackingNoEmailDto);
-                    delOutboundBatchUpdateTrackingNoEmailDto.setSellerEmail(basSeller.getEmail());
+                    //屏蔽添加客户邮箱
+                    //delOutboundBatchUpdateTrackingNoEmailDto.setSellerEmail(basSeller.getEmail());
 
                     if (basSeller.getServiceManagerName() != null && !basSeller.getServiceManagerName().equals("")) {
                         if (!basSeller.getServiceManagerName().equals(basSeller.getServiceStaffName())) {
@@ -1636,7 +1638,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 //                            delOutboundBatchUpdateTrackingNoEmailDto.setEmpCode(basSeller.getServiceManagerName());
 //                            delOutboundBatchUpdateTrackingNoEmailDto.setServiceManagerName(basSeller.getServiceManagerName());
                             if (basSeller.getServiceStaffName() != null && !basSeller.getServiceStaffName().equals("")) {
-                                delOutboundBatchUpdateTrackingNoEmailDto.setServiceStaffName(basSeller.getServiceStaffName());
+                                delOutboundBatchUpdateTrackingNoEmailDto.setServiceStaffName(basSeller.getServiceStaffNickName());
                             }
 
                         }
@@ -1647,7 +1649,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 //                        delOutboundBatchUpdateTrackingNoEmailDto.setServiceStaffName(basSeller.getServiceStaffName());
 
                         if (basSeller.getServiceManagerName() != null && !basSeller.getServiceManagerName().equals("")) {
-                            delOutboundBatchUpdateTrackingNoEmailDto.setServiceManagerName(basSeller.getServiceManagerName());
+                            delOutboundBatchUpdateTrackingNoEmailDto.setServiceManagerName(basSeller.getServiceManagerNickName());
                         }
 //                        delOutboundBatchUpdateTrackingNoEmailDtoList.add(delOutboundBatchUpdateTrackingNoEmailDto);
 
@@ -1703,7 +1705,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
 
                 });
-                serviceManagerStaffName.add(dto.getSellerEmail());
+                //屏蔽添加客户邮箱
+                //serviceManagerStaffName.add(dto.getSellerEmail());
                 //去除重复邮箱
                 List<String> listWithoutDuplicates = serviceManagerStaffName.stream().distinct().collect(Collectors.toList());
 

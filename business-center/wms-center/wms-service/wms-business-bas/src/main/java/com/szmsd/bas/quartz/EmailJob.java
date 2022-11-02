@@ -37,22 +37,25 @@ public class EmailJob extends QuartzJobBean {
          List<BasEmail> list=basEmailMapper.selectByPrimaryKey();
        BasEmail basEmail = new BasEmail();
        basEmailMapper.updateByPrimaryKey(basEmail);
-        //将组合的数据 分解成Map<List> (邮箱为key,组合这个邮箱下的所有信息)
-        Map<String,List<BasEmail>> basMap=list.stream().collect(Collectors.groupingBy(BasEmail::getEmpTo));
+//        //将组合的数据 分解成Map<List> (邮箱为key,组合这个邮箱下的所有信息)
+//        Map<String,List<BasEmail>> basMap=list.stream().collect(Collectors.groupingBy(BasEmail::getEmpTo));
+               //将组合的数据 分解成Map<List> (客户为key,组合这个客户下的所有信息)
+        Map<String,List<BasEmail>> basMap=list.stream().collect(Collectors.groupingBy(BasEmail::getCustomCode));
         //循环map，得到每一组的数据 然后生成excel
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
         if (list.size()>0) {
             for (Map.Entry<String, List<BasEmail>> entry : basMap.entrySet()) {
 
                 List<EmailObjectDto> emailObjectDtoList = BeanMapperUtil.mapList(entry.getValue(), EmailObjectDto.class);
-               String empTO= entry.getKey();
-               String empTOs[] =empTO.split(",");
-               List<String> list1= Arrays.asList(empTOs);
+                //屏蔽对邮箱list的循环
+//               String empTO= entry.getKey();
+//               String empTOs[] =empTO.split(",");
+//               List<String> list1= Arrays.asList(empTOs);
 
-                list1.forEach(x->{
+                emailObjectDtoList.forEach(x->{
 
 
-                emailUtil.sendAttachmentMail(x, "【DM】挂号更新/" + simpleDateFormat.format(new Date()) + "", "您好，\n" +
+                emailUtil.sendAttachmentMail(emailObjectDtoList.get(0).getEmpTo(), "【挂号更新】/" +entry.getKey()+ simpleDateFormat.format(new Date()) + "", "尊敬的"+entry.getKey()+"您好，\n" +
                         "\n" +
                         "请查收昨天中午12:00至今天中午12:00订单挂号的更新情况，如附件所示。\n" +
                         "\n" +
