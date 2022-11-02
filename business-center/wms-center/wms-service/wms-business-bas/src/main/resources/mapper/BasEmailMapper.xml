@@ -20,7 +20,7 @@
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select
       id, custom_code, service_manager_name, service_staff_name, order_no, no_tracking_no,
-      tracking_no, emp_to, emp_code, modular_type,ref_no,date_format(create_time,'%Y-%m-%d %H:%i:%s') as create_time
+      tracking_no, emp_to, emp_code, modular_type,ref_no,DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') as createTimes
     from bas_email where send_type=0
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">

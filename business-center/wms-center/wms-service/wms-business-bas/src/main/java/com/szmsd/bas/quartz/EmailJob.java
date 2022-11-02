@@ -2,6 +2,7 @@ package com.szmsd.bas.quartz;
 
 import com.szmsd.bas.domain.BasEmail;
 import com.szmsd.bas.dto.EmailObjectDto;
+import com.szmsd.bas.dto.EmailObjectDtoVs;
 import com.szmsd.bas.mapper.BasEmailMapper;
 import com.szmsd.bas.util.EmailUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -46,15 +47,16 @@ public class EmailJob extends QuartzJobBean {
         if (list.size()>0) {
             for (Map.Entry<String, List<BasEmail>> entry : basMap.entrySet()) {
 
-                List<EmailObjectDto> emailObjectDtoList = BeanMapperUtil.mapList(entry.getValue(), EmailObjectDto.class);
-                //屏蔽对邮箱list的循环
-//               String empTO= entry.getKey();
-//               String empTOs[] =empTO.split(",");
-//               List<String> list1= Arrays.asList(empTOs);
+                List<EmailObjectDtoVs> emailObjectDtoList = BeanMapperUtil.mapList(entry.getValue(), EmailObjectDtoVs.class);
+                //对邮箱list的循环
+               String empTO= entry.getValue().get(0).getEmpTo();
+               String empTOs[] =empTO.split(",");
+               List<String> list1= Arrays.asList(empTOs);
 
-                emailObjectDtoList.forEach(x->{
+                list1.forEach(x->{
 
-                emailUtil.sendAttachmentMail(emailObjectDtoList.get(0).getEmpTo(), "【挂号更新】/" +entry.getKey()+"/"+ simpleDateFormat.format(new Date()) + "", "尊敬的"+entry.getKey()+"您好，\n" +
+                    System.out.println(x);
+                emailUtil.sendAttachmentMail(x, "【挂号更新】/" +entry.getKey()+"/"+ simpleDateFormat.format(new Date()) + "", "尊敬的"+entry.getKey()+"您好，\n" +
                         "\n" +
                         "请查收昨天中午12:00至今天中午12:00订单挂号的更新情况，如附件所示。\n" +
                         "\n" +
@@ -66,7 +68,7 @@ public class EmailJob extends QuartzJobBean {
             }
         }
 
-       //basEmailMapper.deleteByPrimaryKeys();
+       basEmailMapper.deleteByPrimaryKeys();
 
 
     }
