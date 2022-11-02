@@ -28,7 +28,7 @@ public class BasQuartzConfig {
         //0/3 * * * * ? 3秒测试 0 0 12 * * ?
         return TriggerBuilder.newTrigger().forJob(EmailJob())
                 .withIdentity("EmailJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0/50 * * * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * * * ?"))
                 .build();
     }
 
