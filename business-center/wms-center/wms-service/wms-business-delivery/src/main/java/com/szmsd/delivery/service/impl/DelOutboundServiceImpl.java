@@ -590,7 +590,21 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
         }
         DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
-        return baseMapper.pageList(queryWrapper);
+
+        List<DelOutboundListVO> delOutboundListVOS = baseMapper.pageList(queryWrapper);
+
+        for(DelOutboundListVO outboundVO : delOutboundListVOS){
+
+            BigDecimal amount = outboundVO.getAmount();
+
+            if(amount != null) {
+                BigDecimal changeAmount = amount.setScale(2,BigDecimal.ROUND_UP);
+                outboundVO.setAmount(changeAmount);
+            }
+
+        }
+
+        return delOutboundListVOS;
     }
 
     /**
