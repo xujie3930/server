@@ -22,6 +22,8 @@ public class DelOutboundBatchUpdateTrackingNoDto implements Serializable {
 
     private String customCode;
 
+    private String refNo;
+
 
 
 }
