@@ -15,11 +15,12 @@
   </resultMap>
   <sql id="Base_Column_List">
     id, custom_code, service_manager_name, service_staff_name, order_no, no_tracking_no, 
-    tracking_no, emp_to, emp_code, modular_type
+    tracking_no, emp_to, emp_code, modular_type,ref_no,create_time
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-    select 
-    <include refid="Base_Column_List" />
+    select
+      id, custom_code, service_manager_name, service_staff_name, order_no, no_tracking_no,
+      tracking_no, emp_to, emp_code, modular_type,ref_no,date_format(create_time,'%Y-%m-%d %H:%i:%s') as create_time
     from bas_email where send_type=0
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
@@ -72,6 +73,12 @@
       <if test="modularType != null">
         modular_type,
       </if>
+      <if test="refNo != null">
+        ref_no,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -103,6 +110,12 @@
       </if>
       <if test="modularType != null">
         #{modularType,jdbcType=INTEGER},
+      </if>
+      <if test="refNo != null">
+        #{refNo,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
       </if>
     </trim>
   </insert>
