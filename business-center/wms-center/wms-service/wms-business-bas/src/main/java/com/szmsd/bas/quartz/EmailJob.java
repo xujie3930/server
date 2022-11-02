@@ -64,7 +64,7 @@ public class EmailJob extends QuartzJobBean {
             }
         }
 
-
+       basEmailMapper.deleteByPrimaryKeys();
 
 
     }

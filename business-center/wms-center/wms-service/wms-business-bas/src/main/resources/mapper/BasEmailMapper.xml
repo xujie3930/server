@@ -26,6 +26,9 @@
     delete from bas_email
     where id = #{id,jdbcType=INTEGER}
   </delete>
+  <delete id="deleteByPrimaryKeys">
+    DELETE FROM bas_email where send_type=1
+  </delete>
   <insert id="insert" parameterType="com.szmsd.bas.domain.BasEmail">
     insert into bas_email (id, custom_code, service_manager_name, 
       service_staff_name, order_no, no_tracking_no,
