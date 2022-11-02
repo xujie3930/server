@@ -7,6 +7,7 @@ import com.alibaba.excel.util.FileUtils;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.szmsd.bas.dto.EmailObjectDto;
+import com.szmsd.bas.dto.EmailObjectDtoVs;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
@@ -96,7 +97,7 @@ public class EmailUtil {
      * @param filePath  文件路径
      * @throws MessagingException
      */
-    public void sendAttachmentMail(String to, String subject, String text, List<EmailObjectDto> list){
+    public void sendAttachmentMail(String to, String subject, String text, List<EmailObjectDtoVs> list){
 
 
             //邮件对象
@@ -132,7 +133,7 @@ public class EmailUtil {
 
     }
 
-    File attachmentInfo(List<EmailObjectDto> list){
+    File attachmentInfo(List<EmailObjectDtoVs> list){
         ExcelWriter excelWriter = null;
         //生成文件
         File cacheTmpFile = FileUtils.createTmpFile("Update trackingNo.xlsx");
@@ -143,7 +144,7 @@ public class EmailUtil {
                     .autoCloseStream(true)
                     .build();
             //将数据写入sheet页中
-            WriteSheet writeSheet = EasyExcel.writerSheet(0, "sheet1").head(EmailObjectDto.class).build();
+            WriteSheet writeSheet = EasyExcel.writerSheet(0, "sheet1").head(EmailObjectDtoVs.class).build();
             excelWriter.write(list,writeSheet);
         } catch (Exception e) {
             e.printStackTrace();
