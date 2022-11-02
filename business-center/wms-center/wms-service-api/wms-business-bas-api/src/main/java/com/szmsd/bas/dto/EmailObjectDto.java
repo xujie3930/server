@@ -44,6 +44,13 @@ public class EmailObjectDto {
     private String empTo;
 
 
+    @ApiModelProperty(value = "邮箱")
+    private String email;
+
+
+
+
+
 
 
 
