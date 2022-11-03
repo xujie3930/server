@@ -11,4 +11,8 @@ public interface FssBankService extends IService<FssBank> {
 
 
     R<List<FssBankVO>> findAll();
+
+    R<List<FssBankVO>> findBank();
+
+    R<List<FssBankVO>> findBankAccount(String bankCode);
 }
