@@ -7,6 +7,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "", description = "BasEmail表功能")
@@ -47,6 +49,15 @@ public class BasEmail {
 
     @ApiModelProperty(value = "发送状态（0表示未发送，1已发送）")
     private Integer sendType;
+
+    @ApiModelProperty(value = "refNo）")
+    private String refNo;
+
+    @ApiModelProperty(value = "更新时间")
+    private Date createTime;
+
+    @ApiModelProperty(value = "更新时间")
+    private String createTimes;
 
 
 

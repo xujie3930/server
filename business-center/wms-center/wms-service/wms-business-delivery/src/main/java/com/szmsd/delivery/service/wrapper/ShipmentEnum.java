@@ -700,6 +700,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             delOutbound.setPackingRule(data.getPackingRule());
             delOutbound.setShipmentRule(data.getShipmentRule());
             delOutbound.setProductShipmentRule(data.getShipmentRule());
+            delOutbound.setLogisticsProviderCode(data.getLogisticsProviderCode());
 
             // 费用信息
             Weight calcWeight = packageInfo.getCalcWeight();
@@ -1029,6 +1030,10 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             DelOutbound updateDelOutbound = new DelOutbound();
             updateDelOutbound.setId(delOutbound.getId());
             updateDelOutbound.setShipmentState(END.name());
+
+            updateDelOutbound.setLogisticsProviderCode(delOutbound.getLogisticsProviderCode());
+
+
             // 创建承运商物流订单
             updateDelOutbound.setTrackingNo(delOutbound.getTrackingNo());
             updateDelOutbound.setShipmentOrderNumber(delOutbound.getShipmentOrderNumber());
