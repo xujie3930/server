@@ -87,6 +87,8 @@ public class PricedProductController extends BaseController {
     @ApiOperation(value = "根据产品代码获取计价产品信息")
     public R<PricedProductInfoVO> info(@PathVariable("productCode") String productCode) {
         PricedProductInfoVO pricedProductInfoVO = iPricedProductService.getInfo(productCode);
+        String compareTrackingno=iPricedProductService.selectProductCode(productCode);
+        pricedProductInfoVO.setCompareTrackingno(compareTrackingno);
         String type = pricedProductInfoVO.getSupplierCalcType();
         List<PricedServiceListVO> list = new ArrayList<>();
         if ("LogisticsService".equals(type)) {
