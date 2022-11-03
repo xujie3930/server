@@ -8,8 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel(value = "", description = "EmailObjectDto对象")
-public class EmailObjectDto {
+@ApiModel(value = "", description = "EmailObjectDtoVs对象")
+public class EmailObjectDtoVs {
     @ColumnWidth(30)
     @ExcelProperty(index = 0, value = "客户代码")
     private String customCode;
@@ -39,14 +39,6 @@ public class EmailObjectDto {
     @ColumnWidth(30)
     @ExcelProperty(index = 7, value = "更新时间")
     private String createTimes;
-
-    @ApiModelProperty(value = "邮箱接收人")
-    private String empTo;
-
-
-    @ApiModelProperty(value = "邮箱")
-    private String email;
-
 
 
 

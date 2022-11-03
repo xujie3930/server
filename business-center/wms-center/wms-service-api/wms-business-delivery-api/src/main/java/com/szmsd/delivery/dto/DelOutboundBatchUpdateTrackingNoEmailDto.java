@@ -38,5 +38,8 @@ public class DelOutboundBatchUpdateTrackingNoEmailDto {
     private String sellerEmail;
 
 
+    //refNo
+    private String refNo;
+
 
 }

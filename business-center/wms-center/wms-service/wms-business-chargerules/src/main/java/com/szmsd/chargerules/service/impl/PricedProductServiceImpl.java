@@ -229,4 +229,9 @@ public class PricedProductServiceImpl implements IPricedProductService {
         return exportFile.getData();
     }
 
+    @Override
+    public String selectProductCode(String productCode) {
+      return   basProductServiceMapper.selectProductCode(productCode);
+    }
+
 }

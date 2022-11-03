@@ -8,12 +8,14 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.finance.domain.FssBank;
 import com.szmsd.finance.domain.PreRecharge;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.dto.PreRechargeAuditDTO;
 import com.szmsd.finance.dto.PreRechargeAuditVO;
 import com.szmsd.finance.dto.PreRechargeDTO;
 import com.szmsd.finance.enums.PreRechargeVerifyStatusEnum;
+import com.szmsd.finance.mapper.FssBankMapper;
 import com.szmsd.finance.mapper.PreRechargeMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IPreRechargeService;
@@ -34,10 +36,13 @@ import java.util.List;
 public class PreRechargeServiceImpl implements IPreRechargeService {
 
     @Autowired
-    PreRechargeMapper preRechargeMapper;
+    private PreRechargeMapper preRechargeMapper;
 
     @Autowired
-    IAccountBalanceService accountBalanceService;
+    private IAccountBalanceService accountBalanceService;
+
+    @Autowired
+    private FssBankMapper fssBankMapper;
 
     @Override
     public List<PreRecharge> listPage(PreRechargeDTO dto) {
@@ -72,6 +77,17 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
     public R save(PreRechargeDTO dto) {
         if(StringUtils.isEmpty(dto.getCusCode())){
             return R.failed("Customer code cannot be empty");
+        }
+
+        String bankId = dto.getBankId();
+
+        if(StringUtils.isNotEmpty(bankId)) {
+
+            FssBank fssBank = fssBankMapper.selectById(bankId);
+
+            if(fssBank == null){
+                return R.failed("无法获取银行账号");
+            }
         }
 
         String serialNo = generatorSerialNo();
@@ -185,7 +201,7 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
             PreRecharge preRechargeUpd = new PreRecharge();
             preRechargeUpd.setId(id);
             preRechargeUpd.setVerifyStatus(verifyStatus.getValue().toString());
-            preRechargeUpd.setVerifyRemark(auditVO.getVerifyRemark());
+            preRechargeUpd.setRejectRemark(auditVO.getRejectRemark());
             preRechargeUpd.setUpdateBy(SecurityUtils.getLoginUser().getUsername());
             preRechargeUpd.setUpdateByName(SecurityUtils.getLoginUser().getUsername());
             preRechargeUpd.setUpdateTime(new Date());

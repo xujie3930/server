@@ -1543,6 +1543,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 basTrackingPush.setOrderNo(delOutbound.getOrderNo());
                 basTrackingPush.setWarehouseCode(delOutbound.getWarehouseCode());
                 basTrackingPushMapper.insertSelective(basTrackingPush);
+                updateTrackingNoDto.setRefNo(delOutbound.getRefNo());
                 list1.add(updateTrackingNoDto);
 //                ShipmentTrackingChangeRequestDto
 //                R<ResponseVO> r= htpOutboundFeignService.shipmentTracking(shipmentTrackingChangeRequestDto);
@@ -1625,7 +1626,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                     DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto = new DelOutboundBatchUpdateTrackingNoEmailDto();
                     BeanUtils.copyProperties(dto, delOutboundBatchUpdateTrackingNoEmailDto);
-                    delOutboundBatchUpdateTrackingNoEmailDto.setSellerEmail(basSeller.getEmail());
+                    //屏蔽添加客户邮箱
+                    //delOutboundBatchUpdateTrackingNoEmailDto.setSellerEmail(basSeller.getEmail());
 
                     if (basSeller.getServiceManagerName() != null && !basSeller.getServiceManagerName().equals("")) {
                         if (!basSeller.getServiceManagerName().equals(basSeller.getServiceStaffName())) {
@@ -1691,19 +1693,22 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             for (DelOutboundBatchUpdateTrackingNoEmailDto dto:delOutboundBatchUpdateTrackingNoEmailDtoList){
                 List<String> serviceManagerStaffName=new ArrayList<>();
                 basEmployeesList.stream().filter(x->x.getEmpCode().equals(dto.getServiceManagerName())).findFirst().ifPresent(i -> {
-                    if (i.getEmail()!=null&&!i.getEmail().equals(""))
+                    if (i.getEmail()!=null&&!i.getEmail().equals("")){
                         serviceManagerStaffName.add(i.getEmail());
+                    }
+                    dto.setServiceManagerName(i.getEmpName());
                 });
                 basEmployeesList.stream().filter(x->x.getEmpCode().equals(dto.getServiceStaffName())).findFirst().ifPresent(i -> {
-                    if (i.getEmail()!=null&&!i.getEmail().equals(""))
+                    if (i.getEmail()!=null&&!i.getEmail().equals("")){
+                        serviceManagerStaffName.add(i.getEmail());
+                    }
 
 
-                                serviceManagerStaffName.add(i.getEmail());
-
-
+                    dto.setServiceStaffName(i.getEmpName());
 
                 });
-                serviceManagerStaffName.add(dto.getSellerEmail());
+                //屏蔽添加客户邮箱
+                //serviceManagerStaffName.add(dto.getSellerEmail());
                 //去除重复邮箱
                 List<String> listWithoutDuplicates = serviceManagerStaffName.stream().distinct().collect(Collectors.toList());
 
@@ -1729,8 +1734,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
 
             //将组合的数据 分解成Map<List> (邮箱为key,组合这个员工下的所有信息)
-           Map<String,List<DelOutboundBatchUpdateTrackingNoEmailDto>> delOutboundBatchUpdateTrackingNoEmailDtoMap=delOutboundBatchUpdateTrackingNoEmailDtoList.stream().collect(Collectors.groupingBy(DelOutboundBatchUpdateTrackingNoEmailDto::getEmail));
-            //循环map，得到每一组的数据 然后生产excel
+           Map<String,List<DelOutboundBatchUpdateTrackingNoEmailDto>> delOutboundBatchUpdateTrackingNoEmailDtoMap=delOutboundBatchUpdateTrackingNoEmailDtoList.stream().collect(Collectors.groupingBy(DelOutboundBatchUpdateTrackingNoEmailDto::getCustomCode));
+            //循环map，得到每一组的数据 然后生成excel需要数据
             for (Map.Entry<String, List<DelOutboundBatchUpdateTrackingNoEmailDto>> entry : delOutboundBatchUpdateTrackingNoEmailDtoMap.entrySet()) {
                 System.out.println("key = " + entry.getKey() + ", value = " + entry.getValue());
                 logger.info("组合参数：{}",entry.getValue());
@@ -1741,18 +1746,18 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     }
 
-    public void ExcleDelOutboundBatchUpdateTracking(List<DelOutboundBatchUpdateTrackingNoEmailDto> list,String email,String filepath){
+    public void ExcleDelOutboundBatchUpdateTracking(List<DelOutboundBatchUpdateTrackingNoEmailDto> list,String customCode,String filepath){
         logger.info("更新挂号参数1：{}",list);
         EmailDto emailDto=new EmailDto();
         //功能模块
         emailDto.setModularType(0);
         //emailDto.setSubject("Notice on Update of Tracking Number-"+list.get(0).getCustomCode()+"-"+simpleDateFormat.format(new Date()));
         //邮箱接收人
-        emailDto.setTo(email);
+        //emailDto.setTo(email);
         //emailDto.setText("customer:"+list.get(0).getCustomCode()+"on"+"["+simpleDateFormat.format(new Date())+"]"+"Total number of updated tracking numbers"+"["+list.size()+"]"+"Please download the attachment for details");
         List<EmailObjectDto> emailObjectDtoList= BeanMapperUtil.mapList(list, EmailObjectDto.class);
         emailDto.setList(emailObjectDtoList);
-        if(email!=null&&!email.equals("")){
+        if(customCode!=null&&!customCode.equals("")){
             R r= emailFeingService.sendEmail(emailDto);
             if (r.getCode()== HttpStatus.SUCCESS){
 
