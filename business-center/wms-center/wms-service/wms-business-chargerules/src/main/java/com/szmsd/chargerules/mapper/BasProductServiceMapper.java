@@ -24,4 +24,6 @@ public interface BasProductServiceMapper {
     List<BasProductService> selectBasProductService(@Param("list") List<String> list);
 
     List<BasCustomPricesgradeDto>  selectbasCustomPricesgradeList(BasCustomPricesgradeDto basCustomPricesgradeDto);
+
+    String  selectProductCode(@Param("productCode") String productCode);
 }

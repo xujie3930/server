@@ -28,4 +28,6 @@ public interface IPricedProductService {
     void update(UpdateProductDTO updateProductDTO);
 
     FileStream exportFile(List<String> codes);
+
+    String selectProductCode(String productCode);
 }
