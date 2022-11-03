@@ -56,6 +56,9 @@
      </if>
    </where>
   </select>
+  <select id="selectProductCode" resultType="java.lang.String" parameterType="java.lang.String">
+    SELECT compare_trackingno from bas_product_service where product_code=#{productCode}
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from bas_product_service
     where id = #{id,jdbcType=INTEGER}
