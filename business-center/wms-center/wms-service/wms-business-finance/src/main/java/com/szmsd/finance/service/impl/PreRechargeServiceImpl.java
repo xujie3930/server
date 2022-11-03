@@ -201,7 +201,7 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
             PreRecharge preRechargeUpd = new PreRecharge();
             preRechargeUpd.setId(id);
             preRechargeUpd.setVerifyStatus(verifyStatus.getValue().toString());
-            preRechargeUpd.setVerifyRemark(auditVO.getVerifyRemark());
+            preRechargeUpd.setRejectRemark(auditVO.getRejectRemark());
             preRechargeUpd.setUpdateBy(SecurityUtils.getLoginUser().getUsername());
             preRechargeUpd.setUpdateByName(SecurityUtils.getLoginUser().getUsername());
             preRechargeUpd.setUpdateTime(new Date());
