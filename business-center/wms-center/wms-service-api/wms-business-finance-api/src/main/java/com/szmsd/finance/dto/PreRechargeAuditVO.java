@@ -17,6 +17,6 @@ public class PreRechargeAuditVO {
     @NotNull(message = "审核状态不允许为空")
     private PreRechargeVerifyStatusEnum verifyStatus;
 
-    @ApiModelProperty(value = "审核备注")
-    private String verifyRemark;
+    @ApiModelProperty(value = "驳回意见")
+    private String rejectRemark;
 }

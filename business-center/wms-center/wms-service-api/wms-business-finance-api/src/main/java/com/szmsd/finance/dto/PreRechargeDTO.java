@@ -76,4 +76,7 @@ public class PreRechargeDTO {
 
     @ApiModelProperty(value = "收款银行名称")
     private String dueBankName;
+
+    @ApiModelProperty(value = "银行账号ID")
+    private String bankId;
 }
