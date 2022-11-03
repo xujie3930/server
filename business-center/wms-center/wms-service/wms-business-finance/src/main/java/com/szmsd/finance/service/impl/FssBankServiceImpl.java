@@ -73,7 +73,7 @@ public class FssBankServiceImpl extends ServiceImpl<FssBankMapper, FssBank> impl
 
         for(FssBank fssBank : fssBankList){
             FssBankVO fssBankVO = new FssBankVO();
-            fssBankVO.setBankAccount(fssBankVO.getBankAccount());
+            fssBankVO.setBankAccount(fssBank.getBankAccount());
             fssBankVO.setBankCode(fssBank.getBankCode());
             fssBankVO.setBankName(fssBank.getBankName());
             fssBankVO.setBankId(fssBank.getId().toString());
