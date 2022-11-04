@@ -375,6 +375,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                                     serialBill.setOrderTime(delOutbound.getCreateTime());
                                     serialBill.setPaymentTime(delOutbound.getShipmentsTime());
                                     serialBill.setProductCode(delOutbound.getShipmentRule());
+                                    serialBill.setShipmentRule(delOutbound.getShipmentRule());
+                                    serialBill.setShipmentRuleName(delOutbound.getShipmentRuleName());
+                                    serialBill.setRemark(delOutbound.getRemark());
                                     serialBillInfoList.add(serialBill);
                                 }
                                 custPayDTO.setSerialBillInfoList(serialBillInfoList);
@@ -429,6 +432,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             dto.setProductCategory(BillEnum.PayMethod.BALANCE_DEDUCTIONS.getPaymentName());
                             dto.setChargeCategory(BillEnum.CostCategoryEnum.MATERIAL_COST.getName());
                             dto.setWarehouseCode(basePacking.getWarehouseCode());
+                            dto.setShipmentRule(delOutbound.getShipmentRule());
+                            dto.setShipmentRuleName(delOutbound.getShipmentRuleName());
+                            dto.setNote(delOutbound.getRemark());
                             R<List<BasWarehouse>> listR = basWarehouseFeignService.queryByWarehouseCodes(Collections.singletonList(basePacking.getWarehouseCode()));
                             if (listR.getCode() == HttpStatus.SUCCESS) {
                                 List<BasWarehouse> data = listR.getData();
