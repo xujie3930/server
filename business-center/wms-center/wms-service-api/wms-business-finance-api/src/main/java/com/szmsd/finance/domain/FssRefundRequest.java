@@ -220,7 +220,6 @@ public class FssRefundRequest extends BaseEntity {
 
 
     @ApiModelProperty(value = "产品代码")
-    @TableField(exist = false)
     private String shipmentRule;
 
     @ApiModelProperty(value = "计费重")
@@ -238,6 +237,9 @@ public class FssRefundRequest extends BaseEntity {
     @ApiModelProperty(value = "创建时间")
     @TableField(exist = false)
     private Date delOucreateTime;
+
+    @ApiModelProperty(value = "仓库产品名称")
+    private String shipmentRuleName;
 
 
 

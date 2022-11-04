@@ -76,6 +76,15 @@ public class AccountSerialBillDTO {
     @ApiModelProperty(value = "业务类别（性质）")
     private String businessCategory;
 
+    @ApiModelProperty(value = "仓库产品名称")
+    private String shipmentRuleName;
+
+    @ApiModelProperty(value = "仓库产品代码")
+    private String shipmentRule;
+
+    @ApiModelProperty(value = "附注")
+    private String note;
+
     public void setBusinessCategory(String businessCategory) {
         this.businessCategory = businessCategory;
         if (StringUtils.isNotBlank(businessCategory)) {

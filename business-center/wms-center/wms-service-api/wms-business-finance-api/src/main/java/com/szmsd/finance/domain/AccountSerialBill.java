@@ -139,6 +139,15 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "费用类别转换后")
     private String chargeCategoryChange;
 
+    @ApiModelProperty(value = "仓库产品代码")
+    private String  shipmentRule;
+
+    @ApiModelProperty(value = "仓库产品名称")
+    private String shipmentRuleName;
+
+    @ApiModelProperty(value = "附注")
+    private String note;
+
 
 
     public void setRemark(String remark) {
