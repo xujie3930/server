@@ -89,6 +89,7 @@ public class CustPayDTO {
     @ApiModelProperty(value = "费用类别转换后")
     private String chargeCategoryChange;
 
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);
