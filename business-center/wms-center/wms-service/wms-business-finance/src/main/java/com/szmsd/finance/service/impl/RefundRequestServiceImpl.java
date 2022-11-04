@@ -358,22 +358,22 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         fssRefundRequests.forEach(x->{
           List<Map> list =baseMapper.selectOutbounds(x.getOrderNo());
           if (list.size()>0){
-              if (String.valueOf(list.get(0).get("trackingNo"))!=null&&!String.valueOf(list.get(0).get("trackingNo")).equals(""));{
+              if (String.valueOf(list.get(0).get("trackingNo"))!=null&&!String.valueOf(list.get(0).get("trackingNo")).equals("")){
                   x.setTrackingNo(String.valueOf(list.get(0).get("trackingNo")));
               }
-              if (String.valueOf(list.get(0).get("shipmentRule"))!=null&&!String.valueOf(list.get(0).get("shipmentRule")).equals(""));{
+              if (String.valueOf(list.get(0).get("shipmentRule"))!=null&&!String.valueOf(list.get(0).get("shipmentRule")).equals("")){
                   x.setShipmentRule(String.valueOf(list.get(0).get("shipmentRule")));
               }
-              if (String.valueOf(list.get(0).get("calcWeight"))!=null&&!String.valueOf(list.get(0).get("calcWeight")).equals(""));{
+              if (String.valueOf(list.get(0).get("calcWeight"))!=null&&!String.valueOf(list.get(0).get("calcWeight")).equals("")){
                   x.setCalcWeight((BigDecimal) list.get(0).get("calcWeight"));
               }
-              if (String.valueOf(list.get(0).get("weight"))!=null&&!String.valueOf(list.get(0).get("weight")).equals(""));{
+              if (String.valueOf(list.get(0).get("weight"))!=null&&!String.valueOf(list.get(0).get("weight")).equals("")){
                   x.setWeight((Double) list.get(0).get("weight"));
               }
-              if (String.valueOf(list.get(0).get("specifications"))!=null&&!String.valueOf(list.get(0).get("specifications")).equals(""));{
+              if (String.valueOf(list.get(0).get("specifications"))!=null&&!String.valueOf(list.get(0).get("specifications")).equals("")){
                   x.setSpecifications(String.valueOf(list.get(0).get("specifications")));
               }
-              if (list.get(0).get("createTime")!=null);{
+              if (list.get(0).get("createTime")!=null){
                   x.setDelOucreateTime((Date) list.get(0).get("createTime"));
               }
           }
