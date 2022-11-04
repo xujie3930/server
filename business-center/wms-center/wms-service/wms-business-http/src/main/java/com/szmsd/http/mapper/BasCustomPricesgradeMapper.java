@@ -2,18 +2,21 @@ package com.szmsd.http.mapper;
 
 
 import com.szmsd.http.domain.BasCustomPricesgrade;
+import com.szmsd.http.dto.custom.UpdateCustomMainDto;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 public interface BasCustomPricesgradeMapper {
-    int deleteByPrimaryKey(Integer id);
+    int deleteByPrimaryKey(@Param("sellerCode") String sellerCode,@Param("customprType") String customprType);
 
     int insert(BasCustomPricesgrade record);
 
     int insertSelective(BasCustomPricesgrade record);
 
-    BasCustomPricesgrade selectByPrimaryKey(BasCustomPricesgrade basCustomPricesgrade);
+    List<BasCustomPricesgrade> selectByPrimaryKey(BasCustomPricesgrade basCustomPricesgrade);
 
-    int updateByPrimaryKeySelective(BasCustomPricesgrade record);
+    int updateByPrimaryKeySelective(UpdateCustomMainDto record);
 
     int updateByPrimaryKey(BasCustomPricesgrade record);
 
