@@ -24,11 +24,8 @@
     from bas_custom_pricesgrade
     <where>
        1=1
-      <if test="showTime != null" >
-      and  end_time &lt; #{showTime}
-      </if>
-      <if test="templateId != null" >
-        and  template_id = #{templateId}
+      <if test="sellerCode != null" >
+        and  seller_code = #{sellerCode}
       </if>
       <if test="customprType != null" >
         and  custompr_type = #{customprType}
@@ -41,9 +38,9 @@
     <include refid="Base_Column_List" />
     from bas_custom_pricesgrade where template_id = #{templateId} and custompr_type  = #{customprType}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from bas_custom_pricesgrade
-    where id = #{id,jdbcType=INTEGER}
+    where seller_code = #{sellerCode,jdbcType=VARCHAR} and custompr_type  = #{customprType}
   </delete>
   <insert id="insert" parameterType="com.szmsd.http.domain.BasCustomPricesgrade" >
     insert into bas_custom_pricesgrade (id, template_id, template_name, 
@@ -128,41 +125,19 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.http.domain.BasCustomPricesgrade" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.http.dto.custom.UpdateCustomMainDto" >
     update bas_custom_pricesgrade
     <set >
-      <if test="templateId != null" >
-        template_id = #{templateId,jdbcType=VARCHAR},
-      </if>
-      <if test="templateName != null" >
-        template_name = #{templateName,jdbcType=VARCHAR},
-      </if>
-      <if test="isSelfTemplate != null" >
-        is_self_template = #{isSelfTemplate,jdbcType=VARCHAR},
-      </if>
-      <if test="orderOn != null" >
-        order_on = #{orderOn,jdbcType=INTEGER},
-      </if>
-      <if test="remark != null" >
-        remark = #{remark,jdbcType=VARCHAR},
-      </if>
+
       <if test="beginTime != null" >
         begin_time = #{beginTime,jdbcType=TIMESTAMP},
       </if>
       <if test="endTime != null" >
         end_time = #{endTime,jdbcType=TIMESTAMP},
       </if>
-      <if test="createByName != null" >
-        create_by_name = #{createByName,jdbcType=VARCHAR},
-      </if>
-      <if test="customprType != null" >
-        custompr_type = #{customprType,jdbcType=CHAR},
-      </if>
-      <if test="sellerCode != null" >
-        seller_code= #{sellerCode,jdbcType=VARCHAR},
-      </if>
+
     </set>
-    where id = #{id,jdbcType=INTEGER}
+    where template_id = #{templateId,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.szmsd.http.domain.BasCustomPricesgrade" >
     update bas_custom_pricesgrade
