@@ -57,16 +57,16 @@ public class DiscountDetailImportDto {
 
 
     @Excel(name = "L*W*H")
-    private BigDecimal minVolume;
+    private BigDecimal volume;
 
     @Excel(name = "L+W+H")
-    private BigDecimal minPerimeter;
+    private BigDecimal perimeter;
 
     @Excel(name = "偏远地区模板")
     private String remoteModel;
 
     @Excel(name = "分区名称")
-    private String zoneName;
+    private String zone;
 
     @Excel(name = "起始价格")
     private BigDecimal startPrice;
@@ -78,7 +78,7 @@ public class DiscountDetailImportDto {
     private BigDecimal deltaChargePerStage;
 
     @Excel(name = "续数数量")
-    private Integer detalNumberPerQuantity;
+    private BigDecimal detalNumberPerQuantity;
 
     @Excel(name = "续数价格")
     private BigDecimal detalChargePerQuantity;
