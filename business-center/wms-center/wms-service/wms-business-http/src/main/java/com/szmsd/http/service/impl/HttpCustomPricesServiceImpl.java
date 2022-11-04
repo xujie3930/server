@@ -6,13 +6,17 @@ import com.szmsd.http.config.HttpConfig;
 import com.szmsd.http.dto.OperationRecordDto;
 import com.szmsd.http.dto.custom.*;
 import com.szmsd.http.dto.grade.GradeMainDto;
+import com.szmsd.http.mapper.BasCustomPricesgradeMapper;
 import com.szmsd.http.service.IHttpCustomPricesService;
 import com.szmsd.http.service.http.SaaSPricedRequest;
 import com.szmsd.http.util.HttpResponseVOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class HttpCustomPricesServiceImpl extends SaaSPricedRequest implements IHttpCustomPricesService {
+    @Autowired
+    private BasCustomPricesgradeMapper basCustomPricesgradeMapper;
 
     public HttpCustomPricesServiceImpl(HttpConfig httpConfig) {
         super(httpConfig);
@@ -36,11 +40,13 @@ public class HttpCustomPricesServiceImpl extends SaaSPricedRequest implements IH
 
     @Override
     public R updateDiscount(UpdateCustomMainDto dto) {
+        basCustomPricesgradeMapper.updateByPrimaryKeySelective(dto);
         return HttpResponseVOUtils.transformation(httpPutBody("", "customPrices.updateDiscount", dto, dto.getClientCode()));
     }
 
     @Override
     public R updateGrade(UpdateCustomMainDto dto) {
+        basCustomPricesgradeMapper.updateByPrimaryKeySelective(dto);
         return HttpResponseVOUtils.transformation(httpPutBody("", "customPrices.updateGrade", dto, dto.getClientCode()));
     }
 
