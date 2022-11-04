@@ -46,6 +46,7 @@ public class HttpCustomPricesServiceImpl extends SaaSPricedRequest implements IH
 
     @Override
     public R updateGrade(UpdateCustomMainDto dto) {
+        basCustomPricesgradeMapper.updateByPrimaryKeySelective(dto);
         return HttpResponseVOUtils.transformation(httpPutBody("", "customPrices.updateGrade", dto, dto.getClientCode()));
     }
 
