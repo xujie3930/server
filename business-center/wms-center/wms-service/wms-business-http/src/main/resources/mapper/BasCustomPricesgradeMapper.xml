@@ -24,8 +24,8 @@
     from bas_custom_pricesgrade
     <where>
        1=1
-      <if test="sellerCode != null" >
-        and  seller_code = #{sellerCode}
+      <if test="templateId != null" >
+        and  template_id = #{templateId}
       </if>
       <if test="customprType != null" >
         and  custompr_type = #{customprType}
@@ -136,6 +136,40 @@
         end_time = #{endTime,jdbcType=TIMESTAMP},
       </if>
 
+    </set>
+    where template_id = #{templateId,jdbcType=VARCHAR}
+  </update>
+
+  <update id="updateByPrimaryKeySelectiveby" parameterType="com.szmsd.http.domain.BasCustomPricesgrade" >
+    update bas_custom_pricesgrade
+    <set >
+      <if test="templateName != null" >
+        template_name = #{templateName,jdbcType=VARCHAR},
+      </if>
+      <if test="isSelfTemplate != null" >
+        is_self_template = #{isSelfTemplate,jdbcType=VARCHAR},
+      </if>
+      <if test="orderOn != null" >
+        order_on = #{orderOn,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="beginTime != null" >
+        begin_time = #{beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createByName != null" >
+        create_by_name = #{createByName,jdbcType=VARCHAR},
+      </if>
+      <if test="customprType != null" >
+        custompr_type = #{customprType,jdbcType=CHAR},
+      </if>
+      <if test="sellerCode != null" >
+        seller_code = #{sellerCode,jdbcType=VARCHAR},
+      </if>
     </set>
     where template_id = #{templateId,jdbcType=VARCHAR}
   </update>
