@@ -56,7 +56,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
 
                 String mKey = key + oldBalance.getVersion();
 
-                log.info("balance mKey version {}",mKey);
+                log.info("PaymentPayFactory balance mKey version  1 {}",dto.getNo());
 
                 if(concurrentHashMap.get(mKey) != null){
                     concurrentHashMap.remove(mKey);
@@ -71,6 +71,8 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     log.info("balance 重新执行 {}",mKey);
                     return updateBalance(dto);
                 }
+
+                log.info("PaymentPayFactory  2 {}",dto.getNo());
 
                 List<AccountBalanceChange> balanceChange = getBalanceChange(dto);
 
@@ -97,6 +99,9 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     }
                 }
                 if (balanceChange.size() == 1) {
+
+                    log.info("PaymentPayFactory  先解冻 然后扣费 3 {}",dto.getNo());
+
                     AccountBalanceChange accountBalanceChange = balanceChange.get(0);
                     BigDecimal freeze = accountBalanceChange.getAmountChange();
                     // if (!calculateBalance(oldBalance, changeAmount, freeze, dto)) return false;
@@ -108,10 +113,14 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     setHasFreeze(dto);
                 }
 
+                log.info("PaymentPayFactory  4 {}",dto.getNo());
+
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance, true);
                 recordOpLogAsync(dto, oldBalance.getCurrentBalance());
                 recordDetailLogAsync(dto, oldBalance);
                 setSerialBillLog(dto);
+
+                log.info("PaymentPayFactory  5 {}",dto.getNo());
 
                 concurrentHashMap.put(mKey,oldBalance.getVersion());
 
