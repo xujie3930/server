@@ -588,6 +588,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             return super.batchSelfPick(context, currentState);
         }
 
+        public static final TimeUnit unit = TimeUnit.SECONDS;
+
+        public static final long time = 180L;
+
+        public static final long leantime = 180L;
+
         @Override
         public void handle(ApplicationContext context) {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
@@ -596,46 +602,67 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
             logger.info("出库单{}-开始取消冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
 
-            IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
-            RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
-            List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
-            Map<String, List<DelOutboundCharge>> groupByCharge =
-                    delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
-            for (String currencyCode: groupByCharge.keySet()) {
-                BigDecimal bigDecimal = new BigDecimal(0);
-                for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
-                    if (c.getAmount() != null) {
-                        bigDecimal = bigDecimal.add(c.getAmount());
+            final String key = "cky-fss-freeze-balance-all:" + delOutbound.getCustomCode();
+
+            RedissonClient redissonClient = SpringUtils.getBean(RedissonClient.class);
+
+            RLock lock = redissonClient.getLock(key);
+
+            try {
+                lock.tryLock(time, unit);
+
+                IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
+                RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
+                List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
+                Map<String, List<DelOutboundCharge>> groupByCharge =
+                        delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+                for (String currencyCode : groupByCharge.keySet()) {
+                    BigDecimal bigDecimal = new BigDecimal(0);
+                    for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
+                        if (c.getAmount() != null) {
+                            bigDecimal = bigDecimal.add(c.getAmount());
+                        }
                     }
+
+                    // 取消冻结费用
+                    CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                    cusFreezeBalanceDTO.setAmount(bigDecimal);
+                    cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
+                    cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                    cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                    cusFreezeBalanceDTO.setOrderType("Freight");
+                    // 调用冻结费用接口
+                    R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+                    if (null == thawBalanceR) {
+                        throw new CommonException("400", MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses"));
+                    }
+                    if (Constants.SUCCESS != thawBalanceR.getCode()) {
+                        // 异常信息
+                        String msg = thawBalanceR.getMsg();
+                        if (StringUtils.isEmpty(msg)) {
+                            msg = MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses");
+                        }
+                        throw new CommonException("400", msg);
+                    }
+
                 }
 
-                // 取消冻结费用
-                CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
-                cusFreezeBalanceDTO.setAmount(bigDecimal);
-                cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
-                cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
-                cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
-                cusFreezeBalanceDTO.setOrderType("Freight");
-                // 调用冻结费用接口
-                R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
-                if (null == thawBalanceR) {
-                    throw new CommonException("400", MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses"));
-                }
-                if (Constants.SUCCESS != thawBalanceR.getCode()) {
-                    // 异常信息
-                    String msg = thawBalanceR.getMsg();
-                    if (StringUtils.isEmpty(msg)) {
-                        msg = MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses");
-                    }
-                    throw new CommonException("400", msg);
-                }
+                // 清除费用信息
+                delOutboundChargeService.clearCharges(delOutbound.getOrderNo());
 
+            }catch (Exception e){
+                logger.info("冻结费用异常，加锁失败");
+                logger.info("异常信息:" + e.getMessage());
+
+                throw new RuntimeException(e.getMessage());
+            }finally {
+                if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                    lock.unlock();
+                }
             }
 
 
 
-            // 清除费用信息
-            delOutboundChargeService.clearCharges(delOutbound.getOrderNo());
         }
 
         @Override
@@ -835,7 +862,9 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
             RedissonClient redissonClient = SpringUtils.getBean(RedissonClient.class);
 
-            String key = "deloutbound-fss-freeze-balance" + delOutbound.getCustomCode() + ":" + delOutbound.getOrderNo();
+            //String key = "deloutbound-fss-freeze-balance" + delOutbound.getCustomCode() + ":" + delOutbound.getOrderNo();
+
+            final String key = "cky-fss-freeze-balance-all:" + delOutbound.getCustomCode();
 
             RLock lock = redissonClient.getLock(key);
 

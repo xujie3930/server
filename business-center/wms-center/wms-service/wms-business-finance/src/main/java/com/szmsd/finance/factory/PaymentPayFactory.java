@@ -48,9 +48,9 @@ public class PaymentPayFactory extends AbstractPayFactory {
     public Boolean updateBalance(final CustPayDTO dto) {
         log.info("PaymentPayFactory {}", JSONObject.toJSONString(dto));
         final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
-        RLock lock = redissonClient.getLock(key);
+        //RLock lock = redissonClient.getLock(key);
         try {
-            if (lock.tryLock(time, unit)) {
+           // if (lock.tryLock(time,leaseTime, unit)) {
 
                 String currencyCode = dto.getCurrencyCode();
 
@@ -66,10 +66,10 @@ public class PaymentPayFactory extends AbstractPayFactory {
                 if(concurrentHashMap.get(mKey) != null){
                     concurrentHashMap.remove(mKey);
 
-                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                        log.info("释放redis锁 {}",dto.getNo());
-                        lock.unlock();
-                    }
+//                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                        log.info("释放redis锁 {}",dto.getNo());
+//                        lock.unlock();
+//                    }
 
                     Thread.sleep(200);
 
@@ -136,10 +136,10 @@ public class PaymentPayFactory extends AbstractPayFactory {
                 concurrentHashMap.put(mKey,oldBalance.getVersion());
 
                 return true;
-            } else {
-                log.error("支付超时,请稍候重试{}", JSONObject.toJSONString(dto));
-                throw new RuntimeException("支付超时,请稍候重试");
-            }
+//            } else {
+//                log.error("支付超时,请稍候重试{}", JSONObject.toJSONString(dto));
+//                throw new RuntimeException("支付超时,请稍候重试");
+//            }
         } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
@@ -148,9 +148,9 @@ public class PaymentPayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("支付异常:" + e.getMessage());
         } finally {
-            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
+//            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//            }
         }
     }
 
