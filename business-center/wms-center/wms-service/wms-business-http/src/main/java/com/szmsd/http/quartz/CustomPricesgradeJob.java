@@ -52,8 +52,7 @@ public class CustomPricesgradeJob extends QuartzJobBean {
                          List<BasCustomPricesgrade>   basCustomPricesgrade1 =basCustomPricesgradeMapper.selectByPrimaryKey(basCustomPricesgrade);
                          if (basCustomPricesgrade1.size()>0){
 
-                             basCustomPricesgradeMapper.deleteByPrimaryKey(basCustomPricesgrade1.get(0).getSellerCode(),"1");
-                             basCustomPricesgradeMapper.insertSelective(basCustomPricesgrade);
+                             basCustomPricesgradeMapper.updateByPrimaryKeySelectiveby(basCustomPricesgrade);
                          }
 
                          //BasCustomPricesgrade   basCustomPricesgrade2 =basCustomPricesgradeMapper.selectByPrimaryKeys(i.getTemplateId(),"1");
@@ -79,9 +78,8 @@ public class CustomPricesgradeJob extends QuartzJobBean {
                          basCustomPricesgrade.setShowTime(new Date());
                          basCustomPricesgrade.setSellerCode(s);
                          List<BasCustomPricesgrade>   basCustomPricesgrade1 =basCustomPricesgradeMapper.selectByPrimaryKey(basCustomPricesgrade);
-                         if (basCustomPricesgrade1!=null){
-                             basCustomPricesgradeMapper.deleteByPrimaryKey(basCustomPricesgrade1.get(0).getSellerCode(),"0");
-                             basCustomPricesgradeMapper.insertSelective(basCustomPricesgrade);
+                         if (basCustomPricesgrade1.size()>0){
+                             basCustomPricesgradeMapper.updateByPrimaryKeySelectiveby(basCustomPricesgrade);
                          }
 
 //                         BasCustomPricesgrade   basCustomPricesgrade2 =basCustomPricesgradeMapper.selectByPrimaryKeys(q.getTemplateId(),"0");
