@@ -489,9 +489,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
         public static final TimeUnit unit = TimeUnit.SECONDS;
 
-        public static final long time = 180L;
-
-        public static final long leantime = 180L;
+        public static final long time = 3L;
 
         @Override
         public void handle(ApplicationContext context) {
@@ -505,8 +503,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
             RedissonClient redissonClient = SpringUtils.getBean(RedissonClient.class);
 
-            //String key = "bringVerify-fss-freeze-balance" + delOutbound.getCustomCode() + ":" + delOutbound.getOrderNo();
-            final String key = "cky-fss-freeze-balance-all:" + delOutbound.getCustomCode();
+            String key = "bringVerify-fss-freeze-balance" + delOutbound.getCustomCode() + ":" + delOutbound.getOrderNo();
 
             RLock lock = redissonClient.getLock(key);
 
@@ -580,56 +577,35 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             DelOutboundOperationLogEnum.RK_BRV_FREEZE_BALANCE.listener(delOutbound);
 
-            final String key = "cky-fss-freeze-balance-all:" + delOutbound.getCustomCode();
 
-            RedissonClient redissonClient = SpringUtils.getBean(RedissonClient.class);
-
-            RLock lock = redissonClient.getLock(key);
-
-            try {
-                lock.tryLock(time, unit);
-
-
-                IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
-                RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
-                List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
-                Map<String, List<DelOutboundCharge>> groupByCharge =
-                        delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
-                for (String currencyCode : groupByCharge.keySet()) {
-                    BigDecimal bigDecimal = new BigDecimal(0);
-                    for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
-                        if (c.getAmount() != null) {
-                            bigDecimal = bigDecimal.add(c.getAmount());
-                        }
-                    }
-                    CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
-                    cusFreezeBalanceDTO.setAmount(bigDecimal);
-                    cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
-                    cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
-                    cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
-                    cusFreezeBalanceDTO.setOrderType("Freight");
-                    R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
-                    logger.info(">>>>>[创建出库单{}]取消冻结费用, 数据:{}",
-                            delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO));
-                    if (null == thawBalanceR) {
-                        throw new CommonException("400", MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses"));
-                    }
-                    if (Constants.SUCCESS != thawBalanceR.getCode()) {
-                        throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses") + "2"));
+            IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
+            RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
+            List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
+            Map<String, List<DelOutboundCharge>> groupByCharge =
+                    delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+            for (String currencyCode: groupByCharge.keySet()) {
+                BigDecimal bigDecimal = new BigDecimal(0);
+                for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
+                    if (c.getAmount() != null) {
+                        bigDecimal = bigDecimal.add(c.getAmount());
                     }
                 }
-
-            }catch (Exception e){
-                logger.info("冻结费用异常，加锁失败");
-                logger.info("异常信息:" + e.getMessage());
-
-                throw new RuntimeException(e.getMessage());
-            }finally {
-                if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                    lock.unlock();
+                CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                cusFreezeBalanceDTO.setAmount(bigDecimal);
+                cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
+                cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                cusFreezeBalanceDTO.setOrderType("Freight");
+                R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+                logger.info(">>>>>[创建出库单{}]取消冻结费用, 数据:{}",
+                        delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO));
+                if (null == thawBalanceR) {
+                    throw new CommonException("400", MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses"));
+                }
+                if (Constants.SUCCESS != thawBalanceR.getCode()) {
+                    throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses")+ "2"));
                 }
             }
-
 
             super.rollback(context);
         }
