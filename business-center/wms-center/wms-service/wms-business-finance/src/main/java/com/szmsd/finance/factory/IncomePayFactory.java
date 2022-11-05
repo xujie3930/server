@@ -44,9 +44,9 @@ public class IncomePayFactory extends AbstractPayFactory {
     public Boolean updateBalance(final CustPayDTO dto) {
         log.info("IncomePayFactory {}", JSONObject.toJSONString(dto));
         final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
-        RLock lock = redissonClient.getLock(key);
+        //RLock lock = redissonClient.getLock(key);
         try {
-            if (lock.tryLock(time,leaseTime, unit)) {
+            //if (lock.tryLock(time,leaseTime, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 BigDecimal changeAmount = dto.getAmount();
                 //余额不足
@@ -59,10 +59,10 @@ public class IncomePayFactory extends AbstractPayFactory {
                 if(concurrentHashMap.get(mKey) != null){
                     concurrentHashMap.remove(mKey);
 
-                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                        log.info("释放redis锁 {}",dto.getNo());
-                        lock.unlock();
-                    }
+//                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                        log.info("释放redis锁 {}",dto.getNo());
+//                        lock.unlock();
+//                    }
 
                     Thread.sleep(100);
 
@@ -82,10 +82,10 @@ public class IncomePayFactory extends AbstractPayFactory {
 
                 //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 return true;
-            } else {
-                log.error("充值操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
-                throw new RuntimeException("充值操作超时,请稍候重试");
-            }
+//            } else {
+//                log.error("充值操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
+//                throw new RuntimeException("充值操作超时,请稍候重试");
+//            }
         } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
@@ -94,9 +94,9 @@ public class IncomePayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("充值操作超时,请稍候重试!");
         } finally {
-            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
+//            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//            }
         }
     }
 

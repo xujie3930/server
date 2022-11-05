@@ -311,7 +311,8 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         // 获取到处理状态
         String completedState = this.defaultValue(delOutbound.getCompletedState());
         String originCompletedState = completedState;
-        String key = applicationName + ":DelOutbound:completed:" + orderNo;
+        //String key = applicationName + ":DelOutbound:completed:" + orderNo;
+        final String key = "cky-fss-freeze-balance-all:" + delOutbound.getCustomCode();
         RLock lock = this.redissonClient.getLock(key);
         try {
             if (lock.tryLock(0, TimeUnit.SECONDS)) {
@@ -747,7 +748,9 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         // 获取到处理状态
         String cancelledState = this.defaultValue(delOutbound.getCancelledState());
         String originCancelledState = cancelledState;
-        String key = applicationName + ":DelOutbound:cancelled:" + orderNo;
+        //String key = applicationName + ":DelOutbound:cancelled:" + orderNo;
+        final String key = "cky-fss-freeze-balance-all:" + delOutbound.getCustomCode();
+
         RLock lock = this.redissonClient.getLock(key);
         try {
             if (lock.tryLock(0, TimeUnit.SECONDS)) {
