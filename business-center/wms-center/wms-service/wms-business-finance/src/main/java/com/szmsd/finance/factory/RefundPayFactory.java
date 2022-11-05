@@ -50,7 +50,7 @@ public class RefundPayFactory extends AbstractPayFactory {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Boolean updateBalance(final CustPayDTO dto) {
         log.info("RefundPayFactory {}", JSONObject.toJSONString(dto));
-        String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         try {
 

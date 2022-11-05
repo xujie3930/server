@@ -41,7 +41,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
     @Override
     public Boolean updateBalance(final CustPayDTO dto) {
         log.info("ExchangePayFactory {}", JSONObject.toJSONString(dto));
-        String key = "cky-test-fss-balance-all:" + dto.getCusCode();
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         try {
             if (lock.tryLock(time, unit)) {
