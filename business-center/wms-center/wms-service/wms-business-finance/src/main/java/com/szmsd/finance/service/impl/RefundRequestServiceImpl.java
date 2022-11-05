@@ -352,7 +352,9 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
      */
     @Transactional(rollbackFor = Exception.class)
     public void afterApprove(RefundStatusEnum status, List<String> idList) {
-        if (RefundStatusEnum.COMPLETE != status) return;
+        if (RefundStatusEnum.COMPLETE != status){
+            return;
+        }
         log.info("审核通过-进行相应的越扣减 {}", idList);
         List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>lambdaQuery().in(FssRefundRequest::getId, idList));
         fssRefundRequests.forEach(x->{

@@ -53,16 +53,20 @@ public class RefundPayFactory extends AbstractPayFactory {
         String key = "cky-test-fss-balance-" + dto.getCurrencyCode() + ":" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         try {
-            boolean success = false;
+
             if (lock.tryLock(time, unit)) {
+
+                String currencyCode = dto.getCurrencyCode();
 
                 log.info("【退费】dto-- {}",JSONObject.toJSONString(dto));
 
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
 
+                log.info("【退费】dto-- 1 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
+
                 String mKey = key + oldBalance.getVersion();
 
-                log.info("balance mKey version {}",mKey);
+                log.info("balance mKey version 1{}",mKey);
 
                 if(concurrentHashMap.get(mKey) != null){
                     concurrentHashMap.remove(mKey);
@@ -79,25 +83,40 @@ public class RefundPayFactory extends AbstractPayFactory {
                     return updateBalance(dto);
                 }
 
+                boolean success = false;
+
                 log.info("【退费】RefundPayFactory-- {}",JSONObject.toJSONString(oldBalance));
                 BigDecimal changeAmount = dto.getAmount();
                 if (changeAmount.compareTo(BigDecimal.ZERO) >= 0) {
+
+                    log.info("balance mKey version 1.1 充值{}",dto.getNo());
                     // 充值
                     success = oldBalance.rechargeAndSetAmount(changeAmount);
                     super.addForCreditBillAsync(oldBalance.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
                 } else {
+                    log.info("balance mKey version 1.1 退费强制扣钱{}",dto.getNo());
                     // 退费强制扣钱
                     success = oldBalance.payAnyWay(changeAmount.negate());
                 }
                 if (!success){
                     return false;
                 }
+
+                log.info("balance mKey version 2{}",dto.getNo());
+
+                log.info("【退费】dto-- 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
+
                 BalanceDTO result = oldBalance;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), result, true);
+
+                log.info("【退费】setBalance-- 3 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
+
                 recordOpLogAsync(dto, result.getCurrentBalance());
                 recordDetailLogAsync(dto, oldBalance);
                 log.info("【退费】setSerialBillLog-- {}",JSONObject.toJSONString(dto));
                 setSerialBillLog(dto);
+
+                log.info("balance mKey version 3{}",dto.getNo());
 
                 concurrentHashMap.put(mKey,oldBalance.getVersion());
 

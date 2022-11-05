@@ -57,7 +57,7 @@ public class DiscountDetailImportDto {
 
 
     @Excel(name = "L*W*H")
-    private BigDecimal volume;
+    private BigDecimal minVolume;
 
     @Excel(name = "L+W+H")
     private BigDecimal perimeter;
