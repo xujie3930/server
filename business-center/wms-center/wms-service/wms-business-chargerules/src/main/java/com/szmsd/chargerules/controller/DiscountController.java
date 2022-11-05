@@ -235,6 +235,7 @@ public class DiscountController extends BaseController{
             for(int i = 0; i < list.size(); i++){
                 list.get(i).setBeginTime(DateUtil.formatDateTime(dtoList.get(i).getBeginTimeDate()));
                 list.get(i).setEndTime(DateUtil.formatDateTime(dtoList.get(i).getEndTimeDate()));
+
                 if("是".equals(dtoList.get(i).getIsValidStr())|| "TRUE".equals(dtoList.get(i).getIsValidStr())){
                     list.get(i).setIsValid(true);
                 }else{

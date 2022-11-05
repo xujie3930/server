@@ -75,4 +75,7 @@ public class DiscountDetailPackageLimitDto {
     @ApiModelProperty("最大申报价值")
     private BigDecimal maxDeclareValue;
 
+    @ApiModelProperty("重量单位")
+    private String weightUnit;
+
 }
