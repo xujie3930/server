@@ -71,7 +71,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
                         lock.unlock();
                     }
 
-                    Thread.sleep(100);
+                    Thread.sleep(200);
 
                     log.info("balance 重新执行 {}",mKey);
                     return updateBalance(dto);

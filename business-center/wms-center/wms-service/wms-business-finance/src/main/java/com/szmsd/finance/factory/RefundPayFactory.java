@@ -76,7 +76,7 @@ public class RefundPayFactory extends AbstractPayFactory {
                         lock.unlock();
                     }
 
-                    Thread.sleep(100);
+                    Thread.sleep(200);
 
                     log.info("【退费】重新执行-- {}",JSONObject.toJSONString(dto));
                     log.info("【退费】重新执行-- {}",mKey);
