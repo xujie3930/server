@@ -51,12 +51,17 @@ public class PaymentPayFactory extends AbstractPayFactory {
         RLock lock = redissonClient.getLock(key);
         try {
             if (lock.tryLock(time, unit)) {
+
+                String currencyCode = dto.getCurrencyCode();
+
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 BigDecimal changeAmount = dto.getAmount();
 
                 String mKey = key + oldBalance.getVersion();
 
                 log.info("PaymentPayFactory balance mKey version  1 {}",dto.getNo());
+
+                log.info("PaymentPayFactory 1 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
 
                 if(concurrentHashMap.get(mKey) != null){
                     concurrentHashMap.remove(mKey);
@@ -75,6 +80,8 @@ public class PaymentPayFactory extends AbstractPayFactory {
                 log.info("PaymentPayFactory  2 {}",dto.getNo());
 
                 List<AccountBalanceChange> balanceChange = getBalanceChange(dto);
+
+                log.info("PaymentPayFactory 3 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
 
                 if (balanceChange.size() > 1) {
                     log.info("该单存在多个冻结额，操作失败.{}", JSON.toJSONString(balanceChange));
@@ -113,6 +120,8 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     setHasFreeze(dto);
                 }
 
+                log.info("PaymentPayFactory 4 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
+
                 log.info("PaymentPayFactory  4 {}",dto.getNo());
 
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance, true);
@@ -121,6 +130,8 @@ public class PaymentPayFactory extends AbstractPayFactory {
                 setSerialBillLog(dto);
 
                 log.info("PaymentPayFactory  5 {}",dto.getNo());
+
+                log.info("PaymentPayFactory 5 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
 
                 concurrentHashMap.put(mKey,oldBalance.getVersion());
 
