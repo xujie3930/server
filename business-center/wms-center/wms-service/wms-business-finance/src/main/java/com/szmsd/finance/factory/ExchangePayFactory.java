@@ -42,9 +42,9 @@ public class ExchangePayFactory extends AbstractPayFactory {
     public Boolean updateBalance(final CustPayDTO dto) {
         log.info("ExchangePayFactory {}", JSONObject.toJSONString(dto));
         final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
-        RLock lock = redissonClient.getLock(key);
+        //RLock lock = redissonClient.getLock(key);
         try {
-            if (lock.tryLock(time, unit)) {
+            //if (lock.tryLock(time,leaseTime, unit)) {
                 BigDecimal substractAmount = dto.getAmount();
                 //1.先扣款
                 BalanceDTO beforeSubtract = getBalance(dto.getCusCode(), dto.getCurrencyCode());
@@ -58,10 +58,10 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 if(concurrentHashMap.get(mKey) != null){
                     concurrentHashMap.remove(mKey);
 
-                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                        log.info("释放redis锁 {}",dto.getNo());
-                        lock.unlock();
-                    }
+//                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                        log.info("释放redis锁 {}",dto.getNo());
+//                        lock.unlock();
+//                    }
 
                     log.info("ExchangePayFactory balance 重新执行 {}",mKey);
 
@@ -99,10 +99,10 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 concurrentHashMap.put(mKey,beforeSubtract.getVersion());
 
                 return true;
-            } else {
-                log.error("汇率转换,请稍候重试{}", JSONObject.toJSONString(dto));
-                throw new RuntimeException("汇率转换操作超时,请稍候重试");
-            }
+//            } else {
+//                log.error("汇率转换,请稍候重试{}", JSONObject.toJSONString(dto));
+//                throw new RuntimeException("汇率转换操作超时,请稍候重试");
+//            }
         } catch (InterruptedException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
@@ -111,9 +111,9 @@ public class ExchangePayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("汇率转换,请稍候重试!");
         } finally {
-            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
+//            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//            }
         }
     }
 
