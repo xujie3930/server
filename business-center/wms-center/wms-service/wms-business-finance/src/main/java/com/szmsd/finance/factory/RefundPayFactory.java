@@ -54,7 +54,7 @@ public class RefundPayFactory extends AbstractPayFactory {
         RLock lock = redissonClient.getLock(key);
         try {
 
-            if (lock.tryLock(time, unit)) {
+            if (lock.tryLock(time,leaseTime, unit)) {
 
                 String currencyCode = dto.getCurrencyCode();
 

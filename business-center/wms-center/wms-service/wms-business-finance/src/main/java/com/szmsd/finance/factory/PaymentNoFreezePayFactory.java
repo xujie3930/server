@@ -43,7 +43,7 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
         final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         try {
-            if (lock.tryLock(time, unit)) {
+            if (lock.tryLock(time,leaseTime, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 BigDecimal changeAmount = dto.getAmount();
 
