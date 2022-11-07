@@ -62,10 +62,10 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         log.info("BalanceFreezeFactory {}", JSONObject.toJSONString(dto));
         log.info(LogUtil.format(dto, "冻结/解冻"));
         final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
-        RLock lock = redissonClient.getLock(key);
+//        RLock lock = redissonClient.getLock(key);
 
         try {
-            if (lock.tryLock(time,leaseTime, unit)) {
+//            if (lock.tryLock(time,leaseTime, unit)) {
 
                 final String currencyCode = dto.getCurrencyCode();
 
@@ -76,19 +76,19 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
 
                 log.info("balance mKey version {}",mKey);
 
-                if(concurrentHashMap.get(mKey) != null){
-                    concurrentHashMap.remove(mKey);
-
-                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                        log.info("释放redis锁 {}",dto.getNo());
-                        lock.unlock();
-                    }
-
-                    Thread.sleep(100);
-
-                    log.info("balance 重新执行 {}",mKey);
-                    return updateBalance(dto);
-                }
+//                if(concurrentHashMap.get(mKey) != null){
+//                    concurrentHashMap.remove(mKey);
+//
+//                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                        log.info("释放redis锁 {}",dto.getNo());
+//                        lock.unlock();
+//                    }
+//
+//                    Thread.sleep(100);
+//
+//                    log.info("balance 重新执行 {}",mKey);
+//                    return updateBalance(dto);
+//                }
 
                 log.info("【updateBalance】 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
                 //蒋俊看财务
@@ -117,21 +117,24 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 concurrentHashMap.put(mKey,balance.getVersion());
 
                 return true;
-            } else {
-                log.error("冻结/解冻操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
-                throw new RuntimeException("冻结/解冻操作超时,请稍候重试");
-            }
-        } catch (InterruptedException e) {
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
-            e.printStackTrace();
-            log.error("获取余额异常，加锁失败 BalanceFreezeFactory异常：", e);
-            throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
-        } finally {
+//            } else {
+//                log.error("冻结/解冻操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
+//                throw new RuntimeException("冻结/解冻操作超时,请稍候重试");
+//            }
+//        } catch (InterruptedException e) {
+//            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
+//            e.printStackTrace();
+//            log.error("获取余额异常，加锁失败 BalanceFreezeFactory异常：", e);
+//            throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
+//        } finally {
 
-            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                log.info("释放redis锁 {}",dto.getNo());
-                lock.unlock();
-            }
+//            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                log.info("释放redis锁 {}",dto.getNo());
+//                lock.unlock();
+//            }
+        } catch (Exception e) {
+            log.error("冻结/解冻操作 异常， BalanceFreezeFactory异常：", e);
+            throw new RuntimeException(e);
         }
     }
 
