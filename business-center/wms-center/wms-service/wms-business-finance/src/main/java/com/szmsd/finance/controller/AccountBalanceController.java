@@ -210,7 +210,27 @@ public class AccountBalanceController extends FssBaseController {
     @ApiOperation(value = "仓储费用扣除")
     @PostMapping("/warehouseFeeDeduct")
     public R warehouseFeeDeductions(@RequestBody CustPayDTO dto){
-        return accountBalanceService.warehouseFeeDeductions(dto);
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
+        RLock lock = redissonClient.getLock(key);
+        log.info("仓储费用扣除-尝试获取redis锁 {}",key);
+        try {
+            if (lock.tryLock(time,leaseTime, TimeUnit.SECONDS)){
+                log.info("仓储费用扣除-获取redis锁 {}成功",key);
+                return accountBalanceService.warehouseFeeDeductions(dto);
+            }else {
+                log.info("仓储费用扣除-获取redis锁 {}失败",key);
+                return R.failed("仓储费用扣除操作超时,请稍候重试!");
+            }
+        }catch (Exception e){
+            log.error("仓储费用扣除操作超时，{}",e);
+            return R.failed("仓储费用扣除操作超时,请稍候重试!");
+        }finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                log.info("仓储费用扣除-释放redis锁 {}",key);
+                lock.unlock();
+            }
+        }
+//        return accountBalanceService.warehouseFeeDeductions(dto);
     }
 
     /**
