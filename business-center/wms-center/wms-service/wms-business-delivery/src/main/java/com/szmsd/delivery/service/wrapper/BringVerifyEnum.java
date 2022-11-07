@@ -750,8 +750,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
 
+            String shipmentService = delOutbound.getShipmentService();
+            String trackingAcquireType = delOutbound.getTrackingAcquireType();
 
-
+            if(StringUtils.isEmpty(shipmentService) && trackingAcquireType.equals(DelOutboundTrackingAcquireTypeEnum.NONE.getCode())){
+                return;
+            }
 
             logger.info("{}-创建承运商物流订单：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             // 判断是否需要创建物流订单
