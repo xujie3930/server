@@ -16,10 +16,12 @@
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
     <result column="remark" property="remark" jdbcType="VARCHAR" />
     <result column="del_flag" property="delFlag" jdbcType="CHAR" />
+    <result column="product_code_son" property="productCodeSon" jdbcType="VARCHAR" />
+    <result column="ioss_type" property="iossType" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     id, custom_code, product_code, product_name, service_channel_name, push_date, create_by, 
-    create_by_name, create_time, update_by, update_by_name, update_time, remark, del_flag
+    create_by_name, create_time, update_by, update_by_name, update_time, remark, del_flag,product_code_son,ioss_type
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
@@ -109,6 +111,12 @@
       <if test="delFlag != null" >
         del_flag,
       </if>
+      <if test="productCodeSon != null" >
+        product_code_son,
+      </if>
+      <if test="iossType != null" >
+        ioss_type,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -153,6 +161,12 @@
       <if test="delFlag != null" >
         #{delFlag,jdbcType=CHAR},
       </if>
+      <if test="productCodeSon != null" >
+        #{productCodeSon,jdbcType=VARCHAR},
+      </if>
+      <if test="iossType != null" >
+        #{iossType,jdbcType=CHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.delivery.domain.BasShipmentRules" >
@@ -196,6 +210,12 @@
       </if>
       <if test="delFlag != null" >
         del_flag = #{delFlag,jdbcType=CHAR},
+      </if>
+      <if test="productCodeSon != null" >
+        product_code_son = #{productCodeSon,jdbcType=VARCHAR},
+      </if>
+      <if test="iossType != null" >
+        ioss_type = #{iossType,jdbcType=CHAR},
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}

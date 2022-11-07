@@ -33,8 +33,8 @@ public class BasShipmentRules extends BaseEntity {
     @ApiModelProperty(value = "产品名称")
     private String productName;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @ApiModelProperty(value = "推送时间")
+
+    @ApiModelProperty(value = "服务渠道名称")
     private String serviceChannelName;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -49,6 +49,12 @@ public class BasShipmentRules extends BaseEntity {
 
     @ApiModelProperty(value = "修改人编号")
     private String delFlag;
+
+    @ApiModelProperty(value = "子code")
+    private String productCodeSon;
+
+    @ApiModelProperty(value = "(需要(1)/不需要(0)，默认0）")
+    private String iossType;
 
 
 }
