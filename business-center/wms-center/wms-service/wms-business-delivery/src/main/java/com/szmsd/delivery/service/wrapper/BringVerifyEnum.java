@@ -501,15 +501,15 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             logger.info("出库单{}-开始冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             DelOutboundOperationLogEnum.BRV_FREEZE_BALANCE.listener(delOutbound);
 
-            RedissonClient redissonClient = SpringUtils.getBean(RedissonClient.class);
+            //RedissonClient redissonClient = SpringUtils.getBean(RedissonClient.class);
 
-            String key = "bringVerify-fss-freeze-balance" + delOutbound.getCustomCode() + ":" + delOutbound.getOrderNo();
-
-            RLock lock = redissonClient.getLock(key);
-
-            try {
-
-                lock.tryLock(time, unit);
+//            String key = "bringVerify-fss-freeze-balance" + delOutbound.getCustomCode() + ":" + delOutbound.getOrderNo();
+//
+//            RLock lock = redissonClient.getLock(key);
+//
+//            try {
+//
+//                lock.tryLock(time, unit);
 
                 /**
                  *  获取要冻结的费用数据，并按货币分组冻结
@@ -559,15 +559,15 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     logger.info(">>>>>[创建出库单{}]结束冻结费用, 数据:{} ,耗时{}", delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO), stopWatch.getLastTaskInfo().getTimeMillis());
                 }
 
-            }catch (Exception e){
-                logger.info("冻结费用异常，加锁失败");
-                logger.info("异常信息:" + e.getMessage());
-                throw new RuntimeException(e.getMessage());
-            }finally {
-                if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                    lock.unlock();
-                }
-            }
+//            }catch (Exception e){
+//                logger.info("冻结费用异常，加锁失败");
+//                logger.info("异常信息:" + e.getMessage());
+//                throw new RuntimeException(e.getMessage());
+//            }finally {
+//                if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                    lock.unlock();
+//                }
+//            }
 
         }
 
