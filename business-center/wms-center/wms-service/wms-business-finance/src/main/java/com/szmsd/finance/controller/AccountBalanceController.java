@@ -20,16 +20,23 @@ import com.szmsd.finance.vo.UserCreditInfoVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.poi.ss.usermodel.*;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static com.szmsd.finance.factory.abstractFactory.AbstractPayFactory.leaseTime;
+import static com.szmsd.finance.factory.abstractFactory.AbstractPayFactory.time;
 
 /**
  * @author liulei
@@ -40,6 +47,8 @@ import java.util.List;
 public class AccountBalanceController extends FssBaseController {
     @Autowired
     IAccountBalanceService accountBalanceService;
+    @Resource
+    private RedissonClient redissonClient;
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:listPage')")
     @ApiOperation(value = "分页查询账户余额信息")
@@ -213,21 +222,81 @@ public class AccountBalanceController extends FssBaseController {
     @ApiOperation(value = "费用扣除")
     @PostMapping("/feeDeductions")
     public R feeDeductions(@RequestBody CustPayDTO dto){
-        return accountBalanceService.feeDeductions(dto);
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
+        RLock lock = redissonClient.getLock(key);
+        log.info("费用扣除-尝试获取redis锁 {}",key);
+        try {
+            if (lock.tryLock(time,leaseTime, TimeUnit.SECONDS)){
+                log.info("费用扣除-获取redis锁 {}成功",key);
+                return accountBalanceService.feeDeductions(dto);
+            }else {
+                log.info("费用扣除-获取redis锁 {}失败",key);
+                return R.failed("冻结操作超时,请稍候重试!");
+            }
+        }catch (Exception e){
+            log.error("费用扣除操作超时，{}",e);
+            return R.failed("费用扣除操作超时,请稍候重试!");
+        }finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                log.info("费用扣除-释放redis锁 {}",key);
+                lock.unlock();
+            }
+        }
+//        return accountBalanceService.feeDeductions(dto);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:freezeBalance')")
     @ApiOperation(value = "冻结余额")
     @PostMapping("/freezeBalance")
     public R freezeBalance(@RequestBody CusFreezeBalanceDTO dto){
-        return accountBalanceService.freezeBalance(dto);
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
+        RLock lock = redissonClient.getLock(key);
+        log.info("冻结余额-尝试获取redis锁 {}",key);
+        try {
+            if (lock.tryLock(time,leaseTime, TimeUnit.SECONDS)){
+                log.info("冻结余额-获取redis锁 {}成功",key);
+                return accountBalanceService.freezeBalance(dto);
+            }else {
+                log.info("冻结余额-获取redis锁 {}失败",key);
+                return R.failed("冻结操作超时,请稍候重试!");
+            }
+        }catch (Exception e){
+            log.error("冻结操作超时，{}",e);
+            return R.failed("冻结操作超时,请稍候重试!");
+        }finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                log.info("冻结余额-释放redis锁 {}",key);
+                lock.unlock();
+            }
+        }
+//        return accountBalanceService.freezeBalance(dto);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:thawBalance')")
     @ApiOperation(value = "解冻余额")
     @PostMapping("/thawBalance")
     public R thawBalance(@RequestBody CusFreezeBalanceDTO dto){
-        return accountBalanceService.thawBalance(dto);
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
+        RLock lock = redissonClient.getLock(key);
+        log.info("解冻余额-尝试获取redis锁 {}",key);
+        try {
+            if (lock.tryLock(time,leaseTime, TimeUnit.SECONDS)){
+                log.info("解冻余额-获取redis锁 {}成功",key);
+                return accountBalanceService.thawBalance(dto);
+            }else {
+                log.info("解冻余额-获取redis锁 {}失败",key);
+                return R.failed("解冻操作超时,请稍候重试!");
+            }
+        }catch (Exception e){
+            log.error("冻结操作超时，{}",e);
+            return R.failed("解冻操作超时,请稍候重试!");
+        }finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                log.info("解冻余额-释放redis锁 {}",key);
+                lock.unlock();
+            }
+        }
+//        return accountBalanceService.thawBalance(dto);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:thawBalance')")
