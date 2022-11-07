@@ -41,9 +41,9 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
     public Boolean updateBalance(final CustPayDTO dto) {
         log.info("PaymentNoFreezePayFactory {}", JSONObject.toJSONString(dto));
         final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
-        RLock lock = redissonClient.getLock(key);
+        //RLock lock = redissonClient.getLock(key);
         try {
-            if (lock.tryLock(time,leaseTime, unit)) {
+            //if (lock.tryLock(time,leaseTime, unit)) {
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 BigDecimal changeAmount = dto.getAmount();
 
@@ -58,19 +58,19 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
 
                 String mKey = key + oldBalance.getVersion();
 
-                if(concurrentHashMap.get(mKey) != null){
-                    concurrentHashMap.remove(mKey);
-
-                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                        log.info("释放redis锁 {}",dto.getNo());
-                        lock.unlock();
-                    }
-
-                    Thread.sleep(100);
-
-                    log.info("balance 重新执行 {}",mKey);
-                    return updateBalance(dto);
-                }
+//                if(concurrentHashMap.get(mKey) != null){
+//                    concurrentHashMap.remove(mKey);
+//
+//                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                        log.info("释放redis锁 {}",dto.getNo());
+//                        lock.unlock();
+//                    }
+//
+//                    Thread.sleep(100);
+//
+//                    log.info("balance 重新执行 {}",mKey);
+//                    return updateBalance(dto);
+//                }
 
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance, true);
                 recordOpLogAsync(dto, oldBalance.getCurrentBalance());
@@ -80,11 +80,11 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
                 concurrentHashMap.put(mKey,oldBalance.getVersion());
 
                 return true;
-            } else {
-                log.error("支付操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
-                throw new RuntimeException("支付操作超时,请稍候重试");
-            }
-        } catch (InterruptedException e) {
+//            } else {
+//                log.error("支付操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
+//                throw new RuntimeException("支付操作超时,请稍候重试");
+//            }
+        } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
             log.error("PaymentNoFreeze扣减异常:", e);
@@ -92,9 +92,9 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("支付操作超时,请稍候重试!");
         } finally {
-            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
+//            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//            }
         }
     }
 

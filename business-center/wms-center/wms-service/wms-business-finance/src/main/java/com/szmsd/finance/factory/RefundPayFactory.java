@@ -51,10 +51,10 @@ public class RefundPayFactory extends AbstractPayFactory {
     public Boolean updateBalance(final CustPayDTO dto) {
         log.info("RefundPayFactory {}", JSONObject.toJSONString(dto));
         final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
-        RLock lock = redissonClient.getLock(key);
+        //RLock lock = redissonClient.getLock(key);
         try {
 
-            if (lock.tryLock(time,leaseTime, unit)) {
+            //if (lock.tryLock(time,leaseTime, unit)) {
 
                 String currencyCode = dto.getCurrencyCode();
 
@@ -68,20 +68,20 @@ public class RefundPayFactory extends AbstractPayFactory {
 
                 log.info("balance mKey version 1{}",mKey);
 
-                if(concurrentHashMap.get(mKey) != null){
-                    concurrentHashMap.remove(mKey);
-
-                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                        log.info("释放redis锁 {}",dto.getNo());
-                        lock.unlock();
-                    }
-
-                    Thread.sleep(200);
-
-                    log.info("【退费】重新执行-- {}",JSONObject.toJSONString(dto));
-                    log.info("【退费】重新执行-- {}",mKey);
-                    return updateBalance(dto);
-                }
+//                if(concurrentHashMap.get(mKey) != null){
+//                    concurrentHashMap.remove(mKey);
+//
+//                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                        log.info("释放redis锁 {}",dto.getNo());
+//                        lock.unlock();
+//                    }
+//
+//                    Thread.sleep(200);
+//
+//                    log.info("【退费】重新执行-- {}",JSONObject.toJSONString(dto));
+//                    log.info("【退费】重新执行-- {}",mKey);
+//                    return updateBalance(dto);
+//                }
 
                 boolean success = false;
 
@@ -121,11 +121,11 @@ public class RefundPayFactory extends AbstractPayFactory {
                 concurrentHashMap.put(mKey,oldBalance.getVersion());
 
                 return true;
-            } else {
-                log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(dto));
-                throw new RuntimeException("退费业务处理超时,请稍候重试");
-            }
-        } catch (InterruptedException e) {
+//            } else {
+//                log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(dto));
+//                throw new RuntimeException("退费业务处理超时,请稍候重试");
+//            }
+        } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
             log.error("RefundPayFactory异常:", e);
@@ -133,10 +133,10 @@ public class RefundPayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("退费业务处理超时,请稍候重试!");
         } finally {
-            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-                log.info("【退费】RefundPayFactory 解锁结束--");
-            }
+//            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//                log.info("【退费】RefundPayFactory 解锁结束--");
+//            }
             log.info("【退费】RefundPayFactory --结束--");
         }
     }
