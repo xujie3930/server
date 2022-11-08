@@ -753,7 +753,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             String shipmentService = delOutbound.getShipmentService();
             String trackingAcquireType = delOutbound.getTrackingAcquireType();
 
-            if(StringUtils.isEmpty(shipmentService) && trackingAcquireType.equals(DelOutboundTrackingAcquireTypeEnum.NONE.getCode())){
+            //8431 提审订单时，如果返回的物流服务是空的，跳过调用供应商
+            if(StringUtils.isEmpty(shipmentService) || trackingAcquireType.equals(DelOutboundTrackingAcquireTypeEnum.NONE.getCode())){
                 return;
             }
 
