@@ -1,9 +1,10 @@
 package com.szmsd.http.api.feign.fallback;
 
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.http.api.BusinessHttpInterface;
-import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.api.feign.HtpExceptionFeignService;
+import com.szmsd.http.domain.BasCodExternal;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.ResponseVO;
 import feign.hystrix.FallbackFactory;
@@ -20,6 +21,11 @@ public class HtpExceptionFeignFallback implements FallbackFactory<HtpExceptionFe
         return new HtpExceptionFeignService() {
             @Override
             public R<ResponseVO> processing(@RequestBody ExceptionProcessRequest exceptionProcessRequest){
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<TableDataInfo<BasCodExternal>> basCodlist(BasCodExternalDto basCodExternalDto) {
                 return R.convertResultJson(throwable);
             }
         };
