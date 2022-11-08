@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.szmsd.http.mapper.BasCodExternalMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.http.domain.BasCodExternal" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="Country_code" property="countryCode" jdbcType="VARCHAR" />
+    <result column="Country_en_name" property="countryEnName" jdbcType="VARCHAR" />
+    <result column="Country_cn_name" property="countryCnName" jdbcType="VARCHAR" />
+    <result column="Source_currency_code" property="sourceCurrencyCode" jdbcType="VARCHAR" />
+    <result column="Source_currency_name" property="sourceCurrencyName" jdbcType="VARCHAR" />
+    <result column="Target_currency_code" property="targetCurrencyCode" jdbcType="VARCHAR" />
+    <result column="Target_currency_name" property="targetCurrencyName" jdbcType="VARCHAR" />
+    <result column="Rate" property="rate" jdbcType="DOUBLE" />
+    <result column="Updated_time" property="updatedTimes" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, Country_code, Country_en_name, Country_cn_name, Source_currency_code, Source_currency_name, 
+    Target_currency_code, Target_currency_name, Rate, Updated_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.szmsd.http.dto.BasCodExternalDto" >
+    select 
+    <include refid="Base_Column_List" />
+    from bas_cod_external
+    <where>
+      1=1
+      <if test="countryCode != null  and countryCode != ''">and Country_code = #{countryCode}</if>
+      <if test="currencyFrom != null  and currencyFrom != ''">and Source_currency_code = #{currencyFrom}</if>
+      <if test="currencyTo != null  and currencyTo != ''">and Target_currency_code = #{currencyTo}</if>
+      <if test="beginTime != null and beginTime != ''"><!-- 开始时间检索 -->
+        and date_format(Updated_time,'%y%m%d') &gt;= date_format(#{beginTime},'%y%m%d')
+      </if>
+      <if test="endTime != null and endTime != ''"><!-- 结束时间检索 -->
+        and date_format(Updated_time,'%y%m%d') &lt;= date_format(#{endTime},'%y%m%d')
+      </if>
+    </where>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from bas_cod_external
+  </delete>
+  <insert id="insert" parameterType="com.szmsd.http.domain.BasCodExternal" >
+    insert into bas_cod_external (id, Country_code, Country_en_name, 
+      Country_cn_name, Source_currency_code, Source_currency_name, 
+      Target_currency_code, Target_currency_name, 
+      Rate, Updated_time)
+    values (#{id,jdbcType=INTEGER}, #{countryCode,jdbcType=VARCHAR}, #{countryEnName,jdbcType=VARCHAR}, 
+      #{countryCnName,jdbcType=VARCHAR}, #{sourceCurrencyCode,jdbcType=VARCHAR}, #{sourceCurrencyName,jdbcType=VARCHAR}, 
+      #{targetCurrencyCode,jdbcType=VARCHAR}, #{targetCurrencyName,jdbcType=VARCHAR}, 
+      #{rate,jdbcType=DOUBLE}, #{updatedTimes,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.szmsd.http.domain.BasCodExternal" >
+    insert into bas_cod_external
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="countryCode != null" >
+        Country_code,
+      </if>
+      <if test="countryEnName != null" >
+        Country_en_name,
+      </if>
+      <if test="countryCnName != null" >
+        Country_cn_name,
+      </if>
+      <if test="sourceCurrencyCode != null" >
+        Source_currency_code,
+      </if>
+      <if test="sourceCurrencyName != null" >
+        Source_currency_name,
+      </if>
+      <if test="targetCurrencyCode != null" >
+        Target_currency_code,
+      </if>
+      <if test="targetCurrencyName != null" >
+        Target_currency_name,
+      </if>
+      <if test="rate != null" >
+        Rate,
+      </if>
+      <if test="updatedTimes != null" >
+        Updated_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="countryCode != null" >
+        #{countryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="countryEnName != null" >
+        #{countryEnName,jdbcType=VARCHAR},
+      </if>
+      <if test="countryCnName != null" >
+        #{countryCnName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceCurrencyCode != null" >
+        #{sourceCurrencyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceCurrencyName != null" >
+        #{sourceCurrencyName,jdbcType=VARCHAR},
+      </if>
+      <if test="targetCurrencyCode != null" >
+        #{targetCurrencyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="targetCurrencyName != null" >
+        #{targetCurrencyName,jdbcType=VARCHAR},
+      </if>
+      <if test="rate != null" >
+        #{rate,jdbcType=DOUBLE},
+      </if>
+      <if test="updatedTimes != null" >
+        #{updatedTimes,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.http.domain.BasCodExternal" >
+    update bas_cod_external
+    <set >
+      <if test="countryCode != null" >
+        Country_code = #{countryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="countryEnName != null" >
+        Country_en_name = #{countryEnName,jdbcType=VARCHAR},
+      </if>
+      <if test="countryCnName != null" >
+        Country_cn_name = #{countryCnName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceCurrencyCode != null" >
+        Source_currency_code = #{sourceCurrencyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceCurrencyName != null" >
+        Source_currency_name = #{sourceCurrencyName,jdbcType=VARCHAR},
+      </if>
+      <if test="targetCurrencyCode != null" >
+        Target_currency_code = #{targetCurrencyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="targetCurrencyName != null" >
+        Target_currency_name = #{targetCurrencyName,jdbcType=VARCHAR},
+      </if>
+      <if test="rate != null" >
+        Rate = #{rate,jdbcType=DOUBLE},
+      </if>
+      <if test="updatedTimes != null" >
+        Updated_time = #{updatedTimes,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.http.domain.BasCodExternal" >
+    update bas_cod_external
+    set Country_code = #{countryCode,jdbcType=VARCHAR},
+      Country_en_name = #{countryEnName,jdbcType=VARCHAR},
+      Country_cn_name = #{countryCnName,jdbcType=VARCHAR},
+      Source_currency_code = #{sourceCurrencyCode,jdbcType=VARCHAR},
+      Source_currency_name = #{sourceCurrencyName,jdbcType=VARCHAR},
+      Target_currency_code = #{targetCurrencyCode,jdbcType=VARCHAR},
+      Target_currency_name = #{targetCurrencyName,jdbcType=VARCHAR},
+      Rate = #{rate,jdbcType=DOUBLE},
+      Updated_time = #{updatedTimes,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
