@@ -314,7 +314,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
         String key = applicationName + ":DelOutbound:completed:" + orderNo;
         RLock lock = this.redissonClient.getLock(key);
         try {
-            if (lock.tryLock(0, TimeUnit.SECONDS)) {
+            if (lock.tryLock(180,180, TimeUnit.SECONDS)) {
                 // 空值默认处理
                 if (StringUtils.isEmpty(completedState)) {
                     // 重派订单不扣库存
