@@ -285,6 +285,10 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
             DelOutbound oldDelOutbound = SpringUtils.getBean(IDelOutboundService.class).getById(delOutbound.getId());
 
+            //8431 提审订单时，如果返回的物流服务是空的，跳过调用供应商
+            if(StringUtils.isEmpty(delOutbound.getShipmentService())){
+                return;
+            }
 
             logger.info(">>>>>{}-核重时创建承运商订单{}===={}", oldDelOutbound.getShipmentService(), delOutbound.getShipmentService());
             //新的PRC发货服务和老的PRC服务一致并且订单挂号获取方式是“下单后获取”，就不跑供应商系统
