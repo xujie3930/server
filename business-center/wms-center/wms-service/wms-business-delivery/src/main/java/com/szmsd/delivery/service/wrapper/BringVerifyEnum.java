@@ -81,6 +81,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
     // #1 PRC 计费        - 无回滚
     PRC_PRICING,
 
+    //# 1 IOSS 检查     - 有回滚
+    IOSS_CHECK,
+
     // #2 冻结物流费用    - 有回滚
     FREEZE_BALANCE,
 
@@ -465,6 +468,99 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public ApplicationState nextState() {
+            return IOSS_CHECK;
+        }
+    }
+
+    static class IossChekcHandle extends CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return PRC_PRICING;
+        }
+
+        @Override
+        public ApplicationState quoState() {
+            return IOSS_CHECK;
+        }
+
+        @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
+        }
+
+        @Override
+        public void handle(ApplicationContext context) {
+            StopWatch stopWatch = new StopWatch();
+
+            IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            logger.info(">>>>>[创建出库单{}]-开始执行IOSS_CHECK", delOutbound.getOrderNo());
+
+            String customCode = delOutbound.getCustomCode();
+            String shipmentService = delOutbound.getShipmentService();
+            String ioss = delOutbound.getIoss();
+
+            stopWatch.start();
+
+            //TODO  调用配置查询接口
+
+            boolean checkIoss = false;
+
+            stopWatch.stop();
+            logger.info(">>>>>[创建出库单{}]-IOSS_CHECK计算返回结果：耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
+
+            if (checkIoss) {
+                if(StringUtils.isEmpty(ioss)) {
+
+                    String exceptionMessage = "["+delOutbound.getOrderNo()+"]单号，此物流服务需要必填IOSS";
+                    throw new CommonException("400", exceptionMessage);
+                }
+            }
+
+            //DelOutboundOperationLogEnum.BRV_PRC_PRICING.listener(delOutbound);
+        }
+
+        @Override
+        public void rollback(ApplicationContext context) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            DelOutbound updateDelOutbound = new DelOutbound();
+            updateDelOutbound.setId(delOutbound.getId());
+            updateDelOutbound.setBringVerifyState(BEGIN.name());
+            // PRC计费
+            updateDelOutbound.setCalcWeight(BigDecimal.ZERO);
+            updateDelOutbound.setCalcWeightUnit("");
+            updateDelOutbound.setAmount(BigDecimal.ZERO);
+            updateDelOutbound.setCurrencyCode("");
+            updateDelOutbound.setCurrencyDescribe("");
+
+            updateDelOutbound.setSupplierCalcType("");
+            updateDelOutbound.setSupplierCalcId("");
+            // 产品信息
+            updateDelOutbound.setTrackingAcquireType("");
+            updateDelOutbound.setShipmentService("");
+            updateDelOutbound.setLogisticsProviderCode("");
+            updateDelOutbound.setProductShipmentRule("");
+            updateDelOutbound.setPackingRule("");
+            // 创建承运商物流订单
+            updateDelOutbound.setTrackingNo("");
+            updateDelOutbound.setShipmentOrderNumber("");
+            updateDelOutbound.setShipmentOrderLabelUrl("");
+            // 推单WMS
+            updateDelOutbound.setRefOrderNo("");
+
+            // 提审失败
+            updateDelOutbound.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode());
+            delOutboundService.updateById(updateDelOutbound);
+            super.rollback(context);
+        }
+
+        @Override
+        public ApplicationState nextState() {
             return FREEZE_BALANCE;
         }
     }
@@ -473,7 +569,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
         @Override
         public ApplicationState preState() {
-            return PRC_PRICING;
+            return IOSS_CHECK;
         }
 
         @Override
