@@ -114,9 +114,14 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     // if (!calculateBalance(oldBalance, changeAmount, freeze, dto)) return false;
                     //先解冻 然后扣费
                     this.rollbackFreeze(oldBalance, freeze);
-                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, (x, y) -> this.calculateBalance(x, y, BigDecimal.ZERO, dto))) {
+                    log.info("PaymentPayFactory  rollbackFreeze {},{} ",dto.getNo(),freeze);
+                    boolean check = oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, (x, y) -> this.calculateBalance(x, y, BigDecimal.ZERO, dto));
+                    log.info("PaymentPayFactory  rollbackFreeze {},{},{} ",dto.getNo(),freeze,check);
+                    if (!check) {
                         return false;
                     }
+
+                    log.info("PaymentPayFactory  setHasFreeze {}",JSON.toJSONString(dto));
                     setHasFreeze(dto);
                 }
 
