@@ -44,8 +44,13 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
         //RLock lock = redissonClient.getLock(key);
         try {
             //if (lock.tryLock(time,leaseTime, unit)) {
+                String currencyCode = dto.getCurrencyCode();
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 BigDecimal changeAmount = dto.getAmount();
+
+                log.info("PaymentNoFreezePayFactory balance mKey version  1 {}",dto.getNo());
+
+                log.info("PaymentNoFreezePayFactory 1 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
 
                 //余额不足
                 /*if (dto.getPayType() == BillEnum.PayType.PAYMENT_NO_FREEZE && oldBalance.getCurrentBalance().compareTo(changeAmount) < 0) {
@@ -76,6 +81,8 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
                 recordOpLogAsync(dto, oldBalance.getCurrentBalance());
                 recordDetailLogAsync(dto, oldBalance);
                 setSerialBillLog(dto);
+
+                log.info("PaymentNoFreezePayFactory 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
 
                 concurrentHashMap.put(mKey,oldBalance.getVersion());
 
