@@ -21,38 +21,89 @@
   </resultMap>
   <sql id="Base_Column_List" >
     id, custom_code, product_code, product_name, service_channel_name, push_date, create_by, 
-    create_by_name, create_time, update_by, update_by_name, update_time, remark, del_flag,product_code_son,ioss_type
+    create_by_name, create_time, update_by, update_by_name, update_time, remark, del_flag,product_code_son,ioss_type,service_channel_sub
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.szmsd.delivery.dto.BasShipmentRulesDto" >
     select 
     <include refid="Base_Column_List" />
     from bas_shipment_rules
-    where id = #{id,jdbcType=INTEGER}
+    <where>
+    del_flag=1
+      <if test="customCode !=null">
+        and  FIND_IN_SET(#{customCode},custom_code)
+      </if>
+      <if test="productCode !=null">
+        and  product_code =#{productCode}
+      </if>
+    </where>
   </select>
   <select id="selectLists" resultType="com.szmsd.delivery.domain.BasShipmentRules" parameterType="com.szmsd.delivery.dto.BasShipmentRulesDto">
     select
     <include refid="Base_Column_List" />
     from bas_shipment_rules
     <where>
-      del_flag=1
-      <if test="customCode !=null">
+      del_flag=1 and type_name=#{typeName}
+      <if test="customCode !=null and customCode!=''">
       and  FIND_IN_SET(#{customCode},custom_code)
       </if>
-      <if test="productCode !=null">
+      <if test="productCode !=null and productCode!=''">
       and  product_code =#{productCode}
       </if>
-      <if test="serviceChannelName !=null">
+      <if test="serviceChannelName !=null and serviceChannelName!=''">
         and  service_channel_name =#{serviceChannelName}
       </if>
+      <if test="productCodeSon !=null and productCodeSon!=''">
+        and     FIND_IN_SET(#{productCodeSon},product_code_son)
+      </if>
+
     </where>
 
   </select>
   <select id="selectserviceChannelName" resultType="java.lang.String">
     SELECT logistics_route_id from bas_product_service where product_code=#{productCode}
   </select>
+  <select id="selectListus" resultType="com.szmsd.delivery.domain.BasShipmentRules">
+    select
+    <include refid="Base_Column_List" />
+    from bas_shipment_rules
+    where
+      del_flag=1 and type_name=#{typeName}
+
+        and custom_code=#{customCode}
+
+    and  product_code =#{productCode}
+
+
+
+  </select>
+  <select id="selectbasShipmentRules" resultType="com.szmsd.delivery.domain.BasShipmentRules" parameterType="com.szmsd.delivery.dto.BasShipmentRulesDto">
+    select
+    <include refid="Base_Column_List" />
+    from bas_shipment_rules
+    where
+      del_flag=1 and type_name=1
+
+        and  custom_code =#{customCode}
+
+
+        and  service_channel_sub =#{serviceChannelName}
+  </select>
+  <select id="selectbasShipmentRulesu" resultType="com.szmsd.delivery.domain.BasShipmentRules" parameterType="com.szmsd.delivery.dto.BasShipmentRulesDto">
+    select
+    <include refid="Base_Column_List" />
+    from bas_shipment_rules
+    where
+    del_flag=1 and type_name=1
+
+    and  custom_code =#{customCode}
+    and  service_channel_name =#{serviceChannelName}
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     update  bas_shipment_rules set  del_flag=0
     where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByPrimaryKeyus" parameterType="com.szmsd.delivery.domain.BasShipmentRules">
+    DELETE  from bas_shipment_rules where custom_code=#{customCode} and type_name=#{typeName} and service_channel_name=#{serviceChannelName}
   </delete>
   <insert id="insert" parameterType="com.szmsd.delivery.domain.BasShipmentRules" >
     insert into bas_shipment_rules (id, custom_code, product_code, 
@@ -117,6 +168,12 @@
       <if test="iossType != null" >
         ioss_type,
       </if>
+      <if test="serviceChannelSub != null" >
+        service_channel_sub,
+      </if>
+      <if test="typeName != null" >
+        type_name,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -167,6 +224,12 @@
       <if test="iossType != null" >
         #{iossType,jdbcType=CHAR},
       </if>
+      <if test="serviceChannelSub != null" >
+        #{serviceChannelSub,jdbcType=VARCHAR},
+      </if>
+      <if test="typeName != null" >
+        #{typeName,jdbcType=CHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.delivery.domain.BasShipmentRules" >
@@ -216,6 +279,9 @@
       </if>
       <if test="iossType != null" >
         ioss_type = #{iossType,jdbcType=CHAR},
+      </if>
+      <if test="serviceChannelSub != null" >
+        service_channel_sub = #{serviceChannelSub,jdbcType=VARCHAR},
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}

@@ -19,7 +19,7 @@ public interface BasShipmentRulesMapper extends BaseMapper<BasShipmentRules> {
 
     int insertSelective(BasShipmentRules record);
 
-    BasShipmentRules selectByPrimaryKey(Integer id);
+    List<BasShipmentRules> selectByPrimaryKey(BasShipmentRulesDto basShipmentRulesDto);
 
     int updateByPrimaryKeySelective(BasShipmentRules record);
 
@@ -28,4 +28,13 @@ public interface BasShipmentRulesMapper extends BaseMapper<BasShipmentRules> {
     List<BasShipmentRules> selectLists(BasShipmentRulesDto basShipmentRulesDto);
 
     String  selectserviceChannelName(@Param("productCode") String productCode);
+
+    List<BasShipmentRules>  selectListus(BasShipmentRules basShipmentRules);
+
+    void deleteByPrimaryKeyus(BasShipmentRules basShipmentRules);
+
+    BasShipmentRules selectbasShipmentRules(BasShipmentRulesDto basShipmentRulesDto);
+
+    BasShipmentRules selectbasShipmentRulesu(BasShipmentRulesDto basShipmentRulesDto);
+
 }
