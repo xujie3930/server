@@ -32,7 +32,7 @@ public class InboundController extends BaseController {
     @PostMapping("/receipt")
     @ApiOperation(value = "B1 创建入库单")
     public R<CreateReceiptResponse> create(@RequestBody CreateReceiptRequest createReceiptRequestDTO) {
-//        CreateReceiptResponse createReceiptResponse = iInboundService.create(createReceiptRequestDTO);
+//       CreateReceiptResponse createReceiptResponse = iInboundService.create(createReceiptRequestDTO);
         CreateReceiptResponse createReceiptResponse = httpSyncProxy.create(createReceiptRequestDTO);
         return R.ok(createReceiptResponse);
     }

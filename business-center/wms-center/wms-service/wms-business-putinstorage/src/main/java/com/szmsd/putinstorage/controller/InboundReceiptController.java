@@ -451,6 +451,15 @@ public class InboundReceiptController extends BaseController {
         }
     }
 
+    @GetMapping("/updateInboundReceipt/{warehouseNo}")
+    @ApiOperation(value = "异常500回写状态", notes = "异常500回写状态")
+    public R updateInboundReceipt(@PathVariable("warehouseNo") String warehouseNo) {
+        iInboundReceiptService.updateInboundReceipt(warehouseNo);
+        return R.ok();
+    }
+
+
+
     @PreAuthorize("@ss.hasPermi('inbound:receiving:completed')")
     @PostMapping("/receiving/completed")
     @ApiOperation(value = "#B3 接收完成入库", notes = "#B3 接收完成入库")
