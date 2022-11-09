@@ -38,9 +38,8 @@ public class BasShipmentRulesDto extends QueryDto {
     @ApiModelProperty(value = "服务渠道名称")
     private String serviceChannelName;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "推送时间")
-    private Date pushDate;
+    private String pushDate;
 
     @ApiModelProperty(value = "创建人编号")
     private String createBy;
@@ -53,6 +52,18 @@ public class BasShipmentRulesDto extends QueryDto {
 
     @ApiModelProperty(value = "集合 删除用")
     private List<Integer> ids;
+
+    @ApiModelProperty(value = "子产品")
+    private String productCodeSon;
+
+    @ApiModelProperty(value = "(需要(1)/不需要(0)，默认0）")
+    private String iossType;
+
+    @ApiModelProperty(value = "子产品")
+    private String serviceChannelSub;
+
+    @ApiModelProperty(value = "功能模块")
+    private String typeName="0";
 
 
 }
