@@ -868,7 +868,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             paramBasShipmentRulesDto.setCustomCode(delOutbound.getSellerCode());
             paramBasShipmentRulesDto.setServiceChannelName(shipmentService);
             List<BasShipmentRules> list = basShipmenRulesService.selectBasShipmentRules(paramBasShipmentRulesDto);
-            if(list.isEmpty()){
+            if(CollectionUtils.isNotEmpty(list)){
                 return;
             }
 
