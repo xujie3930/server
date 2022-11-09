@@ -71,4 +71,7 @@ public interface InboundReceiptFeignService {
 
     @PostMapping("/inbound/receipt")
     R receipt(@RequestBody ReceiptRequest receiptRequest);
+
+    @GetMapping("/inbound/updateInboundReceipt/{warehouseNo}")
+    R updateInboundReceipt(@PathVariable("warehouseNo") String warehouseNo);
 }

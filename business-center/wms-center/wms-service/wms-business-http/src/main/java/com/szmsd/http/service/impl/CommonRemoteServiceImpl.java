@@ -20,9 +20,11 @@ import com.szmsd.http.service.RemoteInterfaceService;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.feign.InventoryInspectionFeignService;
 import com.szmsd.inventory.domain.dto.InboundInventoryInspectionDTO;
+import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -61,6 +63,9 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
     private BaseProductFeignService baseProductFeignService;
     @Resource
     private InventoryInspectionFeignService inventoryInspectionFeignService;
+    @Autowired
+    private InboundReceiptFeignService inboundReceiptFeignService;
+
 
     /** 入库单审核 根据客户配置的验货状态生成验货单
  *
@@ -136,6 +141,14 @@ public class CommonRemoteServiceImpl extends ServiceImpl<CommonScanMapper, Commo
                             CreateReceiptRequest createReceiptRequest = JSONObject.parseObject(oneTask.getRequestParams(), CreateReceiptRequest.class);
                             log.info("【WMS】SYNC 【入库单创建】-{}", createReceiptRequest);
                             responseVO = iInboundService.create(createReceiptRequest);
+                            if (responseVO==null){
+                                Map inboundReceiptMap = JSONObject.parseObject(JSONObject.toJSONString(createReceiptRequest), Map.class);
+
+                                    inboundReceiptFeignService.updateInboundReceipt(String.valueOf(inboundReceiptMap.get("refOrderNo")));
+
+                            }
+
+
                             if (responseVO != null && StringUtils.isNotBlank(responseVO.getMessage()) && responseVO.getMessage().contains("此编码未创建产品信息")) {
                                 log.info("【WMS】SYNC 【入库单创建】-失败：可能未创建sku,尝试推送sku {}", createReceiptRequest);
                                 List<String> skuNeedPushList = createReceiptRequest.getDetails().stream().map(ReceiptDetailInfo::getSku).collect(Collectors.toList());

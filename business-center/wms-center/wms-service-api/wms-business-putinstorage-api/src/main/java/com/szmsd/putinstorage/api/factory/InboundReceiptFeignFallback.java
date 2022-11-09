@@ -107,6 +107,12 @@ public class InboundReceiptFeignFallback implements FallbackFactory<InboundRecei
                 log.info("InboundReceiptFeignFallback receipt{}", JSONObject.toJSONString(receiptRequest), throwable);
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R updateInboundReceipt(String warehouseNo) {
+                log.info("InboundReceiptFeignFallback updateInboundReceipt{}", JSONObject.toJSONString(warehouseNo), throwable);
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }
