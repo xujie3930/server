@@ -43,6 +43,7 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
 
     void review(InboundReceiptReviewDTO inboundReceiptReviewDTO);
 
+
     void delete(String warehouseNo);
 
     List<InboundReceiptExportVO> selectExport(InboundReceiptQueryDTO queryDTO);
