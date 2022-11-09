@@ -249,7 +249,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      * @param createInboundReceiptDTO
      */
     @Override
-//    @Transactional(rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Throwable.class)
     public InboundReceiptInfoVO saveOrUpdate(CreateInboundReceiptDTO createInboundReceiptDTO) {
         log.info("创建入库单：{}", createInboundReceiptDTO);
         CheckTag.set(createInboundReceiptDTO.getOrderType());
@@ -284,7 +284,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         if (inboundReceiptReview) {
             // 审核 第三方接口推送
             String localLanguage = LocalLanguageEnum.getLocalLanguageSplice(LocalLanguageEnum.INBOUND_RECEIPT_REVIEW_0);
-            this.reviews(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
+            this.review(new InboundReceiptReviewDTO().setWarehouseNos(Arrays.asList(warehouseNo)).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue()).setReviewRemark(localLanguage));
 
         }
         InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
@@ -823,10 +823,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 } else {
                     this.updateByWarehouseNo(inboundReceipt);
                     R<CreateReceiptResponse> createReceiptResponseR = remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
-                    // 创建入库单物流信息列表
-                    if (createReceiptResponseR.getCode()== HttpStatus.ERROR){
-                     baseMapper.updateInboundReceipt(warehouseNo);
-                    }
+//                    // 创建入库单物流信息列表
+//                    if (createReceiptResponseR.getCode()== HttpStatus.ERROR){
+//                     baseMapper.updateInboundReceipt(warehouseNo);
+//                    }
 
 
                     CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
@@ -855,71 +855,71 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
      *
      * @param inboundReceiptReviewDTO
      */
-    public void reviews(InboundReceiptReviewDTO inboundReceiptReviewDTO) {
-        /* SysUser loginUserInfo = remoteComponent.getLoginUserInfo();*/
-        InboundReceipt inboundReceipt = new InboundReceipt();
-        InboundReceiptEnum.InboundReceiptEnumMethods anEnum = InboundReceiptEnum.InboundReceiptEnumMethods.getEnum(InboundReceiptEnum.InboundReceiptStatus.class, inboundReceiptReviewDTO.getStatus());
-        anEnum = anEnum == null ? InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE : anEnum;
-        inboundReceipt.setStatus(anEnum.getValue());
-        inboundReceipt.setReviewRemark(inboundReceiptReviewDTO.getReviewRemark());
-        Optional<LoginUser> loginUser = Optional.ofNullable(SecurityUtils.getLoginUser());
-        String userId = loginUser.map(LoginUser::getUserId).map(String::valueOf).orElse("");
-        String userName = loginUser.map(LoginUser::getUsername).orElse("");
-        inboundReceipt.setReviewBy(userId);
-        inboundReceipt.setReviewBy(userName);
-        inboundReceipt.setReviewTime(new Date());
-        List<String> warehouseNos = inboundReceiptReviewDTO.getWarehouseNos();
-        log.info("入库单审核: {},{},{}", anEnum.getValue2(), warehouseNos, inboundReceipt);
-
-        StringBuffer sb = new StringBuffer();
-        warehouseNos.forEach(warehouseNo -> {
-            inboundReceipt.setWarehouseNo(warehouseNo);
-            // 审核通过 第三方接口推送
-            if (!InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(inboundReceiptReviewDTO.getStatus())) {
-                this.updateByWarehouseNo(inboundReceipt);
-                return;
-            }
-            InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
-
-            // 入库按照数量（按申报数量）进行扣费 扣费失败则出库失败，不能出库
-            log.info("审核通过则扣费{}", JSONObject.toJSONString(inboundReceiptReviewDTO));
-            //remoteComponent.delOutboundCharge(inboundReceiptInfoVO);
-
-
-            try {
-                if (CheckTag.get()) {
-                    log.info("-----转运单不推送wms，由调用发起方推送 转运入库-提交 里面直接调用B3接口-----");
-                    this.updateByWarehouseNo(inboundReceipt);
-                } else {
-                    this.updateByWarehouseNo(inboundReceipt);
-                    R<CreateReceiptResponse> createReceiptResponseR = remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
-
-                    if (createReceiptResponseR.getCode()== HttpStatus.ERROR){
-                        baseMapper.updateInboundReceipt(warehouseNo);
-                    }
-
-                    CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
-                    BeanUtils.copyProperties(inboundReceiptInfoVO, createInboundReceiptDTO);
-                    createInboundReceiptDTO.setWarehouseNo(inboundReceiptInfoVO.getWarehouseNo());
-                    createInboundReceiptDTO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
-                    createInboundReceiptDTO.setDeliveryNo(inboundReceiptInfoVO.getDeliveryNo());
-
-                    remoteComponent.createTracking(createInboundReceiptDTO);
-                    // 创建入库单物流信息列表
-
-
-                }
-
-//                this.inbound(inboundReceiptInfoVO);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                sb.append(e.getMessage().replace("运行时异常", warehouseNo));
-//                this.updateByWarehouseNo(new InboundReceipt().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE.getValue()).setReviewRemark(e.getMessage()));
-            }
-        });
-        AssertUtil.isTrue(sb.length() == 0, sb::toString);
-
-    }
+//    public void reviews(InboundReceiptReviewDTO inboundReceiptReviewDTO) {
+//        /* SysUser loginUserInfo = remoteComponent.getLoginUserInfo();*/
+//        InboundReceipt inboundReceipt = new InboundReceipt();
+//        InboundReceiptEnum.InboundReceiptEnumMethods anEnum = InboundReceiptEnum.InboundReceiptEnumMethods.getEnum(InboundReceiptEnum.InboundReceiptStatus.class, inboundReceiptReviewDTO.getStatus());
+//        anEnum = anEnum == null ? InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE : anEnum;
+//        inboundReceipt.setStatus(anEnum.getValue());
+//        inboundReceipt.setReviewRemark(inboundReceiptReviewDTO.getReviewRemark());
+//        Optional<LoginUser> loginUser = Optional.ofNullable(SecurityUtils.getLoginUser());
+//        String userId = loginUser.map(LoginUser::getUserId).map(String::valueOf).orElse("");
+//        String userName = loginUser.map(LoginUser::getUsername).orElse("");
+//        inboundReceipt.setReviewBy(userId);
+//        inboundReceipt.setReviewBy(userName);
+//        inboundReceipt.setReviewTime(new Date());
+//        List<String> warehouseNos = inboundReceiptReviewDTO.getWarehouseNos();
+//        log.info("入库单审核: {},{},{}", anEnum.getValue2(), warehouseNos, inboundReceipt);
+//
+//        StringBuffer sb = new StringBuffer();
+//        warehouseNos.forEach(warehouseNo -> {
+//            inboundReceipt.setWarehouseNo(warehouseNo);
+//            // 审核通过 第三方接口推送
+//            if (!InboundReceiptEnum.InboundReceiptStatus.REVIEW_PASSED.getValue().equals(inboundReceiptReviewDTO.getStatus())) {
+//                this.updateByWarehouseNo(inboundReceipt);
+//                return;
+//            }
+//            InboundReceiptInfoVO inboundReceiptInfoVO = this.queryInfo(warehouseNo, false);
+//
+//            // 入库按照数量（按申报数量）进行扣费 扣费失败则出库失败，不能出库
+//            log.info("审核通过则扣费{}", JSONObject.toJSONString(inboundReceiptReviewDTO));
+//            //remoteComponent.delOutboundCharge(inboundReceiptInfoVO);
+//
+//
+//            try {
+//                if (CheckTag.get()) {
+//                    log.info("-----转运单不推送wms，由调用发起方推送 转运入库-提交 里面直接调用B3接口-----");
+//                    this.updateByWarehouseNo(inboundReceipt);
+//                } else {
+//                    this.updateByWarehouseNo(inboundReceipt);
+//                    R<CreateReceiptResponse> createReceiptResponseR = remoteRequest.createInboundReceipt(inboundReceiptInfoVO);
+//
+//                    if (createReceiptResponseR.getCode()== HttpStatus.ERROR){
+//                        baseMapper.updateInboundReceipt(warehouseNo);
+//                    }
+//
+//                    CreateInboundReceiptDTO createInboundReceiptDTO = new CreateInboundReceiptDTO();
+//                    BeanUtils.copyProperties(inboundReceiptInfoVO, createInboundReceiptDTO);
+//                    createInboundReceiptDTO.setWarehouseNo(inboundReceiptInfoVO.getWarehouseNo());
+//                    createInboundReceiptDTO.setWarehouseCode(inboundReceiptInfoVO.getWarehouseCode());
+//                    createInboundReceiptDTO.setDeliveryNo(inboundReceiptInfoVO.getDeliveryNo());
+//
+//                    remoteComponent.createTracking(createInboundReceiptDTO);
+//                    // 创建入库单物流信息列表
+//
+//
+//                }
+//
+////                this.inbound(inboundReceiptInfoVO);
+//            } catch (Exception e) {
+//                log.error(e.getMessage());
+//                sb.append(e.getMessage().replace("运行时异常", warehouseNo));
+////                this.updateByWarehouseNo(new InboundReceipt().setWarehouseNo(warehouseNo).setStatus(InboundReceiptEnum.InboundReceiptStatus.REVIEW_FAILURE.getValue()).setReviewRemark(e.getMessage()));
+//            }
+//        });
+//        AssertUtil.isTrue(sb.length() == 0, sb::toString);
+//
+//    }
 
 
 
@@ -1180,6 +1180,11 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void updateInboundReceipt(String warehouseNo) {
+        baseMapper.updateInboundReceipt(warehouseNo);
     }
 }
 
