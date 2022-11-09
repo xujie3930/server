@@ -653,13 +653,16 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     public BalanceDTO getBalance(String cusCode, String currencyCode) {
         log.info("查询用户币别余额{}-{}", cusCode, currencyCode);
         // 查询授信额使用数
-        BigDecimal creditUseAmount;
 
-        CompletableFuture<BigDecimal> creditUseAmountFuture = CompletableFuture.supplyAsync(() -> {
-            Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
-            log.info("查询用户币别余额完成：{}", JSONObject.toJSONString(creditUse));
-            return Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
-        }, financeThreadTaskPool);
+        Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
+        log.info("查询用户币别余额完成：{}", JSONObject.toJSONString(creditUse));
+        BigDecimal creditUseAmount =  Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+
+//        CompletableFuture<BigDecimal> creditUseAmountFuture = CompletableFuture.supplyAsync(() -> {
+//            Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
+//            log.info("查询用户币别余额完成：{}", JSONObject.toJSONString(creditUse));
+//            return Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+//        }, financeThreadTaskPool);
 
         CompletableFuture<AccountBalance> accountBalanceCompletableFuture = CompletableFuture.supplyAsync(() -> {
             QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
@@ -697,7 +700,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         }, financeThreadTaskPool);
         try {
             AccountBalance accountBalance = accountBalanceCompletableFuture.get();
-            creditUseAmount = creditUseAmountFuture.get();
+            //creditUseAmount = creditUseAmountFuture.get();
             BalanceDTO balanceDTO = new BalanceDTO(accountBalance.getCurrentBalance(), accountBalance.getFreezeBalance(), accountBalance.getTotalBalance());
             CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
             BeanUtils.copyProperties(accountBalance, creditInfoBO);
