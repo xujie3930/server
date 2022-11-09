@@ -503,7 +503,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
             BasShipmenRulesService basShipmenRulesService = SpringUtils.getBean(BasShipmenRulesService.class);
 
-            String customCode = delOutbound.getCustomCode();
+            String customCode = delOutbound.getSellerCode();
             String shipmentService = delOutbound.getShipmentService();
             String ioss = delOutbound.getIoss();
 
