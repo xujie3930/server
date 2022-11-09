@@ -56,5 +56,11 @@ public class BasShipmentRules extends BaseEntity {
     @ApiModelProperty(value = "(需要(1)/不需要(0)，默认0）")
     private String iossType;
 
+    @ApiModelProperty(value = "子code")
+    private String serviceChannelSub;
+
+    @ApiModelProperty(value = "功能模块")
+    private String typeName;
+
 
 }

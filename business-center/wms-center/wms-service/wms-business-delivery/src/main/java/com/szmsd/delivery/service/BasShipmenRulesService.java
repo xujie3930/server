@@ -14,4 +14,6 @@ public interface BasShipmenRulesService {
     R  updeteBasShipmentRules(BasShipmentRulesDto basShipmentRulesDto);
 
     R  deleteShipmentRules(BasShipmentRulesDto basShipmentRulesDto);
+
+    boolean selectbasShipmentRules(BasShipmentRulesDto basShipmentRulesDto);
 }
