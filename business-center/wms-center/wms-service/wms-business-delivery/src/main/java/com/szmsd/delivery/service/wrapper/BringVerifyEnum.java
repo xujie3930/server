@@ -2,6 +2,7 @@ package com.szmsd.delivery.service.wrapper;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.ArrayUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
@@ -142,6 +143,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         Map<String, ApplicationHandle> map = new HashMap<>();
         map.put(BEGIN.name(), new BeginHandle());
         map.put(PRC_PRICING.name(), new PrcPricingHandle());
+        map.put(IOSS_CHECK.name(), new IossChekcHandle());
         map.put(FREEZE_BALANCE.name(), new FreezeBalanceHandle());
         map.put(PRODUCT_INFO.name(), new ProductInfoHandle());
         map.put(SHIPMENT_RULE.name(), new ShipmentRuleHandle());
@@ -494,10 +496,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         public void handle(ApplicationContext context) {
             StopWatch stopWatch = new StopWatch();
 
-            IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+            //IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             logger.info(">>>>>[创建出库单{}]-开始执行IOSS_CHECK", delOutbound.getOrderNo());
+
+            BasShipmenRulesService basShipmenRulesService = SpringUtils.getBean(BasShipmenRulesService.class);
 
             String customCode = delOutbound.getCustomCode();
             String shipmentService = delOutbound.getShipmentService();
@@ -505,12 +509,16 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
             stopWatch.start();
 
-            //TODO  调用配置查询接口
+            BasShipmentRulesDto basShipmentRulesDto = new BasShipmentRulesDto();
+            basShipmentRulesDto.setCustomCode(customCode);
+            basShipmentRulesDto.setServiceChannelName(shipmentService);
 
-            boolean checkIoss = false;
+            logger.info(">>>>>[创建出库单{}]-IOSS_CHECK参数：耗时{}",delOutbound.getOrderNo(), JSON.toJSONString(basShipmentRulesDto));
+
+            boolean checkIoss = basShipmenRulesService.selectbasShipmentRules(basShipmentRulesDto);
 
             stopWatch.stop();
-            logger.info(">>>>>[创建出库单{}]-IOSS_CHECK计算返回结果：耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
+            logger.info(">>>>>[创建出库单{}]-IOSS_CHECK计算返回结果：{}", delOutbound.getOrderNo(), checkIoss);
 
             if (checkIoss) {
                 if(StringUtils.isEmpty(ioss)) {
