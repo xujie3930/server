@@ -86,7 +86,7 @@
         and  custom_code =#{customCode}
 
 
-        and   FIND_IN_SET(#{serviceChannelName},service_channel_sub)
+        and  service_channel_sub =#{serviceChannelName}
   </select>
   <select id="selectbasShipmentRulesu" resultType="com.szmsd.delivery.domain.BasShipmentRules" parameterType="com.szmsd.delivery.dto.BasShipmentRulesDto">
     select
