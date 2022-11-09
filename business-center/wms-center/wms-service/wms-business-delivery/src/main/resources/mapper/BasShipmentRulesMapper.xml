@@ -21,7 +21,7 @@
   </resultMap>
   <sql id="Base_Column_List" >
     id, custom_code, product_code, product_name, service_channel_name, push_date, create_by, 
-    create_by_name, create_time, update_by, update_by_name, update_time, remark, del_flag,product_code_son,ioss_type,service_channel_sub
+    create_by_name, create_time, update_by, update_by_name, update_time, remark, del_flag,product_code_son,ioss_type,service_channel_sub,type_name
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.szmsd.delivery.dto.BasShipmentRulesDto" >
     select 
@@ -103,7 +103,7 @@
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <delete id="deleteByPrimaryKeyus" parameterType="com.szmsd.delivery.domain.BasShipmentRules">
-    DELETE  from bas_shipment_rules where custom_code=#{customCode} and type_name=#{typeName} and service_channel_name=#{serviceChannelName}
+    DELETE  from bas_shipment_rules where custom_code=#{customCode} and type_name=#{typeName} and product_code=#{productCode}
   </delete>
   <insert id="insert" parameterType="com.szmsd.delivery.domain.BasShipmentRules" >
     insert into bas_shipment_rules (id, custom_code, product_code, 
