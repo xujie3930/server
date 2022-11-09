@@ -69,5 +69,7 @@ public interface IInboundReceiptService extends IService<InboundReceipt> {
     InboundReceiptInfoVO collectAndInbound(PackageCollection packageCollection);
 
     void  receipt(ReceiptRequest receiptRequest);
+
+    void updateInboundReceipt(String warehouseNo);
 }
 
