@@ -210,7 +210,7 @@ public class AccountBalanceController extends FssBaseController {
     @ApiOperation(value = "仓储费用扣除")
     @PostMapping("/warehouseFeeDeduct")
     public R warehouseFeeDeductions(@RequestBody CustPayDTO dto){
-        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode() +"_"+dto.getCurrencyCode();
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         log.info("仓储费用扣除-尝试获取redis锁 {}",key);
         try {
@@ -242,7 +242,7 @@ public class AccountBalanceController extends FssBaseController {
     @ApiOperation(value = "费用扣除")
     @PostMapping("/feeDeductions")
     public R feeDeductions(@RequestBody CustPayDTO dto){
-        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode() +"_"+dto.getCurrencyCode();
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         log.info("费用扣除-尝试获取redis锁 {}",key);
         try {
@@ -269,7 +269,7 @@ public class AccountBalanceController extends FssBaseController {
     @ApiOperation(value = "冻结余额")
     @PostMapping("/freezeBalance")
     public R freezeBalance(@RequestBody CusFreezeBalanceDTO dto){
-        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode() +"_"+dto.getCurrencyCode();
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         log.info("冻结余额-尝试获取redis锁 {}",key);
         try {
@@ -296,7 +296,7 @@ public class AccountBalanceController extends FssBaseController {
     @ApiOperation(value = "解冻余额")
     @PostMapping("/thawBalance")
     public R thawBalance(@RequestBody CusFreezeBalanceDTO dto){
-        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode() +"_"+dto.getCurrencyCode();
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
         RLock lock = redissonClient.getLock(key);
         log.info("解冻余额-尝试获取redis锁 {}",key);
         try {

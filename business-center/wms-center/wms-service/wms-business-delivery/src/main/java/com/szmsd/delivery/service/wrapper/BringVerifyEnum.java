@@ -503,7 +503,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
             BasShipmenRulesService basShipmenRulesService = SpringUtils.getBean(BasShipmenRulesService.class);
 
-            String customCode = delOutbound.getCustomCode();
+            String customCode = delOutbound.getSellerCode();
             String shipmentService = delOutbound.getShipmentService();
             String ioss = delOutbound.getIoss();
 
@@ -857,8 +857,18 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             String shipmentService = delOutbound.getShipmentService();
             String trackingAcquireType = delOutbound.getTrackingAcquireType();
 
+            BasShipmenRulesService basShipmenRulesService = SpringUtils.getBean(BasShipmenRulesService.class);
+
             //8431 提审订单时，如果返回的物流服务是空的，跳过调用供应商
             if(StringUtils.isEmpty(shipmentService) || trackingAcquireType.equals(DelOutboundTrackingAcquireTypeEnum.NONE.getCode())){
+                return;
+            }
+
+            BasShipmentRulesDto paramBasShipmentRulesDto = new BasShipmentRulesDto();
+            paramBasShipmentRulesDto.setCustomCode(delOutbound.getSellerCode());
+            paramBasShipmentRulesDto.setServiceChannelName(shipmentService);
+            List<BasShipmentRules> list = basShipmenRulesService.selectBasShipmentRules(paramBasShipmentRulesDto);
+            if(CollectionUtils.isNotEmpty(list)){
                 return;
             }
 

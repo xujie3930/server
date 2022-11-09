@@ -40,7 +40,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
     @Resource
     private IAccountBalanceService accountBalanceService;
 
-    private ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap<>();
+    //private ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap<>();
 
 
     @Transactional
@@ -114,9 +114,14 @@ public class PaymentPayFactory extends AbstractPayFactory {
                     // if (!calculateBalance(oldBalance, changeAmount, freeze, dto)) return false;
                     //先解冻 然后扣费
                     this.rollbackFreeze(oldBalance, freeze);
-                    if (!oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, (x, y) -> this.calculateBalance(x, y, BigDecimal.ZERO, dto))) {
+                    log.info("PaymentPayFactory  rollbackFreeze {},{} ",dto.getNo(),freeze);
+                    boolean check = oldBalance.checkAndSetAmountAndCreditAnd(changeAmount, true, (x, y) -> this.calculateBalance(x, y, BigDecimal.ZERO, dto));
+                    log.info("PaymentPayFactory  rollbackFreeze {},{},{} ",dto.getNo(),freeze,check);
+                    if (!check) {
                         return false;
                     }
+
+                    log.info("PaymentPayFactory  setHasFreeze {}",JSON.toJSONString(dto));
                     setHasFreeze(dto);
                 }
 
@@ -133,7 +138,7 @@ public class PaymentPayFactory extends AbstractPayFactory {
 
                 log.info("PaymentPayFactory 5 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
 
-                concurrentHashMap.put(mKey,oldBalance.getVersion());
+                //concurrentHashMap.put(mKey,oldBalance.getVersion());
 
                 return true;
 //            } else {

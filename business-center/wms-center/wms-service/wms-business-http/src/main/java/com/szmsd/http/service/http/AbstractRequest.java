@@ -1,6 +1,7 @@
 package com.szmsd.http.service.http;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -20,6 +21,7 @@ import com.szmsd.http.service.IHtpConfigService;
 import com.szmsd.http.service.http.resolver.Actuator;
 import com.szmsd.http.service.http.resolver.ActuatorParameter;
 import com.szmsd.http.service.http.resolver.ResponseResolverActuatorParameter;
+import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,9 @@ abstract class AbstractRequest extends BaseRequest {
     private IHtpConfigService iHtpConfigService;
     @Autowired
     private Actuator actuator;
+
+    @Autowired
+    private InboundReceiptFeignService inboundReceiptFeignService;
 
     protected AbstractRequest(HttpConfig httpConfig) {
         this.httpConfig = httpConfig;
@@ -235,6 +240,14 @@ abstract class AbstractRequest extends BaseRequest {
         } else {
             logRequestBody = requestBody;
         }
+        if (api.equals("inbound.create")&&HttpMethod.POST.equals(httpMethod)){
+            Map inboundReceiptMap = JSONObject.parseObject(JSONObject.toJSONString(object), Map.class);
+             if (responseBody.getStatus()==500){
+                 inboundReceiptFeignService.updateInboundReceipt(String.valueOf(inboundReceiptMap.get("refOrderNo")));
+             }
+
+
+        }
         this.addLog(warehouseCode, urlGroupName, url, httpMethod.name(), headerMap, logRequestBody, requestTime, responseBody.getBody(), responseBody.getStatus());
         return responseBody;
     }
@@ -304,6 +317,7 @@ abstract class AbstractRequest extends BaseRequest {
         String formatApi = Utils.formatApi(api);
         return this.httpConfig.getMultipleChannelUrlSet().contains(formatApi);
     }
+
 
     HttpResponseBody httpRequestBodyAdapter(String warehouseCode, String api, ReFunction<String, UrlConfig, HttpResponseBody> reFunction) {
         // 先调用自己的服务，自己的服务调用成功之后再去调用其它的服务
