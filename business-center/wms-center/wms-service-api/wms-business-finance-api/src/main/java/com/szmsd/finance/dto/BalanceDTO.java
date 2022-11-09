@@ -3,6 +3,7 @@ package com.szmsd.finance.dto;
 import com.szmsd.finance.enums.CreditConstant;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.util.function.BiFunction;
  * @author liulei
  */
 @Data
+@Slf4j
 public class BalanceDTO {
     @ApiModelProperty(value = "可用余额")
     private BigDecimal currentBalance;
@@ -74,6 +76,7 @@ public class BalanceDTO {
                 // 可能未负数 把余额全部冻结 剩余需要扣除的钱
                 this.actualDeduction = currentBalance.min(amount).max(BigDecimal.ZERO);
                 BigDecimal needDeducted = amount.subtract(currentBalance.max(BigDecimal.ZERO));
+                log.info("可能未负数 把余额全部冻结 剩余需要扣除的钱:{},{},{}",amount,currentBalance,needDeducted);
                 this.creditUseAmount = needDeducted;
                 if (null != function){
                     function.apply(this, amount);
