@@ -31,8 +31,8 @@
         </sql>
     <insert id="insertBasMessage" useGeneratedKeys="true" keyProperty="id" parameterType="com.szmsd.bas.dto.BasMessageDto">
         insert into bas_message (create_by_name,create_time,
-            id, del_flag,title, content, `type`, bullet)
-        values(#{createByName},now(),#{id},'0',#{title},#{content},#{type},#{bullet})
+            id, del_flag,title, content, `type`, bullet,take_effect_date,file_route,file_name,file_size)
+        values(#{createByName},now(),#{id},'0',#{title},#{content},#{type},#{bullet},#{takeEffectDate},#{fileRoute},#{fileName},#{fileSize})
     </insert>
 
 
