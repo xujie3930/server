@@ -70,7 +70,6 @@ public class BalanceDTO {
                     return function.apply(this, amount);
                 }
             } else {
-                boolean b = false;
                 // 余额不足扣减，使用授信额度
                 BigDecimal currentBalance = this.currentBalance;
                 // 可能未负数 把余额全部冻结 剩余需要扣除的钱
@@ -79,9 +78,9 @@ public class BalanceDTO {
                 log.info("可能未负数 把余额全部冻结 剩余需要扣除的钱:{},{},{}",amount,currentBalance,needDeducted);
                 this.creditUseAmount = needDeducted;
                 if (null != function){
-                    function.apply(this, amount);
+                    return function.apply(this, amount);
                 }
-                b = this.creditInfoBO.changeCreditAmount(needDeducted, updateCredit);
+                boolean b = this.creditInfoBO.changeCreditAmount(needDeducted, updateCredit);
                 return b;
             }
         } else {
