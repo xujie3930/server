@@ -2626,7 +2626,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         // 增加出库单已完成记录，异步处理，定时任务
 
         Date pushDate = DateUtils.parseDate(DateUtil.format(new Date(), "yyyy-MM-dd") + " " + list.get(0).getPushDate());
-        if(pushDate.getTime() > System.currentTimeMillis()){
+        if(pushDate.getTime() < System.currentTimeMillis()){
             //推送时间大于当前时间的明日推送
             pushDate = DateUtils.parseDate(DateUtil.format(tomorrow(new Date()), "yyyy-MM-dd") + " " + list.get(0).getPushDate());
         }
