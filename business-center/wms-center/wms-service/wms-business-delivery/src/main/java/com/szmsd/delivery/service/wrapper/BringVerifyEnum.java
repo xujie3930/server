@@ -25,6 +25,7 @@ import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
+import com.szmsd.delivery.util.BigDecimalUtil;
 import com.szmsd.delivery.util.PdfUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.DelOutboundOperationDetailVO;
@@ -409,16 +410,22 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             //分组计算货币金额
             Map<String, BigDecimal> currencyMap = new HashMap<String, BigDecimal>();
             for (DelOutboundCharge charge: delOutboundCharges){
-                if(currencyMap.containsKey(charge.getCurrencyCode())){
-                    currencyMap.put(charge.getCurrencyCode(), currencyMap.get(charge.getCurrencyCode()).add(charge.getAmount()));
+
+                String currencyCode = charge.getCurrencyCode();
+                BigDecimal amount = BigDecimalUtil.setScale(charge.getAmount(),3);
+
+                if(currencyMap.containsKey(currencyCode)){
+                    BigDecimal chargeamount = currencyMap.get(currencyCode).add(amount);
+                    currencyMap.put(currencyCode, chargeamount);
                 }else{
-                    currencyMap.put(charge.getCurrencyCode(), charge.getAmount());
+                    currencyMap.put(currencyCode, amount);
                 }
             }
-            delOutbound.setCurrencyDescribe(ArrayUtil.join(currencyMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue))
-                    .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()).toArray(), "；"));
 
+            String currencyDescribe = ArrayUtil.join(currencyMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue))
+                    .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()).toArray(), "；");
 
+            delOutbound.setCurrencyDescribe(currencyDescribe);
 
 
             //更新PRC发货服务

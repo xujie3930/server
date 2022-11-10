@@ -343,7 +343,14 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
 
             }
-            delOutbound.setShipmentRule(furtherHandlerDto.getShipmentRule());
+
+            //汪总说：不存在取数据库名称
+            if(StringUtils.isNotEmpty(furtherHandlerDto.getShipmentRule())){
+                delOutbound.setShipmentRule(furtherHandlerDto.getShipmentRule());
+            }else{
+                delOutbound.setShipmentRule(delOutbound.getShipmentRule());
+            }
+
             delOutbound.setShipmentService(furtherHandlerDto.getShipmentService());
 
             if(StringUtils.isNotEmpty(furtherHandlerDto.getTrackingAcquireType())){
