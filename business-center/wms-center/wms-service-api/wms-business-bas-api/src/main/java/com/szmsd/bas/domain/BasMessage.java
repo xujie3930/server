@@ -11,6 +11,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 
 /**
@@ -65,6 +66,20 @@ public class BasMessage extends BaseEntity {
     @ApiModelProperty(value = "是否弹框")
     @Excel(name = "是否弹框")
     private Boolean bullet;
+
+
+    @ApiModelProperty(value = "生效日期")
+    private Date takeEffectDate;
+
+    @ApiModelProperty(value = "文件路径")
+    private String fileRoute;
+
+    @ApiModelProperty(value = "文件名")
+    private String fileName;
+
+    @ApiModelProperty(value = "文件大小")
+    private String fileSize;
+
 
 
 }
