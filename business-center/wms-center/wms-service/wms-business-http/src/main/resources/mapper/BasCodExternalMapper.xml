@@ -35,7 +35,7 @@
     </where>
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
-    delete from bas_cod_external
+    TRUNCATE TABLE bas_cod_external
   </delete>
   <insert id="insert" parameterType="com.szmsd.http.domain.BasCodExternal" >
     insert into bas_cod_external (id, Country_code, Country_en_name, 

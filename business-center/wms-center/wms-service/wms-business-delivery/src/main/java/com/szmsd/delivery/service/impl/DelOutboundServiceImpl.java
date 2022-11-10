@@ -2539,55 +2539,59 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         //查询最新的挂号数据
         try {
             R<ShipmentOrderResult> r = htpOutboundFeignService.shipmentOrderRealResult(String.valueOf(delOutbound.getId()));
-            if (r.getCode() == 200 && r.getData() != null) {
-                if(!r.getData().getSuccess()){
-                    throw new RuntimeException(r.getData().getError().getMessage());
+
+            if (r.getCode() != 200) {
+                log.error("订单号["+delOutbound.getOrderNo()+"]调用根据参考号返回真实的挂号和标签数据接口失败,{}",r.getMsg());
+                throw new RuntimeException(r.getData().getError().getMessage());
+            }
+
+            if(!r.getData().getSuccess()){
+                throw new RuntimeException(r.getData().getError().getMessage());
+            }
+            ShipmentOrderResult data = r.getData();
+            if (!StringUtils.equals(delOutbound.getTrackingNo(), data.getMainTrackingNumber())) {
+                //新老挂号不一样，更新数据库
+                DelOutbound dataDelOutbound = this.getById(delOutbound.getId());
+                dataDelOutbound.setTrackingNo(data.getMainTrackingNumber());
+                this.updateById(dataDelOutbound);
+
+
+                //新增挂号修改记录
+                DelOutboundTarckOn delOutboundTarckOn = new DelOutboundTarckOn();
+                delOutboundTarckOn.setOrderNo(dataDelOutbound.getOrderNo());
+                delOutboundTarckOn.setTrackingNo(delOutbound.getTrackingNo());
+                delOutboundTarckOn.setUpdateTime(new Date());
+                delOutboundTarckOn.setTrackingNoNew(data.getMainTrackingNumber());
+                delOutboundTarckOnMapper.insertSelective(delOutboundTarckOn);
+
+
+                List<String> orders = new ArrayList<String>();
+                orders.add(dataDelOutbound.getOrderNo());
+                // 推送ty系统
+                manualTrackingYee(orders);
+
+
+                //推邮箱
+                R<BasSellerInfoVO> info = basSellerFeignService.getInfoBySellerCode(dataDelOutbound.getSellerCode());
+                if(info.getData() == null) {
+                    throw new RuntimeException("客户信息获取失败");
                 }
-                ShipmentOrderResult data = r.getData();
-                if (!StringUtils.equals(delOutbound.getTrackingNo(), data.getMainTrackingNumber())) {
-                    //新老挂号不一样，更新数据库
-                    DelOutbound dataDelOutbound = this.getById(delOutbound.getId());
-                    dataDelOutbound.setTrackingNo(data.getMainTrackingNumber());
-                    this.updateById(dataDelOutbound);
+                BasSellerInfoVO userInfo = R.getDataAndException(info);
+
+                EmailDto emailDto=new EmailDto();
+                emailDto.setModularType(1);
+                emailDto.setTo(userInfo.getEmail());
+                EmailObjectDto emailDtoDetail=new EmailObjectDto();
+                emailDtoDetail.setCustomCode(dataDelOutbound.getSellerCode());
+                emailDtoDetail.setOrderNo(dataDelOutbound.getOrderNo());
+                emailDtoDetail.setServiceManagerName(userInfo.getServiceManagerName());
+                emailDtoDetail.setServiceStaffName(userInfo.getServiceStaffName());
+                emailDtoDetail.setNoTrackingNo(delOutbound.getTrackingNo());
+                emailDtoDetail.setTrackingNo(data.getMainTrackingNumber());
+                emailDto.setList(Arrays.asList(emailDtoDetail));
+                emailFeingService.sendEmail(emailDto);
 
 
-                    //新增挂号修改记录
-                    DelOutboundTarckOn delOutboundTarckOn = new DelOutboundTarckOn();
-                    delOutboundTarckOn.setOrderNo(dataDelOutbound.getOrderNo());
-                    delOutboundTarckOn.setTrackingNo(delOutbound.getTrackingNo());
-                    delOutboundTarckOn.setUpdateTime(new Date());
-                    delOutboundTarckOn.setTrackingNoNew(data.getMainTrackingNumber());
-                    delOutboundTarckOnMapper.insertSelective(delOutboundTarckOn);
-
-
-                    List<String> orders = new ArrayList<String>();
-                    orders.add(dataDelOutbound.getOrderNo());
-                    // 推送ty系统
-                    manualTrackingYee(orders);
-
-
-                    //推邮箱
-                    R<BasSellerInfoVO> info = basSellerFeignService.getInfoBySellerCode(dataDelOutbound.getSellerCode());
-                    if(info.getData() == null) {
-                        throw new RuntimeException("客户信息获取失败");
-                    }
-                    BasSellerInfoVO userInfo = R.getDataAndException(info);
-
-                    EmailDto emailDto=new EmailDto();
-                    emailDto.setModularType(1);
-                    emailDto.setTo(userInfo.getEmail());
-                    EmailObjectDto emailDtoDetail=new EmailObjectDto();
-                    emailDtoDetail.setCustomCode(dataDelOutbound.getSellerCode());
-                    emailDtoDetail.setOrderNo(dataDelOutbound.getOrderNo());
-                    emailDtoDetail.setServiceManagerName(userInfo.getServiceManagerName());
-                    emailDtoDetail.setServiceStaffName(userInfo.getServiceStaffName());
-                    emailDtoDetail.setNoTrackingNo(delOutbound.getTrackingNo());
-                    emailDtoDetail.setTrackingNo(data.getMainTrackingNumber());
-                    emailDto.setList(Arrays.asList(emailDtoDetail));
-                    emailFeingService.sendEmail(emailDto);
-
-
-                }
             }
         }catch (Exception e){
             throw new RuntimeException(e);
