@@ -334,4 +334,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "第三方更新状态")
     private Integer thridPartStatus;
+
+    @ApiModelProperty(value = "供应商参考单号")
+    private String referenceNumber;
 }

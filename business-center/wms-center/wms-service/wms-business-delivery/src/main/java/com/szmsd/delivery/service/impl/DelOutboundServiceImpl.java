@@ -13,8 +13,6 @@ import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.pagehelper.PageHelper;
-import com.itextpdf.text.PageSize;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.BasEmployees;
@@ -2538,7 +2536,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public void carrierRegister(DelOutbound delOutbound) {
         //查询最新的挂号数据
         try {
-            R<ShipmentOrderResult> r = htpOutboundFeignService.shipmentOrderRealResult(String.valueOf(delOutbound.getId()));
+
+            String referenceNumber = delOutbound.getReferenceNumber();
+
+            if(StringUtils.isEmpty(referenceNumber)){
+                log.error("订单号["+delOutbound.getOrderNo()+"] referenceNumber 为空");
+                return;
+            }
+
+            R<ShipmentOrderResult> r = htpOutboundFeignService.shipmentOrderRealResult(referenceNumber);
 
             if (r.getCode() != 200) {
                 log.error("订单号["+delOutbound.getOrderNo()+"]调用根据参考号返回真实的挂号和标签数据接口失败,{}",r.getMsg());

@@ -891,6 +891,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
                     delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
                     delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
+                    delOutbound.setReferenceNumber(shipmentOrderResult.getReferenceNumber());
                 }
                 logger.info(">>>>>[创建出库单{}]创建承运商 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
 
