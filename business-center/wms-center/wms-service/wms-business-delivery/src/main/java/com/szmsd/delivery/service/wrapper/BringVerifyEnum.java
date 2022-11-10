@@ -871,13 +871,13 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 return;
             }
 
-            BasShipmentRulesDto paramBasShipmentRulesDto = new BasShipmentRulesDto();
-            paramBasShipmentRulesDto.setCustomCode(delOutbound.getSellerCode());
-            paramBasShipmentRulesDto.setServiceChannelName(shipmentService);
-            List<BasShipmentRules> list = basShipmenRulesService.selectBasShipmentRules(paramBasShipmentRulesDto);
-            if(CollectionUtils.isNotEmpty(list)){
-                return;
-            }
+//            BasShipmentRulesDto paramBasShipmentRulesDto = new BasShipmentRulesDto();
+//            paramBasShipmentRulesDto.setCustomCode(delOutbound.getSellerCode());
+//            paramBasShipmentRulesDto.setServiceChannelName(shipmentService);
+//            List<BasShipmentRules> list = basShipmenRulesService.selectBasShipmentRules(paramBasShipmentRulesDto);
+//            if(CollectionUtils.isNotEmpty(list)){
+//                return;
+//            }
 
             logger.info("{}-创建承运商物流订单：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             // 判断是否需要创建物流订单
