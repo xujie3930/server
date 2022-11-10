@@ -24,6 +24,7 @@ import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundRetryLabelService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
+import com.szmsd.delivery.util.BigDecimalUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
@@ -774,21 +775,24 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             delOutbound.setCurrencyCode(totalCurrencyCode);
             //分组计算货币金额
             Map<String, BigDecimal> currencyMap = new HashMap<String, BigDecimal>();
+
             for (DelOutboundCharge charge: delOutboundCharges){
-                if(currencyMap.containsKey(charge.getCurrencyCode())){
-                    currencyMap.put(charge.getCurrencyCode(), currencyMap.get(charge.getCurrencyCode()).add(charge.getAmount()));
+
+                String currencyCode = charge.getCurrencyCode();
+                BigDecimal amount = BigDecimalUtil.setScale(charge.getAmount(),3);
+
+                if(currencyMap.containsKey(currencyCode)){
+                    BigDecimal chargeamount = currencyMap.get(currencyCode).add(amount);
+                    currencyMap.put(currencyCode, chargeamount);
                 }else{
-                    currencyMap.put(charge.getCurrencyCode(), charge.getAmount());
+                    currencyMap.put(currencyCode, amount);
                 }
             }
-            delOutbound.setCurrencyDescribe(ArrayUtil.join(currencyMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue))
-                    .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()).toArray(), "；"));
 
+            String currencyDescribe = ArrayUtil.join(currencyMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue))
+                    .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()).toArray(), "；");
 
-
-
-
-
+            delOutbound.setCurrencyDescribe(currencyDescribe);
 
             /**
              * 特殊化日志记录，分币别
