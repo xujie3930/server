@@ -131,15 +131,17 @@ public class CreditInfoBO {
                 boolean after = now.isAfter(this.creditBeginTime);
                 boolean before = now.isBefore(this.creditEndTime);
                 if (after && before) {
-//                    if (updateCredit)
-//                    this.creditUseAmount = this.creditUseAmount.add(amount);
+                    if (updateCredit) {
+                        this.creditUseAmount = this.creditUseAmount.add(amount);
+                    }
                     return true;
                 } else {
                     //判断是否是 缓存期 缓冲期仍可下单 记录在缓冲期中作为下一期账单
                     boolean bufferBefore = now.isBefore(this.creditBufferTime);
                     if (after && bufferBefore) {
-//                        if (updateCredit)
-//                        this.creditBufferUseAmount = this.creditBufferUseAmount.add(amount);
+                        if (updateCredit) {
+                            this.creditBufferUseAmount = this.creditBufferUseAmount.add(amount);
+                        }
                         return true;
                     } else {
                         // 逾期不还 禁用账号 充值所有金额才能继续使用
