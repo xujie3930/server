@@ -55,7 +55,6 @@ public class EmailJob extends QuartzJobBean {
 
                 list1.forEach(x->{
 
-                    System.out.println(x);
                 emailUtil.sendAttachmentMail(x, "【挂号更新】/" +entry.getKey()+"/"+ simpleDateFormat.format(new Date()) + "", "尊敬的"+entry.getKey()+"您好，\n" +
                         "\n" +
                         "请查收昨天中午12:00至今天中午12:00订单挂号的更新情况，如附件所示。\n" +
