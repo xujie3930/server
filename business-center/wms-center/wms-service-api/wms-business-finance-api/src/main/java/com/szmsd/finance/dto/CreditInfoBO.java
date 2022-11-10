@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ import java.time.temporal.ChronoUnit;
  * @Author: 11
  * @Date: 2021-09-07 14:56
  */
+@Slf4j
 @Setter
 @Getter
 @Accessors(chain = true)
@@ -110,8 +112,10 @@ public class CreditInfoBO {
     protected boolean changeCreditAmount(BigDecimal amount, boolean updateCredit) {
         CreditConstant.CreditTypeEnum creditTypeEnum = CreditConstant.CreditTypeEnum.getThisByTypeCode(this.creditType);
         BigDecimal canUseAmount = this.creditLine.subtract(this.creditUseAmount);
+        log.info("creditTypeEnum:{}",creditTypeEnum);
         switch (creditTypeEnum) {
             case QUOTA:
+                log.info("creditTypeEnum:QUOTA");
                 // 授信额度扣减 足额可扣减 反之不行
                 if (amount.compareTo(canUseAmount) > 0) {
                     return false;
@@ -126,14 +130,17 @@ public class CreditInfoBO {
                     return true;
                 }
             case TIME_LIMIT:
+                log.info("creditTypeEnum:TIME_LIMIT");
                 // 余额 不足 但是在授信期间（A+B）则都可以支付
                 LocalDateTime now = LocalDateTime.now();
                 boolean after = now.isAfter(this.creditBeginTime);
                 boolean before = now.isBefore(this.creditEndTime);
                 if (after && before) {
+
                     if (updateCredit) {
                         this.creditUseAmount = this.creditUseAmount.add(amount);
                     }
+                    log.info("creditUseAmount:{}",creditUseAmount);
                     return true;
                 } else {
                     //判断是否是 缓存期 缓冲期仍可下单 记录在缓冲期中作为下一期账单
@@ -142,6 +149,7 @@ public class CreditInfoBO {
                         if (updateCredit) {
                             this.creditBufferUseAmount = this.creditBufferUseAmount.add(amount);
                         }
+                        log.info("creditUseAmount111:{}",creditBufferUseAmount);
                         return true;
                     } else {
                         // 逾期不还 禁用账号 充值所有金额才能继续使用
