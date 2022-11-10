@@ -776,7 +776,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         accountBalance.setTotalBalance(result.getTotalBalance());
         accountBalance.setVersion(result.getVersion());
         if (needUpdateCredit && null != result.getCreditInfoBO()) {
-            accountBalance.setCreditUseAmount(result.getCreditUseAmount());
+            accountBalance.setCreditUseAmount(result.getCreditInfoBO().getCreditUseAmount());
             accountBalance.setCreditStatus(result.getCreditInfoBO().getCreditStatus());
             accountBalance.setCreditBeginTime(result.getCreditInfoBO().getCreditBeginTime());
             accountBalance.setCreditEndTime(result.getCreditInfoBO().getCreditEndTime());
