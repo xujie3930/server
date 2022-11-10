@@ -14,13 +14,13 @@ public class EmailObjectDtoVs {
     @ExcelProperty(index = 0, value = "客户代码")
     private String customCode;
     @ColumnWidth(30)
-    @ExcelProperty(index = 1, value = "CBD")
+    @ExcelProperty(index = 1, value = "客户经理")
     private String serviceManagerName;
     @ColumnWidth(30)
-    @ExcelProperty(index = 2, value = "CS")
+    @ExcelProperty(index = 2, value = "客服")
     private String serviceStaffName;
     @ColumnWidth(30)
-    @ExcelProperty(index = 3, value = "orderNo")
+    @ExcelProperty(index = 3, value = "单号")
     private String orderNo;
 
     @ColumnWidth(30)
@@ -29,11 +29,11 @@ public class EmailObjectDtoVs {
 
 
     @ColumnWidth(30)
-    @ExcelProperty(index = 5, value = "trackingNo")
+    @ExcelProperty(index = 5, value = "原跟踪号")
     private String noTrackingNo;
 
     @ColumnWidth(30)
-    @ExcelProperty(index = 6, value = "New TrackingNo")
+    @ExcelProperty(index = 6, value = "新跟踪号")
     private String trackingNo;
 
     @ColumnWidth(30)
