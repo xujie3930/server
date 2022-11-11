@@ -97,7 +97,7 @@ public class PaymentNoFreezePayFactory extends AbstractPayFactory {
             log.error("PaymentNoFreeze扣减异常:", e);
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
-            throw new RuntimeException("支付操作超时,请稍候重试!");
+            throw new RuntimeException(e.getMessage());
         } finally {
 //            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
 //                lock.unlock();

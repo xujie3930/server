@@ -131,7 +131,7 @@ public class RefundPayFactory extends AbstractPayFactory {
             log.error("RefundPayFactory异常:", e);
             log.info("获取余额异常，加锁失败");
             log.info("异常信息:" + e.getMessage());
-            throw new RuntimeException("退费业务处理超时,请稍候重试!");
+            throw new RuntimeException(e.getMessage());
         } finally {
 //            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
 //                lock.unlock();
