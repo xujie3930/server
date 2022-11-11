@@ -847,7 +847,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 //
 //            RLock lock = redissonClient.getLock(key);
 //
-//            try {
+            try {
 //                lock.tryLock(time, unit);
 
                 /**
@@ -890,18 +890,15 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     logger.info(">>>>>[发货后出库单{}]冻结费用, 数据:{}",delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO2));
                 }
 
-//            } catch (InterruptedException e) {
-//
-//                logger.info("冻结费用异常，加锁失败");
-//                logger.info("异常信息:" + e.getMessage());
-//
-//                throw new RuntimeException(e.getMessage());
-//
-//            }finally {
-//                if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-//                    lock.unlock();
-//                }
-//            }
+            } catch (Exception e) {
+
+                logger.info("冻结费用异常，加锁失败");
+                logger.info("异常信息:" + e.getMessage());
+
+                throw new RuntimeException(e.getMessage());
+
+            }finally {
+            }
         }
 
         @Override
