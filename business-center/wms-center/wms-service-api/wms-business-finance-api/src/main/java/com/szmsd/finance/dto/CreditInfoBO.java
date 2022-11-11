@@ -175,21 +175,27 @@ public class CreditInfoBO {
         CreditConstant.CreditTypeEnum creditTypeEnum = CreditConstant.CreditTypeEnum.getThisByTypeCode(this.creditType);
         switch (creditTypeEnum) {
             case QUOTA:
+                log.info("rechargeCreditAmount QUOTA");
                 if (amount.compareTo(this.creditUseAmount) >= 0) {
                     this.repaymentAmount = this.creditUseAmount;
                     this.creditStatus = CreditConstant.CreditStatusEnum.ACTIVE.getValue();
+                    this.creditUseAmount = BigDecimal.ZERO;
                     return amount.subtract(this.creditUseAmount);
                 } else {
                     this.repaymentAmount = amount;
+                    this.creditUseAmount = this.creditUseAmount.subtract(amount);
                     return BigDecimal.ZERO;
                 }
             case TIME_LIMIT:
                 // 优先还清欠款 还清后充值余额
+                log.info("rechargeCreditAmount TIME_LIMIT");
                 if (amount.compareTo(this.creditUseAmount) >= 0) {
                     this.repaymentAmount = this.creditUseAmount;
+                    this.creditUseAmount = BigDecimal.ZERO;
                     return amount.subtract(this.creditUseAmount);
                 } else {
                     this.repaymentAmount = amount;
+                    this.creditUseAmount = this.creditUseAmount.subtract(amount);
                     return BigDecimal.ZERO;
                 }
             default:
