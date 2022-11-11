@@ -181,6 +181,9 @@ public class BalanceDTO {
      * @return
      */
     private Boolean recharge(BigDecimal amount) {
+
+        log.info("recharge{}",amount);
+
         if (amount.compareTo(BigDecimal.ZERO) >= 0) {
             // 可用
             this.currentBalance = this.currentBalance.add(amount);

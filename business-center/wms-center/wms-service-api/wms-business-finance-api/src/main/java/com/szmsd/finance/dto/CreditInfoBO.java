@@ -182,7 +182,7 @@ public class CreditInfoBO {
                     this.creditUseAmount = BigDecimal.ZERO;
                     return amount.subtract(this.creditUseAmount);
                 } else {
-                    this.repaymentAmount = amount;
+                    //this.repaymentAmount = amount;
                     this.creditUseAmount = this.creditUseAmount.subtract(amount);
                     return BigDecimal.ZERO;
                 }
@@ -192,9 +192,11 @@ public class CreditInfoBO {
                 if (amount.compareTo(this.creditUseAmount) >= 0) {
                     this.repaymentAmount = this.creditUseAmount;
                     this.creditUseAmount = BigDecimal.ZERO;
-                    return amount.subtract(this.creditUseAmount);
+                    BigDecimal resultAmount = amount.subtract(this.creditUseAmount);
+                    log.info("rechargeCreditAmount 充值{}",resultAmount);
+                    return resultAmount;
                 } else {
-                    this.repaymentAmount = amount;
+                    //this.repaymentAmount = amount;
                     this.creditUseAmount = this.creditUseAmount.subtract(amount);
                     return BigDecimal.ZERO;
                 }

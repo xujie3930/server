@@ -62,7 +62,7 @@ public class RefundPayFactory extends AbstractPayFactory {
 
                 BalanceDTO oldBalance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
 
-                log.info("【退费】dto-- 1 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
+                log.info("【退费】dto-- 1 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{},授信额度:{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),oldBalance.getCreditInfoBO().getCreditUseAmount(),JSONObject.toJSONString(oldBalance));
 
                 String mKey = key + oldBalance.getVersion();
 
@@ -104,12 +104,12 @@ public class RefundPayFactory extends AbstractPayFactory {
 
                 log.info("balance mKey version 2{}",dto.getNo());
 
-                log.info("【退费】dto-- 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
+                log.info("【退费】dto-- 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{},授信额度：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),oldBalance.getCreditInfoBO().getCreditUseAmount(),JSONObject.toJSONString(oldBalance));
 
                 BalanceDTO result = oldBalance;
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), result, true);
 
-                log.info("【退费】setBalance-- 3 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),JSONObject.toJSONString(oldBalance));
+                log.info("【退费】setBalance-- 3 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{},授信额度：{} ",currencyCode,oldBalance.getCurrentBalance(),oldBalance.getFreezeBalance(),oldBalance.getTotalBalance(),oldBalance.getCreditInfoBO().getCreditUseAmount(),JSONObject.toJSONString(oldBalance));
 
                 recordOpLogAsync(dto, result.getCurrentBalance());
                 recordDetailLogAsync(dto, oldBalance);
