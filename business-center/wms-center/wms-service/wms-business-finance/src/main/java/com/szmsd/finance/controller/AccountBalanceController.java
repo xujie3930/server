@@ -223,7 +223,7 @@ public class AccountBalanceController extends FssBaseController {
             }
         }catch (Exception e){
             log.error("仓储费用扣除操作超时，{}",e);
-            return R.failed("仓储费用扣除操作超时,请稍候重试!");
+            return R.failed(e.getMessage());
         }finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 log.info("仓储费用扣除-释放redis锁 {}",key);
@@ -255,7 +255,7 @@ public class AccountBalanceController extends FssBaseController {
             }
         }catch (Exception e){
             log.error("费用扣除操作超时，{}",e);
-            return R.failed("费用扣除操作超时,请稍候重试!");
+            return R.failed(e.getMessage());
         }finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 log.info("费用扣除-释放redis锁 {}",key);
@@ -282,7 +282,7 @@ public class AccountBalanceController extends FssBaseController {
             }
         }catch (Exception e){
             log.error("冻结操作超时，{}",e);
-            return R.failed("冻结操作超时,请稍候重试!");
+            return R.failed(e.getMessage());
         }finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 log.info("冻结余额-释放redis锁 {}",key);
@@ -309,7 +309,7 @@ public class AccountBalanceController extends FssBaseController {
             }
         }catch (Exception e){
             log.error("冻结操作超时，{}",e);
-            return R.failed("解冻操作超时,请稍候重试!");
+            return R.failed(e.getMessage());
         }finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 log.info("解冻余额-释放redis锁 {}",key);
