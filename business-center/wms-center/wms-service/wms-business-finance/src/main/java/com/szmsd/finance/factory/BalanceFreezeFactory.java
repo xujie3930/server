@@ -136,7 +136,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
             log.error("获取余额异常，加锁失败 BalanceFreezeFactory异常：", e);
-            throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
+            throw new RuntimeException("冻结/解冻操作超时,请稍候重试!",e);
         }
     }
 
@@ -196,7 +196,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 if (!balance.checkAndSetAmountAndCreditAnd(changeAmount, false, BalanceDTO::freeze)) {
 
                     String message = "Sorry, your "+currencyCode+" balance is low ,"+changeAmount;
-                    throw new RuntimeException(message);
+                    throw new CommonException(message);
                 }
                 return true;
             }
