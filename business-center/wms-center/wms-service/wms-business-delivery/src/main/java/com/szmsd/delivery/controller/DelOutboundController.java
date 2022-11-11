@@ -52,8 +52,6 @@ import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.delivery.task.EasyPoiExportTask;
-import com.szmsd.delivery.task.PoiExportTask;
-import com.szmsd.delivery.util.ExParams;
 import com.szmsd.delivery.util.ZipFileUtils;
 import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
@@ -898,7 +896,8 @@ public class DelOutboundController extends BaseController {
                                 .setData2(itemQueryPage.getPage())
                                 .setClazz2(DelOutboundExportItemListVO.class)
                                 .setFilepath(filepath)
-                                .setCountDownLatch(countDownLatch);
+                                .setCountDownLatch(countDownLatch)
+                                .setFileId(basFile.getId());
 
                         basFile.setState("1");
                         basFileMapper.updateByPrimaryKeySelective(basFile);

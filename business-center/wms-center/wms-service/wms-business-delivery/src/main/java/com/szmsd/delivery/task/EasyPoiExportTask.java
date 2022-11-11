@@ -3,6 +3,7 @@ package com.szmsd.delivery.task;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import com.szmsd.delivery.util.ExParams;
 import com.szmsd.delivery.util.ExcelUtil;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
@@ -23,12 +24,14 @@ public class EasyPoiExportTask<T,V> implements Runnable {
     private String filepath;
     private CountDownLatch countDownLatch;
 
+    private Integer FileId;
+
     @Override
     public void run() {
         log.info("{}-ExportTask is running", Thread.currentThread().getName());
         long start = System.currentTimeMillis();
         try {
-            ExcelUtil.export(exportParams, clazz, data,data2,clazz2,filepath);
+            ExcelUtil.export(exportParams, clazz, data,data2,clazz2,filepath,FileId);
             log.info("{}-ExportTask is finished, cost {}ms", Thread.currentThread().getName(), System.currentTimeMillis() - start);
         }catch (OutOfMemoryError e) {
             log.error("{}-ExportTask is error,message={}", Thread.currentThread().getName(), e.getMessage());
@@ -67,6 +70,11 @@ public class EasyPoiExportTask<T,V> implements Runnable {
     }
     public EasyPoiExportTask<T,V> setCountDownLatch(CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
+        return this;
+    }
+
+    public EasyPoiExportTask<T,V> setFileId(Integer FileId) {
+        this.FileId = FileId;
         return this;
     }
 }

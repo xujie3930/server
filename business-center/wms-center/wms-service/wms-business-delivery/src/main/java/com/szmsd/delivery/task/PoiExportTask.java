@@ -26,12 +26,14 @@ public class PoiExportTask<T,V> implements Runnable {
     private String filepath;
     private CountDownLatch countDownLatch;
 
+    private Integer FileId;
+
     @Override
     public void run() {
         log.info("{}-PoiExportTask is running", Thread.currentThread().getName());
         long start = System.currentTimeMillis();
         try {
-            ExcelUtil.exportBySxssf(exParams, clazz, data,data2,clazz2,filepath);
+            ExcelUtil.exportBySxssf(exParams, clazz, data,data2,clazz2,filepath,FileId);
             log.info("{}-PoiExportTask is finished, cost {}ms", Thread.currentThread().getName(), System.currentTimeMillis() - start);
         }catch (OutOfMemoryError e) {
             log.error("{}-PoiExportTask is error,message={}", Thread.currentThread().getName(), e.getMessage());
@@ -70,6 +72,11 @@ public class PoiExportTask<T,V> implements Runnable {
     }
     public PoiExportTask<T,V> setCountDownLatch(CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
+        return this;
+    }
+
+    public PoiExportTask<T,V> setFileId(Integer FileId) {
+        this.FileId = FileId;
         return this;
     }
 }

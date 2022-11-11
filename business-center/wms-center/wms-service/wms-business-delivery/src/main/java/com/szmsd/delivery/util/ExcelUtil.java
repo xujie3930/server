@@ -3,6 +3,9 @@ package com.szmsd.delivery.util;
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
+import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.delivery.domain.BasFile;
 import com.szmsd.delivery.mapper.BasFileMapper;
 import com.szmsd.delivery.vo.DelOutboundExportItemListVO;
 import com.szmsd.delivery.vo.DelOutboundExportListVO;
@@ -19,6 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -42,13 +46,17 @@ public class ExcelUtil {
      */
     public static Integer SHEET_DATA_MAX_LIMIT_XLS = 2 << 15;
 
+//    @Autowired
+//    private BasFileMapper basFileMapper;
+
 
     /**
      * 下载Excel
      * @param fileName 文件名
      * @param workbook Excel对象
      */
-    public static void downLoadExcel(String fileName, Workbook workbook,String filepath) {
+    public static void downLoadExcel(String fileName, Workbook workbook,String filepath,Integer fileId) {
+        BasFileMapper basFileMapper= SpringUtils.getBean(BasFileMapper.class);
         if (workbook instanceof HSSFWorkbook) {
             fileName = fileName + ".xls";
         } else {
@@ -62,7 +70,14 @@ public class ExcelUtil {
         try {
             outputStream = new FileOutputStream(excelFile);
             workbook.write(outputStream);
+            DecimalFormat df= new DecimalFormat("0.00");
+            String fileSize = df.format((double) excelFile.length() / 1048576);
+            BasFile basFile = new BasFile();
+            basFile.setId(fileId);
+            basFile.setFileSize(fileSize+"MB");
+            basFileMapper.updateByPrimaryKeySelective(basFile);
             outputStream.flush();
+
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -83,7 +98,7 @@ public class ExcelUtil {
      * @param pojoClass 数据类型
      * @param data 数据
      */
-    public static void export(ExportParams entity, Class<?> pojoClass, Collection<?> data,Collection<?> data2,Class<?> pojoClass2,String filepath) {
+    public static void export(ExportParams entity, Class<?> pojoClass, Collection<?> data,Collection<?> data2,Class<?> pojoClass2,String filepath,Integer fileId) {
         log.info("线程-【{}】-导出开始",Thread.currentThread().getName());
         long start = System.currentTimeMillis();
         ExportParams params = new ExportParams();
@@ -165,7 +180,10 @@ public class ExcelUtil {
             deliveryTimeCell.setCellStyle(styleMain);
         }
         if (workbook != null){
-            downLoadExcel(entity.getTitle(), workbook,filepath);
+
+
+
+            downLoadExcel(entity.getTitle(), workbook,filepath,fileId);
         }
 
         log.info("线程-【{}】-导出结束-耗时:{}ms",Thread.currentThread().getName(), System.currentTimeMillis() - start);
@@ -179,7 +197,7 @@ public class ExcelUtil {
      * @param pojoClass 数据类型
      * @param data 数据
      */
-    public static void exportBySxssf(ExParams exParams, Class<?> pojoClass, Collection<?> data,Collection<?> data2,Class<?> pojoClass2,String filepath) {
+    public static void exportBySxssf(ExParams exParams, Class<?> pojoClass, Collection<?> data,Collection<?> data2,Class<?> pojoClass2,String filepath,Integer fileId) {
         log.info("线程-【{}】-导出开始",Thread.currentThread().getName());
         long start = System.currentTimeMillis();
         SXSSFWorkbook workbook = new SXSSFWorkbook(2<<10);
@@ -201,7 +219,7 @@ public class ExcelUtil {
         }else {
             createSheet(exParams.getSheetName(), pojoClass, data, workbook);
         }
-        downLoadExcel(exParams.getFileName(), workbook,filepath);
+        downLoadExcel(exParams.getFileName(), workbook,filepath,fileId);
         log.info("线程-【{}】-导出结束-耗时:{}ms",Thread.currentThread().getName(), System.currentTimeMillis() - start);
     }
 
