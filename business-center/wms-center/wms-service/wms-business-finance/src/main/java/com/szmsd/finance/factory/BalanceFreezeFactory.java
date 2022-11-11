@@ -196,7 +196,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 if (!balance.checkAndSetAmountAndCreditAnd(changeAmount, false, BalanceDTO::freeze)) {
 
                     String message = "Sorry, your "+currencyCode+" balance is low ,"+changeAmount;
-                    throw new CommonException(message);
+                    throw new RuntimeException(message);
                 }
                 return true;
             }
@@ -220,7 +220,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                     setHasFreeze(dto);
                     return true;
                 }
-                throw new CommonException("999", "解冻金额不足 单号: " + dto.getNo() + " 金额：" + amountChange);
+                throw new RuntimeException("解冻金额不足 单号: " + dto.getNo() + " 金额：" + amountChange);
             }
         }
 
