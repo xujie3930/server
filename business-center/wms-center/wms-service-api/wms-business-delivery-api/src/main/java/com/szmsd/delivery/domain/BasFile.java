@@ -43,6 +43,9 @@ public class BasFile extends BaseEntity {
     @ApiModelProperty(value = "模块名英文")
     private String modularNameEn;
 
+    @ApiModelProperty(value = "文件大小")
+    private String fileSize;
+
     @ApiModelProperty(value = "开始时间")
     @TableField(exist = false)
     private String startDate;

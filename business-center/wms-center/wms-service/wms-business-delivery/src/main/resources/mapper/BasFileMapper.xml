@@ -162,6 +162,9 @@
       <if test="state != null" >
         state = #{state,jdbcType=VARCHAR},
       </if>
+      <if test="fileSize != null" >
+        file_size = #{fileSize,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
