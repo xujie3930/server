@@ -184,7 +184,8 @@ public class CreditInfoBO {
                     return resultAmount;
                 } else {
                     //this.repaymentAmount = amount;
-                    this.creditUseAmount = this.creditUseAmount.subtract(amount);
+                    BigDecimal cU = this.creditUseAmount.subtract(amount);
+                    this.creditUseAmount = cU;
                     return BigDecimal.ZERO;
                 }
             case TIME_LIMIT:
@@ -198,7 +199,8 @@ public class CreditInfoBO {
                     return resultAmount;
                 } else {
                     //this.repaymentAmount = amount;
-                    this.creditUseAmount = this.creditUseAmount.subtract(amount);
+                    BigDecimal cU = this.creditUseAmount.subtract(amount);
+                    this.creditUseAmount = cU;
                     return BigDecimal.ZERO;
                 }
             default:
