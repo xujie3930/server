@@ -75,4 +75,14 @@ public class HttpDiscountController extends BaseController {
         return httpDiscountService.customUpdate(dto);
     }
 
+    /**
+     * //cod接口拉取数据
+     * @return
+     */
+    @PostMapping("insertBasCodExternal")
+    public R basCodlist() {
+        R r=  httpDiscountService.insertBasCodExternal();
+        return r;
+    }
+
 }

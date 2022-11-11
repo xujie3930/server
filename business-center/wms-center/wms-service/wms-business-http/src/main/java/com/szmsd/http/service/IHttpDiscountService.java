@@ -24,4 +24,6 @@ public interface IHttpDiscountService {
 
 
     R<OperationRecordDto> operationRecord(String id);
+
+    R insertBasCodExternal();
 }
