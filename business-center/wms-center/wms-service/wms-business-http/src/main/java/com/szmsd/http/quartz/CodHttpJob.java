@@ -60,9 +60,6 @@ public class CodHttpJob extends QuartzJobBean {
                 basCodExternalMapper.insertSelective(x);
             });
         }
-        System.out.println("cod拉取终止后i的数值"+i);
-
-
 
 
     }
