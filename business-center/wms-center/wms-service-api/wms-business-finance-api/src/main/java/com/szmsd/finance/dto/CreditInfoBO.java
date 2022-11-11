@@ -179,8 +179,9 @@ public class CreditInfoBO {
                 if (amount.compareTo(this.creditUseAmount) >= 0) {
                     this.repaymentAmount = this.creditUseAmount;
                     this.creditStatus = CreditConstant.CreditStatusEnum.ACTIVE.getValue();
+                    BigDecimal resultAmount = amount.subtract(this.creditUseAmount);
                     this.creditUseAmount = BigDecimal.ZERO;
-                    return amount.subtract(this.creditUseAmount);
+                    return resultAmount;
                 } else {
                     //this.repaymentAmount = amount;
                     this.creditUseAmount = this.creditUseAmount.subtract(amount);
@@ -191,8 +192,8 @@ public class CreditInfoBO {
                 log.info("rechargeCreditAmount TIME_LIMIT");
                 if (amount.compareTo(this.creditUseAmount) >= 0) {
                     this.repaymentAmount = this.creditUseAmount;
-                    this.creditUseAmount = BigDecimal.ZERO;
                     BigDecimal resultAmount = amount.subtract(this.creditUseAmount);
+                    this.creditUseAmount = BigDecimal.ZERO;
                     log.info("rechargeCreditAmount 充值{}",resultAmount);
                     return resultAmount;
                 } else {
