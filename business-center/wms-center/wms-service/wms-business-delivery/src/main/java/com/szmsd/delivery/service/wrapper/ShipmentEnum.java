@@ -34,12 +34,8 @@ import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
 import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import com.szmsd.inventory.domain.dto.InventoryOperateListDto;
-import com.szmsd.pack.api.feign.PackageDeliveryConditionsFeignService;
-import com.szmsd.pack.domain.PackageDeliveryConditions;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -299,6 +295,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 }
             }
 
+            IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
 
             // 创建承运商物流订单
             IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
@@ -310,6 +307,12 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
                 delOutbound.setReferenceNumber(shipmentOrderResult.getReferenceNumber());
             }
+
+            DelOutbound delOutboundUpd = new DelOutbound();
+            delOutboundUpd.setId(delOutbound.getId());
+            delOutboundUpd.setReferenceNumber(delOutbound.getReferenceNumber());
+            iDelOutboundService.updateById(delOutboundUpd);
+
             logger.info(">>>>>{}-承运商订单创建完成", delOutbound.getOrderNo());
             DelOutboundOperationLogEnum.SMT_SHIPMENT_ORDER.listener(delOutbound);
 
