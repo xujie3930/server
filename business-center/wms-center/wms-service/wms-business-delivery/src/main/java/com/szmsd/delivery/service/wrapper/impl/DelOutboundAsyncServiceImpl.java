@@ -606,7 +606,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     if(StringUtils.equals(type, "pushDate")){
                         //不调用wms的订单
                         ShipmentOrderSubmissionParam param = new ShipmentOrderSubmissionParam();
-                        param.setReferenceNumber(""+delOutbound.getId());
+                        param.setReferenceNumber(delOutbound.getReferenceNumber());
                         try {
                             //回写状态提交承运商物流订单（客户端）
                             R r = htpCarrierFeignService.submission(param);

@@ -308,6 +308,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
                 delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
                 delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
+                delOutbound.setReferenceNumber(shipmentOrderResult.getReferenceNumber());
             }
             logger.info(">>>>>{}-承运商订单创建完成", delOutbound.getOrderNo());
             DelOutboundOperationLogEnum.SMT_SHIPMENT_ORDER.listener(delOutbound);
