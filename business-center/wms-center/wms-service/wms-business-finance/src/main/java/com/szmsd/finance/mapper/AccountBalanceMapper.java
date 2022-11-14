@@ -7,10 +7,12 @@ import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.dto.AccountBalanceUpdateDTO;
 import com.szmsd.finance.dto.UserCreditDetailDTO;
+import com.szmsd.finance.vo.CreditUseInfo;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author liulei
@@ -40,4 +42,6 @@ public interface AccountBalanceMapper extends BaseMapper<AccountBalance> {
     List<String>  selectsellerCodeus(@Param("username")String username);
 
     int setBalance(AccountBalanceUpdateDTO accountBalance);
+
+    List<CreditUseInfo> queryTimeCreditUse(@Param("cusCode")String cusCode, @Param("currencyCode")String currencyCode);
 }

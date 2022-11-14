@@ -654,9 +654,16 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         log.info("查询用户币别余额{}-{}", cusCode, currencyCode);
         // 查询授信额使用数
 
-        Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
-        log.info("查询用户币别余额完成：{}", JSONObject.toJSONString(creditUse));
-        BigDecimal creditUseAmount =  Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+        //Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
+//        log.info("查询用户币别余额完成：{}", JSONObject.toJSONString(creditUse));
+//        BigDecimal creditUseAmount =  Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+
+//          List<CreditUseInfo> creditUseList = accountBalanceMapper.queryTimeCreditUse(cusCode,currencyCode);
+//
+//          Map<String,CreditUseInfo> creditUse = creditUseList.stream().collect(Collectors.toMap(CreditUseInfo::getCurrencyCode,v->v));
+//
+//          log.info("查询用户币别余额完成：{}", JSONObject.toJSONString(creditUse));
+//          BigDecimal creditUseAmount =  Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
 
 //        CompletableFuture<BigDecimal> creditUseAmountFuture = CompletableFuture.supplyAsync(() -> {
 //            Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
@@ -738,8 +745,12 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
             BeanUtils.copyProperties(accountBalance, creditInfoBO);
             balanceDTO.setCreditInfoBO(creditInfoBO);
+            BigDecimal creditUseAmount = accountBalance.getCreditUseAmount();
             balanceDTO.getCreditInfoBO().setCreditUseAmount(creditUseAmount);
             balanceDTO.setVersion(accountBalance.getVersion());
+
+            log.info("查询用户币别使用授信额度：{}", creditUseAmount);
+
             return balanceDTO;
         } catch (Exception e) {
             e.printStackTrace();

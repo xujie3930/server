@@ -185,4 +185,14 @@
         where cus_code = #{cusCode} and currency_code = #{currencyCode} and version = #{version}
 
     </update>
+
+    <select id="queryTimeCreditUse" resultType="com.szmsd.finance.vo.CreditUseInfo">
+
+        SELECT currency_code as currencyCode, credit_use_amount as creditUseAmount
+        FROM fss_account_balance
+        <where>
+            cus_code = #{cusCode} and currency_code = #{currencyCode}
+        </where>
+
+    </select>
 </mapper>
