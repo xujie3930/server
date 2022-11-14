@@ -864,7 +864,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             String shipmentService = delOutbound.getShipmentService();
             String trackingAcquireType = delOutbound.getTrackingAcquireType();
 
-            BasShipmenRulesService basShipmenRulesService = SpringUtils.getBean(BasShipmenRulesService.class);
+            //BasShipmenRulesService basShipmenRulesService = SpringUtils.getBean(BasShipmenRulesService.class);
 
             //8431 提审订单时，如果返回的物流服务是空的，跳过调用供应商
             if(StringUtils.isEmpty(shipmentService) || trackingAcquireType.equals(DelOutboundTrackingAcquireTypeEnum.NONE.getCode())){
@@ -878,6 +878,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 //            if(CollectionUtils.isNotEmpty(list)){
 //                return;
 //            }
+
+            IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
 
             logger.info("{}-创建承运商物流订单：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             // 判断是否需要创建物流订单
@@ -893,6 +895,12 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
                     delOutbound.setReferenceNumber(shipmentOrderResult.getReferenceNumber());
                 }
+
+                DelOutbound delOutboundUpd = new DelOutbound();
+                delOutboundUpd.setId(delOutbound.getId());
+                delOutboundUpd.setReferenceNumber(delOutbound.getReferenceNumber());
+                iDelOutboundService.updateById(delOutboundUpd);
+
                 logger.info(">>>>>[创建出库单{}]创建承运商 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
 
                 DelOutboundOperationLogEnum.BRV_SHIPMENT_ORDER.listener(delOutbound);
