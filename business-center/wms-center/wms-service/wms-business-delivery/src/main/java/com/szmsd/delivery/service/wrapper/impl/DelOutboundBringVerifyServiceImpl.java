@@ -620,8 +620,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 创建承运商物流订单
         CreateShipmentOrderCommand createShipmentOrderCommand = new CreateShipmentOrderCommand();
         createShipmentOrderCommand.setWarehouseCode(delOutbound.getWarehouseCode());
+        String referenceNumber = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
         // 改成uuid
-        createShipmentOrderCommand.setReferenceNumber(UUID.randomUUID().toString().replaceAll("-", "").toUpperCase());
+        createShipmentOrderCommand.setReferenceNumber(referenceNumber);
         // 订单号传refno
         if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
             createShipmentOrderCommand.setOrderNumber(delOutbound.getRefNo());
@@ -776,6 +777,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
             }
             this.transferCallback(delOutbound.getOrderNo(), delOutbound.getShopifyOrderNo(), shipmentService, shipmentOrderResult.getMainTrackingNumber(), null);
+            shipmentOrderResult.setReferenceNumber(referenceNumber);
             return shipmentOrderResult;
         } else {
             String exceptionMessage = Utils.defaultValue(ProblemDetails.getErrorMessageOrNull(responseObjectWrapper.getError(), true), "创建承运商物流订单失败，调用承运商系统失败");
