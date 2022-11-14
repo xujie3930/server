@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Mapper
 public interface BasRetreatPieceMapper {
-    int deleteByPrimaryKey(Integer id);
+    int deleteByPrimaryKey(@Param("codeKey") String codeKey);
 
     int insert(BasRetreatPiece record);
 

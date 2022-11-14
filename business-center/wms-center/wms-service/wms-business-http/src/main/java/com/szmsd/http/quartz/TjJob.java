@@ -7,6 +7,7 @@ import com.szmsd.http.enums.DomainEnum;
 import com.szmsd.http.service.IRetreatPieceService;
 import com.szmsd.http.service.RemoteInterfaceService;
 import com.szmsd.http.vo.HttpResponseVO;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -62,11 +63,12 @@ public class TjJob extends QuartzJobBean {
         httpRequestDto.setBody(tpieceDto);
         HttpResponseVO httpResponseVO = remoteInterfaceService.rmi(httpRequestDto);
         Object o=httpResponseVO.getBody();
+        logger.info("调用国外接口返回的Body：{}",o);
         Map map4 = JSONObject.parseObject(String.valueOf(o), Map.class);
-
         Object value = JSONObject.toJSON(map4.get("result"));
-
+        logger.info("调用国外接口返回的result：{}",value);
         Map map5 = JSONObject.parseObject(value.toString(), Map.class);
+        logger.info("调用国外接口返回的map5：{}",map5);
         int a= iRetreatPieceService.insetRetreatPiece(map5);
 
     }
