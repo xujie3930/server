@@ -45,7 +45,7 @@ public class QuartzHttpTjConfig {
 //        每天的0点、13点、18点、21点都执行一次：0 0 0,13,18,21 * * ?
         return TriggerBuilder.newTrigger().forJob(TjJob())
                 .withIdentity("TjJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */20 * * * ?"))
                 .build();
     }
 
