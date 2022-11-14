@@ -19,6 +19,7 @@ import com.szmsd.finance.handler.BillSelectBalanceTask;
 import com.szmsd.finance.mapper.AccountBalanceLogMapper;
 import com.szmsd.finance.mapper.AccountBillRecordMapper;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
+import com.szmsd.finance.mapper.FssConvertUnitMapper;
 import com.szmsd.finance.service.AccountBillRecordService;
 import com.szmsd.finance.util.ExcelUtil;
 import com.szmsd.finance.vo.*;
@@ -59,6 +60,9 @@ public class AccountBillRecordServiceImpl implements AccountBillRecordService {
 
     @Resource
     private AccountBalanceLogMapper accountBalanceLogMapper;
+
+    @Resource
+    private FssConvertUnitMapper fssConvertUnitMapper;
 
 
     @Value("${filepath}")
@@ -116,6 +120,7 @@ public class AccountBillRecordServiceImpl implements AccountBillRecordService {
         billGeneratorBO.setBasFeignService(basFeignService);
         billGeneratorBO.setBasSellerInfoVO(basSellerInfoVO);
         billGeneratorBO.setRequest(request);
+        billGeneratorBO.setFssConvertUnitMapper(fssConvertUnitMapper);
         BillGeneratorExcelTask task = new BillGeneratorExcelTask(billGeneratorBO);
 
         ListenableFuture<AccountBillRecordTaskResultVO> taskResultVOFuture = exportThreadPoolTaskExecutor.submitListenable(task);

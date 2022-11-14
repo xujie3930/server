@@ -4,6 +4,7 @@ import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.finance.mapper.AccountBalanceLogMapper;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
+import com.szmsd.finance.mapper.FssConvertUnitMapper;
 import com.szmsd.finance.vo.BillGeneratorRequestVO;
 import lombok.Data;
 
@@ -21,5 +22,7 @@ public class BillGeneratorBO {
     private String recordId;
 
     private HttpServletRequest request;
+
+    private FssConvertUnitMapper fssConvertUnitMapper;
 
 }
