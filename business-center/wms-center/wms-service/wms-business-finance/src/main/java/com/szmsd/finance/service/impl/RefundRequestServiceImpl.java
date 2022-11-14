@@ -456,11 +456,11 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         accountSerialBillDTO.setSpecifications(x.getSpecifications());
         accountSerialBillDTO.setCreateTime(x.getDelOucreateTime());
 
-        if (x.getTreatmentProperties().equals("退费")||x.getTreatmentProperties().equals("优化")||x.getTreatmentProperties().equals("赔偿")){
-         accountSerialBillDTO.setNature(" 退费/优化/赔偿");
-        }else {
+//        if (x.getTreatmentProperties().equals("退费")||x.getTreatmentProperties().equals("优化")||x.getTreatmentProperties().equals("赔偿")){
+//         accountSerialBillDTO.setNature("退费/优化/赔偿");
+//        }else {
             accountSerialBillDTO.setNature(x.getTreatmentProperties());
-        }
+//        }
         accountSerialBillDTO.setBusinessType(x.getBusinessTypeName());
         accountSerialBillDTO.setChargeCategoryChange(x.getFeeTypeName());
 
