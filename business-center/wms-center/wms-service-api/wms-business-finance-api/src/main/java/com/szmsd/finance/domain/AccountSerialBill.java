@@ -148,6 +148,14 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "附注")
     private String note;
 
+    @ApiModelProperty(value = "亚马逊服务id")
+    private String amazonLogisticsRouteId;
+
+    @ApiModelProperty(value = "国家代码")
+    private String countryCode;
+
+    @ApiModelProperty(value = "国家名称")
+    private String country;
 
 
     public void setRemark(String remark) {

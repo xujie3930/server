@@ -115,4 +115,16 @@ public class AccountSerialBillExcelVO implements Serializable {
     @ApiModelProperty(value = "性质")
     @Excel(name = "性质")
     private String nature;
+
+    @ApiModelProperty(value = "平台标记单号")
+    @Excel(name = "平台标记单号")
+    private String amazonLogisticsRouteId;
+
+    @ApiModelProperty(value = "国家代码")
+    @Excel(name = "国家代码")
+    private String countryCode;
+
+    @ApiModelProperty(value = "国家名称")
+    @Excel(name = "国家名称")
+    private String country;
 }

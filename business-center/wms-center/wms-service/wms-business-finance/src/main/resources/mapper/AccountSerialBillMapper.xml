@@ -36,6 +36,7 @@
         <result column="shipment_service" property="shipmentService"/>
         <result column="shipment_rule_name" property="shipmentRuleName"/>
         <result column="calc_weight_unit" property="calcWeightUnit"/>
+        <result column="amazon_logistics_route_id" property="amazonLogisticsRouteId"/>
     </resultMap>
 
     <resultMap id="AccountSerialBillExcelVOMap" type="com.szmsd.finance.vo.AccountSerialBillExcelVO">
@@ -57,7 +58,9 @@
         <result column="amount" property="amount"/>
         <result column="charge_category" property="chargeCategory"/>
         <result column="charge_type" property="chargeType"/>
-
+        <result column="amazon_logistics_route_id" property="amazonLogisticsRouteId"/>
+        <result column="country" property="country"/>
+        <result column="country_code" property="countryCode"/>
     </resultMap>
 
     <select id="selectPageList" resultType="com.szmsd.finance.domain.AccountSerialBill" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
@@ -67,7 +70,7 @@
         a.warehouse_code,a.warehouse_name,a.pay_method,a.business_category,a.product_code,a.product_category,
         a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
         a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
-        a.calc_weight,a.specifications,a.nature
+        a.calc_weight,a.specifications,a.nature,a.amazon_logistics_route_id,a.country,a.country_code
 
         FROM `fss_account_serial_bill` a
         <include refid="SelectSerialBillWhere"/>
@@ -239,7 +242,7 @@
             DOB.destination_delivery,DOB.weight,DOB.forecast_weight,
             DOB.calc_weight,DOB.calc_weight_unit,
             DOB.create_time,
-            DOB.specifications,
+            DOB.specifications,DOB.amazon_logistics_route_id,
             DOD.product_name,DOD.sku,
             DOA.country,DOA.country_code,
             sum(FASB.amount) as total_amount,
@@ -287,7 +290,7 @@
             a.warehouse_code,a.warehouse_name,a.pay_method,a.business_category,a.product_code,a.product_category,
             a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
             a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
-            a.calc_weight,a.specifications,a.serial_number
+            a.calc_weight,a.specifications,a.serial_number,a.amazon_logistics_route_id,a.country_code,a.country
         FROM `fss_account_serial_bill` a
         <where>
             <if test="cusCode != null and cusCode != ''">
@@ -333,6 +336,7 @@
         inner join del_outbound as DOB on FASB.`no` = DOB.order_no
         <where>
             and DOB.del_flag = 0
+            and FASB.business_category not in ('优惠','退费','赔偿','补收')
             <if test="orderTypeList != null">
                 and DOB.order_type in
                 <foreach collection="orderTypeList" close=")" open="(" separator="," item="item">
@@ -467,6 +471,90 @@
 
     </select>
 
+    <select id="discount" resultType="com.szmsd.finance.vo.BillBusinessTotalVO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
+
+        select
+        FASB.charge_category as chargeCategory,FASB.currency_code as currencyCode,
+        '优惠' as nature,
+        sum(FASB.amount) as amount,FASB.remark
+        from fss_account_serial_bill as FASB
+        <where>
+
+            and FASB.business_category like '%优惠%'
+
+            <if test="cusCode != null and cusCode != ''">
+                and FASB.cus_code = #{cusCode}
+            </if>
+
+            <if test="billStartTime != null  and billStartTime !='' ">
+                and FASB.payment_time <![CDATA[ >= ]]> #{billStartTime}
+            </if>
+
+            <if test="billEndTime != null  and billEndTime != ''">
+                and FASB.payment_time <![CDATA[ <= ]]> #{billEndTime}
+            </if>
+        </where>
+
+        group by FASB.charge_category,FASB.currency_code
+
+    </select>
+
+    <select id="compensate" resultType="com.szmsd.finance.vo.BillBusinessTotalVO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
+
+        select
+        FASB.charge_category as chargeCategory,FASB.currency_code as currencyCode,
+        '赔偿' as nature,
+        sum(FASB.amount) as amount,FASB.remark
+        from fss_account_serial_bill as FASB
+        <where>
+
+            and FASB.business_category like '%赔偿%'
+
+            <if test="cusCode != null and cusCode != ''">
+                and FASB.cus_code = #{cusCode}
+            </if>
+
+            <if test="billStartTime != null  and billStartTime !='' ">
+                and FASB.payment_time <![CDATA[ >= ]]> #{billStartTime}
+            </if>
+
+            <if test="billEndTime != null  and billEndTime != ''">
+                and FASB.payment_time <![CDATA[ <= ]]> #{billEndTime}
+            </if>
+        </where>
+
+        group by FASB.charge_category,FASB.currency_code
+
+    </select>
+
+    <select id="refund" resultType="com.szmsd.finance.vo.BillBusinessTotalVO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
+
+        select
+        FASB.charge_category as chargeCategory,FASB.currency_code as currencyCode,
+        '退费' as nature,
+        sum(FASB.amount) as amount,FASB.remark
+        from fss_account_serial_bill as FASB
+        <where>
+
+            and FASB.business_category like '%退费%'
+
+            <if test="cusCode != null and cusCode != ''">
+                and FASB.cus_code = #{cusCode}
+            </if>
+
+            <if test="billStartTime != null  and billStartTime !='' ">
+                and FASB.payment_time <![CDATA[ >= ]]> #{billStartTime}
+            </if>
+
+            <if test="billEndTime != null  and billEndTime != ''">
+                and FASB.payment_time <![CDATA[ <= ]]> #{billEndTime}
+            </if>
+        </where>
+
+        group by FASB.charge_category,FASB.currency_code
+
+    </select>
+
     <select id="balanceConversion" resultType="com.szmsd.finance.vo.BillBusinessTotalVO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
 
         select
@@ -574,7 +662,7 @@
             a.warehouse_code,a.warehouse_name,a.pay_method,a.business_category,a.product_code,a.product_category,
             a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
             a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
-            a.calc_weight,a.specifications,a.nature,a.serial_number,
+            a.calc_weight,a.specifications,a.nature,a.serial_number,a.amazon_logistics_route_id,a.country_code,a.country,
             a.charge_type
         FROM `fss_account_serial_bill` a
         <include refid="SelectSerialBillWhere"/>

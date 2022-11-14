@@ -31,7 +31,6 @@ import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.exception.api.feign.ExceptionInfoFeignService;
 import com.szmsd.exception.dto.ProcessExceptionOrderRequest;
-import com.szmsd.exception.dto.ProcessExceptionRequest;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
@@ -64,7 +63,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -81,6 +79,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
 
     @Autowired
     private IDelOutboundService delOutboundService;
+
+    @Autowired
+    private IDelOutboundAddressService iDelOutboundAddressService;
+
     @Autowired
     @Lazy
     private IDelOutboundBringVerifyService delOutboundBringVerifyService;
@@ -114,8 +116,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private IDelOutboundExceptionService delOutboundExceptionService;
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
-    @Autowired
-    private IDelSrmCostLogService delSrmCostLogService;
+
     @SuppressWarnings({"all"})
     @Autowired
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
@@ -341,6 +342,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
 
                         List<DelOutboundCharge> chargeList = this.delOutboundChargeService.listCharges(orderNo);
 
+                        //汪总说：一个出库只会有一个地址
+                        List<DelOutboundAddress> addresses = this.iDelOutboundAddressService.list(Wrappers.<DelOutboundAddress>query().lambda().eq(DelOutboundAddress::getOrderNo,orderNo));
+                        DelOutboundAddress address = new DelOutboundAddress();
+                        if(CollectionUtils.isNotEmpty(addresses)){
+                            address = addresses.get(0);
+                        }
 
                         Map<String, List<DelOutboundCharge>> groupByCharge =
                                 chargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
@@ -378,6 +385,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                                     serialBill.setShipmentRule(delOutbound.getShipmentRule());
                                     serialBill.setShipmentRuleName(delOutbound.getShipmentRuleName());
                                     serialBill.setRemark(delOutbound.getRemark());
+                                    serialBill.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
+                                    serialBill.setCountry(address.getCountry());
+                                    serialBill.setCountryCode(address.getCountryCode());
+
                                     serialBillInfoList.add(serialBill);
                                 }
                                 custPayDTO.setSerialBillInfoList(serialBillInfoList);
@@ -409,6 +420,14 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     completedState = "PM_FEE_DE";
                 }
                 if ("PM_FEE_DE".equalsIgnoreCase(completedState)) {
+
+                    //汪总说：一个出库只会有一个地址
+                    List<DelOutboundAddress> addresses = this.iDelOutboundAddressService.list(Wrappers.<DelOutboundAddress>query().lambda().eq(DelOutboundAddress::getOrderNo,orderNo));
+                    DelOutboundAddress address = new DelOutboundAddress();
+                    if(CollectionUtils.isNotEmpty(addresses)){
+                        address = addresses.get(0);
+                    }
+
                     // 根据出库单上的包材类型进行扣去物料费。
                     String packingMaterial = delOutbound.getPackingMaterial();
                     if (StringUtils.isNotEmpty(packingMaterial)) {
@@ -443,6 +462,11 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                                 dto.setWarehouseName(warehouseName);
                             }
                             dto.setChargeType(BillEnum.FeeTypeEnum.BALANCE_DEDUCTIONS.getName());
+
+                            dto.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
+                            dto.setCountryCode(address.getCountryCode());
+                            dto.setCountry(address.getCountry());
+
                             list.add(dto);
                             custPayDTO.setSerialBillInfoList(list);
                             R<?> r = this.rechargesFeignService.feeDeductions(custPayDTO);

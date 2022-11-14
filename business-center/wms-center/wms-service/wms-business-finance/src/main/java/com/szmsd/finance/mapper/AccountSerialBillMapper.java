@@ -54,4 +54,10 @@ public interface AccountSerialBillMapper extends BaseMapper<AccountSerialBill> {
     List<AccountSerialBillTotalVO> selectBillTotal(AccountSerialBillDTO dto);
 
     List<AccountSerialBillExcelVO> exportData(AccountSerialBillDTO dto);
+
+    List<BillBusinessTotalVO> discount(EleBillQueryVO queryVO);
+
+    List<BillBusinessTotalVO> compensate(EleBillQueryVO queryVO);
+
+    List<BillBusinessTotalVO> refund(EleBillQueryVO queryVO);
 }

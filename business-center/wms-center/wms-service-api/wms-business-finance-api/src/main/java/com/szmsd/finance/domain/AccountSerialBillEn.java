@@ -83,4 +83,16 @@ public class AccountSerialBillEn{
     @Excel(name = "Settlement Time", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date paymentTime;
 
+    @ApiModelProperty(value = "平台标记单号")
+    @Excel(name = "平台标记单号")
+    private String amazonLogisticsRouteId;
+
+    @ApiModelProperty(value = "国家代码")
+    @Excel(name = "国家代码")
+    private String countryCode;
+
+    @ApiModelProperty(value = "国家名称")
+    @Excel(name = "国家名称")
+    private String country;
+
 }
