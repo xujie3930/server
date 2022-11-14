@@ -230,7 +230,7 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
                 if(fssConvertUnit != null){
                     BigDecimal convertValue =  fssConvertUnit.getConvertValue();
                     BigDecimal result = BigDecimalUtil.setScale(calcWeight.multiply(convertValue),3);
-                    resultforecastWeight = result + fssConvertUnit.getConvertUnit();
+                    resultCalaWeight = result + fssConvertUnit.getConvertUnit();
                 }
             }
 
