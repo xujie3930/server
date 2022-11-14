@@ -27,7 +27,7 @@
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from bas_retreat_piece
-    where id = #{id,jdbcType=INTEGER}
+    where code_key = #{partnerCode,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="com.szmsd.http.domain.BasRetreatPiece">
     insert into bas_retreat_piece (id, partner_code, reception_wms_id,

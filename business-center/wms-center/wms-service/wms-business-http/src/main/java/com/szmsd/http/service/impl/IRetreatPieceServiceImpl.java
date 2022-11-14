@@ -75,7 +75,8 @@ public class IRetreatPieceServiceImpl implements IRetreatPieceService {
                 }
                 df2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 list2.get(s).put("date_finished",df2.format(date1));
-                basRetreatPieceMapper.insertSelective( list2.get(s));
+                basRetreatPieceMapper.deleteByPrimaryKey(String.valueOf(map5.get("partner_code")));
+                basRetreatPieceMapper.insertSelective(list2.get(s));
             }
 
         });
