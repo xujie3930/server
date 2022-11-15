@@ -41,6 +41,10 @@ public class SaaSCarrierServiceAdminApiConfig implements ApiConfig {
         //创建提货服务
         private String pickupPackageCreate;
 
+        private String shipmentOrderRealResult;
+
+        private String submission;
+
         public String getPickupPackageServices() {
             return pickupPackageServices;
         }
@@ -119,6 +123,22 @@ public class SaaSCarrierServiceAdminApiConfig implements ApiConfig {
 
         public void setLabelUrl(String labelUrl) {
             this.labelUrl = labelUrl;
+        }
+
+        public String getShipmentOrderRealResult() {
+            return shipmentOrderRealResult;
+        }
+
+        public void setShipmentOrderRealResult(String shipmentOrderRealResult) {
+            this.shipmentOrderRealResult = shipmentOrderRealResult;
+        }
+
+        public String getSubmission() {
+            return submission;
+        }
+
+        public void setSubmission(String submission) {
+            this.submission = submission;
         }
     }
 }
