@@ -51,6 +51,8 @@ import com.szmsd.putinstorage.domain.vo.InboundReceiptDetailVO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -66,6 +68,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+
+import static com.szmsd.finance.factory.abstractFactory.AbstractPayFactory.leaseTime;
+import static com.szmsd.finance.factory.abstractFactory.AbstractPayFactory.time;
 
 /**
  * @author liulei
@@ -106,6 +111,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     private DelOutboundFeignService delOutboundFeignService;
     @Resource
     private InboundReceiptFeignService inboundReceiptFeignService;
+
+    @Resource
+    private RedissonClient redissonClient;
 
     @Override
     public R<PageInfo<AccountBalance>> listPage(AccountBalanceDTO dto,String len) {
@@ -851,13 +859,32 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         /*if (checkPayInfo(dto.getCusCode(), dto.getCurrencyCode(), dto.getAmount())) {
             return R.failed("客户编码/币种不能为空且金额必须大于0.01");
         }*/
-        setCurrencyName(dto);
-        dto.setPayType(BillEnum.PayType.REFUND);
-        dto.setPayMethod(BillEnum.PayMethod.REFUND);
-        AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
-        Boolean flag = abstractPayFactory.updateBalance(dto);
-        if (Objects.isNull(flag)) return R.ok();
-        return flag ? R.ok() : R.failed();
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode()+ "_"+dto.getCurrencyCode();
+        RLock lock = redissonClient.getLock(key);
+        try {
+            if (lock.tryLock(time, leaseTime, TimeUnit.SECONDS)) {
+                setCurrencyName(dto);
+                dto.setPayType(BillEnum.PayType.REFUND);
+                dto.setPayMethod(BillEnum.PayMethod.REFUND);
+                AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
+                Boolean flag = abstractPayFactory.updateBalance(dto);
+                if (Objects.isNull(flag)) {
+                    return R.ok();
+                }
+
+                return flag ? R.ok() : R.failed();
+            }
+        }catch (Exception e){
+            log.error("退费操作超时，{}",e);
+            return R.failed(e.getMessage());
+        }finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                log.info("退费操作超时-释放redis锁 {}",key);
+                lock.unlock();
+            }
+        }
+
+        return R.failed();
     }
 
     /**
