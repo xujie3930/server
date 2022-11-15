@@ -608,8 +608,14 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         ShipmentOrderSubmissionParam param = new ShipmentOrderSubmissionParam();
                         param.setReferenceNumber(delOutbound.getReferenceNumber());
                         try {
+
+                            logger.info("请求submission请求参数：{},{}",delOutbound.getOrderNo(),JSONUtil.toJsonStr(param));
+
                             //回写状态提交承运商物流订单（客户端）
                             R r = htpCarrierFeignService.submission(param);
+
+                            logger.info("请求submission返回数据：{},{}",delOutbound.getOrderNo(),JSONUtil.toJsonStr(r.getData()));
+
                             if(r == null || r.getCode() != 200){
                                 logger.error("{}订单完成同步状态失败{}", delOutbound.getOrderNo(), JSONUtil.toJsonStr(r.getData()));
                             }
