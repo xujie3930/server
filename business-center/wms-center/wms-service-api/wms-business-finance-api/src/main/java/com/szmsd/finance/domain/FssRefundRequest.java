@@ -241,6 +241,19 @@ public class FssRefundRequest extends BaseEntity {
     @ApiModelProperty(value = "仓库产品名称")
     private String shipmentRuleName;
 
+    @ApiModelProperty(value = "Amazon Reference ID")
+    @TableField(exist = false)
+    private String amazonReferenceId;
+
+    @ApiModelProperty(value = "国家名称")
+    @TableField(exist = false)
+    private String country;
+
+    @ApiModelProperty(value = "国家代码")
+    @TableField(exist = false)
+    private String countryCode;
+
+
 
 
 }
