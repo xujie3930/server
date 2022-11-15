@@ -513,6 +513,21 @@ abstract class AbstractRequest extends BaseRequest {
         }).getBody();
     }
 
+    protected HttpResponseBody httpPostFilter(String warehouseCode, String api, Object object, Object... pathVariable) {
+        return this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> {
+            String url = urlConfig.getUrl() + getApi(urlConfig, api);
+            if (url.contains("{")) {
+                url = MessageFormat.format(url, pathVariable);
+            }
+            Map<String, String> headerMap = urlConfig.getHeaders();
+            Date requestTime = new Date();
+            String requestBody = JSON.toJSONString(object);
+            HttpResponseBody responseBody = HttpClientHelper.httpPost(url, requestBody, headerMap);
+            addLog(warehouseCode, urlGroupName, url, HttpMethod.PUT.name(), headerMap, requestBody, requestTime, responseBody.getBody(), responseBody.getStatus());
+            return responseBody;
+        });
+    }
+
     protected String httpPutMuFile(String warehouseCode, String api, Object object, MultipartFile file, Object... pathVariable) {
         return this.httpRequestBodyAdapter(warehouseCode, api, (urlGroupName, urlConfig) -> {
             String url = urlConfig.getUrl() + getApi(urlConfig, api);
