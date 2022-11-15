@@ -128,9 +128,13 @@
     </select>
 
     <select id="selectOutbounds" resultType="java.util.Map" parameterType="java.lang.String">
-        SELECT tracking_no as trackingNo,shipment_rule as shipmentRule,calc_weight as calcWeight,weight,
-               specifications,create_time as createTime,
-               shipment_rule_name as shipmentRuleName
-        from del_outbound where order_no=#{orderNo}
+        SELECT a.tracking_no as trackingNo,a.shipment_rule as shipmentRule,a.calc_weight as calcWeight,a.weight,
+               a.specifications,a.create_time as createTime,
+               a.shipment_rule_name as shipmentRuleName,
+               a.amazon_reference_id as amazonReferenceId,
+               b.country,b.country_code as countryCode
+        from del_outbound a
+        LEFT JOIN del_outbound_address b on a.order_no=b.order_no
+        where a.order_no=#{orderNo}
     </select>
 </mapper>
