@@ -230,16 +230,16 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
                 if(fssConvertUnit != null){
                     BigDecimal convertValue =  fssConvertUnit.getConvertValue();
                     BigDecimal result = BigDecimalUtil.setScale(calcWeight.multiply(convertValue),3);
-                    resultCalaWeight = result + fssConvertUnit.getConvertUnit();
+                    resultCalaWeight = result.toString();
                 }
             }
 
             if(billDirectDeliveryTotalVO.getWeight() != null){
-                resultWeight = billDirectDeliveryTotalVO.getWeight() +"g";
+                resultWeight = billDirectDeliveryTotalVO.getWeight();
             }
 
             if(billDirectDeliveryTotalVO.getForecastWeight() != null){
-                resultforecastWeight = billDirectDeliveryTotalVO.getForecastWeight() + "g";
+                resultforecastWeight = billDirectDeliveryTotalVO.getForecastWeight();
             }
 
             billDirectDeliveryTotalVO.setResultCalcWeight(resultCalaWeight);
