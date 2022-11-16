@@ -418,7 +418,7 @@
     <select id="businessAll" resultType="com.szmsd.finance.vo.BillBusinessTotalVO" parameterType="com.szmsd.finance.vo.EleBillQueryVO">
 
         select
-        FASB.charge_category as chargeCategory,FASB.currency_code as currencyCode,
+        FASB.charge_category as chargeCategory,FASB.warehouse_code as warehouse,FASB.currency_code as currencyCode,
         '优惠/退费/赔偿' as nature,
         sum(FASB.amount) as amount,FASB.remark
         from fss_account_serial_bill as FASB
@@ -439,7 +439,7 @@
             </if>
         </where>
 
-        group by FASB.charge_category,FASB.currency_code
+        group by FASB.charge_category,FASB.warehouse_code,FASB.currency_code
 
     </select>
 

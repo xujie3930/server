@@ -301,16 +301,16 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         List<BillBusinessTotalVO> supplementaryData  = accountSerialBillMapper.supplementary(queryVO);
 
         //优惠
-        List<BillBusinessTotalVO> discountData  = accountSerialBillMapper.discount(queryVO);
+        //List<BillBusinessTotalVO> discountData  = accountSerialBillMapper.discount(queryVO);
 
-        //优惠
-        List<BillBusinessTotalVO> compensateData = accountSerialBillMapper.compensate(queryVO);
+        //赔偿
+        //List<BillBusinessTotalVO> compensateData = accountSerialBillMapper.compensate(queryVO);
 
         //退费
-        List<BillBusinessTotalVO> refundData = accountSerialBillMapper.refund(queryVO);
+        //List<BillBusinessTotalVO> refundData = accountSerialBillMapper.refund(queryVO);
 
         //优惠/赔偿/退费
-        //List<BillBusinessTotalVO> businessAll  = accountSerialBillMapper.businessAll(queryVO);
+        List<BillBusinessTotalVO> businessAll  = accountSerialBillMapper.businessAll(queryVO);
 
         //余额转换
         List<BillBusinessTotalVO> balanceData  = accountSerialBillMapper.balanceConversion(queryVO);
@@ -321,9 +321,9 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
         businessTotalVOS.addAll(rechargeData);
         businessTotalVOS.addAll(withdrawalData);
         businessTotalVOS.addAll(supplementaryData);
-        businessTotalVOS.addAll(compensateData);
-        businessTotalVOS.addAll(discountData);
-        businessTotalVOS.addAll(refundData);
+        businessTotalVOS.addAll(businessAll);
+        //businessTotalVOS.addAll(discountData);
+        //businessTotalVOS.addAll(refundData);
         businessTotalVOS.addAll(balanceData);
 
         return businessTotalVOS;
