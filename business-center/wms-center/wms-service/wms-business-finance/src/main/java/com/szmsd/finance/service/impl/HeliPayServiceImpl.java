@@ -280,6 +280,7 @@ public class HeliPayServiceImpl implements HeliPayService {
             }
         }catch (Exception e){
             log.error("helipay payCallback() error: ", e);
+            return e.getMessage();
         }finally {
             if (lock.isLocked()){
                 lock.unlock();
@@ -292,6 +293,18 @@ public class HeliPayServiceImpl implements HeliPayService {
     }
 
     private String heliPayCallback(HeliRequest heliRequest) {
+
+        if(heliRequest == null){
+            return "Parameter exception";
+        }
+
+        String content = heliRequest.getContent();
+        String sign = heliRequest.getSign();
+
+        if(StringUtils.isEmpty(content) || StringUtils.isEmpty(sign)){
+
+            return "content sign ERROR";
+        }
 
         PayCallback payCallback = this.callbackDecode(heliRequest);
 
