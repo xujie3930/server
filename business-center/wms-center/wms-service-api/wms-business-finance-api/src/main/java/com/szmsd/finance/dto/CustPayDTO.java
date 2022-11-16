@@ -8,6 +8,7 @@ import lombok.Data;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +18,10 @@ import java.util.List;
  * @author liulei
  */
 @Data
-public class CustPayDTO {
+public class CustPayDTO implements Serializable {
+
+    private static final long serialVersionUID = 13242314321233L;
+
     @ApiModelProperty(value = "客户id")
     private Long cusId;
 
