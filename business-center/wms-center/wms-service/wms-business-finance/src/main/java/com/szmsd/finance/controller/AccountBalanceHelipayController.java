@@ -8,10 +8,7 @@ import com.szmsd.finance.vo.helibao.PayRequestVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -28,6 +25,13 @@ public class AccountBalanceHelipayController {
     public R<APPScanPayResponseForm> pay(@RequestBody @Valid PayRequestVO payRequestVO){
 
         return payService.pay(payRequestVO);
+    }
+
+    @ApiOperation(value = "/支付回调")
+    @GetMapping("/pay-callback")
+    public String payallback(HeliRequest heliRequest){
+
+        return payService.payCallback(heliRequest);
     }
 
     @ApiOperation(value = "/支付回调")
