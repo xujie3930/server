@@ -518,17 +518,20 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             }
         }
 
-        List<String> productCodeList = detailList.stream().map(DelOutboundDetail::getSku).collect(Collectors.toList());
-        R<List<BasProductService>> basProductServiceRs = chargeFeignService.selectBasProductService(productCodeList);
-
         Integer recevieWarehouseStatus = 0;
 
-        if(basProductServiceRs.getCode() == 200){
-            List<BasProductService> basProductServices = basProductServiceRs.getData();
-            for(BasProductService basProductService : basProductServices){
-                recevieWarehouseStatus = basProductService.getRecevieWarehouseStatus();
-                if(recevieWarehouseStatus.equals(RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode())){
-                    break;
+        if(StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
+
+            List<String> productCodeList = Arrays.asList(delOutbound.getShipmentRule());
+            R<List<BasProductService>> basProductServiceRs = chargeFeignService.selectBasProductService(productCodeList);
+
+            if (basProductServiceRs.getCode() == 200) {
+                List<BasProductService> basProductServices = basProductServiceRs.getData();
+                for (BasProductService basProductService : basProductServices) {
+                    recevieWarehouseStatus = basProductService.getRecevieWarehouseStatus();
+                    if (recevieWarehouseStatus.equals(RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode())) {
+                        break;
+                    }
                 }
             }
         }
@@ -613,17 +616,20 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             createShipmentOrderCommand.setOrderNumber(orderNo);
         }
 
-        List<String> productCodeList = detailList.stream().map(DelOutboundDetail::getSku).collect(Collectors.toList());
-        R<List<BasProductService>> basProductServiceRs = chargeFeignService.selectBasProductService(productCodeList);
-
         Integer recevieWarehouseStatus = 0;
 
-        if(basProductServiceRs.getCode() == 200){
-            List<BasProductService> basProductServices = basProductServiceRs.getData();
-            for(BasProductService basProductService : basProductServices){
-                recevieWarehouseStatus = basProductService.getRecevieWarehouseStatus();
-                if(recevieWarehouseStatus.equals(RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode())){
-                    break;
+        if(StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
+
+            List<String> productCodeList = Arrays.asList(delOutbound.getShipmentRule());
+            R<List<BasProductService>> basProductServiceRs = chargeFeignService.selectBasProductService(productCodeList);
+
+            if (basProductServiceRs.getCode() == 200) {
+                List<BasProductService> basProductServices = basProductServiceRs.getData();
+                for (BasProductService basProductService : basProductServices) {
+                    recevieWarehouseStatus = basProductService.getRecevieWarehouseStatus();
+                    if (recevieWarehouseStatus.equals(RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode())) {
+                        break;
+                    }
                 }
             }
         }
