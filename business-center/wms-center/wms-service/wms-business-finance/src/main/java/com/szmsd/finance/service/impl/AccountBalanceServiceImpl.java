@@ -121,60 +121,58 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             LambdaQueryWrapper<AccountBalance> queryWrapper = Wrappers.lambdaQuery();
             if (StringUtils.isNotEmpty(dto.getCusCode())) {
                 queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
-            }
+            }else {
 
-            LoginUser loginUser = SecurityUtils.getLoginUser();
-            List<String> sellerCodeList=null;
-            List<String> sellerCodeList1=null;
-            if (null != loginUser && !loginUser.getUsername().equals("admin")) {
-                String username = loginUser.getUsername();
-                sellerCodeList=accountBalanceMapper.selectsellerCode(username);
+                LoginUser loginUser = SecurityUtils.getLoginUser();
+                List<String> sellerCodeList = null;
+                List<String> sellerCodeList1 = null;
+                if (null != loginUser && !loginUser.getUsername().equals("admin")) {
+                    String username = loginUser.getUsername();
+                    sellerCodeList = accountBalanceMapper.selectsellerCode(username);
 
-                if (sellerCodeList.size()>0){
-                    queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
+                    if (sellerCodeList.size() > 0) {
+                        queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
 
-                } else if (sellerCodeList.size()==0){
-                    sellerCodeList1=accountBalanceMapper.selectsellerCodeus(username);
-                    if (sellerCodeList1.size()>0){
-                        queryWrapper.in(AccountBalance::getCusCode, sellerCodeList1);
-                    }else {
-                        queryWrapper.in(AccountBalance::getCusCode, "");
+                    } else if (sellerCodeList.size() == 0) {
+                        sellerCodeList1 = accountBalanceMapper.selectsellerCodeus(username);
+                        if (sellerCodeList1.size() > 0) {
+                            queryWrapper.in(AccountBalance::getCusCode, sellerCodeList1);
+                        } else {
+                            queryWrapper.in(AccountBalance::getCusCode, "");
+                        }
                     }
-                }
-                if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
-                    queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
-                }
-
-            }
-            if (null != loginUser && loginUser.getUsername().equals("admin")){
-                sellerCodeList=accountBalanceMapper.selectsellerCodes();
-                if (sellerCodeList.size()>0){
-                    queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
+                    if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
+                        queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
+                    }
 
                 }
-                if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
-                    queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
-                }
+                if (null != loginUser && loginUser.getUsername().equals("admin")) {
+                    sellerCodeList = accountBalanceMapper.selectsellerCodes();
+                    if (sellerCodeList.size() > 0) {
+                        queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
 
+                    }
+                    if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
+                        queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
+                    }
+
+                }
             }
             //设置分页参数
             PageHelper.startPage(dto.getPageNum(),dto.getPageSize());
 
             List<AccountBalance> accountBalances = accountBalanceMapper.listPage(queryWrapper);
 
-
-
-
-            accountBalances.forEach(x -> {
-                Map<String, CreditUseInfo> creditUseInfoMap = iDeductionRecordService.queryTimeCreditUse( x.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
-                Map<String, CreditUseInfo> needRepayCreditUseInfoMap = iDeductionRecordService.queryTimeCreditUse( x.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.CHECKED));
-                String currencyCode = x.getCurrencyCode();
-                BigDecimal creditUseAmount = Optional.ofNullable(creditUseInfoMap.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
-                x.setCreditUseAmount(creditUseAmount);
-                BigDecimal needRepayCreditUseAmount = Optional.ofNullable(needRepayCreditUseInfoMap.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
-                x.setNeedRepayCreditUseAmount(needRepayCreditUseAmount);
-            });
-            accountBalances.forEach(AccountBalance::showCredit);
+//            accountBalances.forEach(x -> {
+//                Map<String, CreditUseInfo> creditUseInfoMap = iDeductionRecordService.queryTimeCreditUse( x.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
+//                Map<String, CreditUseInfo> needRepayCreditUseInfoMap = iDeductionRecordService.queryTimeCreditUse( x.getCusCode(), new ArrayList<>(), Arrays.asList(CreditConstant.CreditBillStatusEnum.CHECKED));
+//                String currencyCode = x.getCurrencyCode();
+//                BigDecimal creditUseAmount = Optional.ofNullable(creditUseInfoMap.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+//                x.setCreditUseAmount(creditUseAmount);
+//                BigDecimal needRepayCreditUseAmount = Optional.ofNullable(needRepayCreditUseInfoMap.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
+//                x.setNeedRepayCreditUseAmount(needRepayCreditUseAmount);
+//            });
+//            accountBalances.forEach(AccountBalance::showCredit);
 
             accountBalances.forEach(x-> {
                         if (len.equals("en")) {
