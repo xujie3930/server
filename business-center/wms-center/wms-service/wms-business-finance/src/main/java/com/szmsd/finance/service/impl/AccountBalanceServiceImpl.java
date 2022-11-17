@@ -121,31 +121,31 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             LambdaQueryWrapper<AccountBalance> queryWrapper = Wrappers.lambdaQuery();
             if (StringUtils.isNotEmpty(dto.getCusCode())) {
                 queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
-            }else {
+            }
 
-                LoginUser loginUser = SecurityUtils.getLoginUser();
-                List<String> sellerCodeList = null;
-                List<String> sellerCodeList1 = null;
-                if (null != loginUser && !loginUser.getUsername().equals("admin")) {
-                    String username = loginUser.getUsername();
-                    sellerCodeList = accountBalanceMapper.selectsellerCode(username);
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            List<String> sellerCodeList = null;
+            List<String> sellerCodeList1 = null;
+            if (null != loginUser && !loginUser.getUsername().equals("admin")) {
+                String username = loginUser.getUsername();
+                sellerCodeList = accountBalanceMapper.selectsellerCode(username);
 
-                    if (sellerCodeList.size() > 0) {
-                        queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
+                if (sellerCodeList.size() > 0) {
+                    queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
 
-                    } else if (sellerCodeList.size() == 0) {
-                        sellerCodeList1 = accountBalanceMapper.selectsellerCodeus(username);
-                        if (sellerCodeList1.size() > 0) {
-                            queryWrapper.in(AccountBalance::getCusCode, sellerCodeList1);
-                        } else {
-                            queryWrapper.in(AccountBalance::getCusCode, "");
-                        }
+                } else if (sellerCodeList.size() == 0) {
+                    sellerCodeList1 = accountBalanceMapper.selectsellerCodeus(username);
+                    if (sellerCodeList1.size() > 0) {
+                        queryWrapper.in(AccountBalance::getCusCode, sellerCodeList1);
+                    } else {
+                        queryWrapper.in(AccountBalance::getCusCode, "");
                     }
-                    if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
-                        queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
-                    }
-
                 }
+                if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
+                    queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
+                }
+
+
                 if (null != loginUser && loginUser.getUsername().equals("admin")) {
                     sellerCodeList = accountBalanceMapper.selectsellerCodes();
                     if (sellerCodeList.size() > 0) {
