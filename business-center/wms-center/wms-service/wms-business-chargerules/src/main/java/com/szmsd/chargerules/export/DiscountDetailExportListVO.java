@@ -58,11 +58,17 @@ public class DiscountDetailExportListVO {
     private BigDecimal volumeLong;
 
 
-    @ExcelProperty("L*W*H")
+    @ExcelProperty("最小L*W*H")
     private BigDecimal minVolume;
 
-    @ExcelProperty("L+W+H")
+    @ExcelProperty("最大L*W*H")
+    private BigDecimal volume;
+
+    @ExcelProperty("最小L+W+H")
     private BigDecimal minPerimeter;
+
+    @ExcelProperty("最大L+W+H")
+    private BigDecimal perimeter;
 
     @ExcelProperty("偏远地区模板")
     private String remoteModel;
