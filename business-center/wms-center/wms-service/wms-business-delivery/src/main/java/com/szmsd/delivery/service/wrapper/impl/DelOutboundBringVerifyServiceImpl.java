@@ -15,6 +15,7 @@ import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.domain.BasProductService;
+import com.szmsd.chargerules.enums.RecevieWarehouseStatusEnum;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -526,7 +527,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             List<BasProductService> basProductServices = basProductServiceRs.getData();
             for(BasProductService basProductService : basProductServices){
                 recevieWarehouseStatus = basProductService.getRecevieWarehouseStatus();
-                if(recevieWarehouseStatus == 1){
+                if(recevieWarehouseStatus.equals(RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode())){
                     break;
                 }
             }
@@ -565,7 +566,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 new CountryInfo(warehouse.getCountryCode(), null, warehouse.getCountryName(), warehouse.getCountryChineseName())
         );
 
-        if(recevieWarehouseStatus == 1){
+        if(recevieWarehouseStatus.equals(RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode())){
             // 收货地址
             calcShipmentFeeCommand.setToAddress(fromAddress);
             // 发货地址
@@ -621,7 +622,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             List<BasProductService> basProductServices = basProductServiceRs.getData();
             for(BasProductService basProductService : basProductServices){
                 recevieWarehouseStatus = basProductService.getRecevieWarehouseStatus();
-                if(recevieWarehouseStatus == 1){
+                if(recevieWarehouseStatus.equals(RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode())){
                     break;
                 }
             }
@@ -657,7 +658,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         
         createShipmentOrderCommand.setClientNumber(delOutbound.getSellerCode());
 
-        if(recevieWarehouseStatus == 1){
+        if(recevieWarehouseStatus.equals(RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode())){
             createShipmentOrderCommand.setReceiverAddress(resultAddressCommand);
             createShipmentOrderCommand.setReturnAddress(addressCommand);
         }else {
