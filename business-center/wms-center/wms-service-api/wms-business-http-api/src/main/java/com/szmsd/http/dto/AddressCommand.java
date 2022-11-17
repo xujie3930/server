@@ -43,5 +43,5 @@ public class AddressCommand {
     //身份证
     private String idNumber;
 
-    private String houseNo;
+    private String houseNumber;
 }
