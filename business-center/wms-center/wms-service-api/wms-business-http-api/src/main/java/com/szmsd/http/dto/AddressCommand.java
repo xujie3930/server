@@ -42,4 +42,6 @@ public class AddressCommand {
     private String taxNumber;
     //身份证
     private String idNumber;
+
+    private String houseNo;
 }

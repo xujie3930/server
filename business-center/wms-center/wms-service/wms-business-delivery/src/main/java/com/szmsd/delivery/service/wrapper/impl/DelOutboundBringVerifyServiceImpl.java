@@ -645,7 +645,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 address.getPostCode(),
                 country.getEnName(),
                 address.getTaxNumber(),
-                address.getIdNumber()
+                address.getIdNumber(),
+                delOutbound.getHouseNo()
         );
 
         AddressCommand resultAddressCommand = new AddressCommand(warehouse.getContact(),
@@ -659,7 +660,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 warehouse.getPostcode(),
                 warehouse.getCountryName(),
                 address.getTaxNumber(),
-                address.getIdNumber()
+                address.getIdNumber(),
+                delOutbound.getHouseNo()
         );
         
         createShipmentOrderCommand.setClientNumber(delOutbound.getSellerCode());
@@ -871,7 +873,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 address.getPostCode(),
                 country.getEnName(),
                 address.getTaxNumber(),
-                address.getIdNumber()
+                address.getIdNumber(),
+                delOutbound.getHouseNo()
         ));
         createShipmentOrderCommand.setReturnAddress(new AddressCommand(warehouse.getContact(),
                 warehouse.getTelephone(),
@@ -884,7 +887,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 warehouse.getPostcode(),
                 warehouse.getCountryName(),
                 address.getTaxNumber(),
-                address.getIdNumber()
+                address.getIdNumber(),
+                delOutbound.getHouseNo()
             ));
         // 税号信息
         String ioss = delOutbound.getIoss();
