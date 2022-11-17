@@ -56,11 +56,17 @@ public class DiscountDetailImportDto {
     private BigDecimal volumeLong;
 
 
-    @Excel(name = "L*W*H")
+    @Excel(name = "最大L*W*H")
     private BigDecimal volume;
 
-    @Excel(name = "L+W+H")
+    @Excel(name = "最大L+W+H")
     private BigDecimal perimeter;
+
+    @Excel(name = "最小L*W*H")
+    private BigDecimal minVolume;
+
+    @Excel(name = "最小L+W+H")
+    private BigDecimal minPerimeter;
 
     @Excel(name = "偏远地区模板")
     private String remoteModel;
