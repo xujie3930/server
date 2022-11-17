@@ -297,6 +297,10 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                 }
             }
 
+            if(StringUtils.isEmpty(value.getAmazonLogisticsRouteId()) || value.getAmazonLogisticsRouteId().equals("null")){
+                value.setAmazonLogisticsRouteId(null);
+            }
+
             String serialNumber = this.createSerialNumber();
             value.setSerialNumber(serialNumber);
 

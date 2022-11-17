@@ -60,10 +60,16 @@ public class AccountSerialBillEn{
     private String logisticsCode;
 
 
-
+    @AutoFieldI18n
     @ApiModelProperty(value = "产品代码")
     @Excel(name = "Product Code")
-    private String productCode;
+    private String shipmentRule;
+
+    @AutoFieldI18n
+    @ApiModelProperty(value = "产品名称")
+    @Excel(name = "Product Name")
+    private String shipmentRuleName;
+
     @AutoFieldI18n
     @ApiModelProperty(value = "费用类别")
     @Excel(name = "Cost Code")
