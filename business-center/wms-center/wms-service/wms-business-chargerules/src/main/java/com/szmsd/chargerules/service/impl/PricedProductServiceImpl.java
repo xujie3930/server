@@ -34,10 +34,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -230,7 +227,7 @@ public class PricedProductServiceImpl implements IPricedProductService {
     }
 
     @Override
-    public String selectProductCode(String productCode) {
+    public Map selectProductCode(String productCode) {
       return   basProductServiceMapper.selectProductCode(productCode);
     }
 
