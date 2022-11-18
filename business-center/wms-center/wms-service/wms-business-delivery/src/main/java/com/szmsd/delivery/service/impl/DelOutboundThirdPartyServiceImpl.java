@@ -140,8 +140,15 @@ public class DelOutboundThirdPartyServiceImpl extends ServiceImpl<DelOutboundThi
 
     @Override
     public void thirdWMS(String orderNo) {
+
+        DelOutbound delOutbound = delOutboundService.getByOrderNo(orderNo);
+
+        if(delOutbound == null){
+            return;
+        }
+
         //该订单全部接收完成后，调用PRC
-        ApplicationContext context = delOutboundBringVerifyService.initContext(delOutboundService.getByOrderNo(orderNo));
+        ApplicationContext context = delOutboundBringVerifyService.initContext(delOutbound);
         ApplicationContainer applicationContainer = new ApplicationContainer(context, BringVerifyEnum.SHIPMENT_CREATE, BringVerifyEnum.END, BringVerifyEnum.SHIPMENT_CREATE);
         applicationContainer.action();
     }
