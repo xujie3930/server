@@ -570,6 +570,15 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
         baseMapper.updateDelOutboundEx(dto);
     }
 
+    @Override
+    public Integer selectExceptionInfoQuery(ExceptionInfoQueryDto dto) {
+        QueryWrapper<ExceptionInfo> where = new QueryWrapper<ExceptionInfo>();
+
+         this.handlerQueryCondition(where, dto);
+        where.orderByDesc("create_time");
+       return baseMapper.selectExceptionInfoQuery(where);
+    }
+
     private Date dealUTZTime(String time) {
         Date date = new Date();
         try {

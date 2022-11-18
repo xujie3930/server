@@ -37,6 +37,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.*;
@@ -833,7 +834,7 @@ public class DelOutboundController extends BaseController {
     @SneakyThrows
     public void export(HttpServletResponse response, @RequestBody DelOutboundListQueryDto queryDto) {
         try {
-
+            LoginUser loginUser = SecurityUtils.getLoginUser();
             String len = getLen();
 
             if (Objects.nonNull(SecurityUtils.getLoginUser())) {
@@ -870,6 +871,9 @@ public class DelOutboundController extends BaseController {
 
                     for (int i = 1; i <= pageTotal; i++) {
 
+                        Date date =new Date();
+                        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMddHHmmss");
+
 //                ExParams exParams = new ExParams();
 //                exParams.setFileName("包裹异常-"+i);
 //                exParams.setSheetName("出库单详情");
@@ -878,14 +882,14 @@ public class DelOutboundController extends BaseController {
                         queryDto1.setPageSize(pageSize);
                         QueryPage<DelOutboundExportListVO> queryPage = new DelOutboundExportQueryPage(queryDto, queryDto1, exportContext, this.delOutboundService);
                         QueryPage<DelOutboundExportItemListVO> itemQueryPage = new DelOutboundExportItemQueryPage(queryDto, queryDto1, this.delOutboundDetailService, this.baseProductClientService, listMap.get("059"), len);
-                        String fileName = "出库单详情-" + System.currentTimeMillis();
+                        String fileName = "出库单详情-" +loginUser.getUsername()+"-"+ simpleDateFormat.format(date);
                         BasFile basFile = new BasFile();
                         basFile.setState("0");
                         basFile.setFileRoute(filepath);
                         basFile.setCreateBy(SecurityUtils.getUsername());
                         basFile.setFileName(fileName + ".xls");
                         basFile.setModularType(0);
-                        basFile.setModularNameZh("包裹查询");
+                        basFile.setModularNameZh("出库订单导出");
                         basFile.setModularNameEn("OutboundOrderInformation");
                         basFileMapper.insertSelective(basFile);
 
@@ -917,6 +921,8 @@ public class DelOutboundController extends BaseController {
                     long start = System.currentTimeMillis();
 
                     for (int i = 1; i <= pageTotal; i++) {
+                        Date date =new Date();
+                        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMddHHmmss");
 //                ExParams exParams = new ExParams();
 //                exParams.setFileName("包裹异常-"+i);
 //                exParams.setSheetName("出库单详情");
@@ -940,7 +946,7 @@ public class DelOutboundController extends BaseController {
                                 page1.add(vo);
                             }
                         }
-                        String fileName = "OutboundOrderInformation-" + System.currentTimeMillis();
+                        String fileName = "OutboundOrderInformation-" +  loginUser.getUsername()+"-"+ simpleDateFormat.format(date);
 
                         BasFile basFile = new BasFile();
                         basFile.setState("1");
@@ -948,7 +954,7 @@ public class DelOutboundController extends BaseController {
                         basFile.setCreateBy(SecurityUtils.getUsername());
                         basFile.setFileName(fileName + ".xls");
                         basFile.setModularType(0);
-                        basFile.setModularNameZh("包裹查询");
+                        basFile.setModularNameZh("出库订单导出");
                         basFile.setModularNameEn("OutboundOrderInformation");
                         basFileMapper.insertSelective(basFile);
 
@@ -1020,7 +1026,7 @@ public class DelOutboundController extends BaseController {
                     //获取第一行数据
                     Row row2 =sheet.getRow(0);
 
-                    for (int i=0;i<31;i++){
+                    for (int i=0;i<32;i++){
                         Cell deliveryTimeCell = row2.getCell(i);
 
                         CellStyle styleMain = workbook.createCellStyle();
@@ -1153,7 +1159,7 @@ public class DelOutboundController extends BaseController {
                     //获取第一行数据
                     Row row2 =sheet.getRow(0);
 
-                    for (int i=0;i<31;i++){
+                    for (int i=0;i<32;i++){
                         Cell deliveryTimeCell = row2.getCell(i);
 
                         CellStyle styleMain = workbook.createCellStyle();

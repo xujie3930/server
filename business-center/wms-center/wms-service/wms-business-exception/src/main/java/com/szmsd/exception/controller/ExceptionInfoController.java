@@ -4,6 +4,7 @@ import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
+import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -26,23 +27,31 @@ import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.delivery.domain.BasFile;
+import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import com.szmsd.delivery.dto.DelQueryServiceImport;
+import com.szmsd.delivery.vo.DelOutboundExportItemListVO;
+import com.szmsd.delivery.vo.DelOutboundExportListVO;
 import com.szmsd.exception.domain.ExceptionInfo;
 import com.szmsd.exception.dto.*;
 import com.szmsd.exception.enums.StateSubEnum;
 import com.szmsd.exception.exported.DefaultSyncReadListener;
 import com.szmsd.exception.exported.ExceptionInfoExportContext;
 import com.szmsd.exception.exported.ExceptionInfoExportQueryPage;
+import com.szmsd.exception.mapper.BasExcetionFileMapper;
 import com.szmsd.exception.mapper.ExceptionInfoMapper;
 import com.szmsd.exception.service.IExceptionInfoService;
+import com.szmsd.exception.task.ExceptionEasyPoiExportTask;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +62,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -81,6 +91,11 @@ public class ExceptionInfoController extends BaseController {
     private BasRegionFeignService basRegionFeignService;
     @Autowired
     private ExceptionInfoMapper exceptionInfoMapper;
+    @Autowired
+    private BasExcetionFileMapper basExcetionFileMapper;
+
+    @Value("${filepaths}")
+    private String filepath;
 
     /**
      * 查询模块列表
@@ -154,6 +169,8 @@ public class ExceptionInfoController extends BaseController {
         }
     }
 
+
+
     /**
      * 导出模块列表(导入一对多合并单元格)
      */
@@ -161,7 +178,7 @@ public class ExceptionInfoController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.EXPORT)
     @GetMapping("/exportus")
     @ApiOperation(value = "导出模块列表", notes = "导出模块列表")
-    public void exportus(HttpServletResponse response, ExceptionInfoQueryDto dto) throws IOException {
+    public void exportus(HttpServletResponse response, ExceptionInfoQueryDto dto) throws IOException, InterruptedException {
 
         LoginUser loginUser = SecurityUtils.getLoginUser();
         if (null == loginUser) {
@@ -198,96 +215,149 @@ public class ExceptionInfoController extends BaseController {
             }
         }
 
+        Integer   ExceptionInfoTotal=exceptionInfoService.selectExceptionInfoQuery(dto);
+
+
+
         // 查询出库类型数据
         Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("085");
         ExceptionInfoExportContext exportContext = new ExceptionInfoExportContext();
         exportContext.setStateCacheAdapter(listMap.get("085"));
         QueryDto queryDto1 = new QueryDto();
-        queryDto1.setPageNum(1);
-        queryDto1.setPageSize(500);
-        QueryPage<ExceptionInfoExportDto> queryPage = new ExceptionInfoExportQueryPage(dto, queryDto1, exportContext, this.exceptionInfoService);
-        List<ExceptionInfoExportDto> list=queryPage.getPage();
-        list.forEach(x->{
-           if (x.getOrderTypeName().equals("出库单")){
-             x.setExceptionInfoDetailExportDtoList(exceptionInfoService.selectExceptionInfoDetailExport(x.getOrderNo()));
-           }
-        });
-        ExportParams params = new ExportParams();
-//        params.setTitle("异常通知中心_异常导出");
-        int a=0;
-        Workbook workbook=null;
-        if (dto.getType()==0){
-            List<ExceptionInfoExportCustomerDto> exceptionInfoExportCustomerDtos= BeanMapperUtil.mapList(list, ExceptionInfoExportCustomerDto.class);
-            workbook = ExcelExportUtil.exportExcel(params, ExceptionInfoExportCustomerDto.class, exceptionInfoExportCustomerDtos);
-            a=1;
+        if (ExceptionInfoTotal>500){
+            String filepath=this.filepath;
+            Integer pageSize = 100000;
 
-        }else if (dto.getType()==1){
-            workbook = ExcelExportUtil.exportExcel(params, ExceptionInfoExportDto.class, list);
+            // 数据分页==导出excel文件数量
+            int pageTotal = ExceptionInfoTotal % pageSize == 0 ? ExceptionInfoTotal / pageSize : ExceptionInfoTotal / pageSize + 1;
+            log.info("导出数据总量：{}条, 预计导出文件数量：{}件", ExceptionInfoTotal, pageTotal);
+            CountDownLatch countDownLatch = new CountDownLatch(pageTotal);
+            long start = System.currentTimeMillis();
 
-        }
+            for (int i = 1; i <= pageTotal; i++) {
+                queryDto1.setPageNum(i);
+                queryDto1.setPageSize(pageSize);
+                Date date =new Date();
+                SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMddHHmmss");
+                QueryPage<ExceptionInfoExportDto> queryPage = new ExceptionInfoExportQueryPage(dto, queryDto1, exportContext, this.exceptionInfoService);
+                List<ExceptionInfoExportDto> list = queryPage.getPage();
+                list.forEach(x -> {
+                    if (x.getOrderTypeName().equals("出库单")) {
+                        x.setExceptionInfoDetailExportDtoList(exceptionInfoService.selectExceptionInfoDetailExport(x.getOrderNo()));
 
+                    }
+                });
+                String fileName = "异常信息明细-" +loginUser.getUsername()+"-"+ simpleDateFormat.format(date);
+                BasFile basFile = new BasFile();
+                basFile.setState("0");
+                basFile.setFileRoute(filepath);
+                basFile.setCreateBy(SecurityUtils.getUsername());
+                basFile.setFileName(fileName + ".xls");
+                basFile.setModularType(1);
+                basFile.setModularNameZh("异常中心导出");
+                basFile.setModularNameEn("ExceptionExport");
+                basExcetionFileMapper.insertSelective(basFile);
 
+                ExceptionEasyPoiExportTask<ExceptionInfoExportDto> ExceptionInfoExTask = new ExceptionEasyPoiExportTask<ExceptionInfoExportDto>()
+                        .setExportParams(new ExportParams(fileName, "出库单详情(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, ExceptionInfoTotal)) + ")", ExcelType.XSSF))
+                        .setData(list)
+                        .setClazz(ExceptionInfoExportDto.class)
+                        .setFilepath(filepath)
+                        .setCountDownLatch(countDownLatch)
+                        .setExceptionInfoQueryDto(dto)
+                        .setFileId(basFile.getId());
 
-
-
-
-
-        Sheet sheet= workbook.getSheet("sheet0");
-
-      //获取第一行数据
-        Row row2 =sheet.getRow(0);
-
-        for (int i=0;i<19-a;i++){
-            Cell deliveryTimeCell = row2.getCell(i);
-
-            CellStyle styleMain = workbook.createCellStyle();
-            if (i==18-a){
-                styleMain.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
-            }else {
-                styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+                basFile.setState("1");
+                basExcetionFileMapper.updateByPrimaryKeySelective(basFile);
+                //threadPoolTaskExecutor.execute(delOutboundExportExTask);
+                new Thread(ExceptionInfoExTask, "export-" + i).start();
 
             }
-            Font font = workbook.createFont();
-       //true为加粗，默认为不加粗
-            font.setBold(true);
-     //设置字体颜色，颜色和上述的颜色对照表是一样的
-            font.setColor(IndexedColors.WHITE.getIndex());
-      //将字体样式设置到单元格样式中
-            styleMain.setFont(font);
+            countDownLatch.await();
+            log.info("所有导出任务完成，总计耗时：{}ms", System.currentTimeMillis() - start);
 
-            styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            styleMain.setAlignment(HorizontalAlignment.CENTER);
-            styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+
+        }else if (ExceptionInfoTotal<=500) {
+
+            queryDto1.setPageNum(1);
+            queryDto1.setPageSize(500);
+            QueryPage<ExceptionInfoExportDto> queryPage = new ExceptionInfoExportQueryPage(dto, queryDto1, exportContext, this.exceptionInfoService);
+            List<ExceptionInfoExportDto> list = queryPage.getPage();
+            list.forEach(x -> {
+                if (x.getOrderTypeName().equals("出库单")) {
+                    x.setExceptionInfoDetailExportDtoList(exceptionInfoService.selectExceptionInfoDetailExport(x.getOrderNo()));
+                }
+            });
+            ExportParams params = new ExportParams();
+//        params.setTitle("异常通知中心_异常导出");
+            int a = 0;
+            Workbook workbook = null;
+            if (dto.getType() == 0) {
+                List<ExceptionInfoExportCustomerDto> exceptionInfoExportCustomerDtos = BeanMapperUtil.mapList(list, ExceptionInfoExportCustomerDto.class);
+                workbook = ExcelExportUtil.exportExcel(params, ExceptionInfoExportCustomerDto.class, exceptionInfoExportCustomerDtos);
+                a = 1;
+
+            } else if (dto.getType() == 1) {
+                workbook = ExcelExportUtil.exportExcel(params, ExceptionInfoExportDto.class, list);
+
+            }
+
+
+            Sheet sheet = workbook.getSheet("sheet0");
+
+            //获取第一行数据
+            Row row2 = sheet.getRow(0);
+
+            for (int i = 0; i < 19 - a; i++) {
+                Cell deliveryTimeCell = row2.getCell(i);
+
+                CellStyle styleMain = workbook.createCellStyle();
+                if (i == 18 - a) {
+                    styleMain.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
+                } else {
+                    styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+
+                }
+                Font font = workbook.createFont();
+                //true为加粗，默认为不加粗
+                font.setBold(true);
+                //设置字体颜色，颜色和上述的颜色对照表是一样的
+                font.setColor(IndexedColors.WHITE.getIndex());
+                //将字体样式设置到单元格样式中
+                styleMain.setFont(font);
+
+                styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                styleMain.setAlignment(HorizontalAlignment.CENTER);
+                styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
 //        CellStyle style =  workbook.createCellStyle();
 //        style.setFillPattern(HSSFColor.HSSFColorPredefined.valueOf(""));
 //        style.setFillForegroundColor(IndexedColors.RED.getIndex());
-            deliveryTimeCell.setCellStyle(styleMain);
-        }
+                deliveryTimeCell.setCellStyle(styleMain);
+            }
 
-        //获取第二行数据
-        Row row3 =sheet.getRow(1);
-        for (int x=18-a;x<23-a;x++) {
+            //获取第二行数据
+            Row row3 = sheet.getRow(1);
+            for (int x = 18 - a; x < 23 - a; x++) {
 
-            Cell deliveryTimeCell1 = row3.getCell(x);
-            CellStyle styleMain1 = workbook.createCellStyle();
-            styleMain1.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
-            Font font1 = workbook.createFont();
-            //true为加粗，默认为不加粗
-            font1.setBold(true);
-            //设置字体颜色，颜色和上述的颜色对照表是一样的
-            font1.setColor(IndexedColors.WHITE.getIndex());
-            //将字体样式设置到单元格样式中
-            styleMain1.setFont(font1);
+                Cell deliveryTimeCell1 = row3.getCell(x);
+                CellStyle styleMain1 = workbook.createCellStyle();
+                styleMain1.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+                Font font1 = workbook.createFont();
+                //true为加粗，默认为不加粗
+                font1.setBold(true);
+                //设置字体颜色，颜色和上述的颜色对照表是一样的
+                font1.setColor(IndexedColors.WHITE.getIndex());
+                //将字体样式设置到单元格样式中
+                styleMain1.setFont(font1);
 
 
+                styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                styleMain1.setAlignment(HorizontalAlignment.CENTER);
+                styleMain1.setVerticalAlignment(VerticalAlignment.CENTER);
 
-            styleMain1.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            styleMain1.setAlignment(HorizontalAlignment.CENTER);
-            styleMain1.setVerticalAlignment(VerticalAlignment.CENTER);
-
-            deliveryTimeCell1.setCellStyle(styleMain1);
-        }
-        //总行数
+                deliveryTimeCell1.setCellStyle(styleMain1);
+            }
+            //总行数
 //        int rowNum=sheet.getLastRowNum()+2;
 //        for (int j=2;j<rowNum;j++) {
 //            Row row4 = sheet.getRow(j);
@@ -331,34 +401,88 @@ public class ExceptionInfoController extends BaseController {
 //        }
 //        sheet.protectSheet("123456");
 
-        if (dto.getType()==1){
-            sheet.setColumnHidden(18,true);
-        }else {
-            sheet.setColumnHidden(17,true);
+            if (dto.getType() == 1) {
+                sheet.setColumnHidden(18, true);
+            } else {
+                sheet.setColumnHidden(17, true);
 
-        }
-        try {
-            String fileName="异常通知中心_异常导出"+System.currentTimeMillis();
-            URLEncoder.encode(fileName, "UTF-8");
-            //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
-            response.setContentType("application/vnd.ms-excel");
-            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
-
-            response.addHeader("Pargam", "no-cache");
-            response.addHeader("Cache-Control", "no-cache");
-
-            ServletOutputStream outStream = null;
-            try {
-                outStream = response.getOutputStream();
-                workbook.write(outStream);
-                outStream.flush();
-            } finally {
-                outStream.close();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            try {
+                String fileName = "异常通知中心_异常导出" + System.currentTimeMillis();
+                URLEncoder.encode(fileName, "UTF-8");
+                //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
+                response.setContentType("application/vnd.ms-excel");
+                response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+
+                response.addHeader("Pargam", "no-cache");
+                response.addHeader("Cache-Control", "no-cache");
+
+                ServletOutputStream outStream = null;
+                try {
+                    outStream = response.getOutputStream();
+                    workbook.write(outStream);
+                    outStream.flush();
+                } finally {
+                    outStream.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
+
+    }
+
+    @Log(title = "出库管理 - 导出查询", businessType = BusinessType.OTHER)
+    @GetMapping("/exceptionExportselect")
+    @ApiOperation(value = "出库管理 - 导出", position = 1600)
+    @SneakyThrows
+    public R exceptionExportselect(ExceptionInfoQueryDto dto) {
+        try {
+
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            if (null == loginUser) {
+                throw new CommonException("500", "非法的操作");
+            }
+
+
+
+
+            // 获取登录用户的客户编码
+            String sellerCode = loginUser.getSellerCode();
+            //dto.setSellerCode(sellerCode);
+
+            if (dto.getType()==0) {
+                if (dto.getSellerCode()!=null){
+                    List<String> list= Arrays.asList(dto.getSellerCode().split(","));
+                    dto.setSellerCodes(list);
+                }
+            }else if (dto.getType()==1) {
+                //pc端
+                List<String> sellerCodeList = null;
+                if (null != loginUser && !loginUser.getUsername().equals("admin")) {
+                    String username = loginUser.getUsername();
+                    sellerCodeList = exceptionInfoMapper.selectsellerCode(username);
+
+                    if (sellerCodeList.size() > 0) {
+                        dto.setSellerCodes(sellerCodeList);
+
+                    }
+                    if (sellerCodeList.size() == 0) {
+                        sellerCodeList.add("");
+                        dto.setSellerCodes(sellerCodeList);
+                    }
+                }
+            }
+
+            Integer   ExceptionInfoTotal=exceptionInfoService.selectExceptionInfoQuery(dto);
+
+            return R.ok(ExceptionInfoTotal);
+
+        } catch (Exception e) {
+            log.error("查询参数:" + e.getMessage(), e);
+            return R.failed("操作失败");
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('ExceptionInfo:ExceptionInfo:importAgainTrackingNoTemplate')")
