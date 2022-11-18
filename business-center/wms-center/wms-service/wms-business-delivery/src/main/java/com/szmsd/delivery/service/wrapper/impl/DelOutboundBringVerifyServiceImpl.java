@@ -738,10 +738,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (null != delOutbound.getWeight() && delOutbound.getWeight() > 0) {
             weightInGram = Utils.valueOfDouble(delOutbound.getWeight());
         }
-        if (weightInGram <= 0) {
-            throw new CommonException("400", MessageUtil.to("包裹重量为0或者小于0，不能创建承运商物流订单",
-                    "If the package weight is 0 or less than 0, the carrier logistics order cannot be created"));
-        }
+//        if (weightInGram <= 0) {
+//            throw new CommonException("400", MessageUtil.to("包裹重量为0或者小于0，不能创建承运商物流订单",
+//                    "If the package weight is 0 or less than 0, the carrier logistics order cannot be created"));
+//        }
         String packageNumber;
         if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
             packageNumber = delOutbound.getRefNo();
@@ -953,9 +953,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (null != delOutbound.getWeight() && delOutbound.getWeight() > 0) {
             weightInGram = Utils.valueOfDouble(delOutbound.getWeight());
         }
-        if (weightInGram <= 0) {
-            throw new CommonException("400", MessageUtil.to("包裹重量为0或者小于0，不能创建承运商物流订单",
-                    "If the package weight is 0 or less than 0, the carrier logistics order cannot be created"));        }
+//        if (weightInGram <= 0) {
+//            throw new CommonException("400", MessageUtil.to("包裹重量为0或者小于0，不能创建承运商物流订单",
+//                    "If the package weight is 0 or less than 0, the carrier logistics order cannot be created"));        }
         String packageNumber;
         if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
             packageNumber = delOutbound.getRefNo();
