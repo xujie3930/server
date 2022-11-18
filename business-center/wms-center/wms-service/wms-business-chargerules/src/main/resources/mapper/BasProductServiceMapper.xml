@@ -64,8 +64,8 @@
      </if>
    </where>
   </select>
-  <select id="selectProductCode" resultType="java.lang.String" parameterType="java.lang.String">
-    SELECT compare_trackingno from bas_product_service where product_code=#{productCode}
+  <select id="selectProductCode" resultType="java.util.Map" parameterType="java.lang.String">
+    SELECT compare_trackingno as compareTrackingno,recevie_warehouse_status as recevieWarehouseStatus  from bas_product_service where product_code=#{productCode}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from bas_product_service
@@ -150,6 +150,9 @@
       <if test="compareTrackingno != null">
         compare_trackingno,
       </if>
+      <if test="recevieWarehouseStatus != null">
+        recevie_warehouse_status,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -212,6 +215,9 @@
       <if test="compareTrackingno != null">
         #{compareTrackingno,jdbcType=VARCHAR},
       </if>
+      <if test="recevieWarehouseStatus != null">
+        #{recevieWarehouseStatus,jdbcType=BIT},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.chargerules.domain.BasProductService">
@@ -273,6 +279,9 @@
       </if>
       <if test="compareTrackingno != null">
         compare_trackingno = #{compareTrackingno,jdbcType=VARCHAR},
+      </if>
+      <if test="recevieWarehouseStatus != null">
+        recevie_warehouse_status = #{recevieWarehouseStatus,jdbcType=BIT},
       </if>
     </set>
     where product_code = #{productCode,jdbcType=VARCHAR}

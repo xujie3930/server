@@ -12,6 +12,7 @@ import com.szmsd.http.vo.KeyValuePair;
 import com.szmsd.http.vo.PricedProduct;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IPricedProductService {
 
@@ -29,5 +30,5 @@ public interface IPricedProductService {
 
     FileStream exportFile(List<String> codes);
 
-    String selectProductCode(String productCode);
+    Map selectProductCode(String productCode);
 }
