@@ -188,6 +188,9 @@ public class PricedProductInfoVO {
     @ApiModelProperty(value = "0是不比较 1是比较")
     private String compareTrackingno;
 
+    @ApiModelProperty(value = "是否收货仓库 1 是")
+    private Integer recevieWarehouseStatus;
+
 
     public void processDTO() {
         //参数转换
