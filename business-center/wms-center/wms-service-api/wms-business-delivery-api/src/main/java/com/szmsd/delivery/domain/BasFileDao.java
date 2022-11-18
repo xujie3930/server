@@ -9,6 +9,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -49,4 +51,8 @@ public class BasFileDao extends QueryDto {
     @ApiModelProperty(value = "结束时间")
     @TableField(exist = false)
     private String EndDate;
+
+    @ApiModelProperty(value = "模块名中文集合")
+    @TableField(exist = false)
+    private List<String> modularNameZhs;
 }

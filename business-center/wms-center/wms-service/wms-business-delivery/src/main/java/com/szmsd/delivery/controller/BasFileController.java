@@ -46,6 +46,15 @@ public class BasFileController extends BaseController {
         return getDataTable(list);
     }
 
+    @PostMapping("/listmodularName")
+    @ApiOperation(value = "查询模块列表",notes = "查询模块列表")
+    public R<List<String>> listmodularName()
+    {
+
+        R r = basFileService.listmodularName();
+        return r;
+    }
+
 
     /**
      * 单个多个都可以下载
