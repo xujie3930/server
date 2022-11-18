@@ -65,4 +65,6 @@ public class BasProductService extends BaseEntity {
     private Integer recevieWarehouseStatus;
 
 
+
+
 }

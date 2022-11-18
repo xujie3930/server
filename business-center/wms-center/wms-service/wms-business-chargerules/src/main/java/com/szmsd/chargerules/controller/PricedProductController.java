@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Api(tags = {"PricedProduct"})
@@ -87,8 +88,17 @@ public class PricedProductController extends BaseController {
     @ApiOperation(value = "根据产品代码获取计价产品信息")
     public R<PricedProductInfoVO> info(@PathVariable("productCode") String productCode) {
         PricedProductInfoVO pricedProductInfoVO = iPricedProductService.getInfo(productCode);
-        String compareTrackingno=iPricedProductService.selectProductCode(productCode);
-        pricedProductInfoVO.setCompareTrackingno(compareTrackingno);
+            Map map =iPricedProductService.selectProductCode(productCode);
+            if (map!=null) {
+                if (map.get("compareTrackingno")!=null&&String.valueOf(map.get("compareTrackingno")) != null) {
+
+                    pricedProductInfoVO.setCompareTrackingno(String.valueOf(map.get("compareTrackingno")));
+                }
+                if (map.get("recevieWarehouseStatus")!=null&&String.valueOf(map.get("recevieWarehouseStatus")) != null) {
+                    pricedProductInfoVO.setRecevieWarehouseStatus(Integer.parseInt(String.valueOf(map.get("recevieWarehouseStatus"))));
+                }
+            }
+
         String type = pricedProductInfoVO.getSupplierCalcType();
         List<PricedServiceListVO> list = new ArrayList<>();
         if ("LogisticsService".equals(type)) {
