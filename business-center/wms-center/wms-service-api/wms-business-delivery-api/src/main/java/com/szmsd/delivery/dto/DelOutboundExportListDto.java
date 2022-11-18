@@ -26,6 +26,10 @@ public class DelOutboundExportListDto implements Serializable {
     @ApiModelProperty(value = "跟踪号")
     private String trackingNo;
 
+
+    @ApiModelProperty(value = "亚马逊服务id")
+    private String amazonLogisticsRouteId;
+
     @ApiModelProperty(value = "客户代码")
     private String sellerCode;
 

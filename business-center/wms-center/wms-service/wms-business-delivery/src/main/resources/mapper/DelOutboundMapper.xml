@@ -173,7 +173,8 @@
             o.tracking_status,
             o.tracking_description,
             o.ioss,
-            o.currency_describe
+            o.currency_describe,
+            o.amazon_logistics_route_id
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}

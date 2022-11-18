@@ -26,6 +26,9 @@ public class DelOutboundExportListEnVO implements Serializable {
     @Excel(name = "Tracking No",width = 20)
     private String trackingNo;
 
+    @Excel(name = "Order number of platform",width = 20)
+    private String amazonLogisticsRouteId;
+
     @Excel(name = "Seller Code",width = 10)
     private String sellerCode;
 
@@ -34,6 +37,8 @@ public class DelOutboundExportListEnVO implements Serializable {
 
     @Excel(name = "RefNo",width = 10)
     private String refNo;
+
+
 
     @Excel(name = "Outbound method",width = 10)
     private String orderTypeName;
