@@ -175,12 +175,21 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
 //            accountBalances.forEach(AccountBalance::showCredit);
 
             accountBalances.forEach(x-> {
-                        if (len.equals("en")) {
-                            x.setCurrencyName(x.getCurrencyCode());
-                        } else if (len.equals("zh")) {
-                            x.setCurrencyName(x.getCurrencyName());
-                        }
-                    });
+                if (len.equals("en")) {
+                    x.setCurrencyName(x.getCurrencyCode());
+                } else if (len.equals("zh")) {
+                    x.setCurrencyName(x.getCurrencyName());
+                }
+                
+                BigDecimal creditUseAmount = x.getCreditUseAmount();
+                BigDecimal totalBalance = x.getTotalBalance();
+
+                if(creditUseAmount.compareTo(BigDecimal.ZERO) > 0){
+                    BigDecimal newTotalBalance = totalBalance.subtract(creditUseAmount);
+                    x.setTotalBalance(newTotalBalance);
+                }
+                
+            });
 
             //获取分页信息
             PageInfo<AccountBalance> pageInfo=new PageInfo<>(accountBalances);

@@ -22,6 +22,7 @@ import java.util.Optional;
 @ApiModel(value = "账户余额表", description = "账户余额表")
 @TableName("fss_account_balance")
 public class AccountBalance extends FssBaseEntity {
+
     @ApiModelProperty(value = "ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -50,9 +51,7 @@ public class AccountBalance extends FssBaseEntity {
 
     @ApiModelProperty(value = "总余额")
     private BigDecimal totalBalance;
-    /**
-     * 09-07 授信额度新增
-     */
+
     @ApiModelProperty(value = "授信类型(0：额度，1：类型)")
     @Excel(name = "授信类型(0：额度，1：类型)")
     private String creditType;
@@ -68,10 +67,12 @@ public class AccountBalance extends FssBaseEntity {
     @ApiModelProperty(value = "使用额度金额")
     @Excel(name = "使用额度金额")
     private BigDecimal creditUseAmount;
+
     @TableField(exist = false)
     @ApiModelProperty(value = "需要偿还的使用额度金额")
     @Excel(name = "需要偿还的使用额度金额")
     private BigDecimal needRepayCreditUseAmount;
+
     @ApiModelProperty(value = "授信开始时间")
     @Excel(name = "授信开始时间")
     private LocalDateTime creditBeginTime;
@@ -83,7 +84,6 @@ public class AccountBalance extends FssBaseEntity {
     @ApiModelProperty(value = "需要偿还金额")
     @Excel(name = "需要偿还金额")
     private BigDecimal creditRepaidAmount;
-
 
     @ApiModelProperty(value = "授信时间间隔")
     @Excel(name = "授信时间间隔")
