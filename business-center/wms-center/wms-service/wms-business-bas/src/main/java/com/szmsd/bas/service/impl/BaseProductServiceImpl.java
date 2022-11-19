@@ -685,8 +685,11 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     }
 
     private List<BaseProduct> queryConditionList(BaseProductConditionQueryDto conditionQueryDto) {
-        if (CollectionUtils.isEmpty(conditionQueryDto.getSkus())) {
-            return Collections.emptyList();
+
+        List<String> skuList = conditionQueryDto.getSkus();
+
+        if (skuList == null || skuList.size() == 0 ) {
+            return new ArrayList<>();
         }
         LambdaQueryWrapper<BaseProduct> queryWrapper = Wrappers.lambdaQuery();
         if (null != conditionQueryDto.getWarehouseCode()) {
