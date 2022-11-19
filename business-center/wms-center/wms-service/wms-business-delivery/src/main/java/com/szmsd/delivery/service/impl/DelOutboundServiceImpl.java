@@ -645,7 +645,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(dto.getWarehouseCode())) {
                 String warehouseCode = dto.getWarehouseCode();
+
+                Long s = System.currentTimeMillis();
+
                 BasWarehouse warehouse = this.basWarehouseClientService.queryByWarehouseCode(warehouseCode);
+
+                Long e = System.currentTimeMillis();
+
+                logger.info("basWarehouseClientService.queryByWarehouseCode,{}",e-s);
+
                 if (null == warehouse) {
                     throw new CommonException("400", "仓库信息不存在");
                 }else if(!"1".equals(warehouse.getStatus())){
@@ -664,7 +672,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 inServiceDto.setWarehouseCode(dto.getWarehouseCode());
                 inServiceDto.setSkus(skus);
                 String shipmentRule = dto.getShipmentRule();
-                if (!this.delOutboundDocService.inServiceValid(inServiceDto, shipmentRule)) {
+
+                Long s = System.currentTimeMillis();
+                boolean f = !this.delOutboundDocService.inServiceValid(inServiceDto, shipmentRule);
+                Long e = System.currentTimeMillis();
+
+                logger.info("delOutboundDocService.inServiceValid,{}",e-s);
+                if (f) {
                     throw new CommonException("400", "发货规则[" + shipmentRule + "]不存在");
                 }
             }
@@ -680,7 +694,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // 集运出库只查询集运的SKU
                 productConditionQueryDto.setSource("084002");
             }
+
+            Long s = System.currentTimeMillis();
             List<BaseProduct> productList = this.baseProductClientService.queryProductList(productConditionQueryDto);
+            Long e = System.currentTimeMillis();
+
+            logger.info("baseProductClientService.queryProductList,{}",e-s);
+
             if (CollectionUtils.isEmpty(productList)) {
                 throw new CommonException("400", "查询SKU信息失败");
             }
@@ -705,7 +725,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 inventoryAvailableQueryDto.setSkus(skus);
                 // 库存是0的也查询出来，自行做数量验证。同时也能验证SKU是不是自己的
                 inventoryAvailableQueryDto.setQueryType(2);
+
+                Long st = System.currentTimeMillis();
                 List<InventoryAvailableListVO> availableList = this.inventoryFeignClientService.queryAvailableList2(inventoryAvailableQueryDto);
+                Long en = System.currentTimeMillis();
+                logger.info("inventoryFeignClientService.queryAvailableList2,{}",en-st);
+
                 Map<String, InventoryAvailableListVO> availableMap = new HashMap<>();
                 Map<String, Integer> availableInventoryMap = new HashMap<>();
                 if (CollectionUtils.isNotEmpty(availableList)) {
