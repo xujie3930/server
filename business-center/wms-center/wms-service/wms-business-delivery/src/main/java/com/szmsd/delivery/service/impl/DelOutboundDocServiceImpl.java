@@ -152,7 +152,10 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
         String warehouseCode = dto.getWarehouseCode();
         BasWarehouse warehouse = null;
         if (StringUtils.isNotEmpty(warehouseCode)) {
+            Long s = System.currentTimeMillis();
             warehouse = this.basWarehouseClientService.queryByWarehouseCode(warehouseCode);
+            Long e = System.currentTimeMillis();
+            logger.info("inService  basWarehouseClientService.queryByWarehouseCode,{}",e-s);
             if (null == warehouse) {
                 throw new CommonException("400", "仓库信息不存在");
             }
@@ -166,7 +169,10 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
         }
         BasRegionSelectListVO country = null;
         if (StringUtils.isNotEmpty(countryCode)) {
+            Long s = System.currentTimeMillis();
             R<BasRegionSelectListVO> countryR = this.basRegionFeignService.queryByCountryCode(countryCode);
+            Long e = System.currentTimeMillis();
+            logger.info("inService  basRegionFeignService.queryByCountryCode,{}",e-s);
             country = R.getDataAndException(countryR);
             if (null == country) {
                 throw new CommonException("400", "国家信息不存在");
@@ -199,12 +205,22 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
             BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
             conditionQueryDto.setSellerCode(dto.getClientCode());
             conditionQueryDto.setSkus(dto.getSkus());
+
+            Long s = System.currentTimeMillis();
+
             criteria.setShipmentTypes(this.baseProductClientService.listProductAttribute(conditionQueryDto));
+
+            Long e = System.currentTimeMillis();
+            logger.info("inService  baseProductClientService.listProductAttribute,{}",e-s);
         }
         if (CollectionUtils.isNotEmpty(dto.getProductAttributes())) {
             criteria.setShipmentTypes(dto.getProductAttributes());
         }
+
+        Long ss = System.currentTimeMillis();
         List<PricedProduct> list = this._inService(criteria);
+        Long ee = System.currentTimeMillis();
+        logger.info("inService  _inService,{}",ss-ee);
 
 
 
@@ -212,7 +228,12 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
             //是否可以查询
             List<String> codes = list.stream().
                     map(sfcMessage -> sfcMessage.getCode()).collect(Collectors.toList());
+
+            Long s = System.currentTimeMillis();
+
             R<List<BasProductService>> r = chargeFeignService.selectBasProductService(codes);
+            Long e = System.currentTimeMillis();
+            logger.info("inService  chargeFeignService.selectBasProductService,{}",e-s);
             if(r.getCode() == 200 && r.getData()!= null && r.getData().size() > 0){
 
                 Map<String, Boolean> map = r.getData().stream()
