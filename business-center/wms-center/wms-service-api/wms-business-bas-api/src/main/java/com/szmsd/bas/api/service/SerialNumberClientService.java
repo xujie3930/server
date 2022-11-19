@@ -19,6 +19,14 @@ public interface SerialNumberClientService {
     /**
      * 生成流水号
      *
+     * @param cusCode 客户代码
+     * @return
+     */
+    String generatorNumber(String cusCode);
+
+    /**
+     * 生成流水号
+     *
      * @param code code
      * @param num  num
      * @return String
