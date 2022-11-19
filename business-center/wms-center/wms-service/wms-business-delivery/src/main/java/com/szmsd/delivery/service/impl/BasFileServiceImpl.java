@@ -30,7 +30,7 @@ public class BasFileServiceImpl extends ServiceImpl<BasFileMapper, BasFile>  imp
         if (StringUtils.isNotEmpty(basFile.getModularNameZh())) {
             where.eq(BasFile::getModularNameZh, basFile.getModularNameZh());
         }
-        if (basFile.getModularNameZhs().size()>0) {
+        if (basFile.getModularNameZhs()!=null&&basFile.getModularNameZhs().size()>0) {
             where.in(BasFile::getModularNameZh, basFile.getModularNameZhs());
         }
 
