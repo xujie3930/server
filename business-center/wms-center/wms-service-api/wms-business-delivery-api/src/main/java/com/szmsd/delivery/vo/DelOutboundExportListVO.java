@@ -30,6 +30,10 @@ public class DelOutboundExportListVO implements Serializable {
     @Excel(name = "跟踪号",width = 20)
     private String trackingNo;
 
+    @ExcelProperty(value = {"平台标志单号", "Order number of platform"})
+    @Excel(name = "平台标志单号",width = 20)
+    private String amazonLogisticsRouteId;
+
     @ExcelProperty(value = {"客户代码", "Seller Code"})
     @Excel(name = "客户代码",width = 10)
     private String sellerCode;

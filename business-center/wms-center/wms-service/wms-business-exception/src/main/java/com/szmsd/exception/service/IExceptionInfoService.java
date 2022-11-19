@@ -139,5 +139,7 @@ public interface IExceptionInfoService extends IService<ExceptionInfo> {
     void updateDelOutboundDetail(String orderNo, List<ExceptionInfoDetailExportDto> exceptionInfoDetailExportDtoList);
 
     void  updateDelOutboundIoss(ExceptionInfoExportDto dto);
+
+    Integer  selectExceptionInfoQuery(ExceptionInfoQueryDto dto);
 }
 

@@ -2,6 +2,7 @@ package com.szmsd.delivery.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.BasFile;
 
@@ -26,8 +27,26 @@ public class BasFileServiceImpl extends ServiceImpl<BasFileMapper, BasFile>  imp
             where.between(BasFile::getCreateTime, basFile.getStartDate(), basFile.getEndDate());
         }
 
+        if (StringUtils.isNotEmpty(basFile.getModularNameZh())) {
+            where.eq(BasFile::getModularNameZh, basFile.getModularNameZh());
+        }
+        if (basFile.getModularNameZhs()!=null&&basFile.getModularNameZhs().size()>0) {
+            where.in(BasFile::getModularNameZh, basFile.getModularNameZhs());
+        }
+
 
         where.orderByDesc(BasFile::getCreateTime);
         return baseMapper.selectList(where);
+    }
+
+    @Override
+    public R<List<String>> listmodularName() {
+        try {
+            return R.ok(baseMapper.selectModularName());
+        }catch (Exception e){
+            e.printStackTrace();
+            return  R.failed();
+        }
+
     }
 }
