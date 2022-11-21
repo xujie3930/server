@@ -42,7 +42,7 @@ public class PreRecharge extends FssBaseEntity {
     @ApiModelProperty(value = "请求参数唯一标识/流水号")
     private String serialNo;
 
-    @ApiModelProperty(value = "汇款方式 0电汇 1转账 2支票")
+    @ApiModelProperty(value = "汇款方式 0电汇 1转账 2支票 3 微信 4 支付宝")
     private String remittanceMethod;
 
 

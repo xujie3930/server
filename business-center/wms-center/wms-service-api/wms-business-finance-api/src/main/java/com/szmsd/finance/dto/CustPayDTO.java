@@ -77,6 +77,7 @@ public class CustPayDTO implements Serializable {
 
     @ApiModelProperty(value = "仓库编号")
     private String warehouseCode;
+
     @ApiModelProperty(value = "仓库名称")
     private String warehouseName;
 
@@ -92,6 +93,9 @@ public class CustPayDTO implements Serializable {
 
     @ApiModelProperty(value = "费用类别转换后")
     private String chargeCategoryChange;
+
+    @ApiModelProperty(value = "附注")
+    private String note;
 
 
     @Override
