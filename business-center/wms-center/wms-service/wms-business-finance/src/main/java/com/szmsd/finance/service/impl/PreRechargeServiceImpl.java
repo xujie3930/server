@@ -20,10 +20,8 @@ import com.szmsd.finance.mapper.FssBankMapper;
 import com.szmsd.finance.mapper.PreRechargeMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IPreRechargeService;
-import lombok.val;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -209,6 +207,12 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
             return R.failed("无法获取充值信息");
         }
 
+        String remittanceMethod = preRecharge.getRemittanceMethod();
+
+        if(remittanceMethod.equals("3") || remittanceMethod.equals("4")){
+            return R.failed("支付宝、微信充值，无法驳回");
+        }
+
         try {
 
             CustPayDTO custPayDTO = new CustPayDTO();
@@ -233,6 +237,7 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
             preRechargeUpd.setUpdateBy(SecurityUtils.getLoginUser().getUsername());
             preRechargeUpd.setUpdateByName(SecurityUtils.getLoginUser().getUsername());
             preRechargeUpd.setUpdateTime(new Date());
+            preRechargeUpd.setRejectDate(new Date());
 
             preRechargeMapper.updateById(preRechargeUpd);
 
