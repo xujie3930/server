@@ -815,7 +815,18 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             if (id != null) {
                 queryWrapper.ne(DelOutbound::getId, dto.getId());
             }
-            queryWrapper.ne(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
+            String states[] = {
+                    DelOutboundStateEnum.DELIVERED.getCode(),
+                    DelOutboundStateEnum.REVIEWED.getCode(),
+                    DelOutboundStateEnum.WHSE_CANCELING.getCode(),
+                    DelOutboundStateEnum.AUDIT_FAILED.getCode(),
+                    DelOutboundStateEnum.COMPLETED.getCode(),
+                    DelOutboundStateEnum.PROCESSING.getCode(),
+                    DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode(),
+                    DelOutboundStateEnum.REVIEWED_DOING.getCode(),
+                    DelOutboundStateEnum.WHSE_PROCESSING.getCode()
+            };
+            queryWrapper.in(DelOutbound::getState, states);
             queryWrapper.eq(DelOutbound::getDelFlag, "0");
             Integer size = baseMapper.selectCount(queryWrapper);
             if (size > 0) {
@@ -905,7 +916,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             long shettTime = System.currentTimeMillis();
 
-            delOutbound.setOrderNo(orderNo = (prefix + sellerCode + this.serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
+            delOutbound.setOrderNo(orderNo = (prefix + sellerCode + this.serialNumberClientService.generatorNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
             logger.info(">>>>>[创建出库单{}]3.0创建出库单流水号时间，耗时{}", delOutbound.getOrderNo(), System.currentTimeMillis()-shettTime);
 
 
