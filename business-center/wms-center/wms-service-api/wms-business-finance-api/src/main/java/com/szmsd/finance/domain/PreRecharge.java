@@ -92,4 +92,8 @@ public class PreRecharge extends FssBaseEntity {
 
     @ApiModelProperty(value = "驳回意见")
     private String rejectRemark;
+
+    @ApiModelProperty(value = "驳回时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date rejectDate;
 }
