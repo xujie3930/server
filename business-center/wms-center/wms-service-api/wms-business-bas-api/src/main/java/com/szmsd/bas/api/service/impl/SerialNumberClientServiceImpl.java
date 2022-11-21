@@ -6,12 +6,14 @@ import com.szmsd.bas.dto.GenerateNumberDto;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.support.atomic.RedisAtomicInteger;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -71,7 +73,13 @@ public class SerialNumberClientServiceImpl implements SerialNumberClientService 
 
         String length = String.format("%08d", no);
 
-        return length;
+        String currentCycle = DateFormatUtils.format(new Date(), "yyMMdd");
+
+        StringBuilder resultBuilder = new StringBuilder();
+        resultBuilder.append(currentCycle);
+        resultBuilder.append(length);
+
+        return resultBuilder.toString();
     }
 
     /**
