@@ -3,7 +3,6 @@ package com.szmsd.finance.controller;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.controller.BaseController;
-import com.szmsd.finance.domain.FssBank;
 import com.szmsd.finance.service.FssBankService;
 import com.szmsd.finance.vo.FssBankVO;
 import io.swagger.annotations.Api;
@@ -44,9 +43,9 @@ public class FssBankController extends BaseController {
 
     @ApiModelProperty(value = "查询银行账号")
     @GetMapping("/find-bank-account")
-    public R<List<FssBankVO>> findBankAccountList(@RequestParam("bankCode")String bankCode){
+    public R<List<FssBankVO>> findBankAccountList(@RequestParam("bankCode")String bankCode,@RequestParam("currencyCode")String currencyCode){
 
-        return fssBankService.findBankAccount(bankCode);
+        return fssBankService.findBankAccount(bankCode,currencyCode);
     }
 
 }

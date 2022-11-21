@@ -19,4 +19,7 @@ public class FssBankVO implements Serializable {
 
     @ApiModelProperty(value = "账号")
     private String bankAccount;
+
+    @ApiModelProperty(value = "币种")
+    private String currencyCode;
 }
