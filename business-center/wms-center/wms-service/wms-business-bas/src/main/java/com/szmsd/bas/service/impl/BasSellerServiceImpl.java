@@ -408,7 +408,7 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
                 accountBalance.setCurrentBalance(BigDecimal.valueOf(0));
                 accountBalance.setFreezeBalance(BigDecimal.valueOf(0));
                 accountBalance.setTotalBalance(BigDecimal.valueOf(0));
-                accountBalance.setCurrencyCode(u.getSubNameEn());
+                accountBalance.setCurrencyCode(u.getSubValue());
                 accountBalance.setCurrencyName(u.getSubName());
                 accountBalance.setCreateTime(new Date());
                 baseMapper.insertAccountBalance(accountBalance);
