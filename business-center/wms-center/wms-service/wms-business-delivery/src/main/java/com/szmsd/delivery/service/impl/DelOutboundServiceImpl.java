@@ -3260,7 +3260,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             addressLambdaUpdateWrapper.set(DelOutboundAddress::getStateOrProvince, vo.getStateOrProvince());
             addressLambdaUpdateWrapper.set(DelOutboundAddress::getCity, vo.getCity());
             addressLambdaUpdateWrapper.set(DelOutboundAddress::getStreet1, vo.getStreet1());
-            addressLambdaUpdateWrapper.set(DelOutboundAddress::getStreet2, vo.getStreet1());
+            addressLambdaUpdateWrapper.set(DelOutboundAddress::getStreet2, vo.getStreet2());
             addressLambdaUpdateWrapper.set(DelOutboundAddress::getPostCode, vo.getPostCode());
             addressLambdaUpdateWrapper.set(DelOutboundAddress::getPhoneNo, vo.getPhoneNo());
             addressLambdaUpdateWrapper.set(DelOutboundAddress::getEmail, vo.getEmail());
