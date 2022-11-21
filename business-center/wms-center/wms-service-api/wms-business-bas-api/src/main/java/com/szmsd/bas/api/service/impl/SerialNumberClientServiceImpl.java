@@ -7,9 +7,13 @@ import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.support.atomic.RedisAtomicInteger;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zhangyuyuan
@@ -20,6 +24,9 @@ public class SerialNumberClientServiceImpl implements SerialNumberClientService 
 
     @Autowired
     private SerialNumberFeignService serialNumberFeignService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public String generateNumber(String code) {
@@ -33,6 +40,12 @@ public class SerialNumberClientServiceImpl implements SerialNumberClientService 
     }
 
     @Override
+    public String generatorNumber(String code) {
+
+        return this.createNo(code);
+    }
+
+    @Override
     public List<String> generateNumbers(String code, int num) {
         GenerateNumberDto dto = new GenerateNumberDto();
         dto.setCode(code);
@@ -42,5 +55,37 @@ public class SerialNumberClientServiceImpl implements SerialNumberClientService 
             throw new CommonException("999", "生成流水号失败");
         }
         return listR.getData();
+    }
+
+    private String createNo(String cusCode) {
+
+        StringBuilder sb = new StringBuilder().append(cusCode);
+        String keyPrefix = sb.toString();
+
+        RedisAtomicInteger atomicInteger = new RedisAtomicInteger(keyPrefix,redisTemplate.getConnectionFactory());
+
+        Integer no = atomicInteger.incrementAndGet();
+
+        Long expiresTime = this.getSecondsNextEarlyMorning();
+        atomicInteger.expire(expiresTime, TimeUnit.SECONDS);
+
+        String length = String.format("%08d", no);
+
+        return length;
+    }
+
+    /**
+     * 判断当前时间距离第二天凌晨的秒数
+     *
+     * @return 返回值单位为[s:秒]
+     */
+    public Long getSecondsNextEarlyMorning() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return (cal.getTimeInMillis() - System.currentTimeMillis()) / 1000;
     }
 }
