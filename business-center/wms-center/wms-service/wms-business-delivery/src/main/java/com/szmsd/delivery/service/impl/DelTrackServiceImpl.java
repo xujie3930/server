@@ -352,6 +352,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                 });
             }
         });
+        log.info("DelTrackServiceImpl的trackList：{}",trackList);
         if (CollectionUtils.isNotEmpty(trackList)) {
             this.saveBatch(trackList);
             if (StringUtils.isBlank(trackingYeeTraceDto.getOrderNo())) {
