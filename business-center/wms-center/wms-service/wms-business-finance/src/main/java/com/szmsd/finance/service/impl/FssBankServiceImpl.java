@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.FssBank;
+import com.szmsd.finance.domain.FssBankQueryVO;
 import com.szmsd.finance.mapper.FssBankMapper;
 import com.szmsd.finance.service.FssBankService;
 import com.szmsd.finance.vo.FssBankVO;
@@ -66,6 +67,30 @@ public class FssBankServiceImpl extends ServiceImpl<FssBankMapper, FssBank> impl
 
         if(StringUtils.isNotEmpty(currencyCode)){
             queryWrapper.eq("currency_code",currencyCode);
+        }
+
+        List<FssBank> fssBankVOS = baseMapper.selectList(queryWrapper);
+
+        if(CollectionUtils.isEmpty(fssBankVOS)){
+            return R.ok();
+        }
+
+        List<FssBankVO> fssVO = this.generatorBank(fssBankVOS);
+
+        return R.ok(fssVO);
+    }
+
+    @Override
+    public R<List<FssBankVO>> findBankAccount(FssBankQueryVO fssBankQueryVO) {
+
+        QueryWrapper<FssBank> queryWrapper = new QueryWrapper<>();
+
+        if(StringUtils.isNotEmpty(fssBankQueryVO.getBankCode())){
+            queryWrapper.eq("bank_code",fssBankQueryVO.getBankCode());
+        }
+
+        if(StringUtils.isNotEmpty(fssBankQueryVO.getCurrencyCode())){
+            queryWrapper.eq("currency_code",fssBankQueryVO.getCurrencyCode());
         }
 
         List<FssBank> fssBankVOS = baseMapper.selectList(queryWrapper);
