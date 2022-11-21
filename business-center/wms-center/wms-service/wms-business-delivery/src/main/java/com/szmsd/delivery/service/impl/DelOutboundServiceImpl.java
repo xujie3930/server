@@ -916,7 +916,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             long shettTime = System.currentTimeMillis();
 
-            delOutbound.setOrderNo(orderNo = (prefix + sellerCode + this.serialNumberClientService.generatorNumber(sellerCode)));
+            delOutbound.setOrderNo(orderNo = (prefix + sellerCode + this.serialNumberClientService.generatorNumber(SerialNumberConstant.DEL_OUTBOUND_NO)));
             logger.info(">>>>>[创建出库单{}]3.0创建出库单流水号时间，耗时{}", delOutbound.getOrderNo(), System.currentTimeMillis()-shettTime);
 
 

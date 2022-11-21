@@ -90,7 +90,7 @@ public class DelOutboundTransferTimer {
                     DelOutboundAddress.class);
 
             String prefix = "CK";
-            delOutbound.setOrderNo(prefix + "CNW759" + serialNumberClientService.generateNumber(SerialNumberConstant.DEL_OUTBOUND_NO));
+            delOutbound.setOrderNo(prefix + "CNW759" + serialNumberClientService.generatorNumber(SerialNumberConstant.DEL_OUTBOUND_NO));
             delOutbound.setTrackingNo(delOutbound.getOrderNo());
             delOutbound.setCreateTime(new Date());
             delOutbound.setSourceType("time");
