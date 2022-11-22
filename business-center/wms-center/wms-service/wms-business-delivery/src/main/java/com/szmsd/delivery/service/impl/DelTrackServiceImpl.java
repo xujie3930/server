@@ -400,12 +400,6 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         }
     }
 
-    public static void main(String[] args) {
-        DelTrack delTrack=new DelTrack();
-        delTrack.setDisplay(null);
-
-    }
-
 
 
     @Override
