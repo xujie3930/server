@@ -266,10 +266,13 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             // 只获取主运单号的轨迹  关联运单号的暂不获取
             if (logisticsTracking != null && logisticsTracking.getTrackingNo().equalsIgnoreCase(trackingYeeTraceDto.getTrackingNo())) {
                 List<TrackingYeeTraceDto.ItemsDto> trackingItems = logisticsTracking.getItems();
-                trackingItems.forEach(item -> {
+                log.info("trackingItems：{}", JSON.toJSONString(trackingItems));
+                for (int item=0;item<trackingItems.size();item++){
+//                trackingItems.forEach(item -> {
+                    log.info("trackingItems的item：{}", JSON.toJSONString(item));
                     // 获取时间
                     Date trackingTime = null;
-                    TrackingYeeTraceDto.TrackingTimeDto trackingTimeDto = item.getTrackingTime();
+                    TrackingYeeTraceDto.TrackingTimeDto trackingTimeDto = trackingItems.get(item).getTrackingTime();
                     if (trackingTimeDto != null) {
                         String trackingTimeStr = trackingTimeDto.getUtcTime();
                         if (StringUtils.isNotBlank(trackingTimeStr)) {
@@ -285,7 +288,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                     Integer trackCount = this.count(new LambdaQueryWrapper<DelTrack>().eq(DelTrack::getOrderNo, trackingYeeTraceDto.getOrderNo())
                             .eq(DelTrack::getTrackingNo, trackingYeeTraceDto.getTrackingNo())
 //                            .eq(DelTrack::getTrackingTime, trackingTime)
-                                    .eq(DelTrack::getNo,item.getNo())
+                                    .eq(DelTrack::getNo, trackingItems.get(item).getNo())
                     );
                     if (trackCount == 0) {
 
@@ -297,25 +300,25 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         delTrack.setShipmentId(trackingYeeTraceDto.getShipmentId());
                         delTrack.setOrderNo(trackingYeeTraceDto.getOrderNo());
                         delTrack.setTrackingStatus(logisticsTracking.getStatus());
-                        delTrack.setNo(item.getNo());
+                        delTrack.setNo(trackingItems.get(item).getNo());
                         maps.put("carrierKeywordType","description");
-                        maps.put("originaKeywords",item.getDescription());
+                        maps.put("originaKeywords", trackingItems.get(item).getDescription());
                         log.info("DelTrackServiceImpl查询关键次传递参数description：{}", JSON.toJSONString(maps));
                         Map CarrierKeywordMaps = basCarrierKeywordFeignService.selectCarrierKeyword(maps).getData();
                         log.info("DelTrackServiceImpl关键词响应结果响应结果description：{}", JSON.toJSONString(CarrierKeywordMaps));
                         if (CarrierKeywordMaps==null){
-                            delTrack.setDescription(item.getDescription());
-                            delTrack.setDmDescription(item.getDescription());
+                            delTrack.setDescription(trackingItems.get(item).getDescription());
+                            delTrack.setDmDescription(trackingItems.get(item).getDescription());
                         }
                         if (CarrierKeywordMaps!=null){
                             delTrack.setDescription(String.valueOf(CarrierKeywordMaps.get("nowKeywords")));
-                            delTrack.setDmDescription(item.getDescription());
+                            delTrack.setDmDescription(trackingItems.get(item).getDescription());
                         }
 
                         delTrack.setTrackingTime(trackingTime);
-                        delTrack.setActionCode(item.getActionCode());
+                        delTrack.setActionCode(trackingItems.get(item).getActionCode());
                         // 获取地址
-                        TrackingYeeTraceDto.LocationDto itemLocation = item.getLocation();
+                        TrackingYeeTraceDto.LocationDto itemLocation = trackingItems.get(item).getLocation();
                         if (itemLocation != null) {
                             maps.put("carrierKeywordType","display");
                             maps.put("originaKeywords",itemLocation.getDisplay());
@@ -349,9 +352,10 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         }
                         trackList.add(delTrack);
                     }
-                });
+                }
             }
         });
+        log.info("DelTrackServiceImpl的trackList：{}",trackList);
         if (CollectionUtils.isNotEmpty(trackList)) {
             this.saveBatch(trackList);
             if (StringUtils.isBlank(trackingYeeTraceDto.getOrderNo())) {
