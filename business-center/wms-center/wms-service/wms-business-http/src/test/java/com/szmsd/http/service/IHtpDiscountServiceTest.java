@@ -54,7 +54,7 @@ public class IHtpDiscountServiceTest {
         httpRequestDto.setMethod(HttpMethod.GET);
         int i=1;
 
-        String url = DomainEnum.Ck1OpenAPIDomain.wrapper("/v1/Bills/ExchangeRate?PageSize=200&PageIndex="+i+"");
+        String url = DomainEnum.TJAPIDomain.wrapper("/v1/Bills/ExchangeRate?PageSize=200&PageIndex="+i+"");
         i++;
         httpRequestDto.setUri(url);
         //httpRequestDto.setBody(tpieceDto);
