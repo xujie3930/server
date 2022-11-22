@@ -6,14 +6,14 @@ import lombok.AllArgsConstructor;
 public enum RecevieWarehouseStatusEnum {
 
     WAREHOUSESTATUS(1, "是否收货仓库");
-    private Integer code;
+    private int code;
     private String msg;
 
-    public Integer getCode() {
+    public int getCode() {
         return code;
     }
 
-    public void setCode(Integer code) {
+    public void setCode(int code) {
         this.code = code;
     }
 
