@@ -643,6 +643,11 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         ReturnExpressDetail returnExpressDetail = new ReturnExpressDetail();
         BeanUtils.copyProperties(expressUpdateDTO, returnExpressDetail);
         ReturnExpressServiceAddDTO expressUpdateServiceDTO = (ReturnExpressServiceAddDTO) expressUpdateDTO;
+
+        if(StringUtils.isEmpty(returnExpressDetail.getSellerCode())){
+            returnExpressDetail.setSellerCode(null);
+        }
+
         int update = returnExpressMapper.update(returnExpressDetail, Wrappers.<ReturnExpressDetail>lambdaUpdate()
                 .eq(ReturnExpressDetail::getId, expressUpdateDTO.getId())
                 .eq(ReturnExpressDetail::getDealStatus, configStatus.getDealStatus().getWaitCustomerDeal())
