@@ -3,9 +3,11 @@ package com.szmsd.finance.service.impl;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.finance.domain.PreWithdraw;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.dto.PreRechargeAuditDTO;
@@ -13,10 +15,11 @@ import com.szmsd.finance.dto.PreWithdrawDTO;
 import com.szmsd.finance.mapper.PreWithdrawMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IPreWithdrawService;
-import com.szmsd.finance.util.SnowflakeId;
+import com.szmsd.finance.vo.PreWithdrawRejectVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -106,6 +109,46 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
         preWithdraw.setVerifyDate(new Date());
         preWithdraw.setPaymentVoucher(dto.getPaymentVoucher());
         preWithdrawMapper.updateById(preWithdraw);
+        return R.ok();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R reject(PreWithdrawRejectVO rejectVO) {
+
+        PreWithdraw preWithdraw = preWithdrawMapper.selectById(rejectVO.getId());
+
+        if(preWithdraw == null){
+            return R.failed("无法获取提现记录");
+        }
+
+        String verifyStatus = preWithdraw.getVerifyStatus();
+
+        if(!verifyStatus.equals("1")){
+            return R.failed("状态必须审核通过才允许提现驳回");
+        }
+
+        CustPayDTO custPayDTO = new CustPayDTO();
+        custPayDTO.setAmount(preWithdraw.getAmount());
+        custPayDTO.setCusCode(preWithdraw.getCusCode());
+        custPayDTO.setCusName(preWithdraw.getCusName());
+        custPayDTO.setCurrencyCode(preWithdraw.getCurrencyCode().trim());
+        custPayDTO.setCurrencyName(preWithdraw.getCurrencyName().trim());
+        custPayDTO.setOrderTime(new Date());
+        custPayDTO.setNo(preWithdraw.getSerialNo());
+        custPayDTO.setNote("提现驳回");
+        R r = accountBalanceService.offlineIncome(custPayDTO);
+        if (Constants.SUCCESS != r.getCode()) {
+            return r;
+        }
+
+        PreWithdraw upd = new PreWithdraw();
+        upd.setId(preWithdraw.getId());
+        upd.setVerifyStatus("3");
+        upd.setRejectRemark(rejectVO.getRejectRemark());
+        upd.setRejectUserBy(SecurityUtils.getLoginUser().getSellerCode());
+        upd.setRejectTime(new Date());
+        preWithdrawMapper.updateById(upd);
         return R.ok();
     }
 }
