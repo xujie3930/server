@@ -62,7 +62,7 @@ public class BasProductService extends BaseEntity {
     private String compareTrackingno;
 
     @ApiModelProperty(value = "是否收货仓库1")
-    private Integer recevieWarehouseStatus;
+    private int recevieWarehouseStatus;
 
 
 

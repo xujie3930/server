@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,12 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
 
     @Autowired
     private HtpConfigMapper htpConfigMapper;
+
+    @Value("${wspfqeopsAddress}")
+    private String wspfqeopsAddress;
+
+    @Value("${wspfqeopsToken}")
+    private String wspfqeopsToken;
 
     @Override
     public HttpResponseVO rmi(HttpRequestDto dto) {
@@ -169,8 +176,8 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
             }
 
             //国外接口地址
-            if (domain.equals("https://ws-pf.qeops.eu:8445")){
-                    Authorization = "Bearer " + "qps_auth_u96vL6IVHm2NwseYO0oHGk5Y2wYWQYn6adad70";
+            if (domain.equals(wspfqeopsAddress)){
+                    Authorization = "Bearer " + wspfqeopsToken;
                     requestHeaders.put("Authorization", Authorization);
             }
 

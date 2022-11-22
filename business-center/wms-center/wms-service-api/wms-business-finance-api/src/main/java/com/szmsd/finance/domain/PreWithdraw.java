@@ -48,7 +48,7 @@ public class PreWithdraw extends FssBaseEntity {
     @ApiModelProperty(value = "金额")
     private BigDecimal amount;
 
-    @ApiModelProperty(value = "审核状态(默认0=未审核，1=审核，2=审核未通过)")
+    @ApiModelProperty(value = "审核状态(默认0=未审核，1=审核，2=审核未通过 3=提现驳回)")
     private String verifyStatus;
 
     @ApiModelProperty(value = "审核备注")
@@ -73,5 +73,15 @@ public class PreWithdraw extends FssBaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @ApiModelProperty(value = "提现申请日期")
     private Date withdrawTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ApiModelProperty(value = "提现驳回时间")
+    private Date rejectTime;
+
+    @ApiModelProperty(value = "提现驳回原因")
+    private String rejectRemark;
+
+    @ApiModelProperty(value = "提现驳回操作人")
+    private String rejectUserBy;
 
 }

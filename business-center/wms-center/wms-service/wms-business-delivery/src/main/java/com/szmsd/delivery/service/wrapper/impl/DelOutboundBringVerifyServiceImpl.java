@@ -170,7 +170,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
                 if(packageDeliveryConditionsR != null && packageDeliveryConditionsR.getCode() == 200){
                     if(packageDeliveryConditionsR.getData() == null || !"1".equals(packageDeliveryConditionsR.getData().getStatus())){
-                        throw new CommonException("400", delOutbound.getShipmentRule()+ MessageUtil.to("物流服务未生效", "Logistics service is not effective"));
+                        throw new CommonException("400", delOutbound.getShipmentRule()+ MessageUtil.to("物流服务未生效", "Logistics service is not effective:"+delOutbound.getOrderNo()));
                     }
                 }
 
@@ -518,7 +518,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             }
         }
 
-        Integer recevieWarehouseStatus = 0;
+        int recevieWarehouseStatus = 0;
 
         if(StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
 
@@ -529,7 +529,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 List<BasProductService> basProductServices = basProductServiceRs.getData();
                 for (BasProductService basProductService : basProductServices) {
                     recevieWarehouseStatus = basProductService.getRecevieWarehouseStatus();
-                    if (recevieWarehouseStatus.equals(RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode())) {
+                    if (recevieWarehouseStatus == RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode()) {
                         break;
                     }
                 }
@@ -569,7 +569,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 new CountryInfo(warehouse.getCountryCode(), null, warehouse.getCountryName(), warehouse.getCountryChineseName())
         );
 
-        if(recevieWarehouseStatus.equals(RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode())){
+        if(recevieWarehouseStatus == RecevieWarehouseStatusEnum.WAREHOUSESTATUS.getCode()){
             // 收货地址
             calcShipmentFeeCommand.setToAddress(fromAddress);
             // 发货地址
