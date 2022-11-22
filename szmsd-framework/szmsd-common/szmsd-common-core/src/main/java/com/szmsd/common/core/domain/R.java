@@ -126,7 +126,7 @@ public class R<T> implements Serializable {
     }
 
     public static <T> T getDataAndException(R<T> r) {
-        if (null != r) {
+        if (null != r  && r.getMsg() != null) {
             if (Constants.SUCCESS == r.getCode()) {
                 return r.getData();
             } else if (HttpStatus.BAD_REQUEST.value() == r.getCode()) {
