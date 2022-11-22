@@ -7,12 +7,14 @@ import com.szmsd.finance.domain.PreWithdraw;
 import com.szmsd.finance.dto.PreRechargeAuditDTO;
 import com.szmsd.finance.dto.PreWithdrawDTO;
 import com.szmsd.finance.service.IPreWithdrawService;
+import com.szmsd.finance.vo.PreWithdrawRejectVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -46,5 +48,11 @@ public class PreWithdrawController extends BaseController {
     @PostMapping("/audit")
     public R audit(@RequestBody PreRechargeAuditDTO dto){
         return preWithdrawService.audit(dto);
+    }
+
+    @ApiOperation(value = "提现退回")
+    @PostMapping("/reject")
+    public R reject(@RequestBody @Valid PreWithdrawRejectVO rejectVO){
+        return preWithdrawService.reject(rejectVO);
     }
 }
