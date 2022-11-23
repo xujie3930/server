@@ -2,6 +2,7 @@ package com.szmsd.exception.task;
 
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
+import com.szmsd.bas.domain.BasFile;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.exception.dto.ExceptionInfoExportCustomerDto;
