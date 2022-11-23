@@ -1,14 +1,13 @@
-package com.szmsd.delivery.service.impl;
+package com.szmsd.bas.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.bas.domain.BasFile;
+import com.szmsd.bas.domain.BasFileDao;
+import com.szmsd.bas.mapper.BasFileMapper;
+import com.szmsd.bas.service.BasFileService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.delivery.domain.BasFile;
-
-import com.szmsd.delivery.domain.BasFileDao;
-import com.szmsd.delivery.mapper.BasFileMapper;
-import com.szmsd.delivery.service.BasFileService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,5 +47,26 @@ public class BasFileServiceImpl extends ServiceImpl<BasFileMapper, BasFile>  imp
             return  R.failed();
         }
 
+    }
+
+    @Override
+    public R addbasFile(BasFile basFile) {
+        try {
+            int a=baseMapper.insertSelective(basFile);
+            return R.ok(basFile);
+        }catch (Exception e){
+            e.printStackTrace();
+            return  R.failed();
+        }
+    }
+
+    @Override
+    public R updatebasFile(BasFile basFile) {
+        try {
+            return R.ok(baseMapper.updateByPrimaryKeySelective(basFile));
+        }catch (Exception e){
+            e.printStackTrace();
+            return  R.failed();
+        }
     }
 }

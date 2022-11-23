@@ -1,16 +1,16 @@
-package com.szmsd.delivery.controller;
+package com.szmsd.bas.controller;
 
 
 import com.google.common.collect.Lists;
+import com.szmsd.bas.domain.BasFile;
+import com.szmsd.bas.domain.BasFileDao;
+import com.szmsd.bas.service.BasFileService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.BatchDownFilesUtils;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
-import com.szmsd.delivery.domain.BasFile;
-import com.szmsd.delivery.domain.BasFileDao;
-import com.szmsd.delivery.service.BasFileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -26,13 +26,13 @@ import java.util.List;
 
 @Api(tags = {"文件中心下载"})
 @RestController
-@RequestMapping("/basFileController")
+@RequestMapping("/basFile")
 @Slf4j
 public class BasFileController extends BaseController {
     @Autowired
     private BasFileService basFileService;
 
-    @Value("${filepaths}")
+    @Value("${filepath}")
     private String filepath;
 
     @PostMapping("/list")
@@ -54,6 +54,24 @@ public class BasFileController extends BaseController {
         R r = basFileService.listmodularName();
         return r;
     }
+
+    @PostMapping("/addbasFile")
+    @ApiOperation(value = "新增",notes = "新增")
+    public R addbasFile(@RequestBody BasFile basFile) {
+
+        R r = basFileService.addbasFile(basFile);
+        return r;
+    }
+
+    @PostMapping("/updatebasFile")
+    @ApiOperation(value = "修改",notes = "修改")
+    public R updatebasFile(@RequestBody BasFile basFile) {
+
+        R r = basFileService.updatebasFile(basFile);
+        return r;
+    }
+
+
 
 
     /**

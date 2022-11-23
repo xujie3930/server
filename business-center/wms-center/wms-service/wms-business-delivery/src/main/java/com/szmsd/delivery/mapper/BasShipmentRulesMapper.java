@@ -2,7 +2,6 @@ package com.szmsd.delivery.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.szmsd.delivery.domain.BasFile;
 import com.szmsd.delivery.domain.BasShipmentRules;
 import com.szmsd.delivery.dto.BasShipmentRulesDto;
 import org.apache.ibatis.annotations.Mapper;

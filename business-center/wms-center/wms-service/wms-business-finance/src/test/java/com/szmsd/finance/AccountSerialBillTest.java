@@ -2,9 +2,11 @@ package com.szmsd.finance;
 
 import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.service.AccountBillRecordService;
 import com.szmsd.finance.service.IAccountBalanceService;
+import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.vo.BillBalanceVO;
 import com.szmsd.finance.vo.EleBillQueryVO;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,19 @@ public class AccountSerialBillTest {
     @Resource
     private IAccountBalanceService iAccountBalanceService;
 
+    @Resource
+    private IAccountSerialBillService iAccountSerialBillService;
+
+
+    @Test
+    public void asyncExport(){
+
+        AccountSerialBillDTO dto = new AccountSerialBillDTO();
+        dto.setPaymentTimeStart("2022-01-01");
+        dto.setPaymentTimeEnd("2022-11-23");
+
+        iAccountSerialBillService.asyncExport(null,dto);
+    }
 
     @Test
     public void balancePage() {
