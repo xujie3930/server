@@ -652,22 +652,33 @@
     <select id="exportData" resultMap="AccountSerialBillExcelVOMap" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
 
         SELECT
-            a.id,a.no,a.tracking_no,a.cus_code,a.cus_name,a.currency_code,a.currency_name,
-            (CASE
-                WHEN
-                a.business_category in ('线下充值','退费','优惠','赔偿') and a.charge_type not in ('汇率转换充值')
-                THEN
-                abs(a.amount) ELSE 0-abs(a.amount)
-                END) as amount,
-            a.warehouse_code,a.warehouse_name,a.pay_method,a.business_category,a.product_code,a.product_category,
-            a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
-            a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
-            a.calc_weight,a.specifications,a.nature,a.serial_number,a.amazon_logistics_route_id,a.country_code,a.country,
-            a.charge_type,a.shipment_rule_name,a.shipment_rule
+        a.id,a.no,a.tracking_no,a.cus_code,a.cus_name,a.currency_code,a.currency_name,
+        (CASE
+        WHEN
+        a.business_category in ('线下充值','退费','优惠','赔偿') and a.charge_type not in ('汇率转换充值')
+        THEN
+        abs(a.amount) ELSE 0-abs(a.amount)
+        END) as amount,
+        a.warehouse_code,a.warehouse_name,a.pay_method,a.business_category,a.product_code,a.product_category,
+        a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
+        a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
+        a.calc_weight,a.specifications,a.nature,a.serial_number,a.amazon_logistics_route_id,a.country_code,a.country,
+        a.charge_type,a.shipment_rule_name,a.shipment_rule
         FROM `fss_account_serial_bill` a
         <include refid="SelectSerialBillWhere"/>
         ORDER BY a.id DESC
 
     </select>
+
+    <select id="selectSerialBillCount" resultType="java.lang.Integer" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
+
+        SELECT
+            count(1)
+        FROM `fss_account_serial_bill` a
+        <include refid="SelectSerialBillWhere"/>
+
+    </select>
+
+
 
 </mapper>
