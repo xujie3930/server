@@ -1,4 +1,4 @@
-package com.szmsd.delivery.domain;
+package com.szmsd.bas.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -8,8 +8,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import java.util.Date;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

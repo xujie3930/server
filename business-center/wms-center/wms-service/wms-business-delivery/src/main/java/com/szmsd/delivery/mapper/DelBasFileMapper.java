@@ -1,16 +1,19 @@
-package com.szmsd.exception.mapper;
+package com.szmsd.delivery.mapper;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+
 import com.szmsd.bas.domain.BasFile;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
-public interface BasExcetionFileMapper extends BaseMapper<BasFile> {
+public interface DelBasFileMapper extends BaseMapper<BasFile> {
     int deleteByPrimaryKey(Integer id);
 
     int insert(BasFile record);
@@ -25,4 +28,5 @@ public interface BasExcetionFileMapper extends BaseMapper<BasFile> {
 
     Integer selectDelOutboundCount(@Param(Constants.WRAPPER) QueryWrapper<DelOutboundListQueryDto> queryWrapper);
 
+    List<String> selectModularName();
 }

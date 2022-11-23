@@ -38,4 +38,11 @@ public interface IAccountSerialBillService extends IService<AccountSerialBill> {
     void exportBillTotal(HttpServletResponse response, AccountSerialBillDTO dto);
 
     List<AccountSerialBillExcelVO> exportData(AccountSerialBillDTO dto);
+
+    /**
+     * 异步导出账单
+     * @param response
+     * @param dto
+     */
+    void asyncExport(HttpServletResponse response, AccountSerialBillDTO dto);
 }
