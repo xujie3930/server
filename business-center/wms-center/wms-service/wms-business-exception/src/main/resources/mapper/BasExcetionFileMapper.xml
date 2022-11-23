@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.szmsd.exception.mapper.BasExcetionFileMapper" >
-  <resultMap id="BaseResultMap" type="com.szmsd.delivery.domain.BasFile" >
+  <resultMap id="BaseResultMap" type="com.szmsd.bas.domain.BasFile" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="create_by" property="createBy" jdbcType="VARCHAR" />
     <result column="create_by_name" property="createByName" jdbcType="VARCHAR" />
@@ -39,7 +39,7 @@
     delete from bas_file
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.szmsd.delivery.domain.BasFile" >
+  <insert id="insert" parameterType="com.szmsd.bas.domain.BasFile" >
     insert into bas_file (id, create_by, create_by_name, 
       create_time, update_by, update_by_name, 
       update_time, state)
@@ -47,7 +47,7 @@
       #{createTime,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, #{updateByName,jdbcType=VARCHAR}, 
       #{updateTime,jdbcType=TIMESTAMP}, #{state,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="com.szmsd.delivery.domain.BasFile" useGeneratedKeys="true" keyProperty="id">
+  <insert id="insertSelective" parameterType="com.szmsd.bas.domain.BasFile" useGeneratedKeys="true" keyProperty="id">
     insert into bas_file
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -138,7 +138,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.delivery.domain.BasFile" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.bas.domain.BasFile" >
     update bas_file
     <set >
       <if test="createBy != null" >
@@ -168,7 +168,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.szmsd.delivery.domain.BasFile" >
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.bas.domain.BasFile" >
     update bas_file
     set create_by = #{createBy,jdbcType=VARCHAR},
       create_by_name = #{createByName,jdbcType=VARCHAR},

@@ -17,9 +17,11 @@ import com.github.pagehelper.Page;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.api.feign.BasFileFeignService;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
+import com.szmsd.bas.domain.BasFile;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
@@ -126,10 +128,9 @@ public class DelOutboundController extends BaseController {
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
 
+
     @Autowired
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
-    @Autowired
-    private BasFileMapper basFileMapper;
+    private BasFileFeignService basFileFeignService;
 
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:list')")
@@ -891,7 +892,7 @@ public class DelOutboundController extends BaseController {
                         basFile.setModularType(0);
                         basFile.setModularNameZh("出库订单导出");
                         basFile.setModularNameEn("OutboundOrderInformation");
-                        basFileMapper.insertSelective(basFile);
+                        basFileFeignService.addbasFile(basFile);
 
                         EasyPoiExportTask<DelOutboundExportListVO, DelOutboundExportItemListVO> delOutboundExportExTask = new EasyPoiExportTask<DelOutboundExportListVO, DelOutboundExportItemListVO>()
                                 .setExportParams(new ExportParams(fileName, "出库单详情(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, DelOutboundExportTotal)) + ")", ExcelType.XSSF))
@@ -904,7 +905,7 @@ public class DelOutboundController extends BaseController {
                                 .setFileId(basFile.getId());
 
                         basFile.setState("1");
-                        basFileMapper.updateByPrimaryKeySelective(basFile);
+                        basFileFeignService.updatebasFile(basFile);
 
                         //threadPoolTaskExecutor.execute(delOutboundExportExTask);
                         new Thread(delOutboundExportExTask, "export-" + i).start();
@@ -956,7 +957,7 @@ public class DelOutboundController extends BaseController {
                         basFile.setModularType(0);
                         basFile.setModularNameZh("出库订单导出");
                         basFile.setModularNameEn("OutboundOrderInformation");
-                        basFileMapper.insertSelective(basFile);
+                        basFileFeignService.addbasFile(basFile);
 
                         EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO> delOutboundExportExTask = new EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO>()
                                 .setExportParams(new ExportParams(fileName, "OutboundOrderInformation(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, DelOutboundExportTotal)) + ")", ExcelType.XSSF))
@@ -968,7 +969,7 @@ public class DelOutboundController extends BaseController {
                                 .setCountDownLatch(countDownLatch);
 
                         basFile.setState("1");
-                        basFileMapper.updateByPrimaryKeySelective(basFile);
+                        basFileFeignService.updatebasFile(basFile);
 
 
                         //threadPoolTaskExecutor.execute(delOutboundExportExTask);
