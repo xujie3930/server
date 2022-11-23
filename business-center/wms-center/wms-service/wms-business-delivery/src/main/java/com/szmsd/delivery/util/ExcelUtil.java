@@ -3,6 +3,7 @@ package com.szmsd.delivery.util;
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
+import com.szmsd.bas.api.feign.BasFileFeignService;
 import com.szmsd.bas.domain.BasFile;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.mapper.DelBasFileMapper;
@@ -30,7 +31,6 @@ public class ExcelUtil {
      * 导出路径
      */
 
-    //public static String filePath;
     /**
      * xlsx格式文件最大行数
      */
@@ -40,8 +40,7 @@ public class ExcelUtil {
      */
     public static Integer SHEET_DATA_MAX_LIMIT_XLS = 2 << 15;
 
-//    @Autowired
-//    private BasFileMapper basFileMapper;
+
 
 
     /**
@@ -66,11 +65,9 @@ public class ExcelUtil {
             workbook.write(outputStream);
             DecimalFormat df= new DecimalFormat("0.00");
             String fileSize = df.format((double) excelFile.length() / 1048576);
-            BasFile basFile = new BasFile();
-            basFile.setId(fileId);
-            basFile.setFileSize(fileSize+"MB");
-            basFileMapper.updateByPrimaryKeySelective(basFile);
             outputStream.flush();
+            updateBasfile(fileSize,fileId);
+
 
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -85,6 +82,23 @@ public class ExcelUtil {
             }
         }
     }
+
+    /**
+     * 修改文件大小值
+     * @param fileSize 文件大小
+     * @param fileId 文件id
+     */
+    public static void updateBasfile(String fileSize, Integer fileId) {
+        BasFileFeignService basFileFeignService= SpringUtils.getBean(BasFileFeignService.class);
+        BasFile basFile = new BasFile();
+        basFile.setId(fileId);
+        basFile.setFileSize(fileSize+"MB");
+        basFileFeignService.updatebasFile(basFile);
+    }
+
+
+
+
 
     /**
      * 使用EasyPOI导出Excel
