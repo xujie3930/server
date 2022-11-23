@@ -1,6 +1,7 @@
 package com.szmsd.delivery.service.wrapper.impl;
 
 import cn.hutool.crypto.digest.MD5;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
@@ -436,7 +437,14 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 if (!skus.isEmpty()) {
                     BaseProductConditionQueryDto baseProductConditionQueryDto = new BaseProductConditionQueryDto();
                     baseProductConditionQueryDto.setSkus(new ArrayList<>(skus));
+
+                    Long s = System.currentTimeMillis();
+
                     List<BaseProduct> basProductList = this.baseProductClientService.queryProductList(baseProductConditionQueryDto);
+
+                    Long e = System.currentTimeMillis();
+                    logger.info(">>>>>[创建出库单{}]-Pricing计算返回结果：baseProductClientService.queryProductList 耗时{}", e-s);
+
                     if (CollectionUtils.isNotEmpty(basProductList)) {
                         bindCodeMap = basProductList.stream().collect(Collectors.toMap(BaseProduct::getCode, v -> v, (v1, v2) -> v1));
                     }
@@ -483,8 +491,14 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
                 // 批量出口传WMS返回的装箱明细过去计算
                 if (DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())) {
+
+                    Long s = System.currentTimeMillis();
                     // 查询装箱明细
                     List<DelOutboundPacking> packingList = this.delOutboundPackingService.packageListByOrderNo(delOutbound.getOrderNo(), DelOutboundPackingTypeConstant.TYPE_2);
+
+                    Long e = System.currentTimeMillis();
+                    logger.info(">>>>>[创建出库单{}]-Pricing计算返回结果：delOutboundPackingService.packageListByOrderNo 耗时{}", e-s);
+
                     if (CollectionUtils.isEmpty(packingList)) {
                         throw new CommonException("400", MessageUtil.to("没有查询到WMS返回的装箱信息",
                                 "No packing information returned by WMS is found"));
@@ -523,8 +537,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if(StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
 
             List<String> productCodeList = Arrays.asList(delOutbound.getShipmentRule());
+            Long s = System.currentTimeMillis();
             R<List<BasProductService>> basProductServiceRs = chargeFeignService.selectBasProductService(productCodeList);
-
+            Long e = System.currentTimeMillis();
+            logger.info(">>>>>[创建出库单{}]-Pricing计算返回结果：chargeFeignService.selectBasProductService 耗时{}", e-s);
             if (basProductServiceRs.getCode() == 200) {
                 List<BasProductService> basProductServices = basProductServiceRs.getData();
                 for (BasProductService basProductService : basProductServices) {
@@ -583,8 +599,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 联系信息
         calcShipmentFeeCommand.setToContactInfo(new ContactInfo(address.getConsignee(), address.getPhoneNo(), address.getEmail(), null));
         // calcShipmentFeeCommand.setCalcTimeForDiscount(new Date());
+        Long s= System.currentTimeMillis();
         // 调用接口
-        return this.htpPricedProductClientService.pricing(calcShipmentFeeCommand);
+        ResponseObject.ResponseObjectWrapper<ChargeWrapper, ProblemDetails> responseObjectWrapper = this.htpPricedProductClientService.pricing(calcShipmentFeeCommand);
+        Long e = System.currentTimeMillis();
+        logger.info(">>>>>[创建出库单{}]-Pricing计算返回结果：htpPricedProductClientService.pricing 耗时{}", e-s);
+
+        return responseObjectWrapper;
     }
 
     @Override
@@ -621,7 +642,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if(StringUtils.isNotEmpty(delOutbound.getShipmentRule())) {
 
             List<String> productCodeList = Arrays.asList(delOutbound.getShipmentRule());
+            Long s = System.currentTimeMillis();
             R<List<BasProductService>> basProductServiceRs = chargeFeignService.selectBasProductService(productCodeList);
+            Long e = System.currentTimeMillis();
+            logger.info(">>>>>[创建出库单{}]创建承运商 chargeFeignService.selectBasProductService 耗时{}", e-s);
 
             if (basProductServiceRs.getCode() == 200) {
                 List<BasProductService> basProductServices = basProductServiceRs.getData();
@@ -708,7 +732,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             skus.add(delOutbound.getNewSku());
             BaseProductConditionQueryDto conditionQueryDto = new BaseProductConditionQueryDto();
             conditionQueryDto.setSkus(skus);
+            Long s = System.currentTimeMillis();
             List<BaseProduct> productList = this.baseProductClientService.queryProductList(conditionQueryDto);
+            Long e = System.currentTimeMillis();
+            logger.info(">>>>>[创建出库单{}]创建承运商 baseProductClientService.queryProductList 耗时{}", e-s);
             if (CollectionUtils.isEmpty(productList)) {
                 throw new CommonException("400", MessageUtil.to("查询SKU[" + delOutbound.getNewSku() + "]信息失败",
                         "Failed to query SKU ["+delOutbound. getNewSku()+"] information"));
@@ -753,7 +780,10 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 weightInGram, packageItems));
         createShipmentOrderCommand.setPackages(packages);
         createShipmentOrderCommand.setCarrier(new Carrier(shipmentService));
+        Long s = System.currentTimeMillis();
         ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);
+        Long e = System.currentTimeMillis();
+        logger.info(">>>>>[创建出库单{}]创建承运商 htpCarrierClientService.shipmentOrder 耗时{}", e-s);
         if (null == responseObjectWrapper) {
             throw new CommonException("400", MessageUtil.to("创建承运商物流订单失败，调用承运商系统无响应",
                     "Failed to create carrier logistics order, calling carrier system has no response"));
