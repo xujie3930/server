@@ -271,7 +271,7 @@ public class ExcelUtil {
         //获取第一行数据
         Row row2 =sheet.getRow(0);
 
-        for (int i=0;i<32;i++){
+        for (int i=0;i<25;i++){
             Cell deliveryTimeCell = row2.getCell(i);
 
             CellStyle styleMain = workbook.createCellStyle();
@@ -296,30 +296,30 @@ public class ExcelUtil {
 
         Sheet sheet1= workbook.getSheet("业务明细");
         //获取第一行数据
-        Row row3 =sheet1.getRow(0);
+        //Row row3 =sheet1.getRow(0);
 
-        for (int i=0;i<7;i++){
-            Cell deliveryTimeCell = row3.getCell(i);
-
-            CellStyle styleMain = workbook.createCellStyle();
-
-            styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
-
-
-            Font font = workbook.createFont();
-            //true为加粗，默认为不加粗
-            font.setBold(true);
-            //设置字体颜色，颜色和上述的颜色对照表是一样的
-            font.setColor(IndexedColors.WHITE.getIndex());
-            //将字体样式设置到单元格样式中
-            styleMain.setFont(font);
-
-            styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            styleMain.setAlignment(HorizontalAlignment.CENTER);
-            styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
-
-            deliveryTimeCell.setCellStyle(styleMain);
-        }
+//        for (int i=0;i<7;i++){
+//            Cell deliveryTimeCell = row3.getCell(i);
+//
+//            CellStyle styleMain = workbook.createCellStyle();
+//
+//            styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+//
+//
+//            Font font = workbook.createFont();
+//            //true为加粗，默认为不加粗
+//            font.setBold(true);
+//            //设置字体颜色，颜色和上述的颜色对照表是一样的
+//            font.setColor(IndexedColors.WHITE.getIndex());
+//            //将字体样式设置到单元格样式中
+//            styleMain.setFont(font);
+//
+//            styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+//            styleMain.setAlignment(HorizontalAlignment.CENTER);
+//            styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+//
+//            deliveryTimeCell.setCellStyle(styleMain);
+//        }
         if (workbook != null){
 
             downLoadExcel(entity.getTitle(), workbook,filepath,fileId);

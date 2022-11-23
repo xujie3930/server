@@ -21,11 +21,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
-import com.szmsd.delivery.vo.DelOutboundExportItemListVO;
-import com.szmsd.delivery.vo.DelOutboundExportListVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
-import com.szmsd.finance.controller.AccountSerialBillController;
-import com.szmsd.finance.convert.AccountSerialBillConvert;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.AccountSerialBillTotalVO;
 import com.szmsd.finance.domain.ChargeRelation;
@@ -47,12 +43,12 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -399,6 +395,10 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
         LoginUser loginUser = SecurityUtils.getLoginUser();
 
+        if(loginUser == null){
+            throw new RuntimeException("无法获取登录人信息");
+        }
+
         Integer pageSize = 100000;
 
         //查询条数
@@ -416,12 +416,15 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
         for(int i = 1;i<=pageTotal;i++){
 
+            Date date =new Date();
+            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMddHHmmss");
+
             //查询数据
             PageHelper.startPage(i, pageSize);
-            List<AccountSerialBill> accountSerialBills = accountSerialBillMapper.selectPageList(dto);
-            List<AccountSerialBillExcelVO> accountSerialBillExcelVOS = AccountSerialBillConvert.INSTANCE.toSerialBillExcelListVO(accountSerialBills);
+            List<AccountSerialBillExcelVO> accountSerialBillExcelVOS = accountSerialBillMapper.exportData(dto);
+            //List<AccountSerialBillExcelVO> accountSerialBillExcelVOS = AccountSerialBillConvert.INSTANCE.toSerialBillExcelListVO(accountSerialBills);
 
-            String fileName = "业务明细-" +loginUser.getUsername()+"-"+ System.currentTimeMillis();
+            String fileName = "业务明细-"+loginUser.getUsername()+"-"+ simpleDateFormat.format(date);
 
             BasFile basFile = new BasFile();
             basFile.setState("0");
