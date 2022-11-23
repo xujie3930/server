@@ -32,7 +32,7 @@ public class BasFileController extends BaseController {
     @Autowired
     private BasFileService basFileService;
 
-    @Value("${filepaths}")
+    @Value("${filepath}")
     private String filepath;
 
     @PostMapping("/list")
