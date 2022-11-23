@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 
+import com.szmsd.bas.domain.BasFile;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -12,7 +13,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
-public interface BasFileMapper extends BaseMapper<BasFile> {
+public interface DelBasFileMapper extends BaseMapper<BasFile> {
     int deleteByPrimaryKey(Integer id);
 
     int insert(BasFile record);

@@ -3,8 +3,9 @@ package com.szmsd.delivery.util;
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
+import com.szmsd.bas.domain.BasFile;
 import com.szmsd.common.core.utils.SpringUtils;
-import com.szmsd.delivery.mapper.BasFileMapper;
+import com.szmsd.delivery.mapper.DelBasFileMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
@@ -49,7 +50,7 @@ public class ExcelUtil {
      * @param workbook Excel对象
      */
     public static void downLoadExcel(String fileName, Workbook workbook,String filepath,Integer fileId) {
-        BasFileMapper basFileMapper= SpringUtils.getBean(BasFileMapper.class);
+        DelBasFileMapper basFileMapper= SpringUtils.getBean(DelBasFileMapper.class);
         if (workbook instanceof HSSFWorkbook) {
             fileName = fileName + ".xls";
         } else {
