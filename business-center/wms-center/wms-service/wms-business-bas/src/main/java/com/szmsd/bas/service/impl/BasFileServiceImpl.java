@@ -48,4 +48,24 @@ public class BasFileServiceImpl extends ServiceImpl<BasFileMapper, BasFile>  imp
         }
 
     }
+
+    @Override
+    public R addbasFile(BasFile basFile) {
+        try {
+            return R.ok(baseMapper.insertSelective(basFile));
+        }catch (Exception e){
+            e.printStackTrace();
+            return  R.failed();
+        }
+    }
+
+    @Override
+    public R updatebasFile(BasFile basFile) {
+        try {
+            return R.ok(baseMapper.updateByPrimaryKeySelective(basFile));
+        }catch (Exception e){
+            e.printStackTrace();
+            return  R.failed();
+        }
+    }
 }

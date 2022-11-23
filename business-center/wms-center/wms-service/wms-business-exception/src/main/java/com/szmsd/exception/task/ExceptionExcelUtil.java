@@ -2,10 +2,8 @@ package com.szmsd.exception.task;
 
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
-import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import com.szmsd.delivery.domain.BasFile;
 import com.szmsd.exception.dto.ExceptionInfoExportCustomerDto;
 import com.szmsd.exception.dto.ExceptionInfoExportDto;
 import com.szmsd.exception.dto.ExceptionInfoQueryDto;
@@ -18,7 +16,6 @@ import org.apache.poi.ss.usermodel.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.*;
 

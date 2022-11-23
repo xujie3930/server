@@ -16,6 +16,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.bas.api.factory.SyslanresFeignFallback,\
   com.szmsd.bas.api.factory.BasPartnerFeignFallback,\
   com.szmsd.bas.api.factory.BasMeteringConfigFeignFallback,\
+  com.szmsd.bas.api.factory.BasFileFeignFallback,\
   com.szmsd.bas.api.factory.BasChildParentChildFeignFallback
 
 
