@@ -889,7 +889,8 @@ public class DelOutboundController extends BaseController {
                         basFile.setModularType(0);
                         basFile.setModularNameZh("出库订单导出");
                         basFile.setModularNameEn("OutboundOrderInformation");
-                        basFileFeignService.addbasFile(basFile);
+                       R<BasFile> r =basFileFeignService.addbasFile(basFile);
+                       BasFile basFile1=r.getData();
 
                         EasyPoiExportTask<DelOutboundExportListVO, DelOutboundExportItemListVO> delOutboundExportExTask = new EasyPoiExportTask<DelOutboundExportListVO, DelOutboundExportItemListVO>()
                                 .setExportParams(new ExportParams(fileName, "出库单详情(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, DelOutboundExportTotal)) + ")", ExcelType.XSSF))
@@ -899,10 +900,10 @@ public class DelOutboundController extends BaseController {
                                 .setClazz2(DelOutboundExportItemListVO.class)
                                 .setFilepath(filepath)
                                 .setCountDownLatch(countDownLatch)
-                                .setFileId(basFile.getId());
+                                .setFileId(basFile1.getId());
 
-                        basFile.setState("1");
-                        basFileFeignService.updatebasFile(basFile);
+                        basFile1.setState("1");
+                        basFileFeignService.updatebasFile(basFile1);
 
                         //threadPoolTaskExecutor.execute(delOutboundExportExTask);
                         new Thread(delOutboundExportExTask, "export-" + i).start();
@@ -954,7 +955,8 @@ public class DelOutboundController extends BaseController {
                         basFile.setModularType(0);
                         basFile.setModularNameZh("出库订单导出");
                         basFile.setModularNameEn("OutboundOrderInformation");
-                        basFileFeignService.addbasFile(basFile);
+                        R<BasFile> r =basFileFeignService.addbasFile(basFile);
+                        BasFile basFile1=r.getData();
 
                         EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO> delOutboundExportExTask = new EasyPoiExportTask<DelOutboundExportListEnVO, DelOutboundExportItemListEnVO>()
                                 .setExportParams(new ExportParams(fileName, "OutboundOrderInformation(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, DelOutboundExportTotal)) + ")", ExcelType.XSSF))
@@ -963,10 +965,11 @@ public class DelOutboundController extends BaseController {
                                 .setData2(page1)
                                 .setClazz2(DelOutboundExportItemListEnVO.class)
                                 .setFilepath(filepath)
-                                .setCountDownLatch(countDownLatch);
+                                .setCountDownLatch(countDownLatch)
+                                .setFileId(basFile1.getId());
 
                         basFile.setState("1");
-                        basFileFeignService.updatebasFile(basFile);
+                        basFileFeignService.updatebasFile(basFile1);
 
 
                         //threadPoolTaskExecutor.execute(delOutboundExportExTask);

@@ -14,7 +14,7 @@ import java.util.List;
 public interface BasFileFeignService {
 
     @PostMapping(value = "/basFile/addbasFile")
-    R  addbasFile(@RequestBody BasFile basFile);
+    R<BasFile>  addbasFile(@RequestBody BasFile basFile);
 
 
     @PostMapping(value = "/basFile/updatebasFile")
