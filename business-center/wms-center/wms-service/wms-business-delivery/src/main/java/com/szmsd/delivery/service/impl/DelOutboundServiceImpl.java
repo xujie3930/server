@@ -185,7 +185,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     private BasWarehouseClientService basWarehouseClientService;
 
     @Autowired
-    private BasFileMapper basFileMapper;
+    private DelBasFileMapper basFileMapper;
 
     @Autowired
     private DelOutboundTarckErrorMapper delOutboundTarckErrorMapper;
