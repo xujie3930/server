@@ -10,4 +10,9 @@ public interface BasFileService {
     List<BasFile>  selectBasFile(BasFileDao basFile);
 
     R<List<String>> listmodularName();
+
+
+    R  addbasFile(BasFile basFile);
+
+    R  updatebasFile(BasFile basFile);
 }

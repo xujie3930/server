@@ -55,6 +55,24 @@ public class BasFileController extends BaseController {
         return r;
     }
 
+    @PostMapping("/addbasFile")
+    @ApiOperation(value = "新增",notes = "新增")
+    public R addbasFile(@RequestBody BasFile basFile) {
+
+        R r = basFileService.addbasFile(basFile);
+        return r;
+    }
+
+    @PostMapping("/updatebasFile")
+    @ApiOperation(value = "修改",notes = "修改")
+    public R updatebasFile(@RequestBody BasFile basFile) {
+
+        R r = basFileService.updatebasFile(basFile);
+        return r;
+    }
+
+
+
 
     /**
      * 单个多个都可以下载

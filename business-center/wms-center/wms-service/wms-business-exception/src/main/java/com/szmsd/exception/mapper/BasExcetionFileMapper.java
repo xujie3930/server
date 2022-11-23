@@ -4,7 +4,7 @@ package com.szmsd.exception.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
-import com.szmsd.delivery.domain.BasFile;
+import com.szmsd.bas.domain.BasFile;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

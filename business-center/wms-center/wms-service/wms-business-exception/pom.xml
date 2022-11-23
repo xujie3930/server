@@ -129,6 +129,10 @@
             <artifactId>poi-ooxml-schemas</artifactId>
             <version>4.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-bas-api</artifactId>
+        </dependency>
 
 
     </dependencies>
