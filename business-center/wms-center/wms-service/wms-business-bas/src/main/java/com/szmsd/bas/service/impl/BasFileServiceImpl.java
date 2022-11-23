@@ -52,7 +52,8 @@ public class BasFileServiceImpl extends ServiceImpl<BasFileMapper, BasFile>  imp
     @Override
     public R addbasFile(BasFile basFile) {
         try {
-            return R.ok(baseMapper.insertSelective(basFile));
+            int a=baseMapper.insertSelective(basFile);
+            return R.ok(basFile);
         }catch (Exception e){
             e.printStackTrace();
             return  R.failed();
