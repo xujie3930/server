@@ -16,6 +16,7 @@ import com.szmsd.finance.mapper.PreWithdrawMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IPreWithdrawService;
 import com.szmsd.finance.vo.PreWithdrawRejectVO;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -116,39 +117,46 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
     @Transactional(rollbackFor = Exception.class)
     public R reject(PreWithdrawRejectVO rejectVO) {
 
-        PreWithdraw preWithdraw = preWithdrawMapper.selectById(rejectVO.getId());
+        List<String> ids =  rejectVO.getIds();
 
-        if(preWithdraw == null){
-            return R.failed("无法获取提现记录");
+        if(CollectionUtils.isEmpty(ids)){
+            return R.failed("主键ID不能为空");
         }
 
-        String verifyStatus = preWithdraw.getVerifyStatus();
+        List<PreWithdraw> preWithdrawList = preWithdrawMapper.selectList(Wrappers.<PreWithdraw>query().lambda().in(PreWithdraw::getId,ids));
 
-        if(!verifyStatus.equals("1")){
-            return R.failed("状态必须审核通过才允许提现驳回");
+        for(PreWithdraw preWithdraw : preWithdrawList) {
+
+            String verifyStatus = preWithdraw.getVerifyStatus();
+
+            if (!verifyStatus.equals("1")) {
+                return R.failed("状态必须审核通过才允许提现驳回");
+            }
+
+            CustPayDTO custPayDTO = new CustPayDTO();
+            custPayDTO.setAmount(preWithdraw.getAmount());
+            custPayDTO.setCusCode(preWithdraw.getCusCode());
+            custPayDTO.setCusName(preWithdraw.getCusName());
+            custPayDTO.setCurrencyCode(preWithdraw.getCurrencyCode().trim());
+            custPayDTO.setCurrencyName(preWithdraw.getCurrencyName().trim());
+            custPayDTO.setOrderTime(new Date());
+            custPayDTO.setNo(preWithdraw.getSerialNo());
+            custPayDTO.setNote("提现驳回");
+            R r = accountBalanceService.offlineIncome(custPayDTO);
+            if (Constants.SUCCESS != r.getCode()) {
+                return r;
+            }
+
+            PreWithdraw upd = new PreWithdraw();
+            upd.setId(preWithdraw.getId());
+            upd.setVerifyStatus("3");
+            upd.setRejectRemark(rejectVO.getRejectRemark());
+            upd.setRejectUserBy(SecurityUtils.getLoginUser().getSellerCode());
+            upd.setRejectTime(new Date());
+            preWithdrawMapper.updateById(upd);
+
         }
 
-        CustPayDTO custPayDTO = new CustPayDTO();
-        custPayDTO.setAmount(preWithdraw.getAmount());
-        custPayDTO.setCusCode(preWithdraw.getCusCode());
-        custPayDTO.setCusName(preWithdraw.getCusName());
-        custPayDTO.setCurrencyCode(preWithdraw.getCurrencyCode().trim());
-        custPayDTO.setCurrencyName(preWithdraw.getCurrencyName().trim());
-        custPayDTO.setOrderTime(new Date());
-        custPayDTO.setNo(preWithdraw.getSerialNo());
-        custPayDTO.setNote("提现驳回");
-        R r = accountBalanceService.offlineIncome(custPayDTO);
-        if (Constants.SUCCESS != r.getCode()) {
-            return r;
-        }
-
-        PreWithdraw upd = new PreWithdraw();
-        upd.setId(preWithdraw.getId());
-        upd.setVerifyStatus("3");
-        upd.setRejectRemark(rejectVO.getRejectRemark());
-        upd.setRejectUserBy(SecurityUtils.getLoginUser().getSellerCode());
-        upd.setRejectTime(new Date());
-        preWithdrawMapper.updateById(upd);
         return R.ok();
     }
 }
