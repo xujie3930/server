@@ -81,6 +81,7 @@ import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
@@ -266,8 +267,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         queryWrapper.eq(DelOutbound::getOrderNo, vo.getOrderNo());
         DelOutbound delOutbound = super.getOne(queryWrapper);
         if(delOutbound == null){
-            throw new CommonException("400", "单据不存在");
+            throw new CommonException("400", "Order does not exist");
         }
+
+        String amazonLogisticsRouteId1 = delOutbound.getAmazonLogisticsRouteId();
+        String amazonReferenceId = delOutbound.getAmazonReferenceId();
+
+        if(StringUtils.isNotEmpty(amazonLogisticsRouteId1) && StringUtils.isEmpty(amazonReferenceId)){
+            throw new CommonException("400","The order number is being obtained");
+        }
+
         DelOutboundThirdPartyVO delOutboundThirdPartyVO =
                 BeanMapperUtil.map(delOutbound, DelOutboundThirdPartyVO.class);
 
