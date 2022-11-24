@@ -667,7 +667,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 address.getCity(),
                 address.getStateOrProvince(),
                 address.getPostCode(),
-                country.getEnName(),
+                address.getCountryCode(),
                 address.getTaxNumber(),
                 address.getIdNumber(),
                 delOutbound.getHouseNo()
@@ -682,7 +682,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 warehouse.getCity(),
                 warehouse.getProvince(),
                 warehouse.getPostcode(),
-                warehouse.getCountryName(),
+                warehouse.getCountryCode(),
                 null,
                 null,
                 null
@@ -901,7 +901,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 address.getCity(),
                 address.getStateOrProvince(),
                 address.getPostCode(),
-                country.getEnName(),
+                address.getCountryCode(),
                 address.getTaxNumber(),
                 address.getIdNumber(),
                 delOutbound.getHouseNo()
@@ -915,7 +915,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 warehouse.getCity(),
                 warehouse.getProvince(),
                 warehouse.getPostcode(),
-                warehouse.getCountryName(),
+                warehouse.getCountryCode(),
                 null,
                 null,
                 null

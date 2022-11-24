@@ -278,7 +278,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                     packageCollection.getReceiverCity(),
                     packageCollection.getReceiverProvince(),
                     packageCollection.getReceiverPostCode(),
-                    packageCollection.getReceiverCountry(),
+                    packageCollection.getReceiverCountryCode(),
                     packageCollection.getTaxNumber(),
                     packageCollection.getIdNumber(),
                     null
@@ -293,7 +293,7 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
                     packageCollection.getCollectionCity(),
                     packageCollection.getCollectionProvince(),
                     packageCollection.getCollectionPostCode(),
-                    packageCollection.getCollectionCountry(),
+                    packageCollection.getCollectionCountryCode(),
                     packageCollection.getTaxNumber(),
                     packageCollection.getIdNumber(),
                     null
