@@ -123,6 +123,10 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 queryWrapper.eq(AccountBalance::getCusCode, dto.getCusCode());
             }
 
+            if(StringUtils.isNotEmpty(dto.getCurrencyCode())){
+                queryWrapper.eq(AccountBalance::getCurrencyCode,dto.getCurrencyCode());
+            }
+
             LoginUser loginUser = SecurityUtils.getLoginUser();
             List<String> sellerCodeList = null;
             List<String> sellerCodeList1 = null;
@@ -141,9 +145,6 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                         queryWrapper.in(AccountBalance::getCusCode, "");
                     }
                 }
-                if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
-                    queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
-                }
 
 
                 if (null != loginUser && loginUser.getUsername().equals("admin")) {
@@ -152,10 +153,6 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                         queryWrapper.in(AccountBalance::getCusCode, sellerCodeList);
 
                     }
-                    if (StringUtils.isNotEmpty(dto.getCurrencyCode())) {
-                        queryWrapper.eq(AccountBalance::getCurrencyCode, dto.getCurrencyCode());
-                    }
-
                 }
             }
             //设置分页参数
