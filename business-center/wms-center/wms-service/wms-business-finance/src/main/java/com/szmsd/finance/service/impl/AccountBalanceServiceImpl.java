@@ -183,12 +183,14 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 
                 BigDecimal creditUseAmount = x.getCreditUseAmount();
                 BigDecimal totalBalance = x.getTotalBalance();
+                BigDecimal currentBalance = x.getCurrentBalance();
 
                 if(creditUseAmount.compareTo(BigDecimal.ZERO) > 0){
                     BigDecimal newTotalBalance = totalBalance.subtract(creditUseAmount);
+                    BigDecimal newCurrentBalance = currentBalance.subtract(creditUseAmount);
                     x.setTotalBalance(newTotalBalance);
+                    x.setCurrentBalance(newCurrentBalance);
                 }
-                
             });
 
             //获取分页信息
