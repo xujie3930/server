@@ -63,7 +63,7 @@ public class BasShipmentRulesDto extends QueryDto {
     private String serviceChannelSub;
 
     @ApiModelProperty(value = "功能模块")
-    private String typeName="0";
+    private String typeName;
 
 
 }
