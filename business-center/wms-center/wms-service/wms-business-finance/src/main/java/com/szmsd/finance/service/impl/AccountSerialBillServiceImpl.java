@@ -393,14 +393,14 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     }
 
     @Override
-    public R asyncExport(HttpServletResponse response, AccountSerialBillDTO dto) {
+    public void asyncExport(HttpServletResponse response, AccountSerialBillDTO dto) {
 
         this.generatorTime(dto);
 
         LoginUser loginUser = SecurityUtils.getLoginUser();
 
         if(loginUser == null){
-            return R.failed("无法获取登录人信息");
+            throw new RuntimeException("无法获取登录人信息");
         }
 
         Integer pageSize = 100000;
@@ -409,7 +409,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         int totalCount = accountSerialBillMapper.selectSerialBillCount(dto);
 
         if(totalCount == 0){
-            return R.failed("无数据生成");
+            throw new RuntimeException("无数据生成");
         }
 
         if(totalCount > 20000) {
@@ -468,7 +468,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
             log.info("所有导出任务完成，总计耗时：{}ms", System.currentTimeMillis() - start);
 
-            return R.ok(totalCount);
+
         }else{
 
             PageHelper.startPage(1, pageSize);
@@ -542,9 +542,19 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                 e.printStackTrace();
             }
 
-            return R.ok(totalCount);
+
         }
 
+    }
+
+    @Override
+    public R<Integer> exportCount(AccountSerialBillDTO dto) {
+
+        this.generatorTime(dto);
+
+        int totalCount = accountSerialBillMapper.selectSerialBillCount(dto);
+
+        return R.ok(totalCount);
     }
 
 
