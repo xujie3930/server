@@ -1,5 +1,6 @@
 package com.szmsd.finance.service.impl;
 
+import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
 import cn.hutool.core.util.RandomUtil;
@@ -21,6 +22,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
+import com.szmsd.delivery.vo.DelOutboundExportListVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.AccountSerialBillTotalVO;
@@ -41,13 +43,16 @@ import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -408,61 +413,138 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             return R.failed("无数据生成");
         }
 
-        int pageTotal = totalCount % pageSize == 0 ? totalCount / pageSize : totalCount / pageSize + 1;
+        if(totalCount > 20000) {
 
-        CountDownLatch countDownLatch = new CountDownLatch(pageTotal);
+            int pageTotal = totalCount % pageSize == 0 ? totalCount / pageSize : totalCount / pageSize + 1;
 
-        long start = System.currentTimeMillis();
+            CountDownLatch countDownLatch = new CountDownLatch(pageTotal);
 
-        for(int i = 1;i<=pageTotal;i++){
+            long start = System.currentTimeMillis();
 
-            Date date =new Date();
-            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMddHHmmss");
+            for (int i = 1; i <= pageTotal; i++) {
 
-            //查询数据
-            PageHelper.startPage(i, pageSize);
+                Date date = new Date();
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+
+                //查询数据
+                PageHelper.startPage(i, pageSize);
+                List<AccountSerialBillExcelVO> accountSerialBillExcelVOS = accountSerialBillMapper.exportData(dto);
+                //List<AccountSerialBillExcelVO> accountSerialBillExcelVOS = AccountSerialBillConvert.INSTANCE.toSerialBillExcelListVO(accountSerialBills);
+
+                String fileName = "业务明细-" + loginUser.getUsername() + "-" + simpleDateFormat.format(date);
+
+                BasFile basFile = new BasFile();
+                basFile.setState("0");
+                basFile.setFileRoute(filePath);
+                basFile.setCreateBy(SecurityUtils.getUsername());
+                basFile.setFileName(fileName + ".xlsx");
+                basFile.setModularType(0);
+                basFile.setModularNameZh("业务明细导出");
+                basFile.setModularNameEn("accountSerialBill");
+                R<BasFile> r = basFileFeignService.addbasFile(basFile);
+                BasFile basFile1 = r.getData();
+
+                //分批异步写入excel
+
+                EasyPoiExportTask<AccountSerialBillExcelVO> delOutboundExportExTask = new EasyPoiExportTask<AccountSerialBillExcelVO>()
+                        .setExportParams(new ExportParams(fileName, "业务明细(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, totalCount)) + ")", ExcelType.XSSF))
+                        .setData(accountSerialBillExcelVOS)
+                        .setClazz(AccountSerialBillExcelVO.class)
+                        .setFilepath(filePath)
+                        .setCountDownLatch(countDownLatch)
+                        .setFileId(basFile1.getId());
+
+                basFile1.setState("1");
+                basFileFeignService.updatebasFile(basFile1);
+
+                new Thread(delOutboundExportExTask, "export-" + i).start();
+
+            }
+
+            try {
+                countDownLatch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            log.info("所有导出任务完成，总计耗时：{}ms", System.currentTimeMillis() - start);
+
+            return R.ok(totalCount);
+        }else{
+
+            PageHelper.startPage(1, pageSize);
             List<AccountSerialBillExcelVO> accountSerialBillExcelVOS = accountSerialBillMapper.exportData(dto);
-            //List<AccountSerialBillExcelVO> accountSerialBillExcelVOS = AccountSerialBillConvert.INSTANCE.toSerialBillExcelListVO(accountSerialBills);
 
-            String fileName = "业务明细-"+loginUser.getUsername()+"-"+ simpleDateFormat.format(date);
+            ExportParams params = new ExportParams();
+            // 设置sheet得名称
+            params.setSheetName("业务账单");
+            ExportParams exportParams2 = new ExportParams();
+            exportParams2.setSheetName("业务账单明细");
+            // 创建sheet1使用得map
+            Map<String, Object>  DelOutboundExportMap = new HashMap<>(4);
+            // title的参数为ExportParams类型
+            DelOutboundExportMap.put("title", params);
+            // 模版导出对应得实体类型
+            DelOutboundExportMap.put("entity", DelOutboundExportListVO.class);
+            // sheet中要填充得数据
+            DelOutboundExportMap.put("data", accountSerialBillExcelVOS);
+            // 将sheet1和sheet2使用得map进行包装
+            List<Map<String, Object>> sheetsList = new ArrayList<>();
+            sheetsList.add(DelOutboundExportMap);
 
-            BasFile basFile = new BasFile();
-            basFile.setState("0");
-            basFile.setFileRoute(filePath);
-            basFile.setCreateBy(SecurityUtils.getUsername());
-            basFile.setFileName(fileName + ".xlsx");
-            basFile.setModularType(0);
-            basFile.setModularNameZh("业务明细导出");
-            basFile.setModularNameEn("accountSerialBill");
-            R<BasFile> r = basFileFeignService.addbasFile(basFile);
-            BasFile basFile1 = r.getData();
+            Workbook workbook = ExcelExportUtil.exportExcel(sheetsList, ExcelType.HSSF);
+            Sheet sheet= workbook.getSheet("业务账单");
 
-            //分批异步写入excel
+            //获取第一行数据
+            Row row2 =sheet.getRow(0);
 
-            EasyPoiExportTask<AccountSerialBillExcelVO> delOutboundExportExTask = new EasyPoiExportTask<AccountSerialBillExcelVO>()
-                    .setExportParams(new ExportParams(fileName, "业务明细(" + ((i - 1) * pageSize) + "-" + (Math.min(i * pageSize, totalCount)) + ")", ExcelType.XSSF))
-                    .setData(accountSerialBillExcelVOS)
-                    .setClazz(AccountSerialBillExcelVO.class)
-                    .setFilepath(filePath)
-                    .setCountDownLatch(countDownLatch)
-                    .setFileId(basFile1.getId());
+            for (int i=0;i<25;i++){
+                Cell deliveryTimeCell = row2.getCell(i);
 
-            basFile1.setState("1");
-            basFileFeignService.updatebasFile(basFile1);
+                CellStyle styleMain = workbook.createCellStyle();
 
-            new Thread(delOutboundExportExTask, "export-" + i).start();
+                styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
 
+
+                Font font = workbook.createFont();
+                //true为加粗，默认为不加粗
+                font.setBold(true);
+                //设置字体颜色，颜色和上述的颜色对照表是一样的
+                font.setColor(IndexedColors.WHITE.getIndex());
+                //将字体样式设置到单元格样式中
+                styleMain.setFont(font);
+
+                styleMain.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                styleMain.setAlignment(HorizontalAlignment.CENTER);
+                styleMain.setVerticalAlignment(VerticalAlignment.CENTER);
+
+                deliveryTimeCell.setCellStyle(styleMain);
+            }
+
+            try {
+                String fileName="业务账单"+System.currentTimeMillis();
+                URLEncoder.encode(fileName, "UTF-8");
+                //response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(), "ISO8859-1"));
+                response.setContentType("application/vnd.ms-excel");
+                response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xls");
+
+                response.addHeader("Pargam", "no-cache");
+                response.addHeader("Cache-Control", "no-cache");
+
+                ServletOutputStream outStream = null;
+                try {
+                    outStream = response.getOutputStream();
+                    workbook.write(outStream);
+                    outStream.flush();
+                } finally {
+                    outStream.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return R.ok(totalCount);
         }
-
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        log.info("所有导出任务完成，总计耗时：{}ms", System.currentTimeMillis() - start);
-
-        return R.ok();
 
     }
 
