@@ -2274,7 +2274,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         shipmentCancelRequestDto.setOrderNoList(orderNos);
         shipmentCancelRequestDto.setWarehouseCode(warehouseCode);
         shipmentCancelRequestDto.setRemark("");
+        logger.info("通知WMS取消单据参数：{}",JSON.toJSONString(shipmentCancelRequestDto));
         ResponseVO responseVO = this.htpOutboundClientService.shipmentDelete(shipmentCancelRequestDto);
+        logger.info("通知WMS取消单据返回：{}",JSON.toJSONString(responseVO));
         if (null == responseVO || null == responseVO.getSuccess()) {
             throw new CommonException("400", "取消出库单失败");
         }
@@ -2290,7 +2292,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }else{
                 throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "取消出库单失败2"));
             }
-
         }
         // 修改单据状态为【仓库取消中】
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
