@@ -2654,11 +2654,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean serviceChannelNamePushWMS(DelOutbound delOutbound, DelOutbound updateDelOutbound) {
 
+        String shipmentService = delOutbound.getShipmentService();
+
+        if(StringUtils.isEmpty(shipmentService)){
+            return false;
+        }
 
         BasShipmentRulesDto paramBasShipmentRulesDto = new BasShipmentRulesDto();
         paramBasShipmentRulesDto.setCustomCode(delOutbound.getSellerCode());
-        paramBasShipmentRulesDto.setServiceChannelName(delOutbound.getShipmentService());
+        paramBasShipmentRulesDto.setServiceChannelName(shipmentService);
         paramBasShipmentRulesDto.setDelFlag("1");
+        paramBasShipmentRulesDto.setTypeName("0");
         List<BasShipmentRules> list = basShipmenRulesService.selectBasShipmentRules(paramBasShipmentRulesDto);
         if(list.isEmpty()){
             return false;
