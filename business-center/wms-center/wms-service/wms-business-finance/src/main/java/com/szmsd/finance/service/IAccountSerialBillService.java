@@ -45,5 +45,7 @@ public interface IAccountSerialBillService extends IService<AccountSerialBill> {
      * @param response
      * @param dto
      */
-    R asyncExport(HttpServletResponse response, AccountSerialBillDTO dto);
+     void asyncExport(HttpServletResponse response, AccountSerialBillDTO dto);
+
+    R<Integer> exportCount(AccountSerialBillDTO dto);
 }

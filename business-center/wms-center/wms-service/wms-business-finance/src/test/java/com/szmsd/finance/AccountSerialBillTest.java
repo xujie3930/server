@@ -45,6 +45,18 @@ public class AccountSerialBillTest {
     }
 
     @Test
+    public void asyncCount(){
+
+        AccountSerialBillDTO dto = new AccountSerialBillDTO();
+        dto.setPaymentTimeStart("2022-01-01");
+        dto.setPaymentTimeEnd("2022-11-23");
+
+        R<Integer> integerR = iAccountSerialBillService.exportCount(dto);
+
+        System.out.println(JSON.toJSONString(integerR));
+    }
+
+    @Test
     public void balancePage() {
 
         EleBillQueryVO queryVO = new EleBillQueryVO();
