@@ -2660,6 +2660,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             return false;
         }
 
+        logger.info("shipmentService单号:{},{}",delOutbound.getOrderNo(),shipmentService);
+
         BasShipmentRulesDto paramBasShipmentRulesDto = new BasShipmentRulesDto();
         paramBasShipmentRulesDto.setCustomCode(delOutbound.getSellerCode());
         paramBasShipmentRulesDto.setServiceChannelName(shipmentService);
@@ -2669,6 +2671,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if(list.isEmpty()){
             return false;
         }
+
+        logger.info("shipmentService selectBasShipmentRules 单号:{},{}",delOutbound.getOrderNo(),JSON.toJSONString(list));
 
         //直接变成仓库发货状态
         updateDelOutbound.setState(DelOutboundStateEnum.WHSE_COMPLETED.getCode());
