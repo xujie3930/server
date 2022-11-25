@@ -50,33 +50,36 @@ public class ReturnExpressClientImportDelOutboundDto implements Serializable {
     @ApiModelProperty(value = "增值税号")
     private String ioss;
     @ExcelProperty(index = 7)
+    @ApiModelProperty(value = "house No")
+    private String houseNo;
+    @ExcelProperty(index = 8)
     @ApiModelProperty(value = "COD")
     private BigDecimal codAmount;
-    @ExcelProperty(index = 8)
+    @ExcelProperty(index = 9)
     @ApiModelProperty(value = "街道1")
     private String street1;
-    @ExcelProperty(index = 9)
+    @ExcelProperty(index = 10)
     @ApiModelProperty(value = "街道2")
     private String street2;
-    @ExcelProperty(index = 10)
+    @ExcelProperty(index = 11)
     @ApiModelProperty(value = "城市")
     private String city;
-    @ExcelProperty(index = 11)
+    @ExcelProperty(index = 12)
     @ApiModelProperty(value = "省份/州")
     private String stateOrProvince;
-    @ExcelProperty(index = 12)
+    @ExcelProperty(index = 13)
     @ApiModelProperty(value = "国家名称")
     private String country;
-    @ExcelProperty(index = 13)
+    @ExcelProperty(index = 14)
     @ApiModelProperty(value = "邮编")
     private String postCode;
-    @ExcelProperty(index = 14)
+    @ExcelProperty(index = 15)
     @ApiModelProperty(value = "物流服务")
     private String shipmentRule;
 //    @ExcelProperty(index = 14)
 //    @ApiModelProperty(value = "refno")
 //    private String refNo;
-    @ExcelProperty(index = 15)
+    @ExcelProperty(index = 16)
     @ApiModelProperty(value = "备注")
     private String remark;
 
