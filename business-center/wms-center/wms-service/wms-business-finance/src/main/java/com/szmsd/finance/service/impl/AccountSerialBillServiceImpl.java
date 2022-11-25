@@ -22,7 +22,6 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
-import com.szmsd.delivery.vo.DelOutboundExportListVO;
 import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.AccountSerialBillTotalVO;
@@ -431,7 +430,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                 List<AccountSerialBillExcelVO> accountSerialBillExcelVOS = accountSerialBillMapper.exportData(dto);
                 //List<AccountSerialBillExcelVO> accountSerialBillExcelVOS = AccountSerialBillConvert.INSTANCE.toSerialBillExcelListVO(accountSerialBills);
 
-                String fileName = "业务明细-" + loginUser.getUsername() + "-" + simpleDateFormat.format(date);
+                String fileName = "业务明细-"+loginUser.getUsername()+"-" + simpleDateFormat.format(date);
 
                 BasFile basFile = new BasFile();
                 basFile.setState("0");
@@ -485,7 +484,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             // title的参数为ExportParams类型
             DelOutboundExportMap.put("title", params);
             // 模版导出对应得实体类型
-            DelOutboundExportMap.put("entity", DelOutboundExportListVO.class);
+            DelOutboundExportMap.put("entity", AccountSerialBillExcelVO.class);
             // sheet中要填充得数据
             DelOutboundExportMap.put("data", accountSerialBillExcelVOS);
             // 将sheet1和sheet2使用得map进行包装
