@@ -82,7 +82,7 @@ public class AccountSerialBillController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('AccountSerialBill:export')")
     @ApiOperation(value = "流水账单 - 异步导出条数")
-    @PostMapping ("/async-export")
+    @PostMapping ("/export-count")
     public R<Integer> exportCount(@RequestBody AccountSerialBillDTO dto){
 
         return accountSerialBillService.exportCount(dto);
