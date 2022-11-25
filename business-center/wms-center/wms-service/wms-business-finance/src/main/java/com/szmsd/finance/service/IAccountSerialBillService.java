@@ -1,6 +1,7 @@
 package com.szmsd.finance.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountBalanceBillCurrencyVO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
@@ -44,5 +45,5 @@ public interface IAccountSerialBillService extends IService<AccountSerialBill> {
      * @param response
      * @param dto
      */
-    void asyncExport(HttpServletResponse response, AccountSerialBillDTO dto);
+    R asyncExport(HttpServletResponse response, AccountSerialBillDTO dto);
 }
