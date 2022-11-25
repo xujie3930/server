@@ -83,9 +83,9 @@ public class AccountSerialBillController extends BaseController {
     @PreAuthorize("@ss.hasPermi('AccountSerialBill:export')")
     @ApiOperation(value = "流水账单 - 异步导出")
     @PostMapping ("/async-export")
-    public void asyncExport(HttpServletResponse response, @RequestBody AccountSerialBillDTO dto){
+    public R asyncExport(HttpServletResponse response, @RequestBody AccountSerialBillDTO dto){
 
-        accountSerialBillService.asyncExport(response,dto);
+        return accountSerialBillService.asyncExport(response,dto);
     }
 
 

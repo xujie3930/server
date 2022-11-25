@@ -141,15 +141,17 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 packageDTO.setServiceCode("DMTCK");
                 DelCk1OutboundDto.PackageDTO.ShipToAddressDTO shipToAddressDTO = new DelCk1OutboundDto.PackageDTO.ShipToAddressDTO();
                 DelOutboundAddress outboundAddress = context.getAddress();
-                shipToAddressDTO.setCountry(outboundAddress.getCountry());
-                shipToAddressDTO.setProvince(outboundAddress.getStateOrProvince());
-                shipToAddressDTO.setCity(outboundAddress.getCity());
-                shipToAddressDTO.setStreet1(outboundAddress.getStreet1());
-                shipToAddressDTO.setStreet2(outboundAddress.getStreet2());
-                shipToAddressDTO.setPostcode(outboundAddress.getPostCode());
-                shipToAddressDTO.setContact(outboundAddress.getConsignee());
-                shipToAddressDTO.setPhone(outboundAddress.getPhoneNo());
-                shipToAddressDTO.setEmail(outboundAddress.getEmail());
+                if(outboundAddress != null) {
+                    shipToAddressDTO.setCountry(outboundAddress.getCountry());
+                    shipToAddressDTO.setProvince(outboundAddress.getStateOrProvince());
+                    shipToAddressDTO.setCity(outboundAddress.getCity());
+                    shipToAddressDTO.setStreet1(outboundAddress.getStreet1());
+                    shipToAddressDTO.setStreet2(outboundAddress.getStreet2());
+                    shipToAddressDTO.setPostcode(outboundAddress.getPostCode());
+                    shipToAddressDTO.setContact(outboundAddress.getConsignee());
+                    shipToAddressDTO.setPhone(outboundAddress.getPhoneNo());
+                    shipToAddressDTO.setEmail(outboundAddress.getEmail());
+                }
                 packageDTO.setShipToAddress(shipToAddressDTO);
                 List<DelCk1OutboundDto.PackageDTO.SkusDTO> skusDTOList = new ArrayList<>();
                 List<DelOutboundDetail> detailList = context.getDetailList();
