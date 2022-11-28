@@ -216,6 +216,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "exception_type", dto.getExceptionType());
         QueryWrapperUtil.filter(where, SqlKeyword.EQ, "state", dto.getState());
         QueryWrapperUtil.filterDate(where, "create_time", dto.getCreateTimes());
+
         if (StringUtils.isNotEmpty(dto.getExceptionNos())) {
             String  exceptionNo = null;
             try {
@@ -224,7 +225,10 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
                 throw new RuntimeException(e);
             }
             List<String> exceptionNoList = splitToArray(exceptionNo, "[\n,]");
-            where.in("exception_no", exceptionNoList).or().in("order_no",exceptionNoList);
+            where.and(w->{
+                w.in("exception_no", exceptionNoList).or().in("order_no",exceptionNoList);
+            });
+
         }
 //        if (CollectionUtils.isNotEmpty(dto.getOrderNos())) {
 //            where.in("order_no", dto.getOrderNos());
