@@ -57,7 +57,7 @@ public class HtpRequestLogServiceImpl extends ServiceImpl<HtpRequestLogMapper, H
             // 小于等于 <=
             queryWrapper.le("request_time", htpRequestLog.getRequestTimeEnd() + " 23:59:59");
         }
-        queryWrapper.orderByDesc("create_time");
+        queryWrapper.orderByDesc("id");
         return super.list(queryWrapper);
     }
 
