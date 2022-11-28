@@ -20,6 +20,7 @@ public enum DelOutboundOrderEnum {
     FREEZE_IN_STORAGE("FreezeInStorage", "入库冻结"),
     PackageCollection("PackageCollection","揽收单"),
     MULTIPLE_PIECES("MultiplePieces","一票多件出库单"),
+    BLUK_ORDER("BlukOrder","大货订单"),
 
     ;
 
