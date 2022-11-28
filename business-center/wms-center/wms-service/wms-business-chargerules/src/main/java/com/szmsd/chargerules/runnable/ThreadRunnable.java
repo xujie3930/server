@@ -67,7 +67,7 @@ public class ThreadRunnable {
 //    @Scheduled(cron = "0/60 * * * * *")
     // @Scheduled(cron = "0 10 0/1 * * ?") 每小时执行一次
     //每周日0 0 20 ? * 1"
-    @Scheduled(cron = "0 0 20 * * ?")
+    @Scheduled(cron = "0 0 20 ? * 1")
     public void executeWarehouse() {
         log.info("executeWarehouse() start...");
         RLock lock = redissonClient.getLock("executeOperation");
