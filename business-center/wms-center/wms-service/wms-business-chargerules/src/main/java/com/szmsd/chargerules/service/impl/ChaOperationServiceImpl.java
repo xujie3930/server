@@ -1,5 +1,6 @@
 package com.szmsd.chargerules.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -173,6 +174,8 @@ public class ChaOperationServiceImpl extends ServiceImpl<ChaOperationMapper, Cha
         //（生效+仓库+操作类型+订单类型）先查到对应的规则，是先按个人匹配，个人没有就按照用户类型 然后再折扣信息列表里面匹配对应的范围区间
         List<ChaOperationListVO> chaOperationList = this.queryOperationList(queryDTO);
 
+        log.info("查询用户规则返回条数：{}", JSON.toJSONString(chaOperationList));
+
         if (CollectionUtils.isEmpty(chaOperationList)) {
             //查询用户的类型
             if (queryByCusCode) {
@@ -185,6 +188,8 @@ public class ChaOperationServiceImpl extends ServiceImpl<ChaOperationMapper, Cha
             queryDTO.setCusCodeList(null);
             queryDTO.setCusTypeCode(cusTypeCode);
             chaOperationList = this.queryOperationList(queryDTO);
+
+            log.info("查询用户规则返回条数2：{}", JSON.toJSONString(chaOperationList));
         }
 
         if (CollectionUtils.isEmpty(chaOperationList)) return null;
