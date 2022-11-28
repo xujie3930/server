@@ -19,4 +19,13 @@ public class BigDecimalUtil {
         return amount.setScale(scale,BigDecimal.ROUND_UP);
     }
 
+    public static BigDecimal setScale(BigDecimal amount){
+
+        if(amount == null){
+            return BigDecimal.ZERO;
+        }
+
+        return amount.setScale(2,BigDecimal.ROUND_HALF_UP);
+    }
+
 }

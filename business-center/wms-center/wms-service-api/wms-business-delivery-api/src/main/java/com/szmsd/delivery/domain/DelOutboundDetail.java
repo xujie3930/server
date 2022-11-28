@@ -53,7 +53,7 @@ public class DelOutboundDetail extends BaseEntity {
     private String sku;
 
     @ApiModelProperty(value = "数量")
-    private Long qty;
+    private long qty;
 
     @ApiModelProperty(value = "指定编码")
     private String newLabelCode;
