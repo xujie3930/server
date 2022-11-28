@@ -20,6 +20,7 @@ import com.szmsd.chargerules.enums.RecevieWarehouseStatusEnum;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.MessageUtil;
 import com.szmsd.common.core.utils.SpringUtils;
@@ -400,28 +401,39 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
             if (PricingEnum.SKU.equals(pricingEnum)) {
                 BigDecimal declaredValue = BigDecimal.ZERO;
+                Long totalQuantity = 0L;
                 for (DelOutboundDetail detail : detailList) {
                     if (null != detail.getDeclaredValue()) {
-                        declaredValue = declaredValue.add(BigDecimal.valueOf(detail.getDeclaredValue()));
+
+                        BigDecimal dvalue = BigDecimal.valueOf(detail.getDeclaredValue());
+                        BigDecimal bqty = BigDecimal.valueOf(detail.getQty());
+                        BigDecimal resultValue = BigDecimalUtil.setScale(dvalue.multiply(bqty));
+
+                        declaredValue = declaredValue.add(resultValue);
                     }
+                    totalQuantity += detail.getQty();
                 }
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                         new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm"),
-                        1, delOutbound.getOrderNo(), declaredValue, ""));
+                        Math.toIntExact(totalQuantity), delOutbound.getOrderNo(), declaredValue, ""));
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
                 BigDecimal declareValue = BigDecimal.ZERO;
+                Long totalQuantity = 0L;
                 for (DelOutboundDetail detail : detailList) {
-                    BigDecimal productDeclaredValue;
                     if (null != detail.getDeclaredValue()) {
-                        productDeclaredValue = BigDecimal.valueOf(detail.getDeclaredValue());
-                    } else {
-                        productDeclaredValue = BigDecimal.ZERO;
+
+                        BigDecimal dvalue = BigDecimal.valueOf(detail.getDeclaredValue());
+                        BigDecimal bqty = BigDecimal.valueOf(detail.getQty());
+                        BigDecimal resultValue = BigDecimalUtil.setScale(dvalue.multiply(bqty));
+
+                        declareValue = declareValue.add(resultValue);
                     }
-                    declareValue = declareValue.add(productDeclaredValue);
+
+                    totalQuantity += detail.getQty();
                 }
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                         new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                        , 1, delOutbound.getOrderNo(), declareValue, ""));
+                        , Math.toIntExact(totalQuantity), delOutbound.getOrderNo(), declareValue, ""));
             }
         } else {
             if (PricingEnum.SKU.equals(pricingEnum)) {
@@ -455,6 +467,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
                 for (DelOutboundDetail detail : detailList) {
                     String sku = detail.getSku();
+                    long qty = detail.getQty();
                     BaseProduct product = productMap.get(sku);
                     if (null == product) {
                         throw new CommonException("400", MessageUtil.to("查询SKU[" + sku + "]信息失败",
@@ -466,9 +479,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     } else {
                         declaredValue = BigDecimal.ZERO;
                     }
+
+                    BigDecimal resultDeclaredValue = BigDecimalUtil.setScale(declaredValue.multiply(BigDecimal.valueOf(qty)));
+
                     packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(product.getWeight()), "g"),
                             new Packing(Utils.valueOf(product.getLength()), Utils.valueOf(product.getWidth()), Utils.valueOf(product.getHeight()), "cm"),
-                            Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, product.getProductAttribute()));
+                            Math.toIntExact(qty), delOutbound.getOrderNo(), resultDeclaredValue, product.getProductAttribute()));
                     // 判断有没有包材
                     String bindCode = detail.getBindCode();
                     if (StringUtils.isNotEmpty(bindCode)) {
@@ -483,9 +499,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         } else {
                             declaredValue = BigDecimal.ZERO;
                         }
+
+                        BigDecimal resultDeclaredValue2 = BigDecimalUtil.setScale(declaredValue.multiply(BigDecimal.valueOf(qty)));
+
                         packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(baseProduct.getWeight()), "g"),
                                 new Packing(Utils.valueOf(baseProduct.getLength()), Utils.valueOf(baseProduct.getWidth()), Utils.valueOf(baseProduct.getHeight()), "cm"),
-                                Math.toIntExact(detail.getQty()), delOutbound.getOrderNo(), declaredValue, ""));
+                                Math.toIntExact(qty), delOutbound.getOrderNo(), resultDeclaredValue2, ""));
                     }
                 }
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
@@ -510,9 +529,11 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                 } else {
                     BigDecimal declareValue = BigDecimal.ZERO;
+                    Long totalQuantity = 0L;
                     Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
                     for (DelOutboundDetail detail : detailList) {
                         String sku = detail.getSku();
+                        long qty = detail.getQty();
                         BaseProduct product = productMap.get(sku);
                         if (null == product) {
                             throw new CommonException("400", MessageUtil.to("查询SKU[" + sku + "]信息失败", "Failed to query SKU ["+sku+"] information"));
@@ -523,11 +544,15 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         } else {
                             productDeclaredValue = BigDecimal.ZERO;
                         }
-                        declareValue = declareValue.add(productDeclaredValue);
+
+                        BigDecimal resultV = BigDecimalUtil.setScale(productDeclaredValue.multiply(BigDecimal.valueOf(qty)));
+                        totalQuantity += qty;
+
+                        declareValue = declareValue.add(resultV);
                     }
                     packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                             new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                            , Math.toIntExact(1), delOutbound.getOrderNo(), declareValue, ""));
+                            , Math.toIntExact(totalQuantity), delOutbound.getOrderNo(), declareValue, ""));
                 }
             }
         }
