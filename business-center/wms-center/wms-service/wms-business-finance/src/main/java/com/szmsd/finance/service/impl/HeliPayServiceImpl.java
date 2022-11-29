@@ -388,6 +388,10 @@ public class HeliPayServiceImpl implements HeliPayService {
         preRechargeDTO.setRemark(accountPay.getRemark());
         preRechargeDTO.setCusName(accountPay.getCusCode());
         preRechargeDTO.setCusCode(accountPay.getCusCode());
+        preRechargeDTO.setCreateBy(accountPay.getCusCode());
+        preRechargeDTO.setCreateByName(accountPay.getCusCode());
+        preRechargeDTO.setUpdateBy(accountPay.getCusCode());
+        preRechargeDTO.setUpdateByName(accountPay.getCusCode());
         String productCode = accountPay.getProductCode();
 
         if(productCode.equals(PayEnum.WXPAYSCAN.name())){

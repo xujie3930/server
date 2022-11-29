@@ -79,4 +79,14 @@ public class PreRechargeDTO {
 
     @ApiModelProperty(value = "银行账号ID")
     private String bankId;
+
+    @ApiModelProperty(value = "创建人编号")
+    private String createBy;
+
+    private String createByName;
+
+    @ApiModelProperty(value = "修改人编号")
+    private String updateBy;
+
+    private String updateByName;
 }
