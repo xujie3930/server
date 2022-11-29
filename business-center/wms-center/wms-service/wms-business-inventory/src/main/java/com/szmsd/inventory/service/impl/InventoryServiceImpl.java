@@ -1,5 +1,6 @@
 package com.szmsd.inventory.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -271,7 +272,9 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         }
         QueryWrapper<InventoryAvailableQueryDto> queryWrapper = Wrappers.query();
         this.handlerSkuQueryWrapper(queryWrapper, queryDto);
+        log.info("queryAvailableList 查询参数：{}", JSON.toJSONString(queryDto));
         List<InventoryAvailableListVO> voList = this.baseMapper.queryAvailableList(queryWrapper);
+        log.info("queryAvailableList 查询返回：{}", JSON.toJSONString(voList));
         /*if (CollectionUtils.isNotEmpty(voList)) {
             // 填充SKU属性信息
             List<String> skus = voList.stream().map(InventoryAvailableListVO::getSku).collect(Collectors.toList());
