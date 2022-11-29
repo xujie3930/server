@@ -218,10 +218,13 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
     }
 
     private void handlerSkuQueryWrapper(QueryWrapper<InventoryAvailableQueryDto> queryWrapper, InventoryAvailableQueryDto queryDto) {
-        queryWrapper.eq("t.warehouse_code", queryDto.getWarehouseCode());
+
         queryWrapper.eq("t.cus_code", queryDto.getCusCode());
         if (StringUtils.isNotEmpty(queryDto.getSku())) {
             queryWrapper.like("t.sku", queryDto.getSku());
+        }
+        if(StringUtils.isNotEmpty(queryDto.getWarehouseCode())){
+            queryWrapper.eq("t.warehouse_code", queryDto.getWarehouseCode());
         }
         if (StringUtils.isNotEmpty(queryDto.getEqSku())) {
             queryWrapper.eq("t.sku", queryDto.getEqSku());
