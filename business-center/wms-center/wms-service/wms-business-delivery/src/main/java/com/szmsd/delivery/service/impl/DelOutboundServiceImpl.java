@@ -965,7 +965,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 for (DelOutboundDetailDto detailDto : dto.getDetails()) {
                     if (StringUtils.isEmpty(detailDto.getBoxMark())) {
-                        detailDto.setBoxMark(this.serialNumberClientService.generateNumber(SerialNumberConstant.BOX_MARK));
+                        detailDto.setBoxMark(this.serialNumberClientService.generatorNumber(SerialNumberConstant.BOX_MARK));
                     }
                 }
                 stopWatch.stop();
