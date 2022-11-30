@@ -605,7 +605,7 @@
         sum(
             CASE
             WHEN
-            a.business_category in ('线下充值','退费','优惠','赔偿') and a.charge_type not in ('汇率转换充值')
+                a.pay_method in ('EXCHANGE_INCOME')
             THEN
             abs(a.amount) ELSE 0-abs(a.amount)
             END
@@ -628,7 +628,7 @@
             sum(
                 CASE
                 WHEN
-                a.business_category in ('线下充值','退费','优惠','赔偿') and a.charge_type not in ('汇率转换充值')
+                    a.pay_method in ('EXCHANGE_INCOME')
                 THEN
                 abs(a.amount) ELSE 0-abs(a.amount)
                 END
@@ -655,7 +655,7 @@
         a.id,a.no,a.tracking_no,a.cus_code,a.cus_name,a.currency_code,a.currency_name,
         (CASE
         WHEN
-        a.business_category in ('线下充值','退费','优惠','赔偿') and a.charge_type not in ('汇率转换充值')
+            a.pay_method in ('EXCHANGE_INCOME')
         THEN
         abs(a.amount) ELSE 0-abs(a.amount)
         END) as amount,
