@@ -274,7 +274,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         String amazonLogisticsRouteId1 = delOutbound.getAmazonLogisticsRouteId();
         String amazonReferenceId = delOutbound.getAmazonReferenceId();
 
-        if(StringUtils.isNotEmpty(amazonLogisticsRouteId1) && StringUtils.isEmpty(amazonReferenceId)){
+        if(StringUtils.isEmpty(amazonLogisticsRouteId1) && StringUtils.isNotEmpty(amazonReferenceId)){
             throw new CommonException("400","The order number is being obtained");
         }
 
