@@ -3,10 +3,7 @@ package com.szmsd.exception.api.factory;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.exception.api.feign.ExceptionInfoFeignService;
-import com.szmsd.exception.dto.ExceptionInfoDto;
-import com.szmsd.exception.dto.NewExceptionRequest;
-import com.szmsd.exception.dto.ProcessExceptionOrderRequest;
-import com.szmsd.exception.dto.ProcessExceptionRequest;
+import com.szmsd.exception.dto.*;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +36,11 @@ public class ExceptionInfoFeignFallback implements FallbackFactory<ExceptionInfo
 
             @Override
             public R<Integer> ignore(ExceptionInfoDto exceptionInfo) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<Integer> updExceptionInfoState(ExceptionInfoStateDto stateDto) {
                 return R.convertResultJson(throwable);
             }
         };

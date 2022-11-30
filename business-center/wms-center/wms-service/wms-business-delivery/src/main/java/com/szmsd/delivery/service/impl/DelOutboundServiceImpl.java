@@ -58,6 +58,8 @@ import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.*;
+import com.szmsd.exception.api.feign.ExceptionInfoFeignService;
+import com.szmsd.exception.dto.ExceptionInfoStateDto;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.api.feign.HtpOutboundFeignService;
@@ -81,7 +83,6 @@ import com.szmsd.inventory.domain.vo.InventoryAvailableListVO;
 import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
@@ -273,7 +274,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         String amazonLogisticsRouteId1 = delOutbound.getAmazonLogisticsRouteId();
         String amazonReferenceId = delOutbound.getAmazonReferenceId();
 
-        if(StringUtils.isNotEmpty(amazonLogisticsRouteId1) && StringUtils.isEmpty(amazonReferenceId)){
+        if(StringUtils.isEmpty(amazonLogisticsRouteId1) && StringUtils.isNotEmpty(amazonReferenceId)){
             throw new CommonException("400","The order number is being obtained");
         }
 

@@ -101,4 +101,13 @@
        ${ew.customSqlSegment}
     </select>
 
+    <update id="updExceptionInfoState">
+        update exception_info set state = #{state}
+        where order_no in
+        <foreach collection="orderNos" close=")" open="(" separator="," item="item">
+            #{item}
+        </foreach>
+
+    </update>
+
 </mapper>

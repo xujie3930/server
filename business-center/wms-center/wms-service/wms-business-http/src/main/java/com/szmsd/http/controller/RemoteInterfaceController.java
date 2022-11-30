@@ -11,6 +11,7 @@ import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.dto.TpieceDto;
 import com.szmsd.http.dto.TpieceVO;
 import com.szmsd.http.enums.DomainEnum;
+import com.szmsd.http.quartz.TjJob;
 import com.szmsd.http.service.IRemoteExecutorTask;
 import com.szmsd.http.service.IRetreatPieceService;
 import com.szmsd.http.service.RemoteInterfaceService;
@@ -20,6 +21,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiSort;
 import org.apache.commons.beanutils.BeanMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,7 +41,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/rmi")
 public class RemoteInterfaceController extends BaseController {
-
+    private final Logger logger = LoggerFactory.getLogger(TjJob.class);
     @Autowired
     private RemoteInterfaceService remoteInterfaceService;
     @Resource
@@ -58,7 +61,7 @@ public class RemoteInterfaceController extends BaseController {
     @PostMapping("testRmi")
     @ApiOperation(value = "HTTP调用接口第三方白名单 - #1", position = 100)
     @ApiImplicitParam(name = "dto", value = "dto", dataType = "TpieceDto")
-    public R<Map> testRmi(@RequestBody TpieceDto tpieceDto) throws IllegalAccessException {
+    public R testRmi(@RequestBody TpieceDto tpieceDto) throws IllegalAccessException {
         HttpRequestDto httpRequestDto = new HttpRequestDto();
         //tpieceDto.setLimit(100);
         //tpieceDto.setOffset(50);
@@ -88,16 +91,17 @@ public class RemoteInterfaceController extends BaseController {
         map.put("result",result);
         map.put("events",events);
         map.put("products",products);
-
+        logger.info("调用国外接口返回的Body：{}",o);
         Map map4 = JSONObject.parseObject(String.valueOf(o), Map.class);
 
         Object value = JSONObject.toJSON(map4.get("result"));
-
+        logger.info("调用国外接口返回的result：{}",value);
         Map map5 = JSONObject.parseObject(value.toString(), Map.class);
         map.put("map5",map5);
+        logger.info("调用国外接口返回的map5：{}",map5);
        int a= iRetreatPieceService.insetRetreatPiece(map5);
         map.put("boby2",httpResponseVO.getBody());
-        return R.ok(map);
+        return R.ok(o);
     }
 
     public  Map objectToMap(Object obj) throws IllegalAccessException {

@@ -30,7 +30,9 @@ import com.szmsd.delivery.service.wrapper.*;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.exception.api.feign.ExceptionInfoFeignService;
+import com.szmsd.exception.dto.ExceptionInfoStateDto;
 import com.szmsd.exception.dto.ProcessExceptionOrderRequest;
+import com.szmsd.exception.enums.StateSubEnum;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
@@ -863,6 +865,16 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     if (DelOutboundExceptionStateEnum.ABNORMAL.getCode().equals(delOutbound.getExceptionState())) {
                         this.delOutboundService.exceptionFix(delOutbound.getId());
                     }
+
+                    logger.info("更新状态为已取消,更新异常通知为已完成-开始：{}",delOutbound.getOrderNo());
+
+                    ExceptionInfoStateDto exceptionInfoStateDto = new ExceptionInfoStateDto();
+                    exceptionInfoStateDto.setState(StateSubEnum.YIWANCHENG.getCode());
+                    exceptionInfoStateDto.setOrderNos(Arrays.asList(delOutbound.getOrderNo()));
+                    exceptionInfoFeignService.updExceptionInfoState(exceptionInfoStateDto);
+
+                    logger.info("更新状态为已取消,更新异常通知为已完成-结束：{}",delOutbound.getOrderNo());
+
                     cancelledState = "END";
                 }
                 // 重派订单不推CK1
