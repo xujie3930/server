@@ -16,11 +16,12 @@
     <result column="update_by_name" property="updateByName" jdbcType="VARCHAR" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
     <result column="del_flag" property="delFlag" jdbcType="CHAR" />
+    <result column="order_type" property="orderType" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     id, logistics_ervices_code, logistics_ervices_name, country_code, country_name, customer_code, 
     difference_type, create_by, create_by_name, create_time, update_by, update_by_name, 
-    update_time, del_flag
+    update_time, del_flag, order_type
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
@@ -96,7 +97,7 @@
           parameterType="com.szmsd.bas.dto.BasMeteringConfigDto">
     SELECT b.*,a.difference_type from bas_metering_config a
                       LEFT JOIN bas_metering_config_data b on a.id=b.metering_id
-    where  a.logistics_ervices_code=#{logisticsErvicesCode} AND a.country_code=#{countryCode} AND a.customer_code=#{customerCode}
+    where  a.logistics_ervices_code=#{logisticsErvicesCode} AND a.country_code=#{countryCode} AND a.customer_code=#{customerCode} AND a.orderType=#{orderType}
     GROUP BY b.id
   </select>
   <select id="selectjbljs" resultType="com.szmsd.bas.domain.BasMeteringConfigData">
@@ -116,12 +117,12 @@
       country_code, country_name, customer_code, 
       difference_type, create_by, create_by_name, 
       create_time, update_by, update_by_name, 
-      update_time, del_flag)
+      update_time, del_flag, order_type)
     values (#{id,jdbcType=INTEGER}, #{logisticsErvicesCode,jdbcType=VARCHAR}, #{logisticsErvicesName,jdbcType=VARCHAR}, 
       #{countryCode,jdbcType=VARCHAR}, #{countryName,jdbcType=VARCHAR}, #{customerCode,jdbcType=VARCHAR}, 
       #{differenceType,jdbcType=INTEGER}, #{createBy,jdbcType=VARCHAR}, #{createByName,jdbcType=VARCHAR}, 
       #{createTime,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, #{updateByName,jdbcType=VARCHAR}, 
-      #{updateTime,jdbcType=TIMESTAMP}, #{delFlag,jdbcType=CHAR})
+      #{updateTime,jdbcType=TIMESTAMP}, #{delFlag,jdbcType=CHAR}, #{orderType,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.szmsd.bas.domain.BasMeteringConfig" useGeneratedKeys="true" keyProperty="delId">
     insert into bas_metering_config
@@ -168,6 +169,9 @@
       <if test="delFlag != null" >
         del_flag,
       </if>
+      <if test="orderType != null" >
+        order_type,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -211,6 +215,9 @@
       </if>
       <if test="delFlag != null" >
         #{delFlag,jdbcType=CHAR},
+      </if>
+      <if test="orderType != null" >
+        #{orderType,jdbcType=VARCHAR}
       </if>
     </trim>
   </insert>
@@ -256,6 +263,9 @@
       <if test="delFlag != null" >
         del_flag = #{delFlag,jdbcType=CHAR},
       </if>
+      <if test="orderType != null" >
+        order_type = #{orderType,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -273,7 +283,9 @@
       update_by = #{updateBy,jdbcType=VARCHAR},
       update_by_name = #{updateByName,jdbcType=VARCHAR},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
-      del_flag = #{delFlag,jdbcType=CHAR}
-    where id = #{id,jdbcType=INTEGER}
+      del_flag = #{delFlag,jdbcType=CHAR},
+      order_type = #{orderType,jdbcType=VARCHAR}
+
+      where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>

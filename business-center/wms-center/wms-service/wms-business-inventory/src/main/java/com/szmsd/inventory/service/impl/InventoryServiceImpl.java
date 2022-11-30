@@ -548,6 +548,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
                     updateConsumer.setFreezeInventory(updateConsumer.getFreezeInventory() - num);
                     updateConsumer.setTotalOutbound(updateConsumer.getTotalOutbound() + num);
                 }, LocalLanguageEnum.INVENTORY_RECORD_TYPE_2);*/
+        log.info("开始扣减库存：{},{},{},{}",invoiceNo,warehouseCode,sku,num,cusCode);
         if (StringUtils.isEmpty(warehouseCode)
                 || StringUtils.isEmpty(sku)
                 || Objects.isNull(num)
@@ -556,6 +557,7 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
         }
         try {
             InventoryOccupy occupyInfo = this.inventoryOccupyService.getOccupyInfo(cusCode, warehouseCode, sku, invoiceNo);
+            log.info("扣减库存occupyInfo ：occupyInfo{}",JSON.toJSONString(occupyInfo));
             if (null == occupyInfo) {
                 // throw new CommonException("500", "扣减库存失败，无库存占用记录，单据号：" + invoiceNo + "，仓库：" + warehouseCode + "，SKU：" + sku);
                 // 无占用记录，不处理扣减库存逻辑
@@ -565,11 +567,13 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             if (!num.equals(occupyInfo.getQuantity())) {
                 throw new CommonException("500", "扣减库存失败，占用数量与操作数量不一致");
             }
+            log.info("验证数量是不是一样的");
             // 修改库存记录信息
             Inventory dbInventory = super.getById(occupyInfo.getInventoryId());
             if (null == dbInventory) {
                 throw new CommonException("500", "扣减库存失败，根据库存占用记录查询库存记录失败");
             }
+            log.info("修改库存记录信息");
             Inventory updateInventory = new Inventory();
             // 1.总库存减少，2.冻结库存减少，3.出库数量增加
             updateInventory.setTotalInventory(dbInventory.getTotalInventory() - num);
@@ -580,8 +584,11 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             if (update < 1) {
                 throw new CommonException("500", "[" + sku + "]扣减库存失败，修改库存数据失败");
             }
+            log.info("1.总库存减少，2.冻结库存减少，3.出库数量增加");
             // 删除库存占用记录
             this.inventoryOccupyService.removeById(occupyInfo.getId());
+
+            log.info("删除库存占用记录");
             // 填充日志记录，日志不能为空，需要设置一个值
             updateInventory.setWarehouseCode(dbInventory.getWarehouseCode());
             updateInventory.setSku(dbInventory.getSku());
@@ -589,6 +596,8 @@ public class InventoryServiceImpl extends ServiceImpl<InventoryMapper, Inventory
             updateInventory.setTotalInbound(dbInventory.getTotalInbound());
             // 添加日志
             iInventoryRecordService.saveLogs(LocalLanguageEnum.INVENTORY_RECORD_TYPE_2.getKey(), dbInventory, updateInventory, invoiceNo, null, null, num, "");
+
+            log.info("扣减库存添加日志");
             return update;
         } catch (Exception e) {
             log.error(e.getMessage(), e);

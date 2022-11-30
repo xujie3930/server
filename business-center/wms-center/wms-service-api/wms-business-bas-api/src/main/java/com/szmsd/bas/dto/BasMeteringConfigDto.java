@@ -37,4 +37,8 @@ public class BasMeteringConfigDto  extends QueryDto {
     @ApiModelProperty(value = "体积重 g")
     private BigDecimal volume;
 
+
+    @ApiModelProperty(value = "订单类型")
+    private String orderType;
+
 }
