@@ -583,6 +583,12 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
        return baseMapper.selectExceptionInfoQuery(where);
     }
 
+    @Override
+    public R<Integer> updExceptionInfoState(ExceptionInfoStateDto stateDto) {
+        int res = baseMapper.updExceptionInfoState(stateDto.getState(),stateDto.getOrderNos());
+        return R.ok(res);
+    }
+
     private Date dealUTZTime(String time) {
         Date date = new Date();
         try {
