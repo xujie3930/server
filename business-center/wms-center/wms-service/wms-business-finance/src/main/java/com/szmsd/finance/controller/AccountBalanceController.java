@@ -203,7 +203,27 @@ public class AccountBalanceController extends FssBaseController {
     @ApiOperation(value = "余额汇率转换")
     @PostMapping("/balanceExchange")
     public R balanceExchange(@RequestBody CustPayDTO dto) {
-        return accountBalanceService.balanceExchange(dto);
+        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode()+ "_"+dto.getCurrencyCode();
+        RLock lock = redissonClient.getLock(key);
+        log.info("余额汇率转换-尝试获取redis锁 {}",key);
+        try {
+            if (lock.tryLock(time,leaseTime, TimeUnit.SECONDS)){
+                log.info("余额汇率转换-获取redis锁 {}成功",key);
+                return accountBalanceService.balanceExchange(dto);
+            }else {
+                log.info("余额汇率转换-获取redis锁 {}失败",key);
+                return R.failed("余额汇率转换操作超时,请稍候重试!");
+            }
+        }catch (Exception e){
+            log.error("余额汇率转换操作超时，{}",e);
+            return R.failed(e.getMessage());
+        }finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                log.info("余额汇率转换-释放redis锁 {}",key);
+                lock.unlock();
+            }
+        }
+        //return accountBalanceService.balanceExchange(dto);
     }
 
     @PreAuthorize("@ss.hasPermi('ExchangeRate:warehouseFeeDeduct')")
