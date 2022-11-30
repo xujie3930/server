@@ -1,6 +1,7 @@
 package com.szmsd.exception.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.exception.domain.ExceptionInfo;
 import com.szmsd.exception.dto.*;
@@ -141,5 +142,7 @@ public interface IExceptionInfoService extends IService<ExceptionInfo> {
     void  updateDelOutboundIoss(ExceptionInfoExportDto dto);
 
     Integer  selectExceptionInfoQuery(ExceptionInfoQueryDto dto);
+
+    R<Integer> updExceptionInfoState(ExceptionInfoStateDto stateDto);
 }
 

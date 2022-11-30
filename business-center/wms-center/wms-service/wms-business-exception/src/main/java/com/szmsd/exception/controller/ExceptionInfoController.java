@@ -92,6 +92,12 @@ public class ExceptionInfoController extends BaseController {
     @Value("${filepaths}")
     private String filepath;
 
+    @PostMapping("/updExceptionInfoState")
+    @ApiOperation(value = "更新异常中心单据状态", notes = "更新异常中心单据状态")
+    public R<Integer> updExceptionInfoState(@RequestBody ExceptionInfoStateDto stateDto){
+        return exceptionInfoService.updExceptionInfoState(stateDto);
+    }
+
     /**
      * 查询模块列表
      */

@@ -8,10 +8,13 @@ import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.HandlerContext;
 import com.szmsd.common.plugin.annotation.AutoValue;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.returnex.dto.ReturnExpressAddDTO;
 import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
 import com.szmsd.returnex.dto.ReturnExpressServiceAddDTO;
+import com.szmsd.returnex.mapper.ReturnExpressMapper;
 import com.szmsd.returnex.service.IReturnExpressService;
+import com.szmsd.returnex.vo.ReturnBasRetreatPiece;
 import com.szmsd.returnex.vo.ReturnExpressClientListVO;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
@@ -19,6 +22,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -33,6 +37,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +54,12 @@ public class ReturnExpressClientController extends BaseController {
 
     @Resource
     private IReturnExpressService returnExpressService;
+
+    @Autowired
+    private ReturnExpressMapper returnExpressMapper;
+
+    @Autowired
+    private IReturnExpressService iReturnExpressService;
 
     /**
      * 新增退件单-生成预报单号
@@ -194,4 +205,39 @@ public class ReturnExpressClientController extends BaseController {
     public R<ReturnExpressVO> getInfo(@PathVariable(value = "id") Long id) {
         return R.ok(returnExpressService.getInfo(id));
     }
-}
+
+    /**
+     * 操作退件手动接口（国外）
+     *
+     * @param
+     * @return
+     */
+    @PostMapping ("/insertbasRetreatPiece")
+    @ApiOperation(value = "操作退件手动接口（国外）")
+    public R getInfo() {
+        List<ReturnBasRetreatPiece> returnBasRetreatPieceList = returnExpressMapper.selectRetunBasRet();
+        returnBasRetreatPieceList.forEach(x -> {
+            List<DelOutbound> delOutbounds = returnExpressMapper.selectRetunDleoutbound(x.getSn());
+            delOutbounds.forEach(delOutbound -> {
+                ReturnExpressServiceAddDTO returnExpressAddDTO = new ReturnExpressServiceAddDTO();
+                returnExpressAddDTO.setFromOrderNo(delOutbound.getOrderNo());
+                returnExpressAddDTO.setScanCode(x.getSn());
+                returnExpressAddDTO.setExpireTime(new Date());
+                returnExpressAddDTO.setArrivalTime(x.getDateFinished());
+
+                returnExpressAddDTO.setWarehouseCode(delOutbound.getWarehouseCode());
+                returnExpressAddDTO.setSellerCode(delOutbound.getCustomCode());
+                returnExpressAddDTO.setReturnSource("068003");
+                iReturnExpressService.insertReturnExpressDetail(returnExpressAddDTO);
+
+
+            });
+
+            returnExpressMapper.updateReturnBasRetreat(x.getId());
+
+        });
+        return R.ok();
+
+    }
+
+    }
