@@ -322,6 +322,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 if (StringUtils.isEmpty(completedState)) {
                     // 重派订单不扣库存
                     if (!DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                        logger.info("订单开始扣减库存:{}",delOutbound.getOrderNo());
                         // 执行扣减库存
                         try {
                             this.deduction(delOutbound);
@@ -329,6 +330,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             logger.error(e.getMessage(), e);
                             throw new CommonException("500", "执行扣减库存失败，" + e.getMessage());
                         }
+                        logger.info("订单结束扣减库存:{}",delOutbound.getOrderNo());
                     }
                     completedState = "FEE_DE";
                 }
@@ -722,6 +724,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     private void deduction(InventoryOperateListDto inventoryOperateListDto) {
         // 扣减库存
         Integer deduction = this.inventoryFeignClientService.deduction(inventoryOperateListDto);
+        logger.info("扣减库存：deduction  结果{}",deduction);
         if (null == deduction || deduction < 1) {
             throw new CommonException("400", "扣减库存失败");
         }
@@ -748,6 +751,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             inventoryOperateListDto.setWarehouseCode(warehouseCode);
             inventoryOperateListDto.setOperateList(operateList);
             inventoryOperateListDto.setCusCode(cusCode);
+            logger.info("扣减库存：{},{}",delOutbound.getOrderNo(),JSON.toJSONString(inventoryOperateListDto));
             this.deduction(inventoryOperateListDto);
         } else {
             this.deduction(orderNo, warehouseCode, orderType, cusCode);
