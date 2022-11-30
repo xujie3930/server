@@ -26,6 +26,10 @@ public class BasMeteringConfig extends BaseEntity {
     @Excel(name = "ID")
     private Integer id;
 
+
+    @ApiModelProperty(value = "订单类型")
+    private String orderType;
+
     @ApiModelProperty(value = "产品code")
     private String logisticsErvicesCode;
 
