@@ -1200,15 +1200,22 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             OperationFeignService operationFeignService = SpringUtils.getBean(OperationFeignService.class);
             R<?> r = operationFeignService.delOutboundThaw(delOutboundOperationVO);
 
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+
+            DelOutbound updateDelOutbound = new DelOutbound();
+            updateDelOutbound.setId(delOutbound.getId());
+
+            updateDelOutbound.setBringVerifyState(FREEZE_INVENTORY.name());
+
+            updateDelOutbound.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode());
+            delOutboundService.updateById(updateDelOutbound);
+
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
             DelOutboundServiceImplUtil.thawOperationThrowCommonException(r);
 
             stopWatch.stop();
             logger.info(">>>>>[创建出库单{}]取消冻结操作费用 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
-
-
-
 
             super.rollback(context);
         }
