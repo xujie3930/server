@@ -235,9 +235,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             if(currentState.name().equals(SHIPMENT_ORDER.name())){
                 //如果是供应商报错，从新开始执行
                 updateDelOutbound.setBringVerifyState(BEGIN.name());
+            }else if(currentState.name().equals(FREEZE_OPERATION.name())){
+                updateDelOutbound.setBringVerifyState(FREEZE_INVENTORY.name());
             }else{
                 updateDelOutbound.setBringVerifyState(currentState.name());
-
             }
 
 
