@@ -1200,6 +1200,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             OperationFeignService operationFeignService = SpringUtils.getBean(OperationFeignService.class);
             R<?> r = operationFeignService.delOutboundThaw(delOutboundOperationVO);
 
+            logger.info(">>>>>[创建出库单{}]取消冻结操作费用失败 {}",delOutbound.getOrderNo(),JSON.toJSONString(delOutbound));
+
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
 
             DelOutbound updateDelOutbound = new DelOutbound();
@@ -1208,7 +1210,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setBringVerifyState(FREEZE_INVENTORY.name());
 
             updateDelOutbound.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode());
-            delOutboundService.updateById(updateDelOutbound);
+            boolean upd  = delOutboundService.updateById(updateDelOutbound);
+
+            logger.info(">>>>>[创建出库单{}]取消冻结操作费用失败状态修改 {}",delOutbound.getOrderNo(),upd);
 
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
