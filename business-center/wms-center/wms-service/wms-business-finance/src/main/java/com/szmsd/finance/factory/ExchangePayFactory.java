@@ -8,19 +8,14 @@ import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
-import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 汇率转换
@@ -30,44 +25,22 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ExchangePayFactory extends AbstractPayFactory {
 
     @Resource
-    private RedissonClient redissonClient;
-
-    @Resource
     private IAccountSerialBillService accountSerialBillService;
-
-    private ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap<>();
 
     @Transactional
     @Override
     public Boolean updateBalance(final CustPayDTO dto) {
         log.info("ExchangePayFactory {}", JSONObject.toJSONString(dto));
         final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
-        RLock lock = redissonClient.getLock(key);
+        //RLock lock = redissonClient.getLock(key);
         try {
-            if (lock.tryLock(time,leaseTime, unit)) {
+            //if (lock.tryLock(time,leaseTime, unit)) {
                 BigDecimal substractAmount = dto.getAmount();
                 //1.先扣款
                 BalanceDTO beforeSubtract = getBalance(dto.getCusCode(), dto.getCurrencyCode());
                 //先判断扣款余额是否充足
                 if (beforeSubtract.getCurrentBalance().compareTo(substractAmount) < 0) {
                     return false;
-                }
-
-                String mKey = key + beforeSubtract.getVersion();
-
-                if(concurrentHashMap.get(mKey) != null){
-                    concurrentHashMap.remove(mKey);
-
-                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                        log.info("释放redis锁 {}",dto.getNo());
-                        lock.unlock();
-                    }
-
-                    log.info("ExchangePayFactory balance 重新执行 {}",mKey);
-
-                    Thread.sleep(100);
-
-                    return updateBalance(dto);
                 }
 
                 BalanceDTO afterSubtract = calculateBalance(beforeSubtract, substractAmount.negate());
@@ -96,14 +69,13 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 recordDetailLogAsync(dto, beforeSubtract);
                 //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
 
-                concurrentHashMap.put(mKey,beforeSubtract.getVersion());
 
                 return true;
-            } else {
-                log.error("汇率转换,请稍候重试{}", JSONObject.toJSONString(dto));
-                throw new RuntimeException("汇率转换操作超时,请稍候重试");
-            }
-        } catch (InterruptedException e) {
+//            } else {
+//                log.error("汇率转换,请稍候重试{}", JSONObject.toJSONString(dto));
+//                throw new RuntimeException("汇率转换操作超时,请稍候重试");
+//            }
+        } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
             log.error("ExchangePayFactory异常:", e);
@@ -111,9 +83,9 @@ public class ExchangePayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("汇率转换,请稍候重试!");
         } finally {
-            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
+//            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//            }
         }
     }
 

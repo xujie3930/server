@@ -742,6 +742,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             BasMeteringConfigFeignService basMeteringConfigFeignService = SpringUtils.getBean(BasMeteringConfigFeignService.class);
 
             BasMeteringConfigDto dto = new BasMeteringConfigDto()
+                    .setOrderType(delOutbound.getOrderType())
                     .setCustomerCode(delOutbound.getSellerCode())
                     .setLogisticsErvicesCode(chargeWrapper.getData().getProductCode())
                     .setLogisticsErvicesName(chargeWrapper.getData().getProductName())
