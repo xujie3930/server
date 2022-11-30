@@ -616,19 +616,21 @@ public class ExceptionInfoController extends BaseController {
                         fixedThreadPool.execute(() -> {
                             try {
                                 dto.setCountry(getCountryCodeS(countryCode));
-                                if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
-                                    successSize.incrementAndGet();
-                                    if(dto.getOrderTypeName().equals("出库单")){
-                                        if (dto.getExceptionInfoDetailExportDtoList().size()>0){
-                                            exceptionInfoService.updateDelOutboundDetail(dto.getOrderNo(),dto.getExceptionInfoDetailExportDtoList());
 
-                                        }
-
-                                        if (dto.getIoss()!=null&&!dto.getIoss().equals("")){
-                                            exceptionInfoService.updateDelOutboundIoss(dto);
-                                        }
+                                if(dto.getOrderTypeName().equals("出库单")){
+                                    if (dto.getExceptionInfoDetailExportDtoList().size()>0){
+                                        exceptionInfoService.updateDelOutboundDetail(dto.getOrderNo(),dto.getExceptionInfoDetailExportDtoList());
 
                                     }
+
+                                    if (dto.getIoss()!=null&&!dto.getIoss().equals("")){
+                                        exceptionInfoService.updateDelOutboundIoss(dto);
+                                    }
+                                }
+
+                                if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
+                                    successSize.incrementAndGet();
+
                                 } else {
                                     errorList.add("第" + (finalI + 1) + "行，" + dto.getExceptionNo() + "导入数据在异常表里面必须类型为待处理，单类型为出库单，异常类型可以为（出库-获取挂号失败，出库-超重件，出库-超规格件）");
                                     failSize.incrementAndGet();
@@ -676,19 +678,21 @@ public class ExceptionInfoController extends BaseController {
                         }
                         try {
                             dto.setCountry(getCountryCodeS(countryCode));
-                            if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
-                                successSize.incrementAndGet();
-                                if(dto.getOrderTypeName().equals("出库单")){
-                                    if (dto.getExceptionInfoDetailExportDtoList().size()>0){
-                                        exceptionInfoService.updateDelOutboundDetail(dto.getOrderNo(),dto.getExceptionInfoDetailExportDtoList());
 
-                                    }
-
-                                    if (dto.getIoss()!=null&&!dto.getIoss().equals("")){
-                                        exceptionInfoService.updateDelOutboundIoss(dto);
-                                    }
+                            if(dto.getOrderTypeName().equals("出库单")){
+                                if (dto.getExceptionInfoDetailExportDtoList().size()>0){
+                                    exceptionInfoService.updateDelOutboundDetail(dto.getOrderNo(),dto.getExceptionInfoDetailExportDtoList());
 
                                 }
+
+                                if (dto.getIoss()!=null&&!dto.getIoss().equals("")){
+                                    exceptionInfoService.updateDelOutboundIoss(dto);
+                                }
+                            }
+
+                            if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
+                                successSize.incrementAndGet();
+
                             } else {
                                 errorList.add("第" + (i + 1) + "行，" + dto.getExceptionNo() + "导入数据在异常表里面必须类型为待处理，单类型为出库单，异常类型可以为（出库-获取挂号失败，出库-超重件，出库-超规格件）");
                                 failSize.incrementAndGet();
