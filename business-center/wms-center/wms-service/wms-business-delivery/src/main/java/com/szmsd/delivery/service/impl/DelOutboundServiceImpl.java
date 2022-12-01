@@ -2776,6 +2776,37 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     }
 
+    @Override
+    public List<DelOutboundSpecialDto> querySpecialGoods(List<String> orders) {
+        if(orders == null || orders.size() == 0){
+            return null;
+        }
+        LambdaQueryWrapper<DelOutboundDetail> detailLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        detailLambdaQueryWrapper.in(DelOutboundDetail::getOrderNo, orders);
+        List<DelOutboundDetail> list = delOutboundDetailService.list(detailLambdaQueryWrapper);
+        List<DelOutboundSpecialDto> dataList = new ArrayList<>();
+        for(String orderNo: orders){
+            boolean isTh = false;
+            for(DelOutboundDetail detail: list){
+                if(StringUtils.equals(detail.getOrderNo(), orderNo)){
+                    if(!StringUtils.equals(detail.getProductAttribute(), "GeneralCargo")){
+                        isTh = true;
+                    }
+                }
+            }
+            DelOutboundSpecialDto dto = new DelOutboundSpecialDto();
+            dto.setOrderNo(orderNo);
+            if(isTh){
+                dto.setSpecialGoods("特货");
+            }else{
+                dto.setSpecialGoods("普货");
+            }
+            dataList.add(dto);
+        }
+
+        return dataList;
+    }
+
     public void bringThridPartyAsync(DelOutbound delOutbound) {
 
         String key = applicationName + ":DelOutbound:bringThridPartyAsync:" + delOutbound.getOrderNo();

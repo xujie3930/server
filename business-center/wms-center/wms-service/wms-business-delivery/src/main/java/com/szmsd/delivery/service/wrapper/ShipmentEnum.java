@@ -699,6 +699,8 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             PricingPackageInfo packageInfo = data.getPackageInfo();
             // 包裹信息
             Packing packing = packageInfo.getPacking();
+            delOutbound.setPrcInterfaceProductCode(data.getProductCode());
+            delOutbound.setPrcTerminalCarrier(data.getTerminalCarrier());
             delOutbound.setLength(Utils.valueOf(packing.getLength()));
             delOutbound.setWidth(Utils.valueOf(packing.getWidth()));
             delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
@@ -1038,6 +1040,9 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 修改出库单相关信息
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
+            updateDelOutbound.setPrcInterfaceProductCode(delOutbound.getPrcInterfaceProductCode());
+            updateDelOutbound.setPrcTerminalCarrier(delOutbound.getPrcTerminalCarrier());
+
             updateDelOutbound.setId(delOutbound.getId());
             updateDelOutbound.setShipmentState(END.name());
 
