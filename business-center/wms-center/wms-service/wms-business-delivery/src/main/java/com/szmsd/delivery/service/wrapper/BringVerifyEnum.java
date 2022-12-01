@@ -350,6 +350,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             ChargeWrapper chargeWrapper = responseObject.getObject();
             ShipmentChargeInfo data = chargeWrapper.getData();
             PricingPackageInfo packageInfo = data.getPackageInfo();
+
+
+            delOutbound.setPrcInterfaceProductCode(data.getProductCode());
+            delOutbound.setPrcTerminalCarrier(data.getTerminalCarrier());
+
             // 挂号服务
             delOutbound.setShipmentService(data.getLogisticsRouteId());
             // 物流商code
@@ -435,6 +440,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setId(delOutbound.getId());
             updateDelOutbound.setProductShipmentRule(data.getShipmentRule());
             updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
+            updateDelOutbound.setPrcInterfaceProductCode(delOutbound.getPrcInterfaceProductCode());
+            updateDelOutbound.setPrcTerminalCarrier(delOutbound.getPrcTerminalCarrier());
+
             delOutboundService.updateByIdTransactional(updateDelOutbound);
 
             DelOutboundOperationLogEnum.BRV_PRC_PRICING.listener(delOutbound);
