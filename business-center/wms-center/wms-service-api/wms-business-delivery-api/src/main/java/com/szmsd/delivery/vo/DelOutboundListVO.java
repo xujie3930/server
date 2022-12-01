@@ -194,4 +194,7 @@ public class DelOutboundListVO implements Serializable {
 
     @ApiModelProperty(value = "prc返回的terminalCarrier")
     private String prcTerminalCarrier;
+
+    @ApiModelProperty(value = "houseNo")
+    private String houseNo;
 }
