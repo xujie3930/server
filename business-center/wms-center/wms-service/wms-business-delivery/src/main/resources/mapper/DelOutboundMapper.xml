@@ -71,7 +71,6 @@
             o.expected_no,
             a.tax_number,
             a.id_number,
-            a.hoese
             o.prc_interface_product_code,
             o.prc_terminal_carrier,
             o.house_no
