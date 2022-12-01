@@ -43,6 +43,9 @@ public class ExchangePayFactory extends AbstractPayFactory {
                     return false;
                 }
 
+                String chargeType = dto.getCurrencyName() + "转" + dto.getCurrencyName2();
+                String chargeType2 = dto.getCurrencyName2() + "转" + dto.getCurrencyName();
+
                 BalanceDTO afterSubtract = calculateBalance(beforeSubtract, substractAmount.negate());
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), afterSubtract);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_PAYMENT);
@@ -56,6 +59,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 super.addForCreditBillAsync(beforeAdd.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode2());
 
                 setBalance(dto.getCusCode(), dto.getCurrencyCode2(), beforeAdd);
+                dto.setChargeCategoryChange(chargeType);
                 setSerialBillLogAsync(dto, accountBalanceChange);
                 dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
                 dto.setAmount(addAmount);
@@ -65,6 +69,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 //设置流水账单
                 dto.setCurrencyCode(accountBalanceChange.getCurrencyCode());
                 dto.setCurrencyName(accountBalanceChange.getCurrencyName());
+                dto.setChargeCategoryChange(chargeType2);
                 setSerialBillLogAsync(dto, afterBalanceChange);
                 recordDetailLogAsync(dto, beforeSubtract);
                 //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
@@ -111,7 +116,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
             serialBill.setCurrencyCode(accountBalanceChange.getCurrencyCode());
             serialBill.setCurrencyName(accountBalanceChange.getCurrencyName());
             serialBill.setAmount(accountBalanceChange.getAmountChange());
-            serialBill.setChargeCategory(dto.getCurrencyName().concat("转").concat(dto.getCurrencyName2()));
+            serialBill.setChargeCategory(dto.getChargeCategoryChange());
             serialBill.setChargeType(dto.getPayMethod().getPaymentName());
             serialBill.setBusinessCategory(BillEnum.PayMethod.BALANCE_EXCHANGE.getPaymentName());
             serialBill.setProductCategory(serialBill.getProductCategory());
