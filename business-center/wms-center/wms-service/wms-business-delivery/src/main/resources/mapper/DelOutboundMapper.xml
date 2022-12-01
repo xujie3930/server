@@ -70,7 +70,9 @@
             o.currency_describe,
             o.expected_no,
             a.tax_number,
-            a.id_number
+            a.id_number,
+            o.prc_interface_product_code,
+            o.prc_terminal_carrier
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
