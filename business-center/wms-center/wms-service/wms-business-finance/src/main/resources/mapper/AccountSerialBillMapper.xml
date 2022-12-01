@@ -310,6 +310,10 @@
                 and a.business_category in ('优惠','赔偿')
             </if>
 
+            <if test="sheetNo != null and sheetNo == 7">
+                and a.business_category = '增值消费';
+            </if>
+
             <if test="billStartTime != null  and billStartTime !='' ">
                 and a.payment_time <![CDATA[ >= ]]> #{billStartTime}
             </if>
