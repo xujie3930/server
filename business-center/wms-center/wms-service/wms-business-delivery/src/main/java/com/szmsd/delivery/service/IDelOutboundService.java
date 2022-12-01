@@ -472,5 +472,6 @@ void emailBatchUpdateTrackingNo(List<Map<String, Object>> list,String filepath);
 
     public void doDirectExpressOrders();
 
+    List<DelOutboundSpecialDto> querySpecialGoods(List<String> orders);
 }
 

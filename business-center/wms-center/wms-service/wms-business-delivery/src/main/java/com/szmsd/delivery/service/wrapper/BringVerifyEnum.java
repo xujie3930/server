@@ -235,9 +235,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             if(currentState.name().equals(SHIPMENT_ORDER.name())){
                 //如果是供应商报错，从新开始执行
                 updateDelOutbound.setBringVerifyState(BEGIN.name());
+            }else if(currentState.name().equals(FREEZE_OPERATION.name())){
+                updateDelOutbound.setBringVerifyState(FREEZE_INVENTORY.name());
             }else{
                 updateDelOutbound.setBringVerifyState(currentState.name());
-
             }
 
 
@@ -349,6 +350,11 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             ChargeWrapper chargeWrapper = responseObject.getObject();
             ShipmentChargeInfo data = chargeWrapper.getData();
             PricingPackageInfo packageInfo = data.getPackageInfo();
+
+
+            delOutbound.setPrcInterfaceProductCode(data.getProductCode());
+            delOutbound.setPrcTerminalCarrier(data.getTerminalCarrier());
+
             // 挂号服务
             delOutbound.setShipmentService(data.getLogisticsRouteId());
             // 物流商code
@@ -434,6 +440,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setId(delOutbound.getId());
             updateDelOutbound.setProductShipmentRule(data.getShipmentRule());
             updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
+            updateDelOutbound.setPrcInterfaceProductCode(delOutbound.getPrcInterfaceProductCode());
+            updateDelOutbound.setPrcTerminalCarrier(delOutbound.getPrcTerminalCarrier());
+
             delOutboundService.updateByIdTransactional(updateDelOutbound);
 
             DelOutboundOperationLogEnum.BRV_PRC_PRICING.listener(delOutbound);
@@ -1200,15 +1209,26 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             OperationFeignService operationFeignService = SpringUtils.getBean(OperationFeignService.class);
             R<?> r = operationFeignService.delOutboundThaw(delOutboundOperationVO);
 
+            logger.info(">>>>>[创建出库单{}]取消冻结操作费用失败 {}",delOutbound.getOrderNo(),JSON.toJSONString(delOutbound));
+
+            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+
+            DelOutbound updateDelOutbound = new DelOutbound();
+            updateDelOutbound.setId(delOutbound.getId());
+
+            updateDelOutbound.setBringVerifyState(FREEZE_INVENTORY.name());
+
+            updateDelOutbound.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode());
+            boolean upd  = delOutboundService.updateById(updateDelOutbound);
+
+            logger.info(">>>>>[创建出库单{}]取消冻结操作费用失败状态修改 {}",delOutbound.getOrderNo(),upd);
+
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
             DelOutboundServiceImplUtil.thawOperationThrowCommonException(r);
 
             stopWatch.stop();
             logger.info(">>>>>[创建出库单{}]取消冻结操作费用 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
-
-
-
 
             super.rollback(context);
         }
