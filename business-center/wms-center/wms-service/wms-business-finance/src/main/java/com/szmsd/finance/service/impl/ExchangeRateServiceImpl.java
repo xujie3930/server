@@ -136,15 +136,7 @@ public class ExchangeRateServiceImpl implements IExchangeRateService  {
             return R.failed("汇率管理存在多条相同配置");
         }
 
-        ExchangeRate rate1 = rate.get(0);
-
-        if(rate1.getRate() == null){
-            return R.failed("汇率管理-"+currencyFromCode+"兑"+currencyToCode+"汇率异常");
-        }
-
-        BigDecimal result = BigDecimal.ONE.divide(rate1.getRate(),4,BigDecimal.ROUND_FLOOR);
-
-        return R.ok(result);
+        return R.ok(rate.get(0));
     }
 
     @Override
