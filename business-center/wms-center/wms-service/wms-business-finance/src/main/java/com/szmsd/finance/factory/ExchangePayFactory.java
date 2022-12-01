@@ -98,8 +98,8 @@ public class ExchangePayFactory extends AbstractPayFactory {
             setSerialBillLogAsync(dto, accountBalanceChange);
             dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
             dto.setAmount(addAmount);
-//            dto.setCurrencyCode(currencyCode2);
-//            dto.setCurrencyName(dto.getCurrencyName2());
+            dto.setCurrencyCode(currencyCode2);
+            dto.setCurrencyName(dto.getCurrencyName2());
             AccountBalanceChange afterBalanceChange = recordOpLog(dto, beforeAdd.getCurrentBalance());
 
             log.info("2,{}", JSON.toJSONString(dto));
