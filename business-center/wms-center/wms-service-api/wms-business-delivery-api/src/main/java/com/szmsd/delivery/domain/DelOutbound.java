@@ -337,4 +337,10 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "供应商参考单号")
     private String referenceNumber;
+
+    @ApiModelProperty(value = "prc返回的产品代码")
+    private String prcInterfaceProductCode;
+
+    @ApiModelProperty(value = "prc返回的terminalCarrier")
+    private String prcTerminalCarrier;
 }
