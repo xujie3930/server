@@ -23,6 +23,7 @@ import com.szmsd.finance.service.IExchangeRateService;
 import com.szmsd.finance.util.ExcelFile;
 import com.szmsd.finance.vo.ExchangeRateExcelVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -121,28 +122,21 @@ public class ExchangeRateServiceImpl implements IExchangeRateService  {
 
     @Override
     public R selectRate(String currencyFromCode, String currencyToCode) {
-        ExchangeRate rate=exchangeRateMapper.selectOne(new QueryWrapper<ExchangeRate>().lambda()
+
+        List<ExchangeRate> rate = exchangeRateMapper.selectList(new QueryWrapper<ExchangeRate>().lambda()
                 .eq(ExchangeRate::getExchangeFromCode,currencyFromCode)
                 .eq(ExchangeRate::getExchangeToCode,currencyToCode)
-                .and(v -> v.gt(ExchangeRate::getExpireTime,new Date()).or().isNull(ExchangeRate::getExpireTime)));
-        if(rate!=null){
-            return R.ok(rate.getRate());
+                .and(v -> v.gt(ExchangeRate::getExpireTime,new Date())));
+
+        if(CollectionUtils.isEmpty(rate)){
+            return R.failed("Exchange rate exchange of corresponding currency is not found");
         }
-        rate=exchangeRateMapper.selectOne(new QueryWrapper<ExchangeRate>().lambda()
-                .eq(ExchangeRate::getExchangeFromCode,currencyToCode)
-                .eq(ExchangeRate::getExchangeToCode,currencyFromCode)
-                .and(v -> v.gt(ExchangeRate::getExpireTime,new Date()).or().isNull(ExchangeRate::getExpireTime)));
-        if(rate!=null){
-            return R.ok(BigDecimal.ONE.divide(rate.getRate(),4,BigDecimal.ROUND_FLOOR));
+
+        if(rate.size() > 1){
+            return R.failed("汇率管理存在多条相同配置");
         }
-        //尝试递归查询汇率
-        /*List<ExchangeRate> exchangeRates=exchangeRateMapper.selectList(new QueryWrapper<ExchangeRate>().lambda().gt(ExchangeRate::getExpireTime,new Date()).or().isNull(ExchangeRate::getExpireTime));
-        RateCalculateUtil rateCalculateUtil = RateCalculateUtil.buildRateTree(currencyFromCode, currencyToCode, exchangeRates);
-        BigDecimal fromToRate = rateCalculateUtil.getFromToRate();
-        if(fromToRate!=null){
-            return R.ok(fromToRate);
-        }*/
-        return R.failed("Exchange rate exchange of corresponding currency is not found");
+
+        return R.ok(rate.get(0));
     }
 
     @Override
