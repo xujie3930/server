@@ -142,7 +142,9 @@ public class ExchangeRateServiceImpl implements IExchangeRateService  {
             return R.failed("汇率管理-"+currencyFromCode+"兑"+currencyToCode+"汇率异常");
         }
 
-        return R.ok(rate1.getRate());
+        BigDecimal result = BigDecimal.ONE.divide(rate1.getRate(),4,BigDecimal.ROUND_FLOOR);
+
+        return R.ok(result);
     }
 
     @Override
