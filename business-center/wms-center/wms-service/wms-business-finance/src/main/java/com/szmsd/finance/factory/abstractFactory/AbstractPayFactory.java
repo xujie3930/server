@@ -66,19 +66,13 @@ public abstract class AbstractPayFactory {
     }
 
     public AccountBalanceChange recordOpLog(CustPayDTO dto, BigDecimal result) {
-
         AccountBalanceChange accountBalanceChange = new AccountBalanceChange();
         log.info("recordOpLog{}-{}", JSONObject.toJSONString(dto), result);
         BeanUtils.copyProperties(dto, accountBalanceChange);
-
-        if (StringUtils.isNotEmpty(accountBalanceChange.getCurrencyCode())) {
+        if (StringUtils.isEmpty(accountBalanceChange.getCurrencyName())) {
             String currencyName = sysDictDataService.getCurrencyNameByCode(accountBalanceChange.getCurrencyCode());
-
-            if(StringUtils.isEmpty(currencyName)){
-                throw new RuntimeException("无法获取币别信息，请检查基础数据字典");
-            }
-
             accountBalanceChange.setCurrencyName(currencyName);
+            dto.setCurrencyName(currencyName);
         }
 
         accountBalanceChange.setSerialNum(SnowflakeId.getNextId12());
