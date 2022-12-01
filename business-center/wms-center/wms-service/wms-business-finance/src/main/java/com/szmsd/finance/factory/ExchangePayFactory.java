@@ -46,6 +46,18 @@ public class ExchangePayFactory extends AbstractPayFactory {
             String currencyCode2 =  dto.getCurrencyCode2();
             String cusCode = dto.getCusCode();
 
+            R<BigDecimal> rateR = iExchangeRateService.selectRate(currencyCode,currencyCode2);
+
+            if(rateR.getCode() != 200){
+                throw new RuntimeException(rateR.getMsg());
+            }
+
+            BigDecimal rate = rateR.getData();
+
+            if(rate == null){
+                throw new RuntimeException("无法获取配置汇率配置信息");
+            }
+
             BigDecimal substractAmount = dto.getAmount();
             //先判断扣款余额是否充足
             BalanceDTO beforeSubtract = getBalance(cusCode, currencyCode);
@@ -74,7 +86,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
 
             log.info("获取账户当前余额充值前,币别{}---当前余额{},总余额：{}，授信额度:{}",currencyCode2,beforeAdd.getCurrentBalance(),beforeAdd.getTotalBalance(),beforeAdd.getCreditUseAmount());
 
-            BigDecimal addAmount = dto.getRate().multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
+            BigDecimal addAmount = rate.multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
             // BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
             // 计算还款额，并销账（还账单）
             beforeAdd.rechargeAndSetAmount(addAmount);

@@ -123,24 +123,26 @@ public class ExchangeRateServiceImpl implements IExchangeRateService  {
     @Override
     public R selectRate(String currencyFromCode, String currencyToCode) {
 
-        ExchangeRate rate = exchangeRateMapper.selectOne(new QueryWrapper<ExchangeRate>().lambda()
+        List<ExchangeRate> rate = exchangeRateMapper.selectList(new QueryWrapper<ExchangeRate>().lambda()
                 .eq(ExchangeRate::getExchangeFromCode,currencyFromCode)
                 .eq(ExchangeRate::getExchangeToCode,currencyToCode)
-                .and(v -> v.gt(ExchangeRate::getExpireTime,new Date()).or().isNull(ExchangeRate::getExpireTime)));
+                .and(v -> v.gt(ExchangeRate::getExpireTime,new Date())));
 
-        if(rate != null){
-            return R.ok(rate.getRate());
+        if(CollectionUtils.isEmpty(rate)){
+            return R.failed("Exchange rate exchange of corresponding currency is not found");
         }
 
-        rate = exchangeRateMapper.selectOne(new QueryWrapper<ExchangeRate>().lambda()
-                .eq(ExchangeRate::getExchangeFromCode,currencyToCode)
-                .eq(ExchangeRate::getExchangeToCode,currencyFromCode)
-                .and(v -> v.gt(ExchangeRate::getExpireTime,new Date()).or().isNull(ExchangeRate::getExpireTime)));
-        if(rate!=null){
-            return R.ok(BigDecimal.ONE.divide(rate.getRate(),4,BigDecimal.ROUND_FLOOR));
+        if(rate.size() > 1){
+            return R.failed("汇率管理存在多条相同配置");
         }
 
-        return R.failed("Exchange rate exchange of corresponding currency is not found");
+        ExchangeRate rate1 = rate.get(0);
+
+        if(rate1.getRate() == null){
+            return R.failed("汇率管理-"+currencyFromCode+"兑"+currencyToCode+"汇率异常");
+        }
+
+        return R.ok(rate1.getRate());
     }
 
     @Override
