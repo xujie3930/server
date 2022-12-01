@@ -1,6 +1,5 @@
 package com.szmsd.finance.factory;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -65,21 +64,21 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 return false;
             }
 
-            log.info("获取账户当前余额 币别{}---当前余额{},总余额：{}，授信额度:{}",currencyCode,beforeSubtract.getCurrentBalance(),beforeSubtract.getTotalBalance(),beforeSubtract.getCreditUseAmount());
+            log.info("获取账户当前余额---当前余额{},总余额：{}，授信额度:{}",beforeSubtract.getCurrentBalance(),beforeSubtract.getTotalBalance(),beforeSubtract.getCreditUseAmount());
 
             //转换后金额
             BalanceDTO afterSubtract = calculateBalance(beforeSubtract, substractAmount.negate());
             setBalance(cusCode, currencyCode, afterSubtract);
 
             log.info("完成转换扣款---{}");
-            log.info("获取账户当前余额，币别{}---当前余额{},总余额：{}，授信额度:{}",currencyCode,beforeSubtract.getCurrentBalance(),beforeSubtract.getTotalBalance(),beforeSubtract.getCreditUseAmount());
+            log.info("获取账户当前余额---当前余额{},总余额：{}，授信额度:{}",beforeSubtract.getCurrentBalance(),beforeSubtract.getTotalBalance(),beforeSubtract.getCreditUseAmount());
 
             dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_PAYMENT);
             AccountBalanceChange accountBalanceChange = recordOpLog(dto, afterSubtract.getCurrentBalance());
             //2.再充值
             BalanceDTO beforeAdd = getBalance(cusCode, currencyCode2);
 
-            log.info("获取账户当前余额充值前,币别{}---当前余额{},总余额：{}，授信额度:{}",currencyCode2,beforeAdd.getCurrentBalance(),beforeAdd.getTotalBalance(),beforeAdd.getCreditUseAmount());
+            log.info("获取账户当前余额充值前---当前余额{},总余额：{}，授信额度:{}",beforeAdd.getCurrentBalance(),beforeAdd.getTotalBalance(),beforeAdd.getCreditUseAmount());
 
             BigDecimal addAmount = rate.multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
             // BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
@@ -89,27 +88,18 @@ public class ExchangePayFactory extends AbstractPayFactory {
 
             setBalance(cusCode, currencyCode2, beforeAdd);
 
-            log.info("完成充值---{}");
-
-            log.info("获取账户当前余额充值后币别{}---当前余额{},总余额：{}，授信额度:{}",currencyCode2,beforeAdd.getCurrentBalance(),beforeAdd.getTotalBalance(),beforeAdd.getCreditUseAmount());
-
-            log.info("1,{}", JSON.toJSONString(dto));
-
+            log.info("获取账户当前余额充值后---当前余额{},总余额：{}，授信额度:{}",beforeAdd.getCurrentBalance(),beforeAdd.getTotalBalance(),beforeAdd.getCreditUseAmount());
             setSerialBillLogAsync(dto, accountBalanceChange);
             dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
             dto.setAmount(addAmount);
             dto.setCurrencyCode(currencyCode2);
             dto.setCurrencyName(dto.getCurrencyName2());
             AccountBalanceChange afterBalanceChange = recordOpLog(dto, beforeAdd.getCurrentBalance());
-
-            log.info("2,{}", JSON.toJSONString(dto));
             //设置流水账单
             dto.setCurrencyCode(accountBalanceChange.getCurrencyCode());
             dto.setCurrencyName(accountBalanceChange.getCurrencyName());
             setSerialBillLogAsync(dto, afterBalanceChange);
             recordDetailLogAsync(dto, beforeSubtract);
-
-            log.info("3,{}", JSON.toJSONString(dto));
 
             return true;
         } catch (Exception e) {
