@@ -311,7 +311,7 @@
             </if>
 
             <if test="sheetNo != null and sheetNo == 7">
-                and a.business_category = '增值消费';
+                and a.business_category = '增值消费'
             </if>
 
             <if test="billStartTime != null  and billStartTime !='' ">
