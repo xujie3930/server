@@ -45,13 +45,13 @@ public class ExchangePayFactory extends AbstractPayFactory {
             String currencyCode2 =  dto.getCurrencyCode2();
             String cusCode = dto.getCusCode();
 
-            R<ExchangeRate> rateR = iExchangeRateService.selectRate(currencyCode,currencyCode2);
+            R<BigDecimal> rateR = iExchangeRateService.selectRate(currencyCode,currencyCode2);
 
             if(rateR.getCode() != 200){
                 throw new RuntimeException(rateR.getMsg());
             }
 
-            ExchangeRate rate = rateR.getData();
+            BigDecimal rate = rateR.getData();
 
             if(rate == null){
                 throw new RuntimeException("无法获取配置汇率配置信息");
@@ -64,25 +64,31 @@ public class ExchangePayFactory extends AbstractPayFactory {
                 return false;
             }
 
-            log.info("获取账户当前余额---当前余额{}",beforeSubtract.getCurrentBalance());
+            log.info("获取账户当前余额---当前余额{},总余额：{}，授信额度:{}",beforeSubtract.getCurrentBalance(),beforeSubtract.getTotalBalance(),beforeSubtract.getCreditUseAmount());
 
             //转换后金额
             BalanceDTO afterSubtract = calculateBalance(beforeSubtract, substractAmount.negate());
             setBalance(cusCode, currencyCode, afterSubtract);
 
             log.info("完成转换扣款---{}");
+            log.info("获取账户当前余额---当前余额{},总余额：{}，授信额度:{}",beforeSubtract.getCurrentBalance(),beforeSubtract.getTotalBalance(),beforeSubtract.getCreditUseAmount());
 
             dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_PAYMENT);
             AccountBalanceChange accountBalanceChange = recordOpLog(dto, afterSubtract.getCurrentBalance());
             //2.再充值
             BalanceDTO beforeAdd = getBalance(cusCode, currencyCode2);
-            BigDecimal addAmount = rate.getRate().multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
+
+            log.info("获取账户当前余额充值前---当前余额{},总余额：{}，授信额度:{}",beforeAdd.getCurrentBalance(),beforeAdd.getTotalBalance(),beforeAdd.getCreditUseAmount());
+
+            BigDecimal addAmount = rate.multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
             // BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
             // 计算还款额，并销账（还账单）
             beforeAdd.rechargeAndSetAmount(addAmount);
             super.addForCreditBillAsync(beforeAdd.getCreditInfoBO().getRepaymentAmount(), cusCode, currencyCode2);
 
             setBalance(cusCode, currencyCode2, beforeAdd);
+
+            log.info("获取账户当前余额充值后---当前余额{},总余额：{}，授信额度:{}",beforeAdd.getCurrentBalance(),beforeAdd.getTotalBalance(),beforeAdd.getCreditUseAmount());
             setSerialBillLogAsync(dto, accountBalanceChange);
             dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
             dto.setAmount(addAmount);
