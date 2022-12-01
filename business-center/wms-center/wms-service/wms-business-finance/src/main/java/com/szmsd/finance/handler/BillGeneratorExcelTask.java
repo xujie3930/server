@@ -242,6 +242,20 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
                 resultforecastWeight = billDirectDeliveryTotalVO.getForecastWeight();
             }
 
+            String businessCategory = billDirectDeliveryTotalVO.getBusinessCategory();
+
+            if(businessCategory.equals("物流消费")){
+
+                billDirectDeliveryTotalVO.setTotalAmount(billDirectDeliveryTotalVO.getTotalAmount().negate());
+                billDirectDeliveryTotalVO.setFreightFee(billDirectDeliveryTotalVO.getFreightFee().negate());
+                billDirectDeliveryTotalVO.setExWarehourseFee(billDirectDeliveryTotalVO.getExWarehourseFee().negate());
+                billDirectDeliveryTotalVO.setPackageFee(billDirectDeliveryTotalVO.getPackageFee().negate());
+                billDirectDeliveryTotalVO.setHanderFee(billDirectDeliveryTotalVO.getHanderFee().negate());
+                billDirectDeliveryTotalVO.setFuelFee(billDirectDeliveryTotalVO.getFuelFee().negate());
+                billDirectDeliveryTotalVO.setRemoteFee(billDirectDeliveryTotalVO.getRemoteFee().negate());
+                billDirectDeliveryTotalVO.setOtherFee(billDirectDeliveryTotalVO.getOtherFee().negate());
+            }
+
             billDirectDeliveryTotalVO.setResultCalcWeight(resultCalaWeight);
             billDirectDeliveryTotalVO.setWeight(resultWeight);
             billDirectDeliveryTotalVO.setForecastWeight(resultforecastWeight);
