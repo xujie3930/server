@@ -148,6 +148,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
                 queryDto.setSellerCodes(cusCode);
             }
         }
+        log.info("doc查询sku绑定的客户code：{}", queryDto.getCodes());
+        log.info("doc查询sku绑定的客户codes：{}", queryDto.getSellerCodes());
         if (StringUtils.isNotEmpty(queryDto.getSellerCodes())) {
             String[] sellerCodes = queryDto.getSellerCodes().split(",");
             queryWrapper.in("seller_code", sellerCodes);
