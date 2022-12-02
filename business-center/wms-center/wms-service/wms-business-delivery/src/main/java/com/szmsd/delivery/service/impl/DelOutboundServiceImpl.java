@@ -286,8 +286,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 BasSubWrapperVO::getSubName, (key1, key2) -> key2));
         delOutboundThirdPartyVO.setStateName(map.get(delOutboundThirdPartyVO.getState()));
 
-        if(StringUtils.isNotEmpty(amazonReferenceId)){
-            delOutboundThirdPartyVO.setTrackingNo(amazonReferenceId);
+        if(StringUtils.isNotEmpty(amazonLogisticsRouteId1)){
+            delOutboundThirdPartyVO.setTrackingNo(amazonLogisticsRouteId1);
         }
 
         return delOutboundThirdPartyVO;
