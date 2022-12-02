@@ -38,6 +38,9 @@ public class KaptchaConfig {
         properties.setProperty("kaptcha.session.key", "code");
         // 验证码长度
         properties.setProperty("kaptcha.textproducer.char.length", "4");
+
+        //去掉干扰线
+        properties.setProperty("kaptcha.noise.impl", "com.google.code.kaptcha.impl.NoNoise");
         // 字体
         properties.setProperty("kaptcha.textproducer.font.names", "宋体,楷体,微软雅黑");
         // 验证码文本字体样式 默认为new Font("Arial", 1, fontSize), new Font("Courier", 1, fontSize)
