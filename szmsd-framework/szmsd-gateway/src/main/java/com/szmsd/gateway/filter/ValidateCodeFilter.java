@@ -64,8 +64,8 @@ public class ValidateCodeFilter extends AbstractGatewayFilterFactory<Object> {
                 return chain.filter(exchange);
             }
             try {
-                validateCodeService.checkCapcha(request.getQueryParams().getFirst("code"),
-                        request.getQueryParams().getFirst("uuid"));
+//                validateCodeService.checkCapcha(request.getQueryParams().getFirst("code"),
+//                        request.getQueryParams().getFirst("uuid"));
             } catch (Exception e) {
                 r.setCode(HttpStatus.ERROR);
                 r.setMsg(e.getMessage());
