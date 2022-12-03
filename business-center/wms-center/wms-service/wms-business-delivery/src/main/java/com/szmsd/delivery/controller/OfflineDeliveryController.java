@@ -6,6 +6,7 @@ import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.delivery.service.OfflineDeliveryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -13,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +37,9 @@ public class OfflineDeliveryController extends BaseController {
 
     private Logger logger = LoggerFactory.getLogger(DelOutboundController.class);
 
+    @Autowired
+    private OfflineDeliveryService offlineDeliveryService;
+
 
     @GetMapping("/exportTemplate")
     @ApiOperation(value = "线下出库 - 导入模板")
@@ -45,25 +50,17 @@ public class OfflineDeliveryController extends BaseController {
     }
 
     @PostMapping("/import")
-    @ApiOperation(value = "出库管理 - 新增 - SKU导入", position = 900)
+    @ApiOperation(value = "线下出库 - 新增 - 导入", position = 900)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "form", dataType = "__file", name = "file", value = "上传文件", required = true, allowMultiple = true)
     })
-    public R importDetail(HttpServletRequest request){
+    public R importExcel(HttpServletRequest request){
 
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
 
         MultipartFile file = multipartHttpServletRequest.getFile("file");
 
-        AssertUtil.notNull(file, "上传文件不存在");
-        String originalFilename = file.getOriginalFilename();
-        AssertUtil.notNull(originalFilename, "导入文件名称不存在");
-        int lastIndexOf = originalFilename.lastIndexOf(".");
-        String suffix = originalFilename.substring(lastIndexOf + 1);
-        boolean isXlsx = "xlsx".equals(suffix);
-        AssertUtil.isTrue(isXlsx, "请上传xlsx文件");
-
-        return R.ok();
+        return offlineDeliveryService.importExcel(file);
     }
 
     /**
