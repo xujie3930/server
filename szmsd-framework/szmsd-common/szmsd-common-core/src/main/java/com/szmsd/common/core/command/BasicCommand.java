@@ -15,7 +15,6 @@ import java.util.Arrays;
  * 所有command命令集成该基类
  *
  * @param <R> 返回的结果类型
- * @author liuyuhua
  */
 public abstract class BasicCommand<R> implements Command<R>, ApplicationBeanAware {
 

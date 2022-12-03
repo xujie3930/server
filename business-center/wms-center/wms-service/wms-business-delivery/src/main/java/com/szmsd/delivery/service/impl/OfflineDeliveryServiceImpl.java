@@ -1,9 +1,10 @@
 package com.szmsd.delivery.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.support.Context;
-import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.delivery.command.OfflineCreateCostCmd;
+import com.szmsd.delivery.command.OfflineDeliveryCreateOrderCmd;
 import com.szmsd.delivery.command.OfflineDeliveryReadExcelCmd;
 import com.szmsd.delivery.convert.OfflineDeliveryConvert;
 import com.szmsd.delivery.domain.OfflineCostImport;
@@ -11,17 +12,29 @@ import com.szmsd.delivery.domain.OfflineDeliveryImport;
 import com.szmsd.delivery.dto.OfflineCostExcelDto;
 import com.szmsd.delivery.dto.OfflineDeliveryExcelDto;
 import com.szmsd.delivery.dto.OfflineReadDto;
+import com.szmsd.delivery.dto.OfflineResultDto;
+import com.szmsd.delivery.enums.OfflineDeliveryStateEnum;
+import com.szmsd.delivery.mapper.OfflineCostImportMapper;
+import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import com.szmsd.delivery.service.OfflineDeliveryService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
+
+    @Autowired
+    private OfflineDeliveryImportMapper offlineDeliveryImportMapper;
+
+    @Autowired
+    private OfflineCostImportMapper offlineCostImportMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -40,28 +53,73 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
         List<OfflineDeliveryImport> offlineDeliveryImports = OfflineDeliveryConvert.INSTANCE.toOfflineDeliveryImportList(deliveryExcelDtoList);
         List<OfflineCostImport> offlineCostImports = OfflineDeliveryConvert.INSTANCE.toOfflineCostImportList(offlineCostExcelDtos);
 
-        LoginUser loginUser = SecurityUtils.getLoginUser();
+        String loginUser = SecurityUtils.getUsername();
         Date date = new Date();
         for(OfflineDeliveryImport deliveryImport : offlineDeliveryImports){
             deliveryImport.setVersion(1L);
-            deliveryImport.setCreateBy(loginUser.getUsername());
+            deliveryImport.setCreateBy(loginUser);
             deliveryImport.setCreateTime(date);
-            deliveryImport.setCreateByName(loginUser.getUsername());
+            deliveryImport.setCreateByName(loginUser);
+            deliveryImport.setDealStatus(OfflineDeliveryStateEnum.INIT.getCode());
         }
         for(OfflineCostImport costImport : offlineCostImports){
-            costImport.setCreateBy(loginUser.getUsername());
+            costImport.setCreateBy(loginUser);
             costImport.setCreateTime(date);
-            costImport.setCreateByName(loginUser.getUsername());
+            costImport.setCreateByName(loginUser);
         }
 
         //step 3. 保存解析记录
-        int batchSaveDelivery[] = Context.batchInsert("offline_delivery_import",offlineDeliveryImports,"id");
-        int batchSaveCost [] = Context.batchInsert("offline_cost_import",offlineCostImports,"id");
-
-        if(batchSaveDelivery.length > 0 && batchSaveCost.length > 0){
+        int batchSaveDelivery = offlineDeliveryImportMapper.saveBatch(offlineDeliveryImports);
+        int batchSaveCost = offlineCostImportMapper.saveBatch(offlineCostImports);
+        if(batchSaveDelivery > 0 && batchSaveCost > 0){
             return R.ok();
         }
 
         return R.failed("导入失败");
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R dealOfflineDelivery() {
+
+        //step 1. 查询INIT 状态的导入数据
+        OfflineResultDto offlineResultDto = this.selectOfflineData();
+        if(offlineResultDto == null){
+            return R.failed("无数据");
+        }
+
+        //step 2. 生成线下出库单，offline 状态修改成CREATE_ORDER
+        Integer createOrder = new OfflineDeliveryCreateOrderCmd(offlineResultDto).execute();
+
+        if(createOrder == 1){
+
+            //step 3. 生成退费、补收费用，自动审核退费
+            new OfflineCreateCostCmd(offlineResultDto).execute();
+
+            //step 4. 推送TY
+        }
+
+        return null;
+    }
+
+
+    private OfflineResultDto selectOfflineData(){
+
+        List<OfflineDeliveryImport> offlineDeliveryImports = offlineDeliveryImportMapper.selectList(Wrappers.<OfflineDeliveryImport>query().lambda()
+                .eq(OfflineDeliveryImport::getDealStatus,OfflineDeliveryStateEnum.INIT.getCode())
+        );
+
+        if(CollectionUtils.isEmpty(offlineDeliveryImports)){
+            return null;
+        }
+
+        List<String> trackNoList = offlineDeliveryImports.stream().map(OfflineDeliveryImport::getTrackingNo).collect(Collectors.toList());
+        List<OfflineCostImport> offlineCostImportList = offlineCostImportMapper.selectList(Wrappers.<OfflineCostImport>query().lambda().in(OfflineCostImport::getTrackingNo,trackNoList));
+        OfflineResultDto offlineResultDto = new OfflineResultDto();
+        offlineResultDto.setOfflineDeliveryImports(offlineDeliveryImports);
+        offlineResultDto.setOfflineCostImportList(offlineCostImportList);
+
+        return offlineResultDto;
+    }
+
 }

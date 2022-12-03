@@ -4,9 +4,14 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.CaseFormat;
+import com.szmsd.common.core.utils.SpringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.core.ResolvableType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,7 +39,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class Context {
+public final class Context implements ApplicationContextAware {
 
     public static ApplicationContext applicationContext;
     private final static ObjectMapper OBJECT_MAPPER;
@@ -43,6 +48,11 @@ public final class Context {
         OBJECT_MAPPER = new ObjectMapper();
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         OBJECT_MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        Context.applicationContext = applicationContext;
     }
 
 
@@ -474,5 +484,6 @@ public final class Context {
                 .stream()
                 .collect(Collectors.toMap(keyMapper, valueMapper));
     }
+
 
 }

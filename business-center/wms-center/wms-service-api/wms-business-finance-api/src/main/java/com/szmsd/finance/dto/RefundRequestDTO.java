@@ -36,6 +36,7 @@ public class RefundRequestDTO {
 
     @ApiModelProperty(value = "客户id")
     private Integer cusId;
+
     @ExcelProperty(  index = 0)
     @NotBlank(message = "客户代码不能为空")
     @ApiModelProperty(value = "客户代码")
@@ -44,22 +45,27 @@ public class RefundRequestDTO {
 
     @ApiModelProperty(value = "客户名称")
     private String cusName;
+
     @ExcelProperty(  index = 1)
     @NotBlank(message = "处理性质不能为空")
     @ApiModelProperty(value = "处理性质")
     @Excel(name = "处理性质", combo = {"退费", "赔偿", "补收", "充值", "优惠", "增值服务"})
     private String treatmentProperties;
+
     @ApiModelProperty(value = "处理性质编码")
     private String treatmentPropertiesCode;
+
     @ExcelProperty( index = 2)
     @ApiModelProperty(value = "责任地区")
     @Excel(name = "责任地区")
     private String responsibilityArea;
+
     @ApiModelProperty(value = "责任地区编码")
     private String responsibilityAreaCode;
 
     @ApiModelProperty(value = "所属仓库")
     private String warehouseName;
+
     @ExcelProperty( index = 3)
     @NotBlank(message = "所属仓库不能为空")
     @Excel(name = "所属仓库")
@@ -71,6 +77,7 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "业务类型")
     @Excel(name = "业务类型")
     private String businessTypeName;
+
     @ApiModelProperty(value = "业务类型编码")
     private String businessTypeCode;
 

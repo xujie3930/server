@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.delivery.mapper.OfflineCostImportMapper">
+
+    <insert id="saveBatch" parameterType="java.util.List">
+        INSERT INTO `offline_cost_import` ( `tracking_no`, `charge_category`, `charge_type`, `amount`, `currency_code`, `remark`, `create_by`, `create_by_name`, `create_time`)
+        values
+        <foreach collection ="list" item="item" separator =",">
+            (#{item.trackingNo}, #{item.chargeCategory}, #{item.chargeType},#{item.amount},#{item.currencyCode},#{item.remark},#{item.createBy},#{item.createByName},#{item.createTime})
+        </foreach >
+    </insert>
+
+</mapper>

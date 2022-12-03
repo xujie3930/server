@@ -111,5 +111,8 @@ public class OfflineDeliveryImport extends BaseEntity {
     @ApiModelProperty(value = "订单号")
     private String orderNo;
 
+    @ApiModelProperty(value = "金额")
+    private BigDecimal amount;
+
 
 }
