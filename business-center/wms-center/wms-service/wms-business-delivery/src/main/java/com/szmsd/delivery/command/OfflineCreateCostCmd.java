@@ -10,8 +10,8 @@ import com.szmsd.delivery.dto.OfflineResultDto;
 import com.szmsd.delivery.enums.OfflineDeliveryStateEnum;
 import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import com.szmsd.finance.api.feign.RefundRequestFeignService;
-import com.szmsd.finance.dto.RefundRequestDTO;
-import com.szmsd.finance.dto.RefundRequestListDTO;
+import com.szmsd.finance.dto.RefundRequestAutoDTO;
+import com.szmsd.finance.dto.RefundRequestListAutoDTO;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
     protected Integer doExecute() throws Exception {
 
         RefundRequestFeignService refundRequestFeignService = SpringUtils.getBean(RefundRequestFeignService.class);
-        RefundRequestListDTO autoRefundData = this.generatorRefundRequest();
+        RefundRequestListAutoDTO autoRefundData = this.generatorRefundRequest();
 
         //自动退费
         R addRequest = refundRequestFeignService.autoRefund(autoRefundData);
@@ -63,10 +63,10 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
         return 1;
     }
 
-    private RefundRequestListDTO generatorRefundRequest() {
+    private RefundRequestListAutoDTO generatorRefundRequest() {
 
-        RefundRequestListDTO refundRequestListDTO = new RefundRequestListDTO();
-        List<RefundRequestDTO> refundRequestList = new ArrayList<>();
+        RefundRequestListAutoDTO refundRequestListDTO = new RefundRequestListAutoDTO();
+        List<RefundRequestAutoDTO> refundRequestList = new ArrayList<>();
 
         List<OfflineCostImport> offlineCostImports = offlineResultDto.getOfflineCostImportList();
         List<OfflineDeliveryImport> offlineDeliveryImports = offlineResultDto.getOfflineDeliveryImports();
@@ -76,7 +76,7 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
         for(OfflineCostImport costImport :offlineCostImports){
 
             OfflineDeliveryImport deliveryImport = deliveryImportMap.get(costImport.getTrackingNo());
-            RefundRequestDTO refundRequestDTO = new RefundRequestDTO();
+            RefundRequestAutoDTO refundRequestDTO = new RefundRequestAutoDTO();
 
             refundRequestDTO.setAmount(costImport.getAmount());
             refundRequestDTO.setCurrencyCode(costImport.getCurrencyCode());
@@ -98,6 +98,7 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
             refundRequestDTO.setPayoutAmount(new BigDecimal("0.00"));
             refundRequestDTO.setAttributes("自动退费");
             refundRequestDTO.setRemark(costImport.getRemark());
+            refundRequestDTO.setOrderNo(deliveryImport.getOrderNo());
 
             refundRequestList.add(refundRequestDTO);
         }

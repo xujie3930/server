@@ -144,7 +144,7 @@ public class FssRefundRequestController extends BaseController {
 
     @PostMapping("autoRefund")
     @ApiOperation(value = "自动生成退费记录", notes = "自动生成退费记录")
-    public R autoRefund(@Validated @RequestBody RefundRequestListDTO addDTO) {
+    public R autoRefund(@RequestBody RefundRequestListDTO addDTO) {
         return fssRefundRequestService.autoRefund(addDTO);
     }
 

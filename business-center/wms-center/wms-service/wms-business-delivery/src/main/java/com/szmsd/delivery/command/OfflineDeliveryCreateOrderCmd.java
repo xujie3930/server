@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OfflineDeliveryCreateOrderCmd extends BasicCommand<Integer> {
+public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto> {
 
     private OfflineResultDto offlineResultDto;
 
@@ -36,7 +36,7 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<Integer> {
     }
 
     @Override
-    protected Integer doExecute() throws Exception {
+    protected OfflineResultDto doExecute() throws Exception {
 
         List<OfflineDeliveryImport> offlineDeliveryImports = offlineResultDto.getOfflineDeliveryImports();
 
@@ -63,6 +63,7 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<Integer> {
             offlineImportDto.setOrderNo(orderNo);
             offlineImportDto.setTrackingNo(deliveryImport.getTrackingNo());
 
+            deliveryImport.setOrderNo(orderNo);
             delOutbound.setOrderNo(orderNo);
             delOutboundAddress.setOrderNo(orderNo);
             delOutbounds.add(delOutbound);
@@ -72,7 +73,7 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<Integer> {
         }
 
         if(CollectionUtils.isEmpty(delOutbounds) || CollectionUtils.isEmpty(delOutboundAddresses)){
-            return 0;
+            return null;
         }
 
         //批量添加出口单据
@@ -86,7 +87,8 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<Integer> {
             OfflineDeliveryImportMapper offlineDeliveryImportMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
             offlineDeliveryImportMapper.updateDealState(updateData);
         }
-        return 1;
+
+        return offlineResultDto;
     }
 
 

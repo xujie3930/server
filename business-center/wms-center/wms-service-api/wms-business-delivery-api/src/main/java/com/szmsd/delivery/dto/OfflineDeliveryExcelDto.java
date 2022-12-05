@@ -108,6 +108,6 @@ public class OfflineDeliveryExcelDto implements Serializable {
     private Date deliveryTime;
 
     @ApiModelProperty(value = "备注")
-    @ExcelProperty(value = "备注")
+    @ExcelProperty(value = "备注",index = 24)
     private String remark;
 }

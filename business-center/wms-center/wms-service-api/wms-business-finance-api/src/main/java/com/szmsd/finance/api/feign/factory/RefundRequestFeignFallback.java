@@ -2,8 +2,7 @@ package com.szmsd.finance.api.feign.factory;
 
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.api.feign.RefundRequestFeignService;
-import com.szmsd.finance.dto.RefundRequestListDTO;
-import com.szmsd.finance.dto.RefundReviewDTO;
+import com.szmsd.finance.dto.RefundRequestListAutoDTO;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,7 @@ public class RefundRequestFeignFallback implements FallbackFactory<RefundRequest
         return new RefundRequestFeignService() {
 
             @Override
-            public R autoRefund(RefundRequestListDTO refundReviewDTO) {
+            public R autoRefund(RefundRequestListAutoDTO refundReviewDTO) {
                 return R.convertResultJson(throwable);
             }
         };

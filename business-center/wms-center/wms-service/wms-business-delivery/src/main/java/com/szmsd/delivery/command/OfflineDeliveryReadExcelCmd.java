@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.collect.Sets;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.domain.BasWarehouse;
 import com.szmsd.common.core.command.BasicCommand;
@@ -17,8 +18,10 @@ import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class OfflineDeliveryReadExcelCmd extends BasicCommand<OfflineReadDto> {
@@ -93,6 +96,13 @@ public class OfflineDeliveryReadExcelCmd extends BasicCommand<OfflineReadDto> {
 
         if(CollectionUtils.isEmpty(costExcelDtos)){
             throw new RuntimeException("导入的补收费用数据不能为空");
+        }
+
+        List<String> costTrackNoList = costExcelDtos.stream().map(OfflineCostExcelDto::getTrackingNo).collect(Collectors.toList());
+        Set<String> differenceSet = Sets.difference(Sets.newHashSet(trackingNoList), Sets.newHashSet(costTrackNoList));
+
+        if(CollectionUtils.isNotEmpty(differenceSet)){
+            throw new RuntimeException("跟踪号"+JSON.toJSONString(differenceSet)+"没有收入情况无法导入");
         }
 
         offlineReadDto.setOfflineDeliveryExcelList(dtoList);

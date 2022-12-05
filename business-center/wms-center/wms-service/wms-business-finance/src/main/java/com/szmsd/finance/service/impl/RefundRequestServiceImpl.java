@@ -530,6 +530,10 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         }
 
         List<String> orderNoList = refundRequestDTOS.stream().map(RefundRequestDTO::getOrderNo).collect(Collectors.toList());
+        if(CollectionUtils.isEmpty(orderNoList)){
+            throw new RuntimeException("自动退费order No 异常");
+        }
+
         List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>query().lambda().in(FssRefundRequest::getOrderNo,orderNoList));
 
         if(CollectionUtils.isEmpty(fssRefundRequests)){
