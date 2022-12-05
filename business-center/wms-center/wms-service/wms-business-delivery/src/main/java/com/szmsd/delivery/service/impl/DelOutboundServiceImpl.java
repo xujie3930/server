@@ -2735,6 +2735,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 DirectExpressOrderApiDTO directExpressOrderApiDTO = directExpressOrderApiDTOR.getData();
 
+                if(directExpressOrderApiDTO == null){
+                    continue;
+                }
+
                 String handleStatus = directExpressOrderApiDTO.getHandleStatus();
 
                 if (handleStatus.equals(DelOutboundOperationTypeEnum.SHIPPED.getCode())) {
