@@ -1,5 +1,6 @@
 package com.szmsd.finance.service;
 
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.finance.domain.FssRefundRequest;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -49,5 +50,12 @@ public interface IRefundRequestService extends IService<FssRefundRequest> {
     int confirmOperation(ConfirmOperationDTO confirmOperationDTO);
 
     TableDataInfo<QueryFinishListVO> queryFinishList(QueryFinishListDTO queryFinishListDTO);
+
+    /**
+     * 自动退费
+     * @param addDTO
+     * @return
+     */
+    R autoRefund(RefundRequestListDTO addDTO);
 }
 

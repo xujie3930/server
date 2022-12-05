@@ -512,5 +512,42 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         }
         return result;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R autoRefund(RefundRequestListDTO addDTO) {
+
+        List<RefundRequestDTO> refundRequestDTOS = addDTO.getRefundRequestList();
+
+        if(CollectionUtils.isEmpty(refundRequestDTOS)){
+            return R.failed("参数异常");
+        }
+
+        int add = this.insertBatchRefundRequest(refundRequestDTOS);
+
+        if(add == 0){
+            return R.failed("添加退费失败");
+        }
+
+        List<String> orderNoList = refundRequestDTOS.stream().map(RefundRequestDTO::getOrderNo).collect(Collectors.toList());
+        List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>query().lambda().in(FssRefundRequest::getOrderNo,orderNoList));
+
+        if(CollectionUtils.isEmpty(fssRefundRequests)){
+            throw new RuntimeException("无法获取退费信息");
+        }
+
+        List<String> ids = new ArrayList<>();
+        for(FssRefundRequest fssRefundRequest : fssRefundRequests){
+            ids.add(fssRefundRequest.getId().toString());
+        }
+
+        try {
+            this.afterApprove(RefundStatusEnum.COMPLETE, ids);
+        }catch (Exception e){
+            throw new RuntimeException("审核退费失败:"+e.getMessage());
+        }
+
+        return R.ok();
+    }
 }
 

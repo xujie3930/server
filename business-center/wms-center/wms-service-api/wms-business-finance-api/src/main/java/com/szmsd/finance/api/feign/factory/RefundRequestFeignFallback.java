@@ -16,12 +16,7 @@ public class RefundRequestFeignFallback implements FallbackFactory<RefundRequest
         return new RefundRequestFeignService() {
 
             @Override
-            public R add(RefundRequestListDTO addDTO) {
-                return R.convertResultJson(throwable);
-            }
-
-            @Override
-            public R approve(RefundReviewDTO refundReviewDTO) {
+            public R autoRefund(RefundRequestListDTO refundReviewDTO) {
                 return R.convertResultJson(throwable);
             }
         };

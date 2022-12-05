@@ -6,6 +6,7 @@ import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.command.OfflineCreateCostCmd;
 import com.szmsd.delivery.command.OfflineDeliveryCreateOrderCmd;
 import com.szmsd.delivery.command.OfflineDeliveryReadExcelCmd;
+import com.szmsd.delivery.command.OfflineDeliveryTrackYeeCmd;
 import com.szmsd.delivery.convert.OfflineDeliveryConvert;
 import com.szmsd.delivery.domain.OfflineCostImport;
 import com.szmsd.delivery.domain.OfflineDeliveryImport;
@@ -89,17 +90,23 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
         }
 
         //step 2. 生成线下出库单，offline 状态修改成CREATE_ORDER
-        Integer createOrder = new OfflineDeliveryCreateOrderCmd(offlineResultDto).execute();
-
-        if(createOrder == 1){
-
-            //step 3. 生成退费、补收费用，自动审核退费
-            new OfflineCreateCostCmd(offlineResultDto).execute();
-
-            //step 4. 推送TY
+        int createOrder = new OfflineDeliveryCreateOrderCmd(offlineResultDto).execute();
+        if(createOrder != 1){
+            return R.failed("创建订单异常");
         }
 
-        return null;
+        //step 3. 生成退费、补收费用，自动审核退费
+        int createCost = new OfflineCreateCostCmd(offlineResultDto).execute();
+        if(createCost != 1){
+            return R.failed("创建退费费用异常");
+        }
+
+        //step 4. 推送TY
+        int trackYee = new OfflineDeliveryTrackYeeCmd(offlineResultDto).execute();
+        if(trackYee != 1){
+            return R.failed("推送TY异常");
+        }
+        return R.ok();
     }
 
 

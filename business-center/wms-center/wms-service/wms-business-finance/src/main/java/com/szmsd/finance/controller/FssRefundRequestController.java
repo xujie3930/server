@@ -142,6 +142,12 @@ public class FssRefundRequestController extends BaseController {
         return toOk(fssRefundRequestService.insertRefundRequest(addDTO));
     }
 
+    @PostMapping("autoRefund")
+    @ApiOperation(value = "自动生成退费记录", notes = "自动生成退费记录")
+    public R autoRefund(@Validated @RequestBody RefundRequestListDTO addDTO) {
+        return fssRefundRequestService.autoRefund(addDTO);
+    }
+
     /**
      * 修改退费记录表模块
      */
