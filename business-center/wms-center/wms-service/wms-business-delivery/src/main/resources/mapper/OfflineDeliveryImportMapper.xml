@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szmsd.delivery.mapper.OfflineDeliveryImportMapper">
+
+    <insert id="saveBatch" parameterType="java.util.List">
+        INSERT INTO `offline_delivery_import`
+        (`tracking_no`, `ref_no`, `amazon_logistics_route_id`, `seller_code`, `supplier_name`, `warehouse_code`, `shipment_service`, `custom_code`, `street1`, `street2`, `house_no`, `state_or_province`, `city`, `post_code`, `country_code`, `country`, `phone_no`, `email`, `tax_number`, `cod`, `weight`, `calc_weight`, `specifications`, `bring_time`, `delivery_time`, `remark`, `create_by`, `create_by_name`, `create_time`, `deal_status`, `order_no`)
+        VALUES
+        <foreach collection ="list" item="item" separator =",">
+            (#{item.trackingNo}, #{item.refNo}, #{item.amazonLogisticsRouteId},#{item.sellerCode},#{item.supplierName},#{item.warehouseCode},#{item.shipmentService},#{item.customCode},#{item.street1},#{item.street2},#{item.houseNo},#{item.stateOrProvince},#{item.city},#{item.postCode},#{item.countryCode},#{item.country},#{item.phoneNo},#{item.email},#{item.taxNumber},#{item.cod},#{item.weight},#{item.calcWeight},#{item.specifications},#{item.bringTime},#{item.deliveryTime},#{item.remark},#{item.createBy},#{item.createByName},#{item.createTime},#{item.dealStatus},#{item.orderNo})
+        </foreach >
+    </insert>
+
+    <update id="updateDealState" parameterType="java.util.List">
+
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update offline_delivery_import
+            <set>
+                <if test="item.dealStatus != null and item.dealStatus != ''">
+                    deal_status = #{item.dealStatus},
+                </if>
+                <if test="item.orderNo != null and item.orderNo != ''">
+                    order_no = #{item.orderNo},
+                </if>
+            </set>
+            where id = #{item.id}
+        </foreach>
+
+    </update>
+
+</mapper>

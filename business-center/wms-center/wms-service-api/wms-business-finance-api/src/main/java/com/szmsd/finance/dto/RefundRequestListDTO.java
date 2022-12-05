@@ -10,6 +10,7 @@ import lombok.experimental.Accessors;
 import org.apache.commons.collections4.CollectionUtils;
 
 import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -22,7 +23,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @ApiModel(description = "退款申请新增修改对象")
-public class RefundRequestListDTO {
+public class RefundRequestListDTO implements Serializable {
 
     @NotEmpty(message = "退款申请不能为空")
     @ApiModelProperty(value = "退款申请")

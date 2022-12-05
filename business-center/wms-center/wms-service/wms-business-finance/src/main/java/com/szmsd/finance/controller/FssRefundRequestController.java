@@ -7,20 +7,14 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.finance.dto.*;
-import com.szmsd.finance.enums.RefundStatusEnum;
-import com.szmsd.finance.enums.ReviewStatusEnum;
 import com.szmsd.finance.service.IRefundRequestService;
 import com.szmsd.finance.vo.RefundRequestListVO;
 import com.szmsd.finance.vo.RefundRequestVO;
 import com.szmsd.inventory.domain.dto.QueryFinishListDTO;
 import com.szmsd.inventory.domain.vo.QueryFinishListVO;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.IOUtils;
-import org.aspectj.apache.bcel.util.ClassPath;
-import org.dozer.util.ResourceLoader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -30,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -147,6 +140,12 @@ public class FssRefundRequestController extends BaseController {
     @ApiOperation(value = "新增", notes = "新增退费记录表模块")
     public R add(@Validated @RequestBody RefundRequestListDTO addDTO) {
         return toOk(fssRefundRequestService.insertRefundRequest(addDTO));
+    }
+
+    @PostMapping("autoRefund")
+    @ApiOperation(value = "自动生成退费记录", notes = "自动生成退费记录")
+    public R autoRefund(@RequestBody RefundRequestListDTO addDTO) {
+        return fssRefundRequestService.autoRefund(addDTO);
     }
 
     /**

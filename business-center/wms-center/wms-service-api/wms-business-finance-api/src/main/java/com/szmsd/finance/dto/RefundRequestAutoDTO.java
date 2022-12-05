@@ -1,23 +1,16 @@
 package com.szmsd.finance.dto;
 
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.annotation.Excel;
-import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-import org.apache.commons.collections4.CollectionUtils;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @ClassName: RefundRequestQueryDTO
@@ -26,10 +19,8 @@ import java.util.List;
  * @Date: 2021-08-13 11:46
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @ApiModel(description = "退款申请新增修改对象")
-public class RefundRequestDTO {
+public class RefundRequestAutoDTO implements Serializable {
 
     @ApiModelProperty(value = "id")
     private Integer id;
@@ -119,14 +110,6 @@ public class RefundRequestDTO {
     @Excel(name = "供应商是否完成赔付", combo = {"未完成", "已完成"}, defaultValue = "未完成")
     private String compensationPaymentFlag;
 
-    public void setCompensationPaymentFlag(String compensationPaymentFlag) {
-        if (StringUtils.isNotBlank(compensationPaymentFlag)) {
-            this.compensationPaymentFlag = compensationPaymentFlag;
-        } else {
-            this.compensationPaymentFlag = null;
-        }
-    }
-
     @ExcelProperty( index = 7)
     @NotNull(message = "赔付金额不能为空", groups = ICompensateCheck.class)
     @Min(value = 0, message = "赔付金额异常")
@@ -183,27 +166,12 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "供应商确认不赔付（0：否，1：是）")
     private String noCompensationFlag;
 
-    public void setNoCompensationFlag(String noCompensationFlag) {
-        if (StringUtils.isNotBlank(noCompensationFlag)) {
-            this.noCompensationFlag = noCompensationFlag;
-        } else {
-            this.noCompensationFlag = null;
-        }
-    }
-
     @ExcelProperty(  index = 10)
     @NotBlank(message = "供应商确认赔付未到账不能为空", groups = ICompensateCheck.class)
     @Excel(name = "供应商确认赔付未到账", combo = {"是", "否"}, defaultValue = "否")
     @ApiModelProperty(value = "供应商确认赔付未到账（0：否，1：是）")
     private String compensationPaymentArrivedFlag;
 
-    public void setCompensationPaymentArrivedFlag(String compensationPaymentArrivedFlag) {
-        if (StringUtils.isNotBlank(compensationPaymentArrivedFlag)) {
-            this.compensationPaymentArrivedFlag = compensationPaymentArrivedFlag;
-        } else {
-            this.compensationPaymentArrivedFlag = null;
-        }
-    }
     @ExcelProperty( index = 14)
     @Excel(name = "费用类别")
     @ApiModelProperty(value = "费用类别")
@@ -215,13 +183,6 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "处理号类型")
     private String orderType;
 
-    @ApiModelProperty(value = "附件")
-    private List<AttachmentFileDTO> attachment;
-
-    public String getAttachment() {
-        if (CollectionUtils.isEmpty(attachment)) return "";
-        return JSONObject.toJSONString(attachment);
-    }
     @ExcelProperty(  index = 19)
     @ApiModelProperty(value = "备注")
     @Excel(name = "备注")
@@ -231,9 +192,4 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "附注")
     @Excel(name = "附注")
     private String noteAppended;
-
-    @Override
-    public String toString() {
-        return JSONObject.toJSONString(this);
-    }
 }

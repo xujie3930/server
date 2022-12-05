@@ -58,8 +58,6 @@ import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.*;
-import com.szmsd.exception.api.feign.ExceptionInfoFeignService;
-import com.szmsd.exception.dto.ExceptionInfoStateDto;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.api.feign.HtpOutboundFeignService;
@@ -209,6 +207,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Autowired
     private BasTrackingPushMapper basTrackingPushMapper;
+
+    @Autowired
+    private OfflineDeliveryImportMapper offlineDeliveryImportMapper;
 
     @Autowired
     private RedissonClient redissonClient;
@@ -3419,11 +3420,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         boolean success = false;
         String responseBody;
         logger.info("手动推送TY{}");
+
+        String trackingNo = delOutboundListQueryDto.getTrackingNo();
         try {
             Map<String, Object> requestBodyMap = new HashMap<>();
             List<Map<String, Object>> shipments = new ArrayList<>();
             Map<String, Object> shipment = new HashMap<>();
-            shipment.put("trackingNo", delOutboundListQueryDto.getTrackingNo());
+            shipment.put("trackingNo", trackingNo);
             shipment.put("carrierCode", delOutboundListQueryDto.getLogisticsProviderCode());
             shipment.put("logisticsServiceProvider", delOutboundListQueryDto.getLogisticsProviderCode());
             shipment.put("logisticsServiceName", delOutboundListQueryDto.getLogisticsProviderCode());
@@ -3512,6 +3515,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         }
                     }
                 }
+
+                if(StringUtils.isNotEmpty(trackingNo)) {
+
+                    offlineDeliveryImportMapper.update(null, Wrappers.<OfflineDeliveryImport>lambdaUpdate()
+                            .set(OfflineDeliveryImport::getDealStatus, OfflineDeliveryStateEnum.PUSH_TY.getCode())
+                            .set(OfflineDeliveryImport::getUpdateBy, SecurityUtils.getUsername())
+                            .set(OfflineDeliveryImport::getUpdateTime, new Date())
+                            .eq(OfflineDeliveryImport::getTrackingNo, trackingNo)
+                    );
+                }
+
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 if (e instanceof CommonException) {

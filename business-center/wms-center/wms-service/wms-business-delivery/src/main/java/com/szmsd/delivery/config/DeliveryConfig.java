@@ -9,8 +9,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
-@ConditionalOnClass(WebMvcConfigurer.class)
-@Configuration
+//@ConditionalOnClass(WebMvcConfigurer.class)
+//@Configuration
 public class DeliveryConfig implements WebMvcConfigurer {
 
     @Override
