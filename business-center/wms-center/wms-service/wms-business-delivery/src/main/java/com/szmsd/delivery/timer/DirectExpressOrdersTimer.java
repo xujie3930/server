@@ -20,7 +20,6 @@ public class DirectExpressOrdersTimer {
     @Autowired
     private IDelOutboundService iDelOutboundService;
 
-    @Async
     @Scheduled(cron = "0 0 8,14 * * ?")
     public void doDirectExpressOrders() {
 
