@@ -949,6 +949,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             delOutbound.setForecastWeight(delOutbound.getWeight());
 
             delOutbound.setThridPartStatus(0);
+            delOutbound.setThridPartCount(0);
             
             // 保存出库单
             int insert = baseMapper.insert(delOutbound);
@@ -2709,6 +2710,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         Integer totalRecord = baseMapper.selectCount(Wrappers.<DelOutbound>query().lambda()
                         .eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode())
                 .eq(DelOutbound::getThridPartStatus,0)
+                .lt(DelOutbound::getThridPartCount,10)
         );
 
         if(totalRecord == 0){
@@ -2732,18 +2734,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 logger.info("订单号DirectExpressOrder1：{},返回数据：{}",delOutbound.getOrderNo(),JSON.toJSONString(directExpressOrderApiDTOR));
 
+                baseMapper.updateThridPartcount(delOutbound.getId());
+
                 if (directExpressOrderApiDTOR.getCode() != 200) {
                     continue;
                 }
                 DirectExpressOrderApiDTO directExpressOrderApiDTO = directExpressOrderApiDTOR.getData();
 
-                if(directExpressOrderApiDTO == null){
+                String handleStatus = directExpressOrderApiDTO.getHandleStatus();
+
+                if(StringUtils.isEmpty(handleStatus)){
                     continue;
                 }
 
                 logger.info("订单号DirectExpressOrder2：{},返回数据：{}",delOutbound.getOrderNo(),JSON.toJSONString(directExpressOrderApiDTO));
-
-                String handleStatus = directExpressOrderApiDTO.getHandleStatus();
 
                 if (handleStatus.equals(DelOutboundOperationTypeEnum.SHIPPED.getCode())) {
 
