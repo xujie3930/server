@@ -346,4 +346,10 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "prc返回的terminalCarrier")
     private String prcTerminalCarrier;
+
+    @ApiModelProperty(value = "更新重量状态")
+    private String nuclearWeightState;
+
+    @ApiModelProperty(value = "时间")
+    private Date nuclearWeightTime;
 }
