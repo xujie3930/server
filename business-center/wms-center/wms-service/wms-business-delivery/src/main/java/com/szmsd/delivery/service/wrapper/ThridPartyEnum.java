@@ -115,15 +115,8 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
             logger.info(">>>>>[ThridPartyEnum创建出库单{}]-开始执行Pricing", delOutbound.getOrderNo());
 
-            PricingEnum pricingEnum;
-            if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
-                // 核重逻辑处理
-                pricingEnum = PricingEnum.PACKAGE;
-            } else {
-                pricingEnum = PricingEnum.SKU;
-            }
             stopWatch.start();
-            ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, pricingEnum);
+            ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, PricingEnum.PACKAGE);
             stopWatch.stop();
             logger.info(">>>>>[ThridPartyEnum创建出库单{}]-Pricing计算返回结果：耗时{}, 内容:{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis(),
                     JSONObject.toJSONString(responseObject));

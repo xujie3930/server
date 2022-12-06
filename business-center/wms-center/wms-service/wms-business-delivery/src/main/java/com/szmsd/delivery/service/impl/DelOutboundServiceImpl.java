@@ -101,7 +101,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Base64Utils;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StopWatch;
 
 import javax.annotation.Resource;
@@ -2918,7 +2917,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         stopWatch.start();
         DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
         stopWatch.stop();
-        logger.info(">>>>>[创建出库单{}]初始化出库对象 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+        logger.info(">>>>>[bringThridPartyAsync创建出库单{}]初始化出库对象 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
 
         ThridPartyEnum currentState;
         String bringVerifyState = delOutbound.getThridPardState();
@@ -2931,7 +2930,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 currentState = ThridPartyEnum.BEGIN;
             }
         }
-        logger.info("(2)提审异步操作开始，出库单号：{}", delOutbound.getOrderNo());
+        logger.info("(2)bringThridPartyAsync提审异步操作开始，出库单号：{}", delOutbound.getOrderNo());
         ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, ThridPartyEnum.END, ThridPartyEnum.BEGIN);
         try {
             applicationContainer.action();
@@ -2941,14 +2940,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPPED.getCode());
             //}
 
-            logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
+            logger.info("(3)bringThridPartyAsync提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
         } catch (CommonException e) {
             // 回滚操作
             applicationContainer.setEndState(ThridPartyEnum.BEGIN);
             applicationContainer.rollback();
             // 异步屏蔽异常，将异常打印到日志中
             // 异步错误在单据里面会显示错误信息
-            this.logger.error("(4)提审异步操作失败，出库单号：" + delOutbound.getOrderNo() + "，错误原因：" + e.getMessage(), e);
+            this.logger.error("(4)bringThridPartyAsync提审异步操作失败，出库单号：" + delOutbound.getOrderNo() + "，错误原因：" + e.getMessage(), e);
         } finally {
             if (isAsyncThread) {
                 asyncThreadObject.unloadTid();
