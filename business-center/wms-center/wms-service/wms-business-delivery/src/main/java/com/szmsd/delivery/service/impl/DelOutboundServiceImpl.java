@@ -947,6 +947,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             //同步更新计泡拦截重量
             delOutbound.setForecastWeight(delOutbound.getWeight());
+
+            delOutbound.setThridPartStatus(0);
             
             // 保存出库单
             int insert = baseMapper.insert(delOutbound);
@@ -2705,11 +2707,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public void doDirectExpressOrders() {
 
         Integer totalRecord = baseMapper.selectCount(Wrappers.<DelOutbound>query().lambda()
-                        .eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode()));
+                        .eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode())
+                .eq(DelOutbound::getThridPartStatus,0)
+        );
 
         if(totalRecord == 0){
             return ;
         }
+
+        logger.info("返回条数:{}",totalRecord);
 
         Integer pageSize = 500;
 
@@ -2717,12 +2723,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         for(int i= 0;i<totalPage;i++) {
 
-
             List<DelOutbound> delOutbounds = baseMapper.selectByState(DelOutboundStateEnum.DELIVERED.getCode(), i, pageSize);
-
-
-            //R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder("CKCNFGZ622101800000018");
-
             List<DelOutbound> updateData = new ArrayList<>();
 
             for (DelOutbound delOutbound : delOutbounds) {
@@ -2732,12 +2733,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 if (directExpressOrderApiDTOR.getCode() != 200) {
                     continue;
                 }
-
                 DirectExpressOrderApiDTO directExpressOrderApiDTO = directExpressOrderApiDTOR.getData();
 
                 if(directExpressOrderApiDTO == null){
                     continue;
                 }
+
+                logger.info("订单号DirectExpressOrder：{},返回数据：{}",delOutbound.getOrderNo(),JSON.toJSONString(directExpressOrderApiDTO));
 
                 String handleStatus = directExpressOrderApiDTO.getHandleStatus();
 
