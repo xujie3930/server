@@ -334,6 +334,7 @@
 
         SELECT * from del_outbound
         where state = #{state}
+        and thrid_part_status = 0
         limit #{pageNumber},#{pageSize}
 
     </select>
