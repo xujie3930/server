@@ -2730,6 +2730,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder(delOutbound.getOrderNo());
 
+                logger.info("订单号DirectExpressOrder1：{},返回数据：{}",delOutbound.getOrderNo(),JSON.toJSONString(directExpressOrderApiDTOR));
+
                 if (directExpressOrderApiDTOR.getCode() != 200) {
                     continue;
                 }
@@ -2739,13 +2741,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     continue;
                 }
 
-                logger.info("订单号DirectExpressOrder：{},返回数据：{}",delOutbound.getOrderNo(),JSON.toJSONString(directExpressOrderApiDTO));
+                logger.info("订单号DirectExpressOrder2：{},返回数据：{}",delOutbound.getOrderNo(),JSON.toJSONString(directExpressOrderApiDTO));
 
                 String handleStatus = directExpressOrderApiDTO.getHandleStatus();
 
                 if (handleStatus.equals(DelOutboundOperationTypeEnum.SHIPPED.getCode())) {
 
+                    Long s = System.currentTimeMillis();
                     this.bringThridPartyAsync(delOutbound);
+                    Long e = System.currentTimeMillis();
+
+                    logger.info("bringThridPartyAsync：{},执行时间：{}",delOutbound.getOrderNo(),e-s);
 
                     DelOutbound updatedata = new DelOutbound();
                     updatedata.setId(delOutbound.getId());
@@ -2774,7 +2780,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
 
             if (CollectionUtils.isNotEmpty(updateData)) {
-                super.updateBatchById(updateData);
+
+                logger.info("DirectExpressOrder 开始更新：{}",JSON.toJSONString(updateData));
+                boolean flag = super.updateBatchById(updateData);
+                if(flag){
+                    logger.info("DirectExpressOrder 更新成功：");
+                }
             }
 
         }
