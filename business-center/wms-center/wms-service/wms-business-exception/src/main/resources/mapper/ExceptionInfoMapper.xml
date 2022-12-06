@@ -67,19 +67,12 @@
     </update>
     <update id="updateDelOutboundEx" parameterType="com.szmsd.exception.dto.ExceptionInfoExportDto">
         UPDATE del_outbound
-        <set>
-            <if test="ioss != null" >
-                ioss=#{ioss}
-            </if>
-        </set>
+        set
+        ioss=#{ioss}
+        where
+        order_no=#{orderNo}
 
-        <where>
-            1=1
-            <if test="orderNo !=null and orderNo!=''">
-                and   order_no=#{orderNo}
-            </if>
 
-        </where>
     </update>
 
     <select id="exportList" resultType="com.szmsd.exception.dto.ExceptionInfoExportDto">
