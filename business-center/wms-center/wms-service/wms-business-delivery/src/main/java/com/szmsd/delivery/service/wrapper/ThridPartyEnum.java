@@ -232,19 +232,7 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
             DelOutbound updateDelOutbound = new DelOutbound();
             updateDelOutbound.setId(delOutbound.getId());
             updateDelOutbound.setThridPardState(BEGIN.name());
-            // PRC计费
-            updateDelOutbound.setCalcWeight(BigDecimal.ZERO);
-            updateDelOutbound.setCalcWeightUnit("");
-            updateDelOutbound.setAmount(BigDecimal.ZERO);
-            updateDelOutbound.setCurrencyCode("");
-            updateDelOutbound.setCurrencyDescribe("");
 
-            updateDelOutbound.setSupplierCalcType("");
-            updateDelOutbound.setSupplierCalcId("");
-
-
-            // 提审失败
-            updateDelOutbound.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode());
             delOutboundService.updateById(updateDelOutbound);
             super.rollback(context);
         }
