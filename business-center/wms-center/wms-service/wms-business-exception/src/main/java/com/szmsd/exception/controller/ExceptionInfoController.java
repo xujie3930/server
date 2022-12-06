@@ -623,7 +623,7 @@ public class ExceptionInfoController extends BaseController {
 
                                     }
 
-                                    if (dto.getIoss()!=null&&!dto.getIoss().equals("")){
+                                    if (dto.getIoss()!=null&&StringUtils.isNotEmpty(dto.getIoss().trim())){
                                         exceptionInfoService.updateDelOutboundIoss(dto);
                                     }
                                 }
@@ -685,7 +685,7 @@ public class ExceptionInfoController extends BaseController {
 
                                 }
 
-                                if (dto.getIoss()!=null&&!dto.getIoss().equals("")){
+                                if (dto.getIoss()!=null&&StringUtils.isNotEmpty(dto.getIoss().trim())){
                                     exceptionInfoService.updateDelOutboundIoss(dto);
                                 }
                             }
