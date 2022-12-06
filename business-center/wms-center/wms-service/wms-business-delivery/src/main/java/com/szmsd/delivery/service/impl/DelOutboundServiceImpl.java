@@ -2719,7 +2719,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         logger.info("返回条数:{}",totalRecord);
 
-        Integer pageSize = 500;
+        Integer pageSize = 5000;
 
         Integer totalPage = (totalRecord + pageSize -1) / pageSize;
 
@@ -2727,6 +2727,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             List<DelOutbound> delOutbounds = baseMapper.selectByState(DelOutboundStateEnum.DELIVERED.getCode(), i, pageSize);
             List<DelOutbound> updateData = new ArrayList<>();
+            List<DelOutbound> updateDataAsy = new ArrayList<>();
 
             for (DelOutbound delOutbound : delOutbounds) {
 
@@ -2751,11 +2752,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 if (handleStatus.equals(DelOutboundOperationTypeEnum.SHIPPED.getCode())) {
 
-                    Long s = System.currentTimeMillis();
-                    this.bringThridPartyAsync(delOutbound);
-                    Long e = System.currentTimeMillis();
-
-                    logger.info("bringThridPartyAsync：{},执行时间：{}",delOutbound.getOrderNo(),e-s);
+                    updateDataAsy.add(delOutbound);
 
                     DelOutbound updatedata = new DelOutbound();
                     updatedata.setId(delOutbound.getId());
@@ -2764,11 +2761,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     Double width = directExpressOrderApiDTO.getPacking().getWidth().doubleValue();
                     Double height = directExpressOrderApiDTO.getPacking().getHeight().doubleValue();
 
+                    //实际重
                     Double weight = null;
                     Integer w = directExpressOrderApiDTO.getWeight();
                     if (w != null) {
                         weight = Double.parseDouble(w.toString());
                     }
+
+                    //计费重
+                    Integer chargedWeight = directExpressOrderApiDTO.getChargedWeight();
+                    BigDecimal calcWeight = new BigDecimal(chargedWeight);
 
                     String specifications = length + "*" + width + "*" + height;
 
@@ -2778,6 +2780,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     updatedata.setWeight(weight);
                     updatedata.setSpecifications(specifications);
                     updatedata.setThridPartStatus(1);
+                    updatedata.setCalcWeight(calcWeight);
 
                     updateData.add(updatedata);
                 }
@@ -2792,6 +2795,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 }
             }
 
+            if(CollectionUtils.isNotEmpty(updateDataAsy)) {
+                for(DelOutbound delOutbound : updateDataAsy){
+                    Long s = System.currentTimeMillis();
+                    this.bringThridPartyAsync(delOutbound);
+                    Long e = System.currentTimeMillis();
+                    logger.info("bringThridPartyAsync：{},执行时间：{}", delOutbound.getOrderNo(), e - s);
+                }
+            }
         }
 
     }
