@@ -506,9 +506,9 @@ public final class DelOutboundServiceImplUtil {
         byte[] fontBytes = ITextPdfFontUtil.getFont("fonts/ARIALUNI.TTF");
         BaseFont bf = BaseFont.createFont("ARIALUNI.TTF", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, BaseFont.NOT_CACHED, fontBytes, fontBytes);
 
-        BufferedImage logoBufferedImage = ImageIO.read(logoImageUrl);
-        Image logoImg = Image.getInstance(logoBufferedImage, null);
-        document.add(logoImg);
+//        BufferedImage logoBufferedImage = ImageIO.read(logoImageUrl);
+//        Image logoImg = Image.getInstance(logoBufferedImage, null);
+//        document.add(logoImg);
 
         //3. 注册字体
         Font font = new Font(bf, 18);
