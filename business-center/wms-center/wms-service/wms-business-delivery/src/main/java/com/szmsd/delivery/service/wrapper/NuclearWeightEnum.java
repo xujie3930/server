@@ -11,7 +11,10 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundThirdParty;
-import com.szmsd.delivery.enums.*;
+import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
+import com.szmsd.delivery.enums.DelOutboundConstant;
+import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
+import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -310,31 +313,9 @@ public enum NuclearWeightEnum implements ApplicationState, ApplicationRegister{
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
             updateDelOutbound.setId(delOutbound.getId());
-            updateDelOutbound.setBringVerifyState(BEGIN.name());
-            // PRC计费
-            updateDelOutbound.setCalcWeight(BigDecimal.ZERO);
-            updateDelOutbound.setCalcWeightUnit("");
-            updateDelOutbound.setAmount(BigDecimal.ZERO);
-            updateDelOutbound.setCurrencyCode("");
-            updateDelOutbound.setCurrencyDescribe("");
-
-            updateDelOutbound.setSupplierCalcType("");
-            updateDelOutbound.setSupplierCalcId("");
-            // 产品信息
-            updateDelOutbound.setTrackingAcquireType("");
-            updateDelOutbound.setShipmentService("");
-            updateDelOutbound.setLogisticsProviderCode("");
-            updateDelOutbound.setProductShipmentRule("");
-            updateDelOutbound.setPackingRule("");
-            // 创建承运商物流订单
-            updateDelOutbound.setTrackingNo("");
-            updateDelOutbound.setShipmentOrderNumber("");
-            updateDelOutbound.setShipmentOrderLabelUrl("");
-            // 推单WMS
-            updateDelOutbound.setRefOrderNo("");
+            updateDelOutbound.setNuclearWeightState(BEGIN.name());
 
             // 提审失败
-            updateDelOutbound.setState(DelOutboundStateEnum.AUDIT_FAILED.getCode());
             delOutboundService.updateById(updateDelOutbound);
             super.rollback(context);
         }
