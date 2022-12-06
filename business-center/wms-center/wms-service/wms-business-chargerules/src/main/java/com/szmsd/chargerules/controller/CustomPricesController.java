@@ -212,7 +212,7 @@ public class CustomPricesController extends BaseController{
         Map<String, String> chargeTypeMap =
                 chargeType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO::getSubCode));
         Map<String, String> chargeRuleTypeMap =
-                chargeRuleType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO::getSubCode));
+                chargeRuleType.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubName, BasSubWrapperVO::getSubValue));
 
         List<DiscountDetailDto> list = null;
         try {
