@@ -107,7 +107,13 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     .setProcessNo(strings.get(noLine.getAndIncrement()));
             return fssRefundRequest;
         }).collect(Collectors.toList());
-        return this.saveBatch(collect) ? addList.size() : 0;
+        int a=this.saveBatch(collect) ? addList.size() : 0;
+        List<String> ids=collect.stream().map(x->String.valueOf(x.getId())).collect(Collectors.toList());
+        RefundReviewDTO refundReviewDTO=new RefundReviewDTO();
+        refundReviewDTO.setIdList(ids);
+        refundReviewDTO.setStatus(RefundStatusEnum.valueOf("COMPLETE"));
+        approve(refundReviewDTO);
+        return a;
     }
 
     @Override
