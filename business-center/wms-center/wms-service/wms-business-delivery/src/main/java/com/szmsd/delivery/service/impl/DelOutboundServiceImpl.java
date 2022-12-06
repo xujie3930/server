@@ -46,6 +46,7 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.delivery.command.OutboundUpdWeightCmd;
 import com.szmsd.delivery.config.AsyncThreadObject;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.*;
@@ -2842,26 +2843,43 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional(rollbackFor = Exception.class)
     public boolean updateWeightDelOutbound(UpdateWeightDelOutboundDto dto) {
 
-        LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
-        queryWrapper.eq(DelOutbound::getSellerCode, dto.getCustomCode());
-        queryWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
-        DelOutbound data = this.getOne(queryWrapper);
-        if(data == null){
-            throw new CommonException("400", "该客户下订单不存在");
-        }
-        if (
-            DelOutboundStateEnum.PROCESSING.getCode().equals(data.getState())
-                    || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(data.getState())
-                    || DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(data.getState())
-                    || DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(data.getState())
-                    || DelOutboundStateEnum.COMPLETED.getCode().equals(data.getState())
-        ) {
-            throw new CommonException("400", "单据不能修改");
-        }
+        boolean upd = new OutboundUpdWeightCmd(dto).execute();
 
-        org.springframework.beans.BeanUtils.copyProperties(dto, data);
-        int upd = baseMapper.updateById(data);
-        return upd > 0 ? true : false;
+        return upd;
+    }
+
+    @Override
+    public void nuclearWeight(DelOutbound delOutbound) {
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
+        stopWatch.stop();
+        logger.info(">>>>>[nuclearWeight{}]初始化出库对象 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
+        NuclearWeightEnum currentState;
+        String nuclearWeightState = delOutbound.getNuclearWeightState();
+        if (org.apache.commons.lang3.StringUtils.isEmpty(nuclearWeightState)) {
+            currentState = NuclearWeightEnum.BEGIN;
+        } else {
+            currentState = NuclearWeightEnum.get(nuclearWeightState);
+            // 兼容
+            if (null == currentState) {
+                currentState = NuclearWeightEnum.BEGIN;
+            }
+        }
+        ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, NuclearWeightEnum.END, NuclearWeightEnum.BEGIN);
+        try {
+            applicationContainer.action();
+        } catch (CommonException e) {
+            // 回滚操作
+            applicationContainer.setEndState(NuclearWeightEnum.BEGIN);
+            applicationContainer.rollback();
+            // 异步屏蔽异常，将异常打印到日志中
+            // 异步错误在单据里面会显示错误信息
+            this.logger.error("(4)nuclearWeight操作失败，出库单号：" + delOutbound.getOrderNo() + "，错误原因：" + e.getMessage(), e);
+        } finally {
+        }
     }
 
     public void bringThridPartyAsync(DelOutbound delOutbound) {
@@ -2902,7 +2920,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         logger.info(">>>>>[创建出库单{}]初始化出库对象 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
 
         ThridPartyEnum currentState;
-        String bringVerifyState = delOutbound.getBringVerifyState();
+        String bringVerifyState = delOutbound.getThridPardState();
         if (org.apache.commons.lang3.StringUtils.isEmpty(bringVerifyState)) {
             currentState = ThridPartyEnum.BEGIN;
         } else {
