@@ -2920,7 +2920,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         logger.info(">>>>>[创建出库单{}]初始化出库对象 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
 
         ThridPartyEnum currentState;
-        String bringVerifyState = delOutbound.getBringVerifyState();
+        String bringVerifyState = delOutbound.getThridPardState();
         if (org.apache.commons.lang3.StringUtils.isEmpty(bringVerifyState)) {
             currentState = ThridPartyEnum.BEGIN;
         } else {

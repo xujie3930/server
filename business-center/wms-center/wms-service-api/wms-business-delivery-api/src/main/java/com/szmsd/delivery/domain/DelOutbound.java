@@ -352,4 +352,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "时间")
     private Date nuclearWeightTime;
+
+    @ApiModelProperty(value = "")
+    private String thridPardState;
 }

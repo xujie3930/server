@@ -231,7 +231,7 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
             updateDelOutbound.setId(delOutbound.getId());
-            updateDelOutbound.setBringVerifyState(BEGIN.name());
+            updateDelOutbound.setThridPardState(BEGIN.name());
             // PRC计费
             updateDelOutbound.setCalcWeight(BigDecimal.ZERO);
             updateDelOutbound.setCalcWeightUnit("");
@@ -434,11 +434,7 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
             if (null == orderTypeEnum) {
                 throw new CommonException("400", MessageUtil.to("不存在的类型[" + delOutbound.getOrderType() + "]", "Non-existent type ["+delOutbound. getOrderType()+"]"));
             }
-            boolean condition = ApplicationRuleConfig.bringVerifyCondition(orderTypeEnum, currentState.name());
-            if (condition) {
-                return otherCondition(context, currentState);
-            }
-            return false;
+            return otherCondition(context, currentState);
         }
 
         /**
@@ -476,28 +472,6 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
         @Override
         public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
 
-
-            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
-            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
-            DelOutbound updateDelOutbound = new DelOutbound();
-            updateDelOutbound.setId(delOutbound.getId());
-
-            // PRC计费
-            updateDelOutbound.setLength(delOutbound.getLength());
-            updateDelOutbound.setWidth(delOutbound.getWidth());
-            updateDelOutbound.setHeight(delOutbound.getHeight());
-            updateDelOutbound.setSupplierCalcType(delOutbound.getSupplierCalcType());
-            updateDelOutbound.setSupplierCalcId(delOutbound.getSupplierCalcId());
-            // 规格，长*宽*高
-            updateDelOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
-            updateDelOutbound.setCalcWeight(delOutbound.getCalcWeight());
-            updateDelOutbound.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
-            updateDelOutbound.setAmount(delOutbound.getAmount());
-            updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
-
-
-            delOutboundService.bringVerifyFail(updateDelOutbound);
         }
     }
 }
