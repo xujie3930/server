@@ -335,7 +335,12 @@
         SELECT * from del_outbound
         where state = #{state}
         and thrid_part_status = 0
+        and thrid_part_count <![CDATA[ <= ]]> 10
         limit #{pageNumber},#{pageSize}
 
     </select>
+
+    <update id="updateThridPartcount">
+        update  del_outbound set thrid_part_count = thrid_part_count + 1 where id = #{id}
+    </update>
 </mapper>
