@@ -97,7 +97,7 @@
           parameterType="com.szmsd.bas.dto.BasMeteringConfigDto">
     SELECT b.*,a.difference_type from bas_metering_config a
                       LEFT JOIN bas_metering_config_data b on a.id=b.metering_id
-    where  a.logistics_ervices_code=#{logisticsErvicesCode} AND a.country_code=#{countryCode} AND a.customer_code=#{customerCode} AND a.orderType=#{orderType}
+    where  a.logistics_ervices_code=#{logisticsErvicesCode} AND a.country_code=#{countryCode} AND a.customer_code=#{customerCode} AND a.order_type=#{orderType}
     GROUP BY b.id
   </select>
   <select id="selectjbljs" resultType="com.szmsd.bas.domain.BasMeteringConfigData">
