@@ -2827,6 +2827,32 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return dataList;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateWeightDelOutbound(UpdateWeightDelOutboundDto dto) {
+
+        LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
+        queryWrapper.eq(DelOutbound::getSellerCode, dto.getCustomCode());
+        queryWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
+        DelOutbound data = this.getOne(queryWrapper);
+        if(data == null){
+            throw new CommonException("400", "该客户下订单不存在");
+        }
+        if (
+            DelOutboundStateEnum.PROCESSING.getCode().equals(data.getState())
+                    || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(data.getState())
+                    || DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(data.getState())
+                    || DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(data.getState())
+                    || DelOutboundStateEnum.COMPLETED.getCode().equals(data.getState())
+        ) {
+            throw new CommonException("400", "单据不能修改");
+        }
+
+        org.springframework.beans.BeanUtils.copyProperties(dto, data);
+        int upd = baseMapper.updateById(data);
+        return upd > 0 ? true : false;
+    }
+
     public void bringThridPartyAsync(DelOutbound delOutbound) {
 
         String key = applicationName + ":DelOutbound:bringThridPartyAsync:" + delOutbound.getOrderNo();
