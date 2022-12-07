@@ -3,8 +3,7 @@ package com.szmsd.delivery.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.delivery.command.ChargeReadExcelCmd;
-import com.szmsd.delivery.command.ChargeUpdateOutboundCmd;
+import com.szmsd.delivery.command.*;
 import com.szmsd.delivery.domain.ChargeImport;
 import com.szmsd.delivery.enums.ChargeImportStateEnum;
 import com.szmsd.delivery.mapper.ChargeImportMapper;
@@ -43,10 +42,13 @@ public class ChargeServiceImpl extends ServiceImpl<ChargeImportMapper, ChargeImp
         List<String> orderNos = new ChargeUpdateOutboundCmd(chargeImportList).execute();
 
         //step 3. PRC 重新计费
+        new ChargePricingCmd(orderNos).execute();
 
         //step 4. 旧数据退费
+        new ChargeRefundCmd().execute();
 
         //step 5. 重新扣费
+        new ChargefeeDeduction().execute();
 
         return null;
     }
