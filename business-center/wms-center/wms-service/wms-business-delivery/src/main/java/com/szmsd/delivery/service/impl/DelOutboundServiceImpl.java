@@ -42,12 +42,10 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.DateUtils;
-import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
-import com.szmsd.delivery.command.OutboundUpdWeightCmd;
 import com.szmsd.delivery.config.AsyncThreadObject;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.*;
@@ -2844,7 +2842,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean updateWeightDelOutbound(UpdateWeightDelOutboundDto dto) {
 
         //boolean upd = new OutboundUpdWeightCmd(dto).execute();
@@ -2869,8 +2866,19 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             throw new CommonException("400", "单据不能修改");
         }
 
-        org.springframework.beans.BeanUtils.copyProperties(dto, data);
-        int upd = baseMapper.updateById(data);
+        //org.springframework.beans.BeanUtils.copyProperties(dto, data);
+        //int upd = baseMapper.updateById(data);
+
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.set(DelOutbound::getWeight, dto.getWeight());
+        updateWrapper.set(DelOutbound::getLength,dto.getLength());
+        updateWrapper.set(DelOutbound::getWidth,dto.getWeight());
+        updateWrapper.set(DelOutbound::getHeight,dto.getHeight());
+        updateWrapper.set(DelOutbound::getCustomCode,dto.getCustomCode());
+        updateWrapper.set(DelOutbound::getPackageWeightDeviation,dto.getPackageWeightDeviation());
+        updateWrapper.set(DelOutbound::getPackageConfirm,dto.getPackageConfirm());
+        updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
+        int upd = this.baseMapper.update(null, updateWrapper);
 
         if(upd > 0){
 
