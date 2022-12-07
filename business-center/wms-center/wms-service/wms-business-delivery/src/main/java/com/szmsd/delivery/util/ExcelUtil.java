@@ -3,20 +3,26 @@ package com.szmsd.delivery.util;
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
+import cn.hutool.core.io.IoUtil;
 import com.szmsd.bas.api.feign.BasFileFeignService;
 import com.szmsd.bas.domain.BasFile;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.mapper.DelBasFileMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.lang.reflect.Field;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -260,6 +266,50 @@ public class ExcelUtil {
                 }
             }
             rowNum++;
+        }
+    }
+
+    /**
+     * 下载模板
+     *
+     * @param response response
+     * @param filePath 文件存放路径，${server.tomcat.basedir}配置的目录和resources目录下
+     * @param fileName 文件名称
+     * @param ext      扩展名
+     */
+    public static void downloadTemplate(HttpServletResponse response, String filePath, String fileName, String ext) {
+        // 先去模板目录中获取模板
+        // 模板目录中没有模板再从项目中获取模板
+        String basedir = SpringUtils.getProperty("server.tomcat.basedir", "/u01/www/ck1/delivery");
+        File file = new File(basedir + "/" + filePath);
+        InputStream inputStream = null;
+        ServletOutputStream outputStream = null;
+        try {
+            if (file.exists()) {
+                inputStream = new FileInputStream(file);
+                response.setHeader("File-Source", "local");
+            } else {
+                Resource resource = new ClassPathResource(filePath);
+                inputStream = resource.getInputStream();
+                response.setHeader("File-Source", "resource");
+            }
+            outputStream = response.getOutputStream();
+            //response为HttpServletResponse对象
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            //Loading plan.xls是弹出下载对话框的文件名，不能为中文，中文请自行编码
+            String efn = URLEncoder.encode(fileName, "utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + efn + "." + ext);
+            IOUtils.copy(inputStream, outputStream);
+        } catch (FileNotFoundException e) {
+            log.error(e.getMessage(), e);
+            throw new CommonException("400", "文件不存在，" + e.getMessage());
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new CommonException("500", "文件流处理失败，" + e.getMessage());
+        } finally {
+            IoUtil.flush(outputStream);
+            IoUtil.close(outputStream);
+            IoUtil.close(inputStream);
         }
     }
 }
