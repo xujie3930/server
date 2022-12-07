@@ -33,6 +33,15 @@ public class ChargeImport extends BaseEntity {
     @ApiModelProperty(value = "实重")
     private BigDecimal weight;
 
+    @ApiModelProperty(value = "长")
+    private BigDecimal length;
+
+    @ApiModelProperty(value = "宽")
+    private BigDecimal width;
+
+    @ApiModelProperty(value = "高")
+    private BigDecimal height;
+
     @ApiModelProperty(value = "计费重")
     private BigDecimal calcWeight;
 
@@ -44,4 +53,10 @@ public class ChargeImport extends BaseEntity {
 
     @ApiModelProperty(value = "报价表编号")
     private String quotationNo;
+
+    @ApiModelProperty(value = "状态")
+    private String state;
+
+    @ApiModelProperty(value = "错误信息")
+    private String errorMsg;
 }

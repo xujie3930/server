@@ -14,4 +14,9 @@ public interface ChargeService {
      * @return
      */
     R importExcel(MultipartFile file);
+
+    /**
+     * 二次计费
+     */
+    R doSecondCharge();
 }
