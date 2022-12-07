@@ -41,7 +41,7 @@ public class ChargeReadExcelCmd extends BasicCommand<List<ChargeImport>> {
         List<ChargeExcelDto> chargeExcelDtos = excelReaderSheetBuilder.doReadSync();
 
         if (CollectionUtils.isEmpty(chargeExcelDtos)) {
-            throw new RuntimeException("导入的线下出库数据不能为空");
+            throw new RuntimeException("导入的二次计费数据不能为空");
         }
 
         List<ChargeImport> chargeImportList = ChargeImportConvert.INSTANCE.toChargeImportList(chargeExcelDtos);
