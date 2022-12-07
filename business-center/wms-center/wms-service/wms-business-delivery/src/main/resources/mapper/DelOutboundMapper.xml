@@ -344,4 +344,36 @@
     <update id="updateThridPartcount">
         update  del_outbound set thrid_part_count = thrid_part_count + 1 where id = #{id}
     </update>
+
+    <update id="updateDeloutByOrder">
+
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update del_outbound
+            <set>
+                <if test="item.length != null">
+                    length = #{item.length},
+                </if>
+                <if test="item.width != null">
+                    width = #{item.width},
+                </if>
+                <if test="item.height != null">
+                    height = #{item.height},
+                </if>
+                <if test="item.weight != null">
+                    weight = #{item.weight},
+                </if>
+                <if test="item.specifications != null and item.specifications != ''">
+                    specifications = #{item.specifications},
+                </if>
+                <if test="item.calcWeight != null">
+                    calc_weight = #{item.calcWeight},
+                </if>
+                <if test="item.calcWeightUnit != null">
+                    calc_weight_unit = #{item.calcWeightUnit},
+                </if>
+            </set>
+            where order_no = #{item.orderNo}
+        </foreach>
+
+    </update>
 </mapper>

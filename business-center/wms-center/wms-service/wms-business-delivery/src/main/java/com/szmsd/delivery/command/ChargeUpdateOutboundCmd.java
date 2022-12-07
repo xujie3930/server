@@ -50,6 +50,12 @@ public class ChargeUpdateOutboundCmd extends BasicCommand<List<String>> {
 
         DelOutboundMapper delOutboundMapper = SpringUtils.getBean(DelOutboundMapper.class);
 
+        int updBatch = delOutboundMapper.updateDeloutByOrder(delOutbounds);
+
+        if(updBatch == 0){
+            return null;
+        }
+
         List<String> orders = delOutbounds.stream().map(DelOutbound::getOrderNo).collect(Collectors.toList());
 
         return orders;
