@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.command.ChargeReadExcelCmd;
+import com.szmsd.delivery.command.ChargeUpdateOutboundCmd;
 import com.szmsd.delivery.domain.ChargeImport;
 import com.szmsd.delivery.enums.ChargeImportStateEnum;
 import com.szmsd.delivery.mapper.ChargeImportMapper;
@@ -40,7 +41,7 @@ public class ChargeServiceImpl extends ServiceImpl<ChargeImportMapper, ChargeImp
         List<ChargeImport> chargeImportList = this.selectChargeImport();
 
         //step 2. 更新出库单数据，尺寸、重量
-
+        List<String> orderNos = new ChargeUpdateOutboundCmd(chargeImportList).execute();
 
         //step 3. PRC 重新计费
 
