@@ -9,6 +9,7 @@ import com.szmsd.delivery.dto.UpdateWeightDelOutboundDto;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.event.DelOutUpdWeightEvent;
 import com.szmsd.delivery.event.EventUtil;
+import com.szmsd.delivery.mapper.DelOutboundMapper;
 import com.szmsd.delivery.service.IDelOutboundService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,14 +30,14 @@ public class OutboundUpdWeightCmd extends BasicCommand<Boolean> {
     @Override
     protected Boolean doExecute() throws Exception {
 
-        IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+        DelOutboundMapper delOutboundMapper = SpringUtils.getBean(DelOutboundMapper.class);
 
         String orderNo = dto.getOrderNo();
 
         LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
         queryWrapper.eq(DelOutbound::getSellerCode, dto.getCustomCode());
         queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
-        DelOutbound data = iDelOutboundService.getOne(queryWrapper);
+        DelOutbound data = delOutboundMapper.selectOne(queryWrapper);
         if(data == null){
             throw new CommonException("400", "该客户下订单不存在");
         }
@@ -52,15 +53,15 @@ public class OutboundUpdWeightCmd extends BasicCommand<Boolean> {
         }
 
         org.springframework.beans.BeanUtils.copyProperties(dto, data);
-        boolean upd = iDelOutboundService.updateById(data);
+        int upd = delOutboundMapper.updateById(data);
 
-        if(upd){
+        if(upd > 0){
 
             log.info("开始DelOutUpdWeightEvent：{}",orderNo);
             DelOutUpdWeightEvent delOutUpdWeightEvent = new DelOutUpdWeightEvent(orderNo);
             EventUtil.publishEvent(delOutUpdWeightEvent);
         }
 
-        return upd;
+        return upd > 0;
     }
 }

@@ -42,6 +42,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.utils.DateUtils;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
@@ -51,7 +52,9 @@ import com.szmsd.delivery.config.AsyncThreadObject;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.*;
+import com.szmsd.delivery.event.DelOutUpdWeightEvent;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
+import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.mapper.*;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.*;
@@ -2844,9 +2847,39 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional(rollbackFor = Exception.class)
     public boolean updateWeightDelOutbound(UpdateWeightDelOutboundDto dto) {
 
-        boolean upd = new OutboundUpdWeightCmd(dto).execute();
+        //boolean upd = new OutboundUpdWeightCmd(dto).execute();
 
-        return upd;
+        String orderNo = dto.getOrderNo();
+
+        LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
+        queryWrapper.eq(DelOutbound::getSellerCode, dto.getCustomCode());
+        queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
+        DelOutbound data = baseMapper.selectOne(queryWrapper);
+        if(data == null){
+            throw new CommonException("400", "该客户下订单不存在");
+        }
+
+        if (
+                DelOutboundStateEnum.PROCESSING.getCode().equals(data.getState())
+                        || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(data.getState())
+                        || DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(data.getState())
+                        || DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(data.getState())
+                        || DelOutboundStateEnum.COMPLETED.getCode().equals(data.getState())
+        ) {
+            throw new CommonException("400", "单据不能修改");
+        }
+
+        org.springframework.beans.BeanUtils.copyProperties(dto, data);
+        int upd = baseMapper.updateById(data);
+
+        if(upd > 0){
+
+            log.info("开始DelOutUpdWeightEvent：{}",orderNo);
+            DelOutUpdWeightEvent delOutUpdWeightEvent = new DelOutUpdWeightEvent(orderNo);
+            EventUtil.publishEvent(delOutUpdWeightEvent);
+        }
+
+        return upd > 0;
     }
 
     @Override
