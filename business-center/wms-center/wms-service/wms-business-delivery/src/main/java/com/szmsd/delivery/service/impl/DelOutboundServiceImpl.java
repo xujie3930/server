@@ -2786,6 +2786,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     updatedata.setSpecifications(specifications);
                     updatedata.setThridPartStatus(1);
                     updatedata.setCalcWeight(calcWeight);
+                    updatedata.setCalcWeightUnit("G");
 
                     updateData.add(updatedata);
                 }
