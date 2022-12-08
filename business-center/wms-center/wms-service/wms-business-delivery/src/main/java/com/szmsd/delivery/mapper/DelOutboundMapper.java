@@ -95,4 +95,10 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     List<DelOutbound> selectByState(@Param("state") String state, @Param("pageNumber") int pageNumber,  @Param("pageSize")Integer pageSize);
 
     int updateThridPartcount(Long id);
+
+    int updateDeloutByOrder(List<DelOutbound> delOutbounds);
+
+    List<DelOutbound> selectOmsWmsLogerror(@Param("createTime") String createTime);
+
+    List<DelOutbound>  selectOmsWmsLogsuccess(@Param("createTime") String createTime);
 }

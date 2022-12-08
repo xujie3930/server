@@ -33,6 +33,13 @@ public class RefundReviewDTO {
     @ApiModelProperty(value = "审核的结果")
     private RefundStatusEnum status;
 
+    @ApiModelProperty(value = "外部传入的登录人信息")
+    private String userId;
+
+    private String sellerCode;
+
+    private String userName;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

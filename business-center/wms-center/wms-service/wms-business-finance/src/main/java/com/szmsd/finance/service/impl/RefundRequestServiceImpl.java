@@ -95,9 +95,31 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         return this.insertBatchRefundRequest(refundRequestList);
     }
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int insertBatchRefundRequest(List<RefundRequestDTO> addList) {
+        List<String> strings = remoteApi.genNo(addList.size());
+        AtomicInteger noLine = new AtomicInteger(0);
+        List<FssRefundRequest> collect = addList.stream().map(x -> {
+            FssRefundRequest fssRefundRequest = new FssRefundRequest();
+            BeanUtils.copyProperties(x, fssRefundRequest);
+            fssRefundRequest.setAuditStatus(RefundStatusEnum.BRING_INTO_COURT.getStatus())
+                    .setProcessNo(strings.get(noLine.getAndIncrement()));
+            return fssRefundRequest;
+        }).collect(Collectors.toList());
+
+
+        return this.saveBatch(collect) ? addList.size() : 0;
+    }
+
+
+
+
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public int insertBatchRefundRequestimport(List<RefundRequestDTO> addList) {
         List<String> strings = remoteApi.genNo(addList.size());
         AtomicInteger noLine = new AtomicInteger(0);
         List<FssRefundRequest> collect = addList.stream().map(x -> {
@@ -163,7 +185,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                     String errorMsg = "";
                     try {
                             handleInsertData(refundRequestDTOS, true);
-                        this.insertBatchRefundRequest(refundRequestDTOS);
+                        this.insertBatchRefundRequestimport(refundRequestDTOS);
                     } catch (Exception e) {
                         e.printStackTrace();
                         errorMsg = e.getMessage();
