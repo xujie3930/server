@@ -334,7 +334,86 @@
 
         SELECT * from del_outbound
         where state = #{state}
+        and thrid_part_status = 0
+        and thrid_part_count <![CDATA[ <= ]]> 10
+        and prc_terminal_carrier = 'CK1'
         limit #{pageNumber},#{pageSize}
 
     </select>
+    <select id="selectOmsWmsLogerror" resultType="com.szmsd.delivery.domain.DelOutbound" parameterType="java.lang.String">
+
+        SELECT
+        exception_message_wms,
+        state,
+        order_no,
+        seller_code,
+        custom_code,
+        order_type
+        FROM
+        del_outbound
+        WHERE
+        state = 'DELIVERED'
+        AND exception_message_wms IS NOT NULL
+        AND exception_message_wms != ''
+        AND order_type IN('Normal','SelfPick','Batch','NewSku','SplitSku','Destroy')
+        AND create_time &lt;= #{createTime}
+        ORDER BY
+        create_time DESC
+    </select>
+    <select id="selectOmsWmsLogsuccess" resultType="com.szmsd.delivery.domain.DelOutbound">
+        SELECT
+        a.order_type,
+        a.order_no,
+        a.custom_code,
+        a.prc_interface_product_code,
+        a.create_time,
+        b.country
+        FROM
+        del_outbound a
+        LEFT JOIN del_outbound_address b on b.order_no=a.order_no
+        WHERE
+        state = 'DELIVERED'
+        AND (a.exception_message_wms IS NULL OR a.exception_message_wms = '' )
+        AND a.order_type IN ('Normal', 'SelfPick', 'Batch', 'NewSku', 'SplitSku', 'Destroy')
+        AND a.create_time  &lt;= #{createTime}
+
+        ORDER BY
+        a.create_time DESC
+    </select>
+
+    <update id="updateThridPartcount">
+        update  del_outbound set thrid_part_count = thrid_part_count + 1 where id = #{id}
+    </update>
+
+    <update id="updateDeloutByOrder">
+
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update del_outbound
+            <set>
+                <if test="item.length != null">
+                    length = #{item.length},
+                </if>
+                <if test="item.width != null">
+                    width = #{item.width},
+                </if>
+                <if test="item.height != null">
+                    height = #{item.height},
+                </if>
+                <if test="item.weight != null">
+                    weight = #{item.weight},
+                </if>
+                <if test="item.specifications != null and item.specifications != ''">
+                    specifications = #{item.specifications},
+                </if>
+                <if test="item.calcWeight != null">
+                    calc_weight = #{item.calcWeight},
+                </if>
+                <if test="item.calcWeightUnit != null">
+                    calc_weight_unit = #{item.calcWeightUnit},
+                </if>
+            </set>
+            where order_no = #{item.orderNo}
+        </foreach>
+
+    </update>
 </mapper>

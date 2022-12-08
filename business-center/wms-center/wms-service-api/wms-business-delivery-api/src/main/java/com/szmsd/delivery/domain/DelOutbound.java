@@ -335,6 +335,9 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "第三方更新状态")
     private Integer thridPartStatus;
 
+    @ApiModelProperty(value = "字数")
+    private Integer thridPartCount;
+
     @ApiModelProperty(value = "供应商参考单号")
     private String referenceNumber;
 
@@ -343,4 +346,17 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "prc返回的terminalCarrier")
     private String prcTerminalCarrier;
+
+    @ApiModelProperty(value = "更新重量状态")
+    private String nuclearWeightState;
+
+    @ApiModelProperty(value = "时间")
+    private Date nuclearWeightTime;
+
+    @ApiModelProperty(value = "")
+    private String thridPardState;
+
+    @ApiModelProperty(value = "国家")
+    @TableField(exist = false)
+    private String country;
 }
