@@ -3,8 +3,12 @@ package com.szmsd.delivery.service.impl;
 import com.szmsd.bas.api.domain.BasEmployees;
 import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.bas.domain.BasSeller;
+import com.szmsd.bas.dto.EmailDto;
+import com.szmsd.bas.dto.EmailObjectDto;
+import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto;
@@ -170,12 +174,35 @@ public class DelOutboundEmailServiceImpl implements DelOutboundEmailService {
            delOutboundEmailsCode.addAll(delOutbounderrorEmailMap.keySet());
            delOutboundEmailsCode.addAll(delOutboundsuccessEmailMap.keySet());
 
+           for (String customCode:delOutboundEmailsCode){
+               String email=null;
+                List<DelOutbounderrorEmail> delOutbounderrorEmailLists=delOutbounderrorEmailMap.get(customCode);
+               List<DelOutboundsuccessEmail> delOutboundsuccessEmailLists=delOutboundsuccessEmailMap.get(customCode);
+
+
+               if (delOutbounderrorEmailLists.size()>0) {
+                   email=delOutbounderrorEmailLists.get(0).getEmail();
+               }
+               if (delOutboundsuccessEmailLists.size()>0){
+                   email=delOutbounderrorEmailLists.get(0).getEmail();
+               }
+               if (email!=null){
+                   //邮件发送
+                   ExcleDelOutboundBatchUpdateTracking(delOutbounderrorEmailLists,delOutboundsuccessEmailLists,email,customCode);
+               }
+
+
+
+
+           }
+
         System.out.println(delOutboundEmailsCode);
 
 
 
 
     }
+
 
     private Map<String, List<DelOutboundsuccessEmail>> delOutboundsuccessEmailMap(List<DelOutbound> successDekOuList) {
         //查询用户，客户关系表
@@ -259,6 +286,39 @@ public class DelOutboundEmailServiceImpl implements DelOutboundEmailService {
 
         //将组合的数据 分解成Map<List> (邮箱为key,组合这个员工下的所有信息)
          return  delOutboundsuccessEmailList.stream().collect(Collectors.groupingBy(DelOutboundsuccessEmail::getCustomCode));
+
+    }
+
+
+    public void ExcleDelOutboundBatchUpdateTracking( List<DelOutbounderrorEmail> delOutbounderrorEmailLists,List<DelOutboundsuccessEmail> delOutboundsuccessEmailLists,String email,String customCode){
+        logger.info("更新挂号参数delOutbounderrorEmailLists：{}",delOutbounderrorEmailLists);
+        logger.info("更新挂号参数delOutboundsuccessEmailLists：{}",delOutboundsuccessEmailLists);
+        logger.info("推送邮箱email：{}",email);
+
+       Date dates =getStartTime();
+       SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
+        EmailDto emailDto=new EmailDto();
+        //功能模块
+        emailDto.setSubject("【发货异常】"+customCode+simpleDateFormat.format(dates));
+        //邮箱接收人
+        emailDto.setTo(email);
+        emailDto.setText("各位好，客户："+customCode+"昨天订单处理异常，请查收附件");
+
+//        List<EmailObjectDto> emailObjectDtoList= BeanMapperUtil.mapList(list, EmailObjectDto.class);
+//        emailDto.setList(emailObjectDtoList);
+//        if(customCode!=null&&!customCode.equals("")){
+//           // R r= emailFeingService.sendEmail(emailDto);
+//            if (r.getCode()== HttpStatus.SUCCESS){
+//
+//            }
+//        }
+//        logger.info("更新挂号参数2：{}",list);
+//        list.forEach(x->{
+//            int u = super.baseMapper.updateTrackingNo(x);
+//
+//            //manualTrackingYees(x.getOrderNo());
+//
+//        });
 
     }
 
