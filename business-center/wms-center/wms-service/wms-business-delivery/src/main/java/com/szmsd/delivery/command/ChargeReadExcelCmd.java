@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.convert.ChargeImportConvert;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ChargeReadExcelCmd extends BasicCommand<List<ChargeImport>> {
 
@@ -54,6 +56,8 @@ public class ChargeReadExcelCmd extends BasicCommand<List<ChargeImport>> {
             throw new RuntimeException("导入的二次计费数据不能为空");
         }
 
+        //List<String> orderNos = chargeExcelDtos.stream().map(ChargeExcelDto::getOrderNo).collect(Collectors.toList());
+
         List<ChargeImport> chargeImportList = ChargeImportConvert.INSTANCE.toChargeImportList(chargeExcelDtos);
 
         String userName = SecurityUtils.getUsername();
@@ -62,6 +66,11 @@ public class ChargeReadExcelCmd extends BasicCommand<List<ChargeImport>> {
             String specifications = chargeImport.getSpecifications();
             if(StringUtils.isNotEmpty(specifications)){
                 String s[] = specifications.split("\\*");
+
+                if(s.length < 3){
+                    throw new RuntimeException(chargeImport.getOrderNo()+"单号，尺寸规则异常");
+                }
+
                 chargeImport.setLength(toDecimal(s[0]));
                 chargeImport.setWidth(toDecimal(s[1]));
                 chargeImport.setHeight(toDecimal(s[2]));

@@ -23,7 +23,7 @@ public interface AccountSerialBillFeignService {
     R<TableDataInfo<AccountSerialBill>> listPage(@RequestBody AccountSerialBillDTO dto);
 
     @ApiOperation(value = "流水账单 - 根据订单查询PRC费用")
-    @PostMapping("/serialBill/selectByOrder")
+    @PostMapping("/serialBill/selectAccountPrcSerialBill")
     R<List<AccountSerialBill>> selectAccountPrcSerialBill(@RequestBody AccountOrderQueryDTO accountOrderQueryDTO);
 
 }

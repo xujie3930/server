@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -39,17 +40,24 @@ public class ChargeServiceImpl extends ServiceImpl<ChargeImportMapper, ChargeImp
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public R doSecondCharge() {
 
         //step 1. 获取导入数据
         List<ChargeImport> chargeImportList = this.selectChargeImport();
 
+        if(CollectionUtils.isEmpty(chargeImportList)){
+            return R.failed("无数据");
+        }
+
+        log.info("step 1.获取导入数据");
+
         //step 2. 更新出库单数据，尺寸、重量
         List<String> orderNos = new ChargeUpdateOutboundCmd(chargeImportList).execute();
+        log.info("step 2.更新出库单数据，尺寸、重量");
 
         //step 3. PRC 重新计费
         ChargePricingResultDto chargePricingResultDto = new ChargePricingCmd(orderNos).execute();
+        log.info("step 3.PRC 重新计费");
 
         List<ChargePricingOrderMsgDto> chargePricingOrderMsgDtoList = chargePricingResultDto.getSuccessOrders();
         List<String> orderNoPrcs = chargePricingOrderMsgDtoList.stream().map(ChargePricingOrderMsgDto::getOrderNo).collect(Collectors.toList());
@@ -58,17 +66,24 @@ public class ChargeServiceImpl extends ServiceImpl<ChargeImportMapper, ChargeImp
 
             //step 4. 旧数据退费
             new ChargeRefundCmd(orderNoPrcs).execute();
+            log.info("step 4. 旧数据退费");
             //step 5. 重新扣费
             List<String> completedOrderList = new ChargefeeDeductionCmd(orderNoPrcs).execute();
+            log.info("step 3. 重新扣费{}", JSON.toJSONString(completedOrderList));
 
             //step 6.更新已经完成
             this.chargeComplete(completedOrderList);
+            log.info("step 3. 更新已经完成");
         }
 
         return R.ok();
     }
 
     private void chargeComplete(List<String> completedOrderList) {
+
+        if(CollectionUtils.isEmpty(completedOrderList)){
+            return;
+        }
 
         ChargeImportMapper chargeImportMapper = SpringUtils.getBean(ChargeImportMapper.class);
 

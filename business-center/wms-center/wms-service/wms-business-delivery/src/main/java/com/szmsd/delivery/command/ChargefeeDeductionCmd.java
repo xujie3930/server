@@ -45,7 +45,7 @@ public class ChargefeeDeductionCmd extends BasicCommand<List<String>> {
 
         List<String> successOrderNos = new ArrayList<>();
 
-        if(!CollectionUtils.isNotEmpty(orderNos)){
+        if(CollectionUtils.isNotEmpty(orderNos)){
 
             IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);

@@ -67,8 +67,9 @@ public class ChargePricingCmd extends BasicCommand<ChargePricingResultDto> {
             ChargePricingOrderMsgDto chargePricingOrderMsgDto = new ChargePricingOrderMsgDto();
 
             DelOutboundWrapperContext delOutboundWrapperContext = delOutboundBringVerifyService.initContext(delOutbound);
+            stopWatch.start();
             ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, PricingEnum.PACKAGE);
-
+            stopWatch.stop();
             logger.info(">>>>>[ChargePricingCmd{}]-Pricing计算返回结果：耗时{}, 内容:{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis(),
                     JSONObject.toJSONString(responseObject));
             if (null == responseObject) {
@@ -191,7 +192,7 @@ public class ChargePricingCmd extends BasicCommand<ChargePricingResultDto> {
             updateDelOutbound.setPrcTerminalCarrier(delOutbound.getPrcTerminalCarrier());
             updateDelOutbound.setAmazonReferenceId(data.getAmazonLogisticsRouteId());
 
-            iDelOutboundService.updateByIdTransactional(updateDelOutbound);
+            iDelOutboundService.updateById(updateDelOutbound);
 
             pricingOrderMsgDto.setOrderNo(delOutbound.getOrderNo());
             pricingOrderMsgDto.setState(ChargeImportStateEnum.PRC_ING.getCode());
