@@ -907,7 +907,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         }
         setCurrencyName(dto);
         dto.setPayType(BillEnum.PayType.INCOME);
-        dto.setPayMethod(BillEnum.PayMethod.OFFLINE_INCOME);
+        if(dto.getPayMethod() == null) {
+            dto.setPayMethod(BillEnum.PayMethod.OFFLINE_INCOME);
+        }
         AbstractPayFactory abstractPayFactory = payFactoryBuilder.build(dto.getPayType());
         Boolean flag = abstractPayFactory.updateBalance(dto);
         if (Objects.isNull(flag)) return R.ok();
