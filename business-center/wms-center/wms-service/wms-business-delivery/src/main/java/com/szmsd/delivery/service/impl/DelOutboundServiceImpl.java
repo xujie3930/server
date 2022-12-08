@@ -50,7 +50,9 @@ import com.szmsd.delivery.config.AsyncThreadObject;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.*;
+import com.szmsd.delivery.event.DelOutUpdWeightEvent;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
+import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.mapper.*;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.*;
@@ -947,6 +949,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             //同步更新计泡拦截重量
             delOutbound.setForecastWeight(delOutbound.getWeight());
+
+            delOutbound.setThridPartStatus(0);
+            delOutbound.setThridPartCount(0);
             
             // 保存出库单
             int insert = baseMapper.insert(delOutbound);
@@ -2282,7 +2287,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         if (!responseVO.getSuccess()) {
 
-            if("有部分单号不存在".equals(responseVO.getMessage())){
+            String msg = responseVO.getMessage().trim();
+
+            if("有部分单号不存在".equals(msg)){
                 this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
                 // 修改单据状态为【仓库取消】
                 LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
@@ -2290,7 +2297,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 updateWrapper.in(DelOutbound::getOrderNo, orderNos);
                 return this.baseMapper.update(null, updateWrapper);
             }else{
-                throw new CommonException("400", Utils.defaultValue(responseVO.getMessage(), "取消出库单失败2"));
+                throw new CommonException("400", Utils.defaultValue(msg, "取消出库单失败2"));
             }
         }
         // 修改单据状态为【仓库取消中】
@@ -2705,41 +2712,52 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     public void doDirectExpressOrders() {
 
         Integer totalRecord = baseMapper.selectCount(Wrappers.<DelOutbound>query().lambda()
-                        .eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode()));
+                        .eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode())
+                .eq(DelOutbound::getThridPartStatus,0)
+                .lt(DelOutbound::getThridPartCount,10)
+                .eq(DelOutbound::getPrcTerminalCarrier,"CK1")
+        );
 
         if(totalRecord == 0){
             return ;
         }
 
-        Integer pageSize = 500;
+        logger.info("返回条数:{}",totalRecord);
+
+        Integer pageSize = 5000;
 
         Integer totalPage = (totalRecord + pageSize -1) / pageSize;
 
         for(int i= 0;i<totalPage;i++) {
 
-
             List<DelOutbound> delOutbounds = baseMapper.selectByState(DelOutboundStateEnum.DELIVERED.getCode(), i, pageSize);
-
-
-            //R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder("CKCNFGZ622101800000018");
-
             List<DelOutbound> updateData = new ArrayList<>();
+            List<DelOutbound> updateDataAsy = new ArrayList<>();
 
             for (DelOutbound delOutbound : delOutbounds) {
 
                 R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder(delOutbound.getOrderNo());
 
+                logger.info("订单号DirectExpressOrder1：{},返回数据：{}",delOutbound.getOrderNo(),JSON.toJSONString(directExpressOrderApiDTOR));
+
+                baseMapper.updateThridPartcount(delOutbound.getId());
+
                 if (directExpressOrderApiDTOR.getCode() != 200) {
                     continue;
                 }
-
                 DirectExpressOrderApiDTO directExpressOrderApiDTO = directExpressOrderApiDTOR.getData();
 
                 String handleStatus = directExpressOrderApiDTO.getHandleStatus();
 
+                if(StringUtils.isEmpty(handleStatus)){
+                    continue;
+                }
+
+                logger.info("订单号DirectExpressOrder2：{},返回数据：{}",delOutbound.getOrderNo(),JSON.toJSONString(directExpressOrderApiDTO));
+
                 if (handleStatus.equals(DelOutboundOperationTypeEnum.SHIPPED.getCode())) {
 
-                    this.bringThridPartyAsync(delOutbound);
+                    updateDataAsy.add(delOutbound);
 
                     DelOutbound updatedata = new DelOutbound();
                     updatedata.setId(delOutbound.getId());
@@ -2748,11 +2766,16 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     Double width = directExpressOrderApiDTO.getPacking().getWidth().doubleValue();
                     Double height = directExpressOrderApiDTO.getPacking().getHeight().doubleValue();
 
+                    //实际重
                     Double weight = null;
                     Integer w = directExpressOrderApiDTO.getWeight();
                     if (w != null) {
                         weight = Double.parseDouble(w.toString());
                     }
+
+                    //计费重
+                    Integer chargedWeight = directExpressOrderApiDTO.getChargedWeight();
+                    BigDecimal calcWeight = new BigDecimal(chargedWeight);
 
                     String specifications = length + "*" + width + "*" + height;
 
@@ -2762,15 +2785,30 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     updatedata.setWeight(weight);
                     updatedata.setSpecifications(specifications);
                     updatedata.setThridPartStatus(1);
+                    updatedata.setCalcWeight(calcWeight);
+                    updatedata.setCalcWeightUnit("G");
 
                     updateData.add(updatedata);
                 }
             }
 
             if (CollectionUtils.isNotEmpty(updateData)) {
-                super.updateBatchById(updateData);
+
+                logger.info("DirectExpressOrder 开始更新：{}",JSON.toJSONString(updateData));
+                boolean flag = super.updateBatchById(updateData);
+                if(flag){
+                    logger.info("DirectExpressOrder 更新成功：");
+                }
             }
 
+            if(CollectionUtils.isNotEmpty(updateDataAsy)) {
+                for(DelOutbound delOutbound : updateDataAsy){
+                    Long s = System.currentTimeMillis();
+                    this.bringThridPartyAsync(delOutbound);
+                    Long e = System.currentTimeMillis();
+                    logger.info("bringThridPartyAsync：{},执行时间：{}", delOutbound.getOrderNo(), e - s);
+                }
+            }
         }
 
     }
@@ -2804,6 +2842,89 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
 
         return dataList;
+    }
+
+    @Override
+    public boolean updateWeightDelOutbound(UpdateWeightDelOutboundDto dto) {
+
+        //boolean upd = new OutboundUpdWeightCmd(dto).execute();
+
+        String orderNo = dto.getOrderNo();
+
+        LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
+        queryWrapper.eq(DelOutbound::getSellerCode, dto.getCustomCode());
+        queryWrapper.eq(DelOutbound::getOrderNo, orderNo);
+        DelOutbound data = baseMapper.selectOne(queryWrapper);
+        if(data == null){
+            throw new CommonException("400", "该客户下订单不存在");
+        }
+
+        if (
+                DelOutboundStateEnum.PROCESSING.getCode().equals(data.getState())
+                        || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(data.getState())
+                        || DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(data.getState())
+                        || DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(data.getState())
+                        || DelOutboundStateEnum.COMPLETED.getCode().equals(data.getState())
+        ) {
+            throw new CommonException("400", "单据不能修改");
+        }
+
+        //org.springframework.beans.BeanUtils.copyProperties(dto, data);
+        //int upd = baseMapper.updateById(data);
+
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        updateWrapper.set(DelOutbound::getWeight, dto.getWeight());
+        updateWrapper.set(DelOutbound::getLength,dto.getLength());
+        updateWrapper.set(DelOutbound::getWidth,dto.getWeight());
+        updateWrapper.set(DelOutbound::getHeight,dto.getHeight());
+        updateWrapper.set(DelOutbound::getCustomCode,dto.getCustomCode());
+        updateWrapper.set(DelOutbound::getPackageWeightDeviation,dto.getPackageWeightDeviation());
+        updateWrapper.set(DelOutbound::getPackageConfirm,dto.getPackageConfirm());
+        updateWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
+        int upd = this.baseMapper.update(null, updateWrapper);
+
+        if(upd > 0){
+
+            log.info("开始DelOutUpdWeightEvent：{}",orderNo);
+            DelOutUpdWeightEvent delOutUpdWeightEvent = new DelOutUpdWeightEvent(orderNo);
+            EventUtil.publishEvent(delOutUpdWeightEvent);
+        }
+
+        return upd > 0;
+    }
+
+    @Override
+    public void nuclearWeight(DelOutbound delOutbound) {
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
+        stopWatch.stop();
+        logger.info(">>>>>[nuclearWeight{}]初始化出库对象 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
+        NuclearWeightEnum currentState;
+        String nuclearWeightState = delOutbound.getNuclearWeightState();
+        if (org.apache.commons.lang3.StringUtils.isEmpty(nuclearWeightState)) {
+            currentState = NuclearWeightEnum.BEGIN;
+        } else {
+            currentState = NuclearWeightEnum.get(nuclearWeightState);
+            // 兼容
+            if (null == currentState) {
+                currentState = NuclearWeightEnum.BEGIN;
+            }
+        }
+        ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, NuclearWeightEnum.END, NuclearWeightEnum.BEGIN);
+        try {
+            applicationContainer.action();
+        } catch (CommonException e) {
+            // 回滚操作
+            applicationContainer.setEndState(NuclearWeightEnum.BEGIN);
+            applicationContainer.rollback();
+            // 异步屏蔽异常，将异常打印到日志中
+            // 异步错误在单据里面会显示错误信息
+            this.logger.error("(4)nuclearWeight操作失败，出库单号：" + delOutbound.getOrderNo() + "，错误原因：" + e.getMessage(), e);
+        } finally {
+        }
     }
 
     public void bringThridPartyAsync(DelOutbound delOutbound) {
@@ -2841,10 +2962,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         stopWatch.start();
         DelOutboundWrapperContext context = this.delOutboundBringVerifyService.initContext(delOutbound);
         stopWatch.stop();
-        logger.info(">>>>>[创建出库单{}]初始化出库对象 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+        logger.info(">>>>>[bringThridPartyAsync创建出库单{}]初始化出库对象 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
 
         ThridPartyEnum currentState;
-        String bringVerifyState = delOutbound.getBringVerifyState();
+        String bringVerifyState = delOutbound.getThridPardState();
         if (org.apache.commons.lang3.StringUtils.isEmpty(bringVerifyState)) {
             currentState = ThridPartyEnum.BEGIN;
         } else {
@@ -2854,7 +2975,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 currentState = ThridPartyEnum.BEGIN;
             }
         }
-        logger.info("(2)提审异步操作开始，出库单号：{}", delOutbound.getOrderNo());
+        logger.info("(2)bringThridPartyAsync提审异步操作开始，出库单号：{}", delOutbound.getOrderNo());
         ApplicationContainer applicationContainer = new ApplicationContainer(context, currentState, ThridPartyEnum.END, ThridPartyEnum.BEGIN);
         try {
             applicationContainer.action();
@@ -2864,14 +2985,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPPED.getCode());
             //}
 
-            logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
+            logger.info("(3)bringThridPartyAsync提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
         } catch (CommonException e) {
             // 回滚操作
             applicationContainer.setEndState(ThridPartyEnum.BEGIN);
             applicationContainer.rollback();
             // 异步屏蔽异常，将异常打印到日志中
             // 异步错误在单据里面会显示错误信息
-            this.logger.error("(4)提审异步操作失败，出库单号：" + delOutbound.getOrderNo() + "，错误原因：" + e.getMessage(), e);
+            this.logger.error("(4)bringThridPartyAsync提审异步操作失败，出库单号：" + delOutbound.getOrderNo() + "，错误原因：" + e.getMessage(), e);
         } finally {
             if (isAsyncThread) {
                 asyncThreadObject.unloadTid();

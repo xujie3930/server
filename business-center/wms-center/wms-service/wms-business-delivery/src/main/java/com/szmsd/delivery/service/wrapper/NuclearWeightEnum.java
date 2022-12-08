@@ -10,18 +10,20 @@ import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.domain.DelOutboundThirdParty;
+import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
 import com.szmsd.delivery.enums.DelOutboundConstant;
 import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
-import com.szmsd.delivery.enums.DelOutboundStateEnum;
+import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.IDelOutboundThirdPartyService;
+import com.szmsd.delivery.util.BigDecimalUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.dto.*;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.util.StopWatch;
 
 import java.math.BigDecimal;
@@ -29,25 +31,33 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
+public enum NuclearWeightEnum implements ApplicationState, ApplicationRegister{
 
     /**
      * 开始
      */
     BEGIN,
 
-    // #1 PRC 计费        - 无回滚
+    // #1 PRC 计费        -无回滚
     PRC_PRICING,
 
-    // #2 冻结物流费用    - 有回滚
+    // 2. 解冻操作费       -解冻
+    THAW_BALANCE,
+
+    // #2 冻结物流费用    -有回滚
     FREEZE_BALANCE,
 
+    // #5 创建承运商物流订单 -有回滚
+    SHIPMENT_ORDER,
+
+    /**
+     * 结束
+     */
     END,
     ;
 
-
-    public static ThridPartyEnum get(String name) {
-        for (ThridPartyEnum anEnum : ThridPartyEnum.values()) {
+    public static NuclearWeightEnum get(String name) {
+        for (NuclearWeightEnum anEnum : NuclearWeightEnum.values()) {
             if (anEnum.name().equals(name)) {
                 return anEnum;
             }
@@ -57,15 +67,70 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
 
     @Override
     public Map<String, ApplicationHandle> register() {
+
         Map<String, ApplicationHandle> map = new HashMap<>();
-        map.put(BEGIN.name(), new BeginHandle());
-        map.put(PRC_PRICING.name(), new PrcPricingHandle());
-        map.put(FREEZE_BALANCE.name(), new FreezeBalanceHandle());
-        map.put(END.name(), new EndHandle());
+        map.put(BEGIN.name(), new NuclearWeightEnum.BeginHandle());
+        map.put(PRC_PRICING.name(), new NuclearWeightEnum.PrcPricingHandle());
+        map.put(THAW_BALANCE.name(),new NuclearWeightEnum.ThawBalanceHandle());
+        map.put(FREEZE_BALANCE.name(), new NuclearWeightEnum.FreezeBalanceHandle());
+        map.put(SHIPMENT_ORDER.name(), new NuclearWeightEnum.ShipmentOrderHandle());
+        map.put(END.name(), new NuclearWeightEnum.EndHandle());
         return map;
     }
 
-    static class BeginHandle extends CommonApplicationHandle {
+    static abstract class CommonApplicationHandle extends ApplicationHandle.AbstractApplicationHandle {
+
+        @Override
+        public boolean condition(ApplicationContext context, ApplicationState currentState) {
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOrderTypeEnum orderTypeEnum = DelOutboundOrderTypeEnum.get(delOutbound.getOrderType());
+            if (null == orderTypeEnum) {
+                throw new CommonException("400", MessageUtil.to("不存在的类型[" + delOutbound.getOrderType() + "]", "Non-existent type ["+delOutbound. getOrderType()+"]"));
+            }
+            return otherCondition(context, currentState);
+        }
+
+        /**
+         * 子级处理条件
+         *
+         * @param context      context
+         * @param currentState currentState
+         * @return boolean
+         */
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            return true;
+        }
+
+        /**
+         * 批量出库-自提出库
+         *
+         * @param context      context
+         * @param currentState currentState
+         * @return boolean
+         */
+        @SuppressWarnings({"all"})
+        public boolean batchSelfPick(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            if (context instanceof DelOutboundWrapperContext) {
+                DelOutbound delOutbound = ((DelOutboundWrapperContext) context).getDelOutbound();
+                String orderType = StringUtils.nvl(delOutbound.getOrderType(), "");
+                String shipmentChannel = StringUtils.nvl(delOutbound.getShipmentChannel(), "");
+                if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) && "SelfPick".equals(shipmentChannel)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
+
+
+        }
+    }
+
+    static class BeginHandle extends NuclearWeightEnum.CommonApplicationHandle {
 
         @Override
         public ApplicationState preState() {
@@ -88,7 +153,7 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
         }
     }
 
-    static class PrcPricingHandle extends CommonApplicationHandle {
+    static class PrcPricingHandle extends NuclearWeightEnum.CommonApplicationHandle {
 
         @Override
         public ApplicationState preState() {
@@ -113,12 +178,12 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
             IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            logger.info(">>>>>[ThridPartyEnum创建出库单{}]-开始执行Pricing", delOutbound.getOrderNo());
+            logger.info(">>>>>[创建出库单{}]-开始执行Pricing", delOutbound.getOrderNo());
 
             stopWatch.start();
             ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, PricingEnum.PACKAGE);
             stopWatch.stop();
-            logger.info(">>>>>[ThridPartyEnum创建出库单{}]-Pricing计算返回结果：耗时{}, 内容:{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis(),
+            logger.info(">>>>>[创建出库单{}]-Pricing计算返回结果：耗时{}, 内容:{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis(),
                     JSONObject.toJSONString(responseObject));
             if (null == responseObject) {
                 // 返回值是空的
@@ -135,6 +200,11 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
             ChargeWrapper chargeWrapper = responseObject.getObject();
             ShipmentChargeInfo data = chargeWrapper.getData();
             PricingPackageInfo packageInfo = data.getPackageInfo();
+
+
+            delOutbound.setPrcInterfaceProductCode(data.getProductCode());
+            delOutbound.setPrcTerminalCarrier(data.getTerminalCarrier());
+
             // 挂号服务
             delOutbound.setShipmentService(data.getLogisticsRouteId());
             // 物流商code
@@ -188,7 +258,7 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
             stopWatch.start();
             delOutboundChargeService.saveCharges(delOutboundCharges);
             stopWatch.stop();
-            logger.info(">>>>>[ThridPartyEnum创建出库单{}]-Pricing保存出库单费用信息：耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
+            logger.info(">>>>>[创建出库单{}]-Pricing保存出库单费用信息：耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
             // 更新值
             delOutbound.setAmount(totalAmount);
             delOutbound.setCurrencyCode(totalCurrencyCode);
@@ -196,14 +266,22 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
             //分组计算货币金额
             Map<String, BigDecimal> currencyMap = new HashMap<String, BigDecimal>();
             for (DelOutboundCharge charge: delOutboundCharges){
-                if(currencyMap.containsKey(charge.getCurrencyCode())){
-                    currencyMap.put(charge.getCurrencyCode(), currencyMap.get(charge.getCurrencyCode()).add(charge.getAmount()));
+
+                String currencyCode = charge.getCurrencyCode();
+                BigDecimal amount = BigDecimalUtil.setScale(charge.getAmount(),3);
+
+                if(currencyMap.containsKey(currencyCode)){
+                    BigDecimal chargeamount = currencyMap.get(currencyCode).add(amount);
+                    currencyMap.put(currencyCode, chargeamount);
                 }else{
-                    currencyMap.put(charge.getCurrencyCode(), charge.getAmount());
+                    currencyMap.put(currencyCode, amount);
                 }
             }
-            delOutbound.setCurrencyDescribe(ArrayUtil.join(currencyMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue))
-                    .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()).toArray(), "；"));
+
+            String currencyDescribe = ArrayUtil.join(currencyMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue))
+                    .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()).toArray(), "；");
+
+            delOutbound.setCurrencyDescribe(currencyDescribe);
 
 
             //更新PRC发货服务
@@ -212,6 +290,10 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
             updateDelOutbound.setId(delOutbound.getId());
             updateDelOutbound.setProductShipmentRule(data.getShipmentRule());
             updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
+            updateDelOutbound.setPrcInterfaceProductCode(delOutbound.getPrcInterfaceProductCode());
+            updateDelOutbound.setPrcTerminalCarrier(delOutbound.getPrcTerminalCarrier());
+            updateDelOutbound.setAmazonReferenceId(data.getAmazonLogisticsRouteId());
+
             delOutboundService.updateByIdTransactional(updateDelOutbound);
 
             DelOutboundOperationLogEnum.BRV_PRC_PRICING.listener(delOutbound);
@@ -224,9 +306,80 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             DelOutbound updateDelOutbound = new DelOutbound();
             updateDelOutbound.setId(delOutbound.getId());
-            updateDelOutbound.setThridPardState(BEGIN.name());
+            updateDelOutbound.setNuclearWeightState(BEGIN.name());
 
+            // 提审失败
             delOutboundService.updateById(updateDelOutbound);
+            super.rollback(context);
+        }
+
+        @Override
+        public ApplicationState nextState() {
+            return THAW_BALANCE;
+        }
+    }
+
+    static class ThawBalanceHandle extends NuclearWeightEnum.CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return THAW_BALANCE;
+        }
+
+        @Override
+        public ApplicationState quoState() {
+            return FREEZE_BALANCE;
+        }
+
+        @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
+        }
+
+        public static final TimeUnit unit = TimeUnit.SECONDS;
+
+        public static final long time = 3L;
+
+        @Override
+        public void handle(ApplicationContext context) {
+
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+
+            IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
+            RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
+            List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
+            Map<String, List<DelOutboundCharge>> groupByCharge =
+                    delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+            for (String currencyCode: groupByCharge.keySet()) {
+                BigDecimal bigDecimal = new BigDecimal(0);
+                for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
+                    if (c.getAmount() != null) {
+                        bigDecimal = bigDecimal.add(c.getAmount());
+                    }
+                }
+                CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                cusFreezeBalanceDTO.setAmount(bigDecimal);
+                cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
+                cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                cusFreezeBalanceDTO.setOrderType("Freight");
+                R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+                logger.info(">>>>>[创建出库单{}]取消冻结费用, 数据:{}",
+                        delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO));
+                if (null == thawBalanceR) {
+                    throw new CommonException("400", MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses"));
+                }
+                if (Constants.SUCCESS != thawBalanceR.getCode()) {
+                    throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), MessageUtil.to("取消冻结费用失败", "Failed to cancel freezing expenses")+ "2"));
+                }
+            }
+        }
+
+        @Override
+        public void rollback(ApplicationContext context) {
+
             super.rollback(context);
         }
 
@@ -236,11 +389,11 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
         }
     }
 
-    static class FreezeBalanceHandle extends CommonApplicationHandle {
+    static class FreezeBalanceHandle extends NuclearWeightEnum.CommonApplicationHandle {
 
         @Override
         public ApplicationState preState() {
-            return PRC_PRICING;
+            return THAW_BALANCE;
         }
 
         @Override
@@ -265,19 +418,10 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
 
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            logger.info("ThridPartyEnum出库单{}-开始冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
+            logger.info("出库单{}-开始冻结费用：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
             DelOutboundOperationLogEnum.BRV_FREEZE_BALANCE.listener(delOutbound);
 
-            RedissonClient redissonClient = SpringUtils.getBean(RedissonClient.class);
-
-            String key = "bringVerify-fss-freeze-balance" + delOutbound.getCustomCode() + ":" + delOutbound.getOrderNo();
-
-            RLock lock = redissonClient.getLock(key);
-
             try {
-
-                lock.tryLock(time, unit);
-
                 /**
                  *  获取要冻结的费用数据，并按货币分组冻结
                  */
@@ -290,7 +434,7 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
                 Map<String, List<DelOutboundCharge>> groupByCharge =
                         delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
 
-                logger.info(">>>>>[ThridPartyEnum创建出库单{}]冻结费用map, 数据:{}",delOutbound.getOrderNo(), JSONObject.toJSONString(groupByCharge));
+                logger.info(">>>>>[创建出库单{}]冻结费用map, 数据:{}",delOutbound.getOrderNo(), JSONObject.toJSONString(groupByCharge));
 
                 for (String currencyCode : groupByCharge.keySet()) {
                     BigDecimal bigDecimal = BigDecimal.ZERO;
@@ -323,7 +467,7 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
                         throw new CommonException("400", msg);
                     }
 
-                    logger.info(">>>>>[ThridPartyEnum创建出库单{}]结束冻结费用, 数据:{} ,耗时{}", delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO), stopWatch.getLastTaskInfo().getTimeMillis());
+                    logger.info(">>>>>[创建出库单{}]结束冻结费用, 数据:{} ,耗时{}", delOutbound.getOrderNo(), JSONObject.toJSONString(cusFreezeBalanceDTO), stopWatch.getLastTaskInfo().getTimeMillis());
                 }
 
             }catch (Exception e){
@@ -331,10 +475,8 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
                 logger.info("异常信息:" + e.getMessage());
                 throw new RuntimeException(e.getMessage());
             }finally {
-                if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                    lock.unlock();
-                }
             }
+
         }
 
         @Override
@@ -378,15 +520,119 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
 
         @Override
         public ApplicationState nextState() {
-            return END;
+            return SHIPMENT_ORDER;
         }
     }
 
-    static class EndHandle extends CommonApplicationHandle {
+    static class ShipmentOrderHandle extends NuclearWeightEnum.CommonApplicationHandle {
 
         @Override
         public ApplicationState preState() {
             return FREEZE_BALANCE;
+        }
+
+        @Override
+        public ApplicationState quoState() {
+            return SHIPMENT_ORDER;
+        }
+
+        @Override
+        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
+            //批量出库->自提出库 不做prc
+            return super.batchSelfPick(context, currentState);
+        }
+
+        @Override
+        public void handle(ApplicationContext context) {
+            StopWatch stopWatch = new StopWatch();
+
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+
+            String shipmentService = delOutbound.getShipmentService();
+            String trackingAcquireType = delOutbound.getTrackingAcquireType();
+
+
+            //8431 提审订单时，如果返回的物流服务是空的，跳过调用供应商
+            if(StringUtils.isEmpty(shipmentService) || trackingAcquireType.equals(DelOutboundTrackingAcquireTypeEnum.NONE.getCode())){
+                return;
+            }
+
+            IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+
+            logger.info("{}-创建承运商物流订单：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
+            // 判断是否需要创建物流订单
+            if (DelOutboundTrackingAcquireTypeEnum.ORDER_SUPPLIER.getCode().equals(delOutbound.getTrackingAcquireType())) {
+                // 创建承运商物流订单
+                IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+                stopWatch.start();
+                ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
+                stopWatch.stop();
+                if(shipmentOrderResult != null){
+                    delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
+                    delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
+                    delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
+                    delOutbound.setReferenceNumber(shipmentOrderResult.getReferenceNumber());
+                }
+
+                DelOutbound delOutboundUpd = new DelOutbound();
+                delOutboundUpd.setId(delOutbound.getId());
+                delOutboundUpd.setReferenceNumber(delOutbound.getReferenceNumber());
+                iDelOutboundService.updateById(delOutboundUpd);
+
+                logger.info(">>>>>[创建出库单{}]创建承运商 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+
+                DelOutboundOperationLogEnum.BRV_SHIPMENT_ORDER.listener(delOutbound);
+            }
+
+
+            if(StringUtils.isNotBlank(delOutbound.getAmazonLogisticsRouteId())){
+
+                // 提交一个亚马逊获取标签的任务
+                stopWatch.start();
+                IDelOutboundThirdPartyService delOutboundThirdPartyService = SpringUtils.getBean(IDelOutboundThirdPartyService.class);
+                DelOutboundThirdParty delOutboundThirdParty = new DelOutboundThirdParty();
+                delOutboundThirdParty.setOrderNo(delOutbound.getOrderNo());
+                delOutboundThirdParty.setState(DelOutboundCompletedStateEnum.INIT.getCode());
+                delOutboundThirdParty.setOperationType(DelOutboundConstant.DELOUTBOUND_OPERATION_TYPE_THIRD_PARTY);
+                delOutboundThirdParty.setKeyInfo(delOutbound.getAmazonLogisticsRouteId());
+                delOutboundThirdPartyService.save(delOutboundThirdParty);
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]提交一个第三方承运商订单任务,耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
+
+            }
+        }
+
+        @Override
+        public void rollback(ApplicationContext context) {
+            // 取消承运商物流订单
+            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
+            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
+            DelOutboundOperationLogEnum.RK_BRV_SHIPMENT_ORDER.listener(delOutbound);
+            String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
+            String trackingNo = delOutbound.getTrackingNo();
+            if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
+                String referenceNumber = String.valueOf(delOutbound.getId());
+                IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+                delOutboundBringVerifyService.cancellation(delOutbound.getWarehouseCode(), referenceNumber, shipmentOrderNumber, trackingNo);
+                delOutbound.setTrackingNo("");
+                delOutbound.setShipmentOrderNumber("");
+                delOutbound.setShipmentOrderLabelUrl("");
+            }
+            super.rollback(context);
+        }
+
+        @Override
+        public ApplicationState nextState() {
+            return END;
+        }
+    }
+
+    static class EndHandle extends NuclearWeightEnum.CommonApplicationHandle {
+
+        @Override
+        public ApplicationState preState() {
+            return SHIPMENT_ORDER;
         }
 
         @Override
@@ -405,54 +651,4 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
         }
     }
 
-    static abstract class CommonApplicationHandle extends ApplicationHandle.AbstractApplicationHandle {
-
-        @Override
-        public boolean condition(ApplicationContext context, ApplicationState currentState) {
-            DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
-            DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
-            DelOutboundOrderTypeEnum orderTypeEnum = DelOutboundOrderTypeEnum.get(delOutbound.getOrderType());
-            if (null == orderTypeEnum) {
-                throw new CommonException("400", MessageUtil.to("不存在的类型[" + delOutbound.getOrderType() + "]", "Non-existent type ["+delOutbound. getOrderType()+"]"));
-            }
-            return otherCondition(context, currentState);
-        }
-
-        /**
-         * 子级处理条件
-         *
-         * @param context      context
-         * @param currentState currentState
-         * @return boolean
-         */
-        public boolean otherCondition(ApplicationContext context, ApplicationState currentState) {
-            return true;
-        }
-
-        /**
-         * 批量出库-自提出库
-         *
-         * @param context      context
-         * @param currentState currentState
-         * @return boolean
-         */
-        @SuppressWarnings({"all"})
-        public boolean batchSelfPick(ApplicationContext context, ApplicationState currentState) {
-            //批量出库->自提出库 不做prc
-            if (context instanceof DelOutboundWrapperContext) {
-                DelOutbound delOutbound = ((DelOutboundWrapperContext) context).getDelOutbound();
-                String orderType = StringUtils.nvl(delOutbound.getOrderType(), "");
-                String shipmentChannel = StringUtils.nvl(delOutbound.getShipmentChannel(), "");
-                if (orderType.equals(DelOutboundOrderTypeEnum.BATCH.getCode()) && "SelfPick".equals(shipmentChannel)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        @Override
-        public void errorHandler(ApplicationContext context, Throwable throwable, ApplicationState currentState) {
-
-        }
-    }
 }

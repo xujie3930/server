@@ -57,6 +57,15 @@ public class QuartzConfig {
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 ? * MON"))
                 .build();
     }
+    @Bean
+    public Trigger DelOutBounderElJobTrigger() {
+        //cron方式，每天上午9点刷0 0 9 * * ?
+        return TriggerBuilder.newTrigger().forJob(DelOutBounderElJob())
+                .withIdentity("DelOutBounderElJob")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */50 * * * ?"))
+                .build();
+    }
+
 
     @Bean
     public Trigger DelQueryServiceJobTrigger() {

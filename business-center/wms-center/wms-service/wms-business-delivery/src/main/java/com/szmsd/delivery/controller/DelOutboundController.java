@@ -9,7 +9,6 @@ import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.pagehelper.Page;
@@ -47,7 +46,6 @@ import com.szmsd.delivery.domain.DelOutboundTarckError;
 import com.szmsd.delivery.domain.DelOutboundTarckOn;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
-import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.exported.DelOutboundExportContext;
 import com.szmsd.delivery.exported.DelOutboundExportItemQueryPage;
 import com.szmsd.delivery.exported.DelOutboundExportQueryPage;
@@ -389,24 +387,8 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 修改", position = 400)
     @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundDto")
     public R<Integer> updateWeightDelOutbound(@RequestBody @Validated(ValidationUpdateGroup.class) UpdateWeightDelOutboundDto dto) {
-        LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
-        queryWrapper.eq(DelOutbound::getSellerCode, dto.getCustomCode());
-        queryWrapper.eq(DelOutbound::getOrderNo, dto.getOrderNo());
-        DelOutbound data = delOutboundService.getOne(queryWrapper);
-        if(data == null){
-            throw new CommonException("400", "该客户下订单不存在");
-        }
-        if (
-                DelOutboundStateEnum.PROCESSING.getCode().equals(data.getState())
-                || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(data.getState())
-                || DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(data.getState())
-                || DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(data.getState())
-                || DelOutboundStateEnum.COMPLETED.getCode().equals(data.getState())
-        ) {
-            throw new CommonException("400", "单据不能修改");
-        }
-        BeanUtils.copyProperties(dto, data);
-        return R.ok(delOutboundService.updateById(data) ? 1 : 0);
+
+        return R.ok(delOutboundService.updateWeightDelOutbound(dto) ? 1 : 0);
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:remove')")

@@ -157,6 +157,9 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "国家名称")
     private String country;
 
+    @ApiModelProperty(value = "是否PRC费用")
+    private Integer prcState;
+
 
     public void setRemark(String remark) {
         this.remark = remark;

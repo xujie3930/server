@@ -1,9 +1,12 @@
 package com.szmsd.delivery.timer;
 
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.util.LockerUtil;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,18 +20,34 @@ public class DirectExpressOrdersTimer {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    @Value("${spring.application.name}")
+    private String applicationName;
+    @Autowired
+    private RedissonClient redissonClient;
+
     @Autowired
     private IDelOutboundService iDelOutboundService;
 
+    /**
+     *
+     * <p/>
+     * 30分钟执行一次
+     */
+    @Scheduled(cron = "0 */30 * * * ?")
     @Async
-    @Scheduled(cron = "0 0 8,14 * * ?")
     public void doDirectExpressOrders() {
 
-        logger.info("doDirectExpressOrders 开始执行 ");
+        String key = applicationName + ":DirectExpressOrders:doOrder";
 
-        iDelOutboundService.doDirectExpressOrders();
+        this.doWorker(key, () -> {
+            logger.info("doDirectExpressOrders 开始执行 ");
+            iDelOutboundService.doDirectExpressOrders();
+            logger.info("doDirectExpressOrders 开始结束 ");
+        });
+    }
 
-        logger.info("doDirectExpressOrders 开始结束 ");
+    private void doWorker(String key, LockerUtil.Worker worker) {
+        new LockerUtil<Integer>(redissonClient).tryLock(key, worker);
     }
 
 }

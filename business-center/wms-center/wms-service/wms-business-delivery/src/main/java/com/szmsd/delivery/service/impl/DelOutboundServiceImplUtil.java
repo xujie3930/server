@@ -34,9 +34,15 @@ import com.szmsd.inventory.domain.dto.InventoryOperateDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.springframework.util.ResourceUtils;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -476,6 +482,10 @@ public final class DelOutboundServiceImplUtil {
     }
 
     public static ByteArrayOutputStream renderPackageTransfer(DelOutbound delOutbound, DelOutboundAddress delOutboundAddress, String skuLabel) throws Exception {
+
+        String modelPath = "classpath:fonts/logo.png";
+        URL logoImageUrl = ResourceUtils.getURL(modelPath);
+
         Document document = new Document();
         document.top(0f);
         document.left(0f);
@@ -495,6 +505,11 @@ public final class DelOutboundServiceImplUtil {
         document.open();
         byte[] fontBytes = ITextPdfFontUtil.getFont("fonts/ARIALUNI.TTF");
         BaseFont bf = BaseFont.createFont("ARIALUNI.TTF", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, BaseFont.NOT_CACHED, fontBytes, fontBytes);
+
+//        BufferedImage logoBufferedImage = ImageIO.read(logoImageUrl);
+//        Image logoImg = Image.getInstance(logoBufferedImage, null);
+//        document.add(logoImg);
+
         //3. 注册字体
         Font font = new Font(bf, 18);
         font.setSize(12f);
@@ -547,6 +562,7 @@ public final class DelOutboundServiceImplUtil {
                 country.setSpacingAfter(0f);
                 pdfPCell.addElement(country);
                 pdfPCell.addElement(new Phrase("TEL:" + delOutboundAddress.getPhoneNo()));
+                pdfPCell.addElement(new Phrase("EMAIL:" + delOutboundAddress.getEmail()));
             } else {
                 pdfPCell.setFixedHeight(38f);
                 font.setSize(12f);
