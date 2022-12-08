@@ -355,4 +355,8 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "")
     private String thridPardState;
+
+    @ApiModelProperty(value = "国家")
+    @TableField(exist = false)
+    private String country;
 }
