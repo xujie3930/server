@@ -40,4 +40,12 @@ public class EmailDto {
 
     @ApiModelProperty(value = "数据集合")
     List<EmailObjectDto> list ;
+
+
+    @ApiModelProperty(value = "（oms推wms）出库单号错误集合")
+    List<EmailDelOutboundError> emailDelOutboundErrorList ;
+
+    @ApiModelProperty(value = "（oms推wms）出库单号正确集合")
+    List<EmailDelOutboundSuccess> emailDelOutboundSuccessList ;
+
 }
