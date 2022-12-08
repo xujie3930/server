@@ -365,7 +365,7 @@
         a.order_type,
         a.order_no,
         a.custom_code,
-        a.prc_interface_product_code,
+        a.shipment_rule as prc_interface_product_code,
         a.create_time,
         b.country
         FROM

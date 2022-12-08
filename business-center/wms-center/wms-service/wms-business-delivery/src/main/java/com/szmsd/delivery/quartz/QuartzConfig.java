@@ -15,6 +15,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class QuartzConfig {
 
+
+    @Bean
+    public JobDetail DelOutBounderElJob() {
+        return JobBuilder.newJob(DelOutBounderElJob.class).withIdentity("DelOutBounderElJob").storeDurably().build();
+    }
+
     @Bean
     public JobDetail DelOutboundJob() {
         return JobBuilder.newJob(DelOutboundJob.class).withIdentity("DelOutboundJob").storeDurably().build();
@@ -60,6 +66,15 @@ public class QuartzConfig {
         return TriggerBuilder.newTrigger().forJob(DelQueryServiceJob())
                 .withIdentity("DelQueryServiceJob")
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 * * ?"))
+                .build();
+    }
+
+    @Bean
+    public Trigger DelOutBounderElJobTrigger() {
+        //cron方式，每天上午9点刷0 0 9 * * ?
+        return TriggerBuilder.newTrigger().forJob(DelOutBounderElJob())
+                .withIdentity("DelOutBounderElJob")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */60 * * * ?"))
                 .build();
     }
 

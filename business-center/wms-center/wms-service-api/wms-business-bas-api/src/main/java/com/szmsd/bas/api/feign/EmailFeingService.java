@@ -17,4 +17,7 @@ public interface EmailFeingService {
 
     @PostMapping("/bas/email/sendEmailError")
     R sendEmailError(@RequestBody EmailDto emailDto);
+
+    @PostMapping("/bas/email/sendEmaildelOut")
+    R sendEmaildelOut(@RequestBody EmailDto emailDto);
 }

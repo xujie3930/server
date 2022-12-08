@@ -95,6 +95,16 @@ public class EmailController extends BaseController {
         return r;
     }
 
+    @PreAuthorize("@ss.hasPermi('bas:email:sendEmaildelOut')")
+    @PostMapping("/sendEmaildelOut")
+    @ApiOperation(value = "发送邮件(出库oms推wms)", notes = "发送邮件(出库oms推wms)")
+    public R sendEmaildelOut(@RequestBody EmailDto emailDto) {
+        emailUtil.sendAttachmentMaildelOut(emailDto.getTo(), emailDto.getSubject(), emailDto.getText(),emailDto.getEmailDelOutboundErrorList(),emailDto.getEmailDelOutboundSuccessList());
+
+        return R.ok();
+    }
+
+
     @PreAuthorize("@ss.hasPermi('bas:email:sendEmailError')")
     @PostMapping("/sendEmailError")
     @ApiOperation(value = "发送邮件(异常500发送)", notes = "发送邮件(异常500发送)")
