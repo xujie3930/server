@@ -97,4 +97,8 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     int updateThridPartcount(Long id);
 
     int updateDeloutByOrder(List<DelOutbound> delOutbounds);
+
+    List<DelOutbound> selectOmsWmsLogerror(@Param("createTime") String createTime);
+
+    List<DelOutbound>  selectOmsWmsLogsuccess(@Param("createTime") String createTime);
 }

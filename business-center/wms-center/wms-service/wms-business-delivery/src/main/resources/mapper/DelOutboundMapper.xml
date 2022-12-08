@@ -340,6 +340,46 @@
         limit #{pageNumber},#{pageSize}
 
     </select>
+    <select id="selectOmsWmsLogerror" resultType="com.szmsd.delivery.domain.DelOutbound" parameterType="java.lang.String">
+
+        SELECT
+        exception_message_wms,
+        state,
+        order_no,
+        seller_code,
+        custom_code,
+        order_type
+        FROM
+        del_outbound
+        WHERE
+        state = 'DELIVERED'
+        AND exception_message_wms IS NOT NULL
+        AND exception_message_wms != ''
+        AND order_type IN('Normal','SelfPick','Batch','NewSku','SplitSku','Destroy')
+        AND create_time &lt;= #{createTime}
+        ORDER BY
+        create_time DESC
+    </select>
+    <select id="selectOmsWmsLogsuccess" resultType="com.szmsd.delivery.domain.DelOutbound">
+        SELECT
+        a.order_type,
+        a.order_no,
+        a.custom_code,
+        a.prc_interface_product_code,
+        a.create_time,
+        b.country
+        FROM
+        del_outbound a
+        LEFT JOIN del_outbound_address b on b.order_no=a.order_no
+        WHERE
+        state = 'DELIVERED'
+        AND (a.exception_message_wms IS NULL OR a.exception_message_wms = '' )
+        AND a.order_type IN ('Normal', 'SelfPick', 'Batch', 'NewSku', 'SplitSku', 'Destroy')
+        AND a.create_time  &lt;= #{createTime}
+
+        ORDER BY
+        a.create_time DESC
+    </select>
 
     <update id="updateThridPartcount">
         update  del_outbound set thrid_part_count = thrid_part_count + 1 where id = #{id}
