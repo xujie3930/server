@@ -4,7 +4,6 @@ import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.fasterxml.jackson.datatype.jsr310.DecimalUtils;
 import com.helipay.app.trx.facade.request.pay.OrderRequestForm;
 import com.helipay.app.trx.facade.response.pay.APPScanPayResponseForm;
 import com.helipay.component.facade.BaseDTO;
@@ -154,6 +153,9 @@ public class HeliPayServiceImpl implements HeliPayService {
         accountPay.setGoodsName(gname);
         accountPay.setAmount(amount);
         accountPay.setCallbackNumber(0L);
+        accountPay.setCreateBy(cusCode);
+        accountPay.setCreateTime(new Date());
+        accountPay.setCreateByName(cusCode);
 
         return accountPay;
     }
