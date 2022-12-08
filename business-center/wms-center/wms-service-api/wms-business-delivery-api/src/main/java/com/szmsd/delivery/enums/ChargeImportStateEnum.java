@@ -4,7 +4,7 @@ public enum ChargeImportStateEnum {
 
     INIT("INIT", "初始化"),
     UPDATE_ORDER("UPDATE_ORDER","更新订单"),
-    PRC_ING("PRC_ING", "计费"),
+    PRC_ING("PRC_ING", "PRC计费"),
     REFUND_COST("REFUND_COST","退费"),
     FEE_DEDUCTIONS("FEE_DEDUCTIONS","费用扣减"),
     COMPLETED("COMPLETED","完成")

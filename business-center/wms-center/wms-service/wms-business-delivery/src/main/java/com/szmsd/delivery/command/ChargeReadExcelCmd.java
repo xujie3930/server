@@ -70,6 +70,7 @@ public class ChargeReadExcelCmd extends BasicCommand<List<ChargeImport>> {
             chargeImport.setCreateBy(userName);
             chargeImport.setCreateTime(new Date());
             chargeImport.setState(ChargeImportStateEnum.INIT.getCode());
+            chargeImport.setDelFlag(0);
         }
 
         return chargeImportList;

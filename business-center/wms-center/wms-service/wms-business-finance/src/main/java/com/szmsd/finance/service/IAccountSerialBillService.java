@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountBalanceBillCurrencyVO;
+import com.szmsd.finance.dto.AccountOrderQueryDTO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.vo.AccountSerialBillExcelVO;
@@ -48,4 +49,6 @@ public interface IAccountSerialBillService extends IService<AccountSerialBill> {
      void asyncExport(HttpServletResponse response, AccountSerialBillDTO dto);
 
     R<Integer> exportCount(AccountSerialBillDTO dto);
+
+    List<AccountSerialBill> selectAccountPrcSerialBill(AccountOrderQueryDTO dto);
 }

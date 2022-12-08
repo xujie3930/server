@@ -59,4 +59,7 @@ public class ChargeImport extends BaseEntity {
 
     @ApiModelProperty(value = "错误信息")
     private String errorMsg;
+
+    @ApiModelProperty(value = "删除状态 1 已删除")
+    private Integer delFlag;
 }

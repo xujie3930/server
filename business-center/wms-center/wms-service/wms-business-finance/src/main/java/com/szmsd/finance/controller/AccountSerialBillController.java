@@ -16,6 +16,7 @@ import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.AccountSerialBillEn;
 import com.szmsd.finance.dto.AccountBalanceBillCurrencyVO;
+import com.szmsd.finance.dto.AccountOrderQueryDTO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.vo.AccountSerialBillExcelVO;
@@ -63,6 +64,12 @@ public class AccountSerialBillController extends BaseController {
         page.setPageSize(dto.getPageSize());
         startPage(page);
         return R.ok(getDataTable(accountSerialBillService.listPage(dto)));
+    }
+
+    @ApiOperation(value = "第三方 - 根据订单查询PRC费用")
+    @PostMapping("/selectAccountPrcSerialBill")
+    public R<List<AccountSerialBill>> selectAccountPrcSerialBill(@RequestBody AccountOrderQueryDTO dto) {
+        return R.ok(accountSerialBillService.selectAccountPrcSerialBill(dto));
     }
 
     //@AutoValue

@@ -26,10 +26,7 @@ import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.AccountSerialBillTotalVO;
 import com.szmsd.finance.domain.ChargeRelation;
-import com.szmsd.finance.dto.AccountBalanceBillCurrencyVO;
-import com.szmsd.finance.dto.AccountSerialBillDTO;
-import com.szmsd.finance.dto.AccountSerialBillNatureDTO;
-import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.finance.dto.*;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.mapper.ChargeRelationMapper;
 import com.szmsd.finance.service.IAccountSerialBillService;
@@ -555,6 +552,17 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         int totalCount = accountSerialBillMapper.selectSerialBillCount(dto);
 
         return R.ok(totalCount);
+    }
+
+    @Override
+    public List<AccountSerialBill> selectAccountPrcSerialBill(AccountOrderQueryDTO dto) {
+
+        List<AccountSerialBill> accountSerialBills = accountSerialBillMapper.selectList(Wrappers.<AccountSerialBill>query().lambda()
+                .in(AccountSerialBill::getNo,dto.getOrderNoList())
+                .eq(AccountSerialBill::getPrcState,dto.getPrcState())
+        );
+
+        return accountSerialBills;
     }
 
 
