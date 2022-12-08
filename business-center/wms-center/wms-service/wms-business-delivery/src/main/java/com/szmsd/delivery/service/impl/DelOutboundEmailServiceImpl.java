@@ -2,9 +2,13 @@ package com.szmsd.delivery.service.impl;
 
 import com.szmsd.bas.api.domain.BasEmployees;
 import com.szmsd.bas.api.feign.BasFeignService;
+import com.szmsd.bas.api.feign.EmailFeingService;
 import com.szmsd.bas.domain.BasSeller;
+import com.szmsd.bas.dto.EmailDelOutboundError;
+import com.szmsd.bas.dto.EmailDelOutboundSuccess;
 import com.szmsd.bas.dto.EmailDto;
 import com.szmsd.bas.dto.EmailObjectDto;
+import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.StringUtils;
@@ -43,6 +47,9 @@ public class DelOutboundEmailServiceImpl implements DelOutboundEmailService {
 
     @Autowired
     private BasFeignService basFeignService;
+
+    @Autowired
+    private EmailFeingService emailFeingService;
     @Override
     public R selectOmsWmsLog() {
 
@@ -51,6 +58,23 @@ public class DelOutboundEmailServiceImpl implements DelOutboundEmailService {
         List<DelOutbound> errorDekOuList=delOutboundMapper.selectOmsWmsLogerror(simpleDateFormat.format(createTime));
         List<DelOutbound> successDekOuList=delOutboundMapper.selectOmsWmsLogsuccess(simpleDateFormat.format(createTime));
         emailBatchUpdateTrackingNo(errorDekOuList,successDekOuList);
+
+        //总邮箱发送
+        List<DelOutbounderrorEmail> delOutbounderrorEmailListsTwo= BeanMapperUtil.mapList(errorDekOuList, DelOutbounderrorEmail.class);
+        List<DelOutboundsuccessEmail>delOutboundsuccessListsTwo= new ArrayList<>(); BeanMapperUtil.mapList(successDekOuList, DelOutboundsuccessEmail.class);
+        successDekOuList.forEach(dto->{
+
+            DelOutboundsuccessEmail delOutboundsuccessEmail = new DelOutboundsuccessEmail();
+            BeanUtils.copyProperties(dto, delOutboundsuccessEmail);
+
+            delOutboundsuccessEmail.setOrderType(DelOutboundOrderEnum.getName(dto.getOrderType()));
+            delOutboundsuccessEmail.setCreateTime(simpleDateFormat.format(dto.getCreateTime()));
+            delOutboundsuccessListsTwo.add(delOutboundsuccessEmail);
+
+        });
+
+        ExcleDelOutboundBatchUpdateTrackingTwo(delOutbounderrorEmailListsTwo,delOutboundsuccessListsTwo);
+
         return null;
     }
 
@@ -180,24 +204,19 @@ public class DelOutboundEmailServiceImpl implements DelOutboundEmailService {
                List<DelOutboundsuccessEmail> delOutboundsuccessEmailLists=delOutboundsuccessEmailMap.get(customCode);
 
 
-               if (delOutbounderrorEmailLists.size()>0) {
+               if (delOutbounderrorEmailLists!=null&&delOutbounderrorEmailLists.size()>0) {
                    email=delOutbounderrorEmailLists.get(0).getEmail();
                }
-               if (delOutboundsuccessEmailLists.size()>0){
-                   email=delOutbounderrorEmailLists.get(0).getEmail();
+               if (delOutboundsuccessEmailLists!=null&&delOutboundsuccessEmailLists.size()>0){
+                   email=delOutboundsuccessEmailLists.get(0).getEmail();
                }
-               if (email!=null){
+               if (email!=null&&!email.equals("")){
                    //邮件发送
                    ExcleDelOutboundBatchUpdateTracking(delOutbounderrorEmailLists,delOutboundsuccessEmailLists,email,customCode);
                }
 
 
-
-
            }
-
-        System.out.println(delOutboundEmailsCode);
-
 
 
 
@@ -214,8 +233,10 @@ public class DelOutboundEmailServiceImpl implements DelOutboundEmailService {
             basSellerList.stream().filter(x -> x.getSellerCode().equals(dto.getCustomCode())).findFirst().ifPresent(basSeller -> {
 
                 DelOutboundsuccessEmail delOutboundsuccessEmail = new DelOutboundsuccessEmail();
+                 SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 BeanUtils.copyProperties(dto, delOutboundsuccessEmail);
-
+                delOutboundsuccessEmail.setOrderType(DelOutboundOrderEnum.getName(delOutboundsuccessEmail.getOrderType()));
+               delOutboundsuccessEmail.setCreateTime(simpleDateFormat.format(dto.getCreateTime()));
 
                 if (basSeller.getServiceManagerName() != null && !basSeller.getServiceManagerName().equals("")) {
                     if (!basSeller.getServiceManagerName().equals(basSeller.getServiceStaffName())) {
@@ -294,31 +315,83 @@ public class DelOutboundEmailServiceImpl implements DelOutboundEmailService {
         logger.info("更新挂号参数delOutbounderrorEmailLists：{}",delOutbounderrorEmailLists);
         logger.info("更新挂号参数delOutboundsuccessEmailLists：{}",delOutboundsuccessEmailLists);
         logger.info("推送邮箱email：{}",email);
+        if (delOutbounderrorEmailLists==null){
+            delOutbounderrorEmailLists=new ArrayList<>();
+        }
+        if (delOutboundsuccessEmailLists==null){
+            delOutboundsuccessEmailLists=new ArrayList<>();
+        }
+        //
 
        Date dates =getStartTime();
        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
         EmailDto emailDto=new EmailDto();
         //功能模块
         emailDto.setSubject("【发货异常】"+customCode+simpleDateFormat.format(dates));
-        //邮箱接收人
-        emailDto.setTo(email);
+
         emailDto.setText("各位好，客户："+customCode+"昨天订单处理异常，请查收附件");
 
-//        List<EmailObjectDto> emailObjectDtoList= BeanMapperUtil.mapList(list, EmailObjectDto.class);
-//        emailDto.setList(emailObjectDtoList);
-//        if(customCode!=null&&!customCode.equals("")){
-//           // R r= emailFeingService.sendEmail(emailDto);
-//            if (r.getCode()== HttpStatus.SUCCESS){
-//
-//            }
-//        }
-//        logger.info("更新挂号参数2：{}",list);
-//        list.forEach(x->{
-//            int u = super.baseMapper.updateTrackingNo(x);
-//
-//            //manualTrackingYees(x.getOrderNo());
-//
-//        });
+        //拆分邮箱
+        String empTOs[] =email.split(",");
+        List<String> emaillist1= Arrays.asList(empTOs);
+        for (int i=0; i<emaillist1.size();i++){
+            //邮箱接收人
+            emailDto.setTo(emaillist1.get(i));
+
+            List<EmailDelOutboundError> emailDelOutboundErrorList= BeanMapperUtil.mapList(delOutbounderrorEmailLists, EmailDelOutboundError.class);
+            emailDto.setEmailDelOutboundErrorList(emailDelOutboundErrorList);
+
+            List<EmailDelOutboundSuccess> emailDelOutboundSuccessList= BeanMapperUtil.mapList(delOutboundsuccessEmailLists, EmailDelOutboundSuccess.class);
+            emailDto.setEmailDelOutboundSuccessList(emailDelOutboundSuccessList);
+
+            if(customCode!=null&&!customCode.equals("")){
+                R r= emailFeingService.sendEmaildelOut(emailDto);
+
+            }
+        }
+
+
+
+    }
+
+    public void ExcleDelOutboundBatchUpdateTrackingTwo( List<DelOutbounderrorEmail> delOutbounderrorEmailLists,List<DelOutboundsuccessEmail> delOutboundsuccessEmailLists){
+        logger.info("更新挂号参数delOutbounderrorEmailLists：{}",delOutbounderrorEmailLists);
+        logger.info("更新挂号参数delOutboundsuccessEmailLists：{}",delOutboundsuccessEmailLists);
+
+        if (delOutbounderrorEmailLists==null){
+            delOutbounderrorEmailLists=new ArrayList<>();
+        }
+        if (delOutboundsuccessEmailLists==null){
+            delOutboundsuccessEmailLists=new ArrayList<>();
+        }
+        //
+
+        Date dates =getStartTime();
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
+        EmailDto emailDto=new EmailDto();
+        //功能模块
+        emailDto.setSubject("【发货异常】"+simpleDateFormat.format(dates));
+
+        emailDto.setText("您好："+"昨天订单处理异常，请查收附件");
+
+
+
+
+            //邮箱接收人
+            emailDto.setTo("developer@dmfgroup.net");
+
+            List<EmailDelOutboundError> emailDelOutboundErrorList= BeanMapperUtil.mapList(delOutbounderrorEmailLists, EmailDelOutboundError.class);
+            emailDto.setEmailDelOutboundErrorList(emailDelOutboundErrorList);
+
+            List<EmailDelOutboundSuccess> emailDelOutboundSuccessList= BeanMapperUtil.mapList(delOutboundsuccessEmailLists, EmailDelOutboundSuccess.class);
+            emailDto.setEmailDelOutboundSuccessList(emailDelOutboundSuccessList);
+
+                R r= emailFeingService.sendEmaildelOut(emailDto);
+
+
+
+
+
 
     }
 
