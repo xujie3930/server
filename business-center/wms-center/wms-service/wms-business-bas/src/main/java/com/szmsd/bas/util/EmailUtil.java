@@ -6,10 +6,13 @@ import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.excel.util.FileUtils;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.szmsd.bas.dto.EmailDelOutboundError;
+import com.szmsd.bas.dto.EmailDelOutboundSuccess;
 import com.szmsd.bas.dto.EmailObjectDto;
 import com.szmsd.bas.dto.EmailObjectDtoVs;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +29,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -154,6 +159,76 @@ public class EmailUtil {
         }
         return cacheTmpFile;
     }
+
+    public void sendAttachmentMaildelOut(String to, String subject, String text, List<EmailDelOutboundError> list,List<EmailDelOutboundSuccess> list2){
+
+
+        //邮件对象
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+
+        //邮件处理对象
+        MimeMessageHelper helper =null;
+
+        //创建附件
+        File excelWriter = attachmentInfodelout(list,list2);
+        try {
+            helper =  new MimeMessageHelper(mimeMessage,true);
+            //发件人
+            helper.setFrom(fromEmail);
+            //收信人账号
+            //收件人
+            helper.setTo(to);
+            //主题
+            helper.setSubject(subject);
+            //文本内容
+            helper.setText(text,true);
+            //加入附件
+//            Date date=new Date();
+//            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
+//            String fileName=simpleDateFormat.format(date).concat("发货异常及未发货清单.xlsx");
+            //String filename = MimeUtility.encodeText(simpleDateFormat.format(date)+"发货异常及未发货清单"  + ".xlsx");
+            helper.addAttachment(MimeUtility.encodeWord("发货异常及未发货清单.xlsx"), excelWriter);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("报表发送失败{}",e.getMessage());
+        }
+
+
+        //发送
+        javaMailSender.send(mimeMessage);
+
+    }
+
+
+    File attachmentInfodelout(List<EmailDelOutboundError> list,List<EmailDelOutboundSuccess> list2){
+        ExcelWriter excelWriter = null;
+        //生成文件
+//        Date date=new Date();
+//        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy/MM/dd");
+//        String fileName=simpleDateFormat.format(date)+"发货异常及未发货清单.xlsx";
+        File cacheTmpFile = FileUtils.createTmpFile("发货异常及未发货清单.xlsx");
+        try {
+            excelWriter = new ExcelWriterBuilder()
+                    .file(cacheTmpFile)
+                    .excelType(ExcelTypeEnum.XLSX)
+                    .autoCloseStream(true)
+                    .build();
+            //将数据写入sheet页中
+            WriteSheet writeSheet = EasyExcel.writerSheet(0, "sheet1").head(EmailDelOutboundError.class).build();
+            excelWriter.write(list,writeSheet);
+            WriteSheet writeSheet1 = EasyExcel.writerSheet(1, "sheet2").head(EmailDelOutboundSuccess.class).build();
+            excelWriter.write(list2,writeSheet1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("报表导出失败{}",e.getMessage());
+        }finally {
+            excelWriter.finish();
+        }
+        return cacheTmpFile;
+    }
+
+
+
 
     public static boolean isEmail(String email) {
         if (null == email || "".equals(email)) {
