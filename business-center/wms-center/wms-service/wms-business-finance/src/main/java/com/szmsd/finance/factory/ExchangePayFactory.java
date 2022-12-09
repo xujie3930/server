@@ -31,55 +31,61 @@ public class ExchangePayFactory extends AbstractPayFactory {
     @Override
     public Boolean updateBalance(final CustPayDTO dto) {
         log.info("ExchangePayFactory {}", JSONObject.toJSONString(dto));
-        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
-        //RLock lock = redissonClient.getLock(key);
         try {
-            //if (lock.tryLock(time,leaseTime, unit)) {
-                BigDecimal substractAmount = dto.getAmount();
-                //1.先扣款
-                BalanceDTO beforeSubtract = getBalance(dto.getCusCode(), dto.getCurrencyCode());
-                //先判断扣款余额是否充足
-                if (beforeSubtract.getCurrentBalance().compareTo(substractAmount) < 0) {
-                    return false;
-                }
+            BigDecimal substractAmount = dto.getAmount();
+            String currencyCode = dto.getCurrencyCode();
+            String currencyCodeTo = dto.getCurrencyCode2();
+            String cusCode = dto.getCusCode();
+            //1.先扣款
+            BalanceDTO beforeSubtract = getBalance(cusCode, currencyCode);
 
-                String chargeType = dto.getCurrencyName() + "转" + dto.getCurrencyName2();
-                String chargeType2 = dto.getCurrencyName2() + "转" + dto.getCurrencyName();
+            log.info("币别转换当前剩余，币别：{},总余额：{},当前余额：{},冻结余额：{},授信额度:{}",currencyCode,beforeSubtract.getTotalBalance(),beforeSubtract.getCurrentBalance(),beforeSubtract.getFreezeBalance(),beforeSubtract.getCreditUseAmount());
+            //先判断扣款余额是否充足
+            if (beforeSubtract.getCurrentBalance().compareTo(substractAmount) < 0) {
+                return false;
+            }
 
-                BalanceDTO afterSubtract = calculateBalance(beforeSubtract, substractAmount.negate());
-                setBalance(dto.getCusCode(), dto.getCurrencyCode(), afterSubtract);
-                dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_PAYMENT);
-                AccountBalanceChange accountBalanceChange = recordOpLog(dto, afterSubtract.getCurrentBalance());
-                //2.再充值
-                BalanceDTO beforeAdd = getBalance(dto.getCusCode(), dto.getCurrencyCode2());
-                BigDecimal addAmount = dto.getRate().multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
-                // BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
-                // 计算还款额，并销账（还账单）
-                beforeAdd.rechargeAndSetAmount(addAmount);
-                super.addForCreditBillAsync(beforeAdd.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode2());
+            String chargeType = dto.getCurrencyName() + "转" + dto.getCurrencyName2();
+            String chargeType2 = dto.getCurrencyName2() + "转" + dto.getCurrencyName();
 
-                setBalance(dto.getCusCode(), dto.getCurrencyCode2(), beforeAdd);
-                dto.setChargeCategoryChange(chargeType);
-                setSerialBillLogAsync(dto, accountBalanceChange);
-                dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
-                dto.setAmount(addAmount);
-                dto.setCurrencyCode(dto.getCurrencyCode2());
-                dto.setCurrencyName(dto.getCurrencyName2());
-                AccountBalanceChange afterBalanceChange = recordOpLog(dto, beforeAdd.getCurrentBalance());
-                //设置流水账单
-                dto.setCurrencyCode(accountBalanceChange.getCurrencyCode());
-                dto.setCurrencyName(accountBalanceChange.getCurrencyName());
-                dto.setChargeCategoryChange(chargeType2);
-                setSerialBillLogAsync(dto, afterBalanceChange);
-                recordDetailLogAsync(dto, beforeSubtract);
-                //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
+            BalanceDTO afterSubtract = calculateBalance(beforeSubtract, substractAmount.negate());
+            log.info("币别转换calculateBalance剩余，币别：{},总余额：{},当前余额：{},冻结余额：{},授信额度:{}",currencyCode,beforeSubtract.getTotalBalance(),beforeSubtract.getCurrentBalance(),beforeSubtract.getFreezeBalance(),beforeSubtract.getCreditUseAmount());
+            setBalance(cusCode, currencyCode, afterSubtract);
 
+            log.info("币别转换setBalance 1 更新转换，币别：{},总余额：{},当前余额：{},冻结余额：{},授信额度:{}",currencyCode,beforeSubtract.getTotalBalance(),beforeSubtract.getCurrentBalance(),beforeSubtract.getFreezeBalance(),beforeSubtract.getCreditUseAmount());
+            dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_PAYMENT);
+            AccountBalanceChange accountBalanceChange = recordOpLog(dto, afterSubtract.getCurrentBalance());
+            //2.再充值
+            BalanceDTO beforeAdd = getBalance(cusCode, currencyCodeTo);
 
-                return true;
-//            } else {
-//                log.error("汇率转换,请稍候重试{}", JSONObject.toJSONString(dto));
-//                throw new RuntimeException("汇率转换操作超时,请稍候重试");
-//            }
+            log.info("币别转换获取转换后，币别：{},总余额：{},当前余额：{},冻结余额：{},授信额度:{}",currencyCodeTo,beforeAdd.getTotalBalance(),beforeAdd.getCurrentBalance(),beforeAdd.getFreezeBalance(),beforeAdd.getCreditUseAmount());
+
+            BigDecimal addAmount = dto.getRate().multiply(substractAmount).setScale(2, BigDecimal.ROUND_FLOOR);
+            // BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
+            // 计算还款额，并销账（还账单）
+            beforeAdd.rechargeAndSetAmount(addAmount);
+            super.addForCreditBillAsync(beforeAdd.getCreditInfoBO().getRepaymentAmount(), cusCode, currencyCodeTo);
+
+            log.info("币别转换计算还款额，并销账后，币别：{},总余额：{},当前余额：{},冻结余额：{},授信额度:{}",currencyCodeTo,beforeAdd.getTotalBalance(),beforeAdd.getCurrentBalance(),beforeAdd.getFreezeBalance(),beforeAdd.getCreditUseAmount());
+
+            setBalance(cusCode, currencyCodeTo, beforeAdd);
+
+            log.info("币别转换setBalance 2 更新转换后，币别：{},总余额：{},当前余额：{},冻结余额：{},授信额度:{}",currencyCodeTo,beforeAdd.getTotalBalance(),beforeAdd.getCurrentBalance(),beforeAdd.getFreezeBalance(),beforeAdd.getCreditUseAmount());
+            dto.setChargeCategoryChange(chargeType);
+            setSerialBillLogAsync(dto, accountBalanceChange);
+            dto.setPayMethod(BillEnum.PayMethod.EXCHANGE_INCOME);
+            dto.setAmount(addAmount);
+            dto.setCurrencyCode(currencyCodeTo);
+            dto.setCurrencyName(dto.getCurrencyName2());
+            AccountBalanceChange afterBalanceChange = recordOpLog(dto, beforeAdd.getCurrentBalance());
+            //设置流水账单
+            dto.setCurrencyCode(accountBalanceChange.getCurrencyCode());
+            dto.setCurrencyName(accountBalanceChange.getCurrencyName());
+            dto.setChargeCategoryChange(chargeType2);
+            setSerialBillLogAsync(dto, afterBalanceChange);
+            recordDetailLogAsync(dto, beforeSubtract);
+
+            return true;
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
@@ -88,9 +94,6 @@ public class ExchangePayFactory extends AbstractPayFactory {
             log.info("异常信息:" + e.getMessage());
             throw new RuntimeException("汇率转换,请稍候重试!");
         } finally {
-//            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-//                lock.unlock();
-//            }
         }
     }
 
