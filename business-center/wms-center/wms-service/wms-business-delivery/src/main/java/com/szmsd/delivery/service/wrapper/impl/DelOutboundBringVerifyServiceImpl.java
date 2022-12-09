@@ -413,6 +413,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     totalQuantity += detail.getQty();
                 }
+                if(StringUtils.equals(delOutboundWrapperContext.getBringVerifyFlag(), "1")){
+                    totalQuantity = 1L;
+                }
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                         new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm"),
                         Math.toIntExact(totalQuantity), delOutbound.getOrderNo(), declaredValue, ""));
@@ -428,7 +431,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
                         declareValue = declareValue.add(resultValue);
                     }
-
+                    if(StringUtils.equals(delOutboundWrapperContext.getBringVerifyFlag(), "1")){
+                        totalQuantity = 1L;
+                    }
                     totalQuantity += detail.getQty();
                 }
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
