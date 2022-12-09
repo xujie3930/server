@@ -73,8 +73,11 @@ public class DiscountDetailExportListVO {
     @ExcelProperty("偏远地区模板")
     private String remoteModel;
 
+//    private String zoneName;
+
+
     @ExcelProperty("分区名称")
-    private String zoneName;
+    private String zone;
 
     @ExcelProperty("起始价格")
     private BigDecimal startPrice;
