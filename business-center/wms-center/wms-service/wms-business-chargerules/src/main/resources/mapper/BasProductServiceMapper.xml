@@ -23,12 +23,14 @@
     <result column="del_flag" jdbcType="VARCHAR" property="delFlag" />
     <result column="compare_trackingno" jdbcType="VARCHAR" property="compareTrackingno" />
     <result column="recevie_warehouse_status" property="recevieWarehouseStatus"/>
+    <result column="custom_code" jdbcType="VARCHAR" property="customCode" />
+    <result column="custom_name" jdbcType="VARCHAR" property="customName" />
   </resultMap>
   <sql id="Base_Column_List">
     id, product_code, product_name, is_show, in_service, tracking_acquire_type, logistics_route_id, 
     terminal_carrier, logistics_provider_code, packing_rule, shipment_rule, create_by, 
     create_by_name, create_time, update_by, update_by_name, update_time, remark, del_flag,compare_trackingno,
-    recevie_warehouse_status
+    recevie_warehouse_status,custom_code,custom_name
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
     select 
@@ -153,6 +155,12 @@
       <if test="recevieWarehouseStatus != null">
         recevie_warehouse_status,
       </if>
+      <if test="customCode != null">
+        custom_code,
+      </if>
+      <if test="customName != null">
+        custom_name,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -218,6 +226,12 @@
       <if test="recevieWarehouseStatus != null">
         #{recevieWarehouseStatus,jdbcType=BIT},
       </if>
+      <if test="customCode != null">
+        #{customCode,jdbcType=VARCHAR},
+      </if>
+      <if test="customName != null">
+        #{customName,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.chargerules.domain.BasProductService">
@@ -282,6 +296,12 @@
       </if>
       <if test="recevieWarehouseStatus != null">
         recevie_warehouse_status = #{recevieWarehouseStatus,jdbcType=BIT},
+      </if>
+      <if test="customCode != null">
+        custom_code = #{customCode,jdbcType=VARCHAR},
+      </if>
+      <if test="customName != null">
+        custom_code = #{customName,jdbcType=VARCHAR},
       </if>
     </set>
     where product_code = #{productCode,jdbcType=VARCHAR}
