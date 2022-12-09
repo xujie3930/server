@@ -71,7 +71,7 @@ public class ExchangePayFactory extends AbstractPayFactory {
 
             log.info("币别转换计算还款额，并销账后，币别：{},总余额：{},当前余额：{},冻结余额：{},授信额度:{}",currencyCodeTo,beforeAdd.getTotalBalance(),beforeAdd.getCurrentBalance(),beforeAdd.getFreezeBalance(),beforeAdd.getCreditUseAmount());
 
-            setBalance(cusCode, currencyCodeTo, beforeAdd);
+            setBalance(cusCode, currencyCodeTo, beforeAdd,true);
 
             log.info("币别转换setBalance 2 更新转换后，币别：{},总余额：{},当前余额：{},冻结余额：{},授信额度:{}",currencyCodeTo,beforeAdd.getTotalBalance(),beforeAdd.getCurrentBalance(),beforeAdd.getFreezeBalance(),beforeAdd.getCreditUseAmount());
             dto.setChargeCategoryChange(chargeType);
