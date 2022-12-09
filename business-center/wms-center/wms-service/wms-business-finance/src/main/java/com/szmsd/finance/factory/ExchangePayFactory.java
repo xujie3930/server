@@ -64,7 +64,10 @@ public class ExchangePayFactory extends AbstractPayFactory {
             // BalanceDTO afterAdd = calculateBalance(beforeAdd, addAmount);
             // 计算还款额，并销账（还账单）
             beforeAdd.rechargeAndSetAmount(addAmount);
-            super.addForCreditBillAsync(beforeAdd.getCreditInfoBO().getRepaymentAmount(), cusCode, currencyCodeTo);
+            log.info("rechargeAndSetAmount  {}",addAmount);
+            BigDecimal repaymentAmount = beforeAdd.getCreditInfoBO().getRepaymentAmount();
+            log.info("repaymentAmount  {}",addAmount);
+            super.addForCreditBillAsync(repaymentAmount, cusCode, currencyCodeTo);
 
             log.info("币别转换计算还款额，并销账后，币别：{},总余额：{},当前余额：{},冻结余额：{},授信额度:{}",currencyCodeTo,beforeAdd.getTotalBalance(),beforeAdd.getCurrentBalance(),beforeAdd.getFreezeBalance(),beforeAdd.getCreditUseAmount());
 

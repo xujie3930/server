@@ -1,5 +1,6 @@
 package com.szmsd.finance.dto;
 
+import com.alibaba.fastjson.JSON;
 import com.szmsd.finance.enums.CreditConstant;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -103,7 +104,9 @@ public class BalanceDTO {
     public Boolean rechargeAndSetAmount(BigDecimal amount) {
         CreditInfoBO creditInfoBO = this.creditInfoBO;
         Integer creditStatus = creditInfoBO.getCreditStatus();
+        log.info("rechargeAndSetAmount  creditStatus :{}", creditStatus);
         if (!CreditConstant.CreditStatusEnum.NOT_ENABLED.getValue().equals(creditStatus)) {
+            log.info("");
             // 只要有授信额度 优先充值（还款）授信额度
             BigDecimal bigDecimal = creditInfoBO.rechargeCreditAmount(amount);
             if (creditInfoBO.getRepaymentAmount().compareTo(BigDecimal.ZERO) >= 0) {
