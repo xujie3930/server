@@ -4,6 +4,7 @@ import com.szmsd.chargerules.api.SpecialOperationInterface;
 import com.szmsd.chargerules.api.feign.factory.ChargeFeignFallback;
 import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.chargerules.domain.ChargeLog;
+import com.szmsd.chargerules.dto.BasProductServiceDao;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.finance.dto.QueryChargeDto;
@@ -30,4 +31,12 @@ public interface ChargeFeignService {
     @PostMapping("/log/selectBasProductService")
     @ApiOperation(value = "查询产品服务接口")
     R<List<BasProductService>> selectBasProductService(@RequestBody List<String> list);
+
+
+    //查询产品服务接口（二）
+    @PostMapping("/log/selectBasProductServiceeOne")
+    @ApiOperation(value = "查询产品服务接口")
+    R<BasProductService> selectBasProductServiceeOne(@RequestBody BasProductServiceDao basProductServiceDao);
+
+
 }

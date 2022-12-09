@@ -3,6 +3,7 @@ package com.szmsd.chargerules.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.chargerules.domain.BasProductService;
+import com.szmsd.chargerules.dto.BasProductServiceDao;
 import com.szmsd.http.dto.custom.BasCustomPricesgradeDto;
 import org.apache.ibatis.annotations.Param;
 
@@ -27,4 +28,7 @@ public interface BasProductServiceMapper extends BaseMapper<BasProductService> {
     List<BasCustomPricesgradeDto>  selectbasCustomPricesgradeList(BasCustomPricesgradeDto basCustomPricesgradeDto);
 
     Map selectProductCode(@Param("productCode") String productCode);
+
+
+    BasProductService  selectBasProductServiceeOne(BasProductServiceDao basProductServiceDao);
 }

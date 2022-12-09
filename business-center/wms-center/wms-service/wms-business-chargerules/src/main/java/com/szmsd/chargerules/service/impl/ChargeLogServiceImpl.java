@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.chargerules.domain.ChargeLog;
+import com.szmsd.chargerules.dto.BasProductServiceDao;
 import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.chargerules.mapper.BasProductServiceMapper;
 import com.szmsd.chargerules.mapper.ChargeLogMapper;
@@ -93,5 +94,16 @@ public class ChargeLogServiceImpl implements IChargeLogService {
             return R.failed();
         }
 
+    }
+
+    @Override
+    public R<BasProductService> selectBasProductServiceeOne(BasProductServiceDao basProductServiceDao) {
+        try {
+            BasProductService basProductService=  basProductServiceMapper.selectBasProductServiceeOne(basProductServiceDao);
+            return R.ok(basProductService);
+        }catch (Exception e){
+            e.printStackTrace();
+            return R.failed();
+        }
     }
 }
