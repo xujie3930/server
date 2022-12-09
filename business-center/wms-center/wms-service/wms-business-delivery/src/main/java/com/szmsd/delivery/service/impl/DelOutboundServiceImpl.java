@@ -2875,7 +2875,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.set(DelOutbound::getWeight, dto.getWeight());
         updateWrapper.set(DelOutbound::getLength,dto.getLength());
-        updateWrapper.set(DelOutbound::getWidth,dto.getWeight());
+        updateWrapper.set(DelOutbound::getWidth,dto.getWidth());
         updateWrapper.set(DelOutbound::getHeight,dto.getHeight());
         updateWrapper.set(DelOutbound::getCustomCode,dto.getCustomCode());
         updateWrapper.set(DelOutbound::getPackageWeightDeviation,dto.getPackageWeightDeviation());
