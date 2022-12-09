@@ -547,20 +547,21 @@ public final class DelOutboundServiceImplUtil {
                 Phrase element = new Phrase("To:");
                 pdfPCell.addElement(element);
                 pdfPCell.addElement(new Phrase(delOutboundAddress.getConsignee()));
-                pdfPCell.addElement(new Phrase(delOutboundAddress.getStreet1()));
-                pdfPCell.addElement(new Phrase(delOutboundAddress.getStreet2()));
-                pdfPCell.addElement(new Phrase(delOutboundAddress.getCity() + " " + delOutboundAddress.getStateOrProvince() + " " + delOutboundAddress.getPostCode()));
+                pdfPCell.addElement(new Phrase(delOutboundAddress.getStreet1()+" "+delOutboundAddress.getStreet2()+" "+ delOutbound.getHouseNo()));
+                pdfPCell.addElement(new Phrase(delOutboundAddress.getCity() + " " + delOutboundAddress.getStateOrProvince()));
+                pdfPCell.addElement(new Phrase(delOutboundAddress.getPostCode()));
                 // 国家二字码
                 String text = delOutboundAddress.getCountryCode();
                 if (StringUtils.isEmpty(text)) {
                     // 二字码是空的就取国家名称
                     text = delOutboundAddress.getCountry();
                 }
-                Paragraph country = new Paragraph(text, font);
-                country.setAlignment(Element.ALIGN_RIGHT);
-                country.setSpacingBefore(-5f);
-                country.setSpacingAfter(0f);
-                pdfPCell.addElement(country);
+                pdfPCell.addElement(new Phrase(text));
+//                Paragraph country = new Paragraph(text, font);
+//                country.setAlignment(Element.ALIGN_RIGHT);
+//                country.setSpacingBefore(-5f);
+//                country.setSpacingAfter(0f);
+//                pdfPCell.addElement(country);
                 pdfPCell.addElement(new Phrase("TEL:" + delOutboundAddress.getPhoneNo()));
                 pdfPCell.addElement(new Phrase("EMAIL:" + delOutboundAddress.getEmail()));
             } else {

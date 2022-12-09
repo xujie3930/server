@@ -614,7 +614,7 @@
         sum(
             CASE
             WHEN
-                a.pay_method in ('EXCHANGE_INCOME','OFFLINE_INCOME','ONLINE_INCOME')
+                a.pay_method in ('EXCHANGE_INCOME','OFFLINE_INCOME','ONLINE_INCOME') or a.business_category in('退费','赔偿','充值','优惠')
             THEN
             abs(a.amount) ELSE 0-abs(a.amount)
             END
@@ -637,7 +637,7 @@
             sum(
                 CASE
                 WHEN
-                    a.pay_method in ('EXCHANGE_INCOME','OFFLINE_INCOME','ONLINE_INCOME')
+                    a.pay_method in ('EXCHANGE_INCOME','OFFLINE_INCOME','ONLINE_INCOME') or a.business_category in('退费','赔偿','充值','优惠')
                 THEN
                 abs(a.amount) ELSE 0-abs(a.amount)
                 END
@@ -664,7 +664,7 @@
         a.id,a.no,a.tracking_no,a.cus_code,a.cus_name,a.currency_code,a.currency_name,
         (CASE
         WHEN
-            a.pay_method in ('EXCHANGE_INCOME','OFFLINE_INCOME','ONLINE_INCOME')
+            a.pay_method in ('EXCHANGE_INCOME','OFFLINE_INCOME','ONLINE_INCOME') or a.business_category in('退费','赔偿','充值','优惠')
         THEN
         abs(a.amount) ELSE 0-abs(a.amount)
         END) as amount,
