@@ -433,7 +433,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                 basFile.setState("0");
                 basFile.setFileRoute(filePath);
                 basFile.setCreateBy(SecurityUtils.getUsername());
-                basFile.setFileName(fileName + ".xlsx");
+                basFile.setFileName(fileName + ".xls");
                 basFile.setModularType(0);
                 basFile.setModularNameZh("业务明细导出");
                 basFile.setModularNameEn("accountSerialBill");
