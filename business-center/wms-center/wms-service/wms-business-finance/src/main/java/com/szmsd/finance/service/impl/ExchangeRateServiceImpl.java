@@ -80,7 +80,7 @@ public class ExchangeRateServiceImpl implements IExchangeRateService  {
         if(dto.getRate()==null){
             return R.failed("Exchange rate cannot be blank");
         }
-        if(!checkExchangeRateIsExists(dto,0)){
+        if(!checkExchangeRateIsExistsadd(dto,0)){
             return R.failed("Currency is blank or the exchange rate has been maintained");
         }
         ExchangeRate domain= new ExchangeRate();
@@ -99,6 +99,16 @@ public class ExchangeRateServiceImpl implements IExchangeRateService  {
             return false;
         }
         List<ExchangeRate> list=exchangeRateMapper.checkExchangeRateIsExists(dto);
+        return list.size()<=count;
+    }
+
+    private boolean checkExchangeRateIsExistsadd(ExchangeRateDTO dto, int count) {
+        String currencyFromCode = dto.getExchangeFromCode();
+        String currencyToCode = dto.getExchangeToCode();
+        if(currencyFromCode==null||currencyToCode==null){
+            return false;
+        }
+        List<ExchangeRate> list=exchangeRateMapper.checkExchangeRateIsExistsadd(dto);
         return list.size()<=count;
     }
 
