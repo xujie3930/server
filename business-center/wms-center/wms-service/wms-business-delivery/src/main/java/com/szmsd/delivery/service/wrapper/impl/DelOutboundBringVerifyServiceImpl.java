@@ -413,7 +413,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     totalQuantity += detail.getQty();
                 }
-                if(StringUtils.equals(delOutboundWrapperContext.getBringVerifyFlag(), "1")){
+                if(StringUtils.equals(delOutboundWrapperContext.getBringVerifyFlag(), "0")){
                     totalQuantity = 1L;
                 }
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
@@ -431,7 +431,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
                         declareValue = declareValue.add(resultValue);
                     }
-                    if(StringUtils.equals(delOutboundWrapperContext.getBringVerifyFlag(), "1")){
+                    if(StringUtils.equals(delOutboundWrapperContext.getBringVerifyFlag(), "0")){
                         totalQuantity = 1L;
                     }
                     totalQuantity += detail.getQty();
