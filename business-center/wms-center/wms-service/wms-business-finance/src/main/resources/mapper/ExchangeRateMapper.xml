@@ -21,6 +21,10 @@
     <select id="selectRates" resultType="com.szmsd.finance.dto.ExchangeRateDTO">
         select * from fss_exchange_rate where exchange_from=#{map.exchangeFrom} and exchange_to=#{map.exchangeTo}
     </select>
+    <select id="checkExchangeRateIsExistsadd" resultType="com.szmsd.finance.domain.ExchangeRate">
+        select * from fss_exchange_rate
+        where exchange_from_code=#{exchangeFromCode} and exchange_to_code=#{exchangeToCode}
+    </select>
     <delete id="deleteExchangeRate">
          delete from fss_exchange_rate where exchange_from=#{map.exchangeFrom} and exchange_to=#{map.exchangeTo}
     </delete>
