@@ -73,7 +73,7 @@ public class DiscountDetailExportListVO {
     @ExcelProperty("偏远地区模板")
     private String remoteModel;
 
-    private String zoneName;
+//    private String zoneName;
 
 
     @ExcelProperty("分区名称")
