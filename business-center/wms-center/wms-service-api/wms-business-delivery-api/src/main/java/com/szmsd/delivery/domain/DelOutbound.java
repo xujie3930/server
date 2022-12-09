@@ -359,4 +359,7 @@ public class DelOutbound extends BaseEntity {
     @ApiModelProperty(value = "国家")
     @TableField(exist = false)
     private String country;
+
+    @ApiModelProperty(value = "尾程标签状态")
+    private Integer endTagState;
 }

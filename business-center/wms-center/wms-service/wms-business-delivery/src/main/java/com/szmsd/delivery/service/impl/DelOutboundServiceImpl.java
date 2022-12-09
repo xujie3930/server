@@ -278,7 +278,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         String amazonReferenceId = delOutbound.getAmazonReferenceId();
 
         if(StringUtils.isEmpty(amazonLogisticsRouteId1) && StringUtils.isNotEmpty(amazonReferenceId)){
-            throw new CommonException("400","The order number is being obtained");
+            throw new CommonException("200","The order number is being obtained");
         }
 
         DelOutboundThirdPartyVO delOutboundThirdPartyVO =
@@ -2875,7 +2875,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.set(DelOutbound::getWeight, dto.getWeight());
         updateWrapper.set(DelOutbound::getLength,dto.getLength());
-        updateWrapper.set(DelOutbound::getWidth,dto.getWeight());
+        updateWrapper.set(DelOutbound::getWidth,dto.getWidth());
         updateWrapper.set(DelOutbound::getHeight,dto.getHeight());
         updateWrapper.set(DelOutbound::getCustomCode,dto.getCustomCode());
         updateWrapper.set(DelOutbound::getPackageWeightDeviation,dto.getPackageWeightDeviation());
@@ -3050,7 +3050,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             String pathname = null;
             byte[] fb = null;
-            if("1".equals(dto.getType())){
+            if(outbound.getEndTagState().equals(DelOutboundEndTagStateEnum.REVIEWED.getCode())){
                 pathname = outbound.getShipmentRetryLabel();
                 File labelFile = new File(pathname);
                 if (labelFile.exists()) {
