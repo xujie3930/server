@@ -23,4 +23,6 @@ public interface ExchangeRateMapper extends BaseMapper<ExchangeRate> {
     void deleteExchangeRate(@Param("map") Map map);
 
     int saveBatch(List<ExchangeRate> exchangeRateList);
+
+    List<ExchangeRate>  checkExchangeRateIsExistsadd(ExchangeRateDTO dto);
 }
