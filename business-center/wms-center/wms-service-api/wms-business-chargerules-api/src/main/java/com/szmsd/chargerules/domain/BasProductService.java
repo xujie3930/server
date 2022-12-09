@@ -64,6 +64,13 @@ public class BasProductService extends BaseEntity {
     @ApiModelProperty(value = "是否收货仓库1")
     private int recevieWarehouseStatus;
 
+    @ApiModelProperty(value = "客户代码")
+    private String customCode;
+
+    @ApiModelProperty(value = "客户名字")
+    private String customName;
+
+
 
 
 
