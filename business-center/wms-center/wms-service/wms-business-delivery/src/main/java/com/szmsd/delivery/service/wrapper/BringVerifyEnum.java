@@ -334,6 +334,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 pricingEnum = PricingEnum.SKU;
             }
             stopWatch.start();
+            delOutboundWrapperContext.setBringVerifyFlag("0");
             ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, pricingEnum);
             stopWatch.stop();
             logger.info(">>>>>[创建出库单{}]-Pricing计算返回结果：耗时{}, 内容:{}", delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis(),
