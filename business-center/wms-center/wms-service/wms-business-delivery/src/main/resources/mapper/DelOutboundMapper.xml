@@ -352,7 +352,7 @@
         FROM
         del_outbound
         WHERE
-        state = 'DELIVERED'
+        state in ('DELIVERED','PROCESSING')
         AND exception_message_wms IS NOT NULL
         AND exception_message_wms != ''
         AND order_type IN('Normal','SelfPick','Batch','NewSku','SplitSku','Destroy')
@@ -372,7 +372,7 @@
         del_outbound a
         LEFT JOIN del_outbound_address b on b.order_no=a.order_no
         WHERE
-        state = 'DELIVERED'
+        state  in ('DELIVERED','PROCESSING')
         AND (a.exception_message_wms IS NULL OR a.exception_message_wms = '' )
         AND a.order_type IN ('Normal', 'SelfPick', 'Batch', 'NewSku', 'SplitSku', 'Destroy')
         AND a.create_time  &lt;= #{createTime}
