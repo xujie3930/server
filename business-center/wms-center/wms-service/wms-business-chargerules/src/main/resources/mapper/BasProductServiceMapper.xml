@@ -69,6 +69,10 @@
   <select id="selectProductCode" resultType="java.util.Map" parameterType="java.lang.String">
     SELECT compare_trackingno as compareTrackingno,recevie_warehouse_status as recevieWarehouseStatus  from bas_product_service where product_code=#{productCode}
   </select>
+  <select id="selectBasProductServiceeOne" resultType="com.szmsd.chargerules.domain.BasProductService" parameterType="com.szmsd.chargerules.dto.BasProductServiceDao">
+    SELECT * from  bas_product_service where  FIND_IN_SET(#{customCode},custom_code) AND product_code=#{productCode} LIMIT 1
+
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from bas_product_service
     where id = #{id,jdbcType=INTEGER}

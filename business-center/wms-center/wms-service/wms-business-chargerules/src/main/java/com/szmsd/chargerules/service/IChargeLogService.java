@@ -2,6 +2,7 @@ package com.szmsd.chargerules.service;
 
 import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.chargerules.domain.ChargeLog;
+import com.szmsd.chargerules.dto.BasProductServiceDao;
 import com.szmsd.chargerules.dto.ChargeLogDto;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.dto.QueryChargeDto;
@@ -41,4 +42,6 @@ public interface IChargeLogService {
     int update(Long id);
 
     R selectBasProductService(List<String> list);
+
+    R<BasProductService>  selectBasProductServiceeOne(BasProductServiceDao basProductServiceDao);
 }
