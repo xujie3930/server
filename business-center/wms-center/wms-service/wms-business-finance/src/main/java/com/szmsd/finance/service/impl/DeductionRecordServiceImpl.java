@@ -155,8 +155,7 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
         StopWatch stopWatch = new StopWatch("还款销账");
         stopWatch.start();
         log.info("addForCreditBill {} - {} - {}", addMoney, cusCode, currencyCode);
-        List<FssDeductionRecord> fssDeductionRecords = new ArrayList<>();
-        while (addMoney.compareTo(BigDecimal.ZERO) > 0 && (fssDeductionRecords = baseMapper.selectList(Wrappers.<FssDeductionRecord>lambdaQuery()
+        List<FssDeductionRecord> fssDeductionRecords = baseMapper.selectList(Wrappers.<FssDeductionRecord>lambdaQuery()
                 .eq(FssDeductionRecord::getCurrencyCode, currencyCode)
                 .eq(FssDeductionRecord::getCusCode, cusCode)
                 .in(FssDeductionRecord::getPayMethod, BillEnum.PayMethod.BALANCE_DEDUCTIONS.name(), BillEnum.PayMethod.BUSINESS_OPERATE.name())
@@ -168,7 +167,9 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
                         FssDeductionRecord::getActualDeduction,
                         FssDeductionRecord::getRemainingRepaymentAmount,
                         FssDeductionRecord::getCreditUseAmount,
-                        FssDeductionRecord::getRepaymentAmount))).size() > 0) {
+                        FssDeductionRecord::getRepaymentAmount));
+
+        while (addMoney.compareTo(BigDecimal.ZERO) > 0 && fssDeductionRecords.size() > 0) {
             log.info("inner==addForCreditBill {} - {} - {}", addMoney, cusCode, currencyCode);
 
             for (FssDeductionRecord x : fssDeductionRecords) {
