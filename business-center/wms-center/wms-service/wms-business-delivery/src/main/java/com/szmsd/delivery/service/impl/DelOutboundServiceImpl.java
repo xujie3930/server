@@ -3050,7 +3050,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             String pathname = null;
             byte[] fb = null;
-            if("1".equals(dto.getType())){
+            if(outbound.getEndTagState().equals(DelOutboundEndTagStateEnum.REVIEWED.getCode())){
                 pathname = outbound.getShipmentRetryLabel();
                 File labelFile = new File(pathname);
                 if (labelFile.exists()) {

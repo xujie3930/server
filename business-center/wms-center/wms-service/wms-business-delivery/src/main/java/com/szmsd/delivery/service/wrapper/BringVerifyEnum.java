@@ -11,7 +11,10 @@ import com.szmsd.bas.api.feign.RemoteAttachmentService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
+import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
+import com.szmsd.chargerules.domain.BasProductService;
+import com.szmsd.chargerules.dto.BasProductServiceDao;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -433,6 +436,14 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
 
             delOutbound.setCurrencyDescribe(currencyDescribe);
 
+            ChargeFeignService chargeFeignService = SpringUtils.getBean(ChargeFeignService.class);
+
+            BasProductServiceDao basProductServiceDao = new BasProductServiceDao();
+            basProductServiceDao.setProductCode(delOutbound.getPrcInterfaceProductCode());
+            basProductServiceDao.setCustomCode(delOutbound.getSellerCode());
+            logger.info("selectBasProductServiceeOne 参数:{}",JSON.toJSONString(basProductServiceDao));
+            R<BasProductService> basProductServiceR = chargeFeignService.selectBasProductServiceeOne(basProductServiceDao);
+            logger.info("selectBasProductServiceeOne 返回:{}",JSON.toJSONString(basProductServiceR));
 
             //更新PRC发货服务
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
@@ -443,6 +454,14 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setPrcInterfaceProductCode(delOutbound.getPrcInterfaceProductCode());
             updateDelOutbound.setPrcTerminalCarrier(delOutbound.getPrcTerminalCarrier());
             updateDelOutbound.setAmazonReferenceId(data.getAmazonLogisticsRouteId());
+
+            if(basProductServiceR != null && basProductServiceR.getCode() == 200){
+
+                BasProductService basProductService = basProductServiceR.getData();
+                if(basProductService != null){
+                    updateDelOutbound.setEndTagState(DelOutboundEndTagStateEnum.REVIEWED.getCode());
+                }
+            }
 
             delOutboundService.updateByIdTransactional(updateDelOutbound);
 
