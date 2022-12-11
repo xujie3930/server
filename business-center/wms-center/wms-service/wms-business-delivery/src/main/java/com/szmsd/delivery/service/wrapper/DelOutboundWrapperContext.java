@@ -35,6 +35,15 @@ public class DelOutboundWrapperContext implements ApplicationContext {
     // 是否执行更新发货指令接口调用
     private boolean execShipmentShipping;
 
+    private String bringVerifyFlag;
+
+    public String getBringVerifyFlag() {
+        return bringVerifyFlag;
+    }
+
+    public void setBringVerifyFlag(String bringVerifyFlag) {
+        this.bringVerifyFlag = bringVerifyFlag;
+    }
 
     public boolean getExecShipmentShipping() {
         return execShipmentShipping;
