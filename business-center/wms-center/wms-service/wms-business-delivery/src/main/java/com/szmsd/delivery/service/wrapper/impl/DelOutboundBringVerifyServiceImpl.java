@@ -418,7 +418,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                         new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm"),
-                        Math.toIntExact(totalQuantity), delOutbound.getOrderNo(), declaredValue, ""));
+                        Math.toIntExact(1), delOutbound.getOrderNo(), declaredValue, ""));
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
                 BigDecimal declareValue = BigDecimal.ZERO;
                 Long totalQuantity = 0L;
@@ -438,7 +438,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 }
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                         new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                        , Math.toIntExact(totalQuantity), delOutbound.getOrderNo(), declareValue, ""));
+                        , Math.toIntExact(1), delOutbound.getOrderNo(), declareValue, ""));
             }
         }else if(DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())){
 
@@ -509,7 +509,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
                     packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(product.getWeight()), "g"),
                             new Packing(Utils.valueOf(product.getLength()), Utils.valueOf(product.getWidth()), Utils.valueOf(product.getHeight()), "cm"),
-                            Math.toIntExact(qty), delOutbound.getOrderNo(), resultDeclaredValue, product.getProductAttribute()));
+                            Math.toIntExact(1), delOutbound.getOrderNo(), resultDeclaredValue, product.getProductAttribute()));
                     // 判断有没有包材
                     String bindCode = detail.getBindCode();
                     if (StringUtils.isNotEmpty(bindCode)) {
@@ -529,7 +529,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
                         packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(baseProduct.getWeight()), "g"),
                                 new Packing(Utils.valueOf(baseProduct.getLength()), Utils.valueOf(baseProduct.getWidth()), Utils.valueOf(baseProduct.getHeight()), "cm"),
-                                Math.toIntExact(qty), delOutbound.getOrderNo(), resultDeclaredValue2, ""));
+                                Math.toIntExact(1), delOutbound.getOrderNo(), resultDeclaredValue2, ""));
                     }
                 }
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
@@ -577,7 +577,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                             new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                            , Math.toIntExact(totalQuantity), delOutbound.getOrderNo(), declareValue, ""));
+                            , Math.toIntExact(1), delOutbound.getOrderNo(), declareValue, ""));
                 }
             }
         }
