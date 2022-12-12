@@ -1562,6 +1562,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         createShipmentRequestDto.setOrderType(delOutbound.getOrderType());
         createShipmentRequestDto.setSellerCode(delOutbound.getSellerCode());
         createShipmentRequestDto.setTrackingNo(trackingNo);
+        createShipmentRequestDto.setRefCode(delOutbound.getRefNo());
         // 获取从prc返回的发货规则
         String shipmentRule;
         if (StringUtils.isNotEmpty(delOutbound.getProductShipmentRule())) {

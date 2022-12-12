@@ -39,6 +39,9 @@ public class CreateShipmentRequestDto implements Serializable {
     @ApiModelProperty(value = "参照单号")
     private String refOrderNo;
 
+    @ApiModelProperty(value = "参考单号")
+    private String refCode;
+
     @ApiModelProperty(value = "是否必须按要求装箱")
     private Boolean isPackingByRequired;
 
