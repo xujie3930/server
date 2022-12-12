@@ -169,7 +169,7 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
                         FssDeductionRecord::getCreditUseAmount,
                         FssDeductionRecord::getRepaymentAmount));
 
-        while (addMoney.compareTo(BigDecimal.ZERO) > 0 && fssDeductionRecords.size() > 0) {
+        if (addMoney.compareTo(BigDecimal.ZERO) > 0 && fssDeductionRecords.size() > 0) {
             log.info("inner==addForCreditBill {} - {} - {}", addMoney, cusCode, currencyCode);
 
             for (FssDeductionRecord x : fssDeductionRecords) {
@@ -186,6 +186,9 @@ public class DeductionRecordServiceImpl extends ServiceImpl<DeductionRecordMappe
             }
             this.updateBatchById(fssDeductionRecords);
         }
+
+        fssDeductionRecords.clear();
+
         stopWatch.stop();
         log.info("addForCreditBill {} - {} - {}\n{}", addMoney, cusCode, currencyCode, stopWatch.prettyPrint());
         // 多余的钱充值道钱包里面

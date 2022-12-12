@@ -2010,6 +2010,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (shipmentState != null) {
             updateWrapper.set(DelOutbound::getShipmentState, shipmentState);
         }
+        updateWrapper.eq(DelOutbound::getOrderNo,dto.getOrderNo());
         return this.baseMapper.update(null, updateWrapper);
     }
 

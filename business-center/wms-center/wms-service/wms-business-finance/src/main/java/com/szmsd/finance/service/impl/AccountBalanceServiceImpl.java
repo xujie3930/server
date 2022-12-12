@@ -668,59 +668,25 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
         log.info("查询用户币别余额{}-{}", cusCode, currencyCode);
         // 查询授信额使用数
 
-        //Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
+//        Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
 //        log.info("查询用户币别余额完成：{}", JSONObject.toJSONString(creditUse));
 //        BigDecimal creditUseAmount =  Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
-
+//
 //          List<CreditUseInfo> creditUseList = accountBalanceMapper.queryTimeCreditUse(cusCode,currencyCode);
 //
 //          Map<String,CreditUseInfo> creditUse = creditUseList.stream().collect(Collectors.toMap(CreditUseInfo::getCurrencyCode,v->v));
 //
 //          log.info("查询用户币别余额完成：{}", JSONObject.toJSONString(creditUse));
 //          BigDecimal creditUseAmount =  Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
-
+//
 //        CompletableFuture<BigDecimal> creditUseAmountFuture = CompletableFuture.supplyAsync(() -> {
 //            Map<String, CreditUseInfo> creditUse = iDeductionRecordService.queryTimeCreditUse(cusCode, Arrays.asList(currencyCode), Arrays.asList(CreditConstant.CreditBillStatusEnum.DEFAULT, CreditConstant.CreditBillStatusEnum.CHECKED));
 //            log.info("查询用户币别余额完成：{}", JSONObject.toJSONString(creditUse));
 //            return Optional.ofNullable(creditUse.get(currencyCode)).map(CreditUseInfo::getCreditUseAmount).orElse(BigDecimal.ZERO);
 //        }, financeThreadTaskPool);
 
-//        CompletableFuture<AccountBalance> accountBalanceCompletableFuture = CompletableFuture.supplyAsync(() -> {
-//            QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
-//            queryWrapper.eq("cus_code", cusCode);
-//            queryWrapper.eq("currency_code", currencyCode);
-//            AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
-//            // 账户不存在 则为该用户开通相对应的币别账户
-//            if (accountBalance == null) {
-//                log.info("getBalance() cusCode: {} currencyCode: {}", cusCode, currencyCode);
-//                String currencyName = getCurrencyName(currencyCode);
-//                accountBalance = new AccountBalance(cusCode, currencyCode, currencyName);
-//                //判断是否有启用中的授信信息，有的话需要设置
-//                List<AccountBalance> accountBalances = accountBalanceMapper.selectList(Wrappers.<AccountBalance>lambdaQuery()
-//                        .eq(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue())
-//                        .eq(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.ACTIVE.getValue())
-//                        .eq(AccountBalance::getCusCode, cusCode));
-//                if (CollectionUtils.isNotEmpty(accountBalances)) {
-//                    log.info("查询到客户 {} 启用中的授信信息：{}", cusCode, JSON.toJSONString(accountBalances));
-//                    AccountBalance accountBalanceCredit = accountBalances.get(0);
-//                    BeanUtils.copyProperties(accountBalanceCredit, accountBalance);
-//                    accountBalance.setId(null);
-//                    accountBalance.setCurrencyCode(currencyCode).setCurrencyName(currencyName)
-//                            .setCreditUseAmount(BigDecimal.ZERO).setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue().toString())
-//                            .setTotalBalance(BigDecimal.ZERO).setCurrentBalance(BigDecimal.ZERO).setFreezeBalance(BigDecimal.ZERO)
-//                            .setCreateTime(new Date());
-//                }
-//                // 如果没有CreditType 则设置默认值，防止后续操作空指针
-//                if (StringUtils.isBlank(accountBalance.getCreditType())) {
-//                    accountBalance.setCreditType(CreditConstant.CreditTypeEnum.QUOTA.getValue().toString());
-//                }
-//                accountBalance.setVersion(0L);
-//                accountBalanceMapper.insert(accountBalance);
-//            }
-//            return accountBalance;
-//        }, financeThreadTaskPool);
-
-        QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
+        CompletableFuture<AccountBalance> accountBalanceCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("cus_code", cusCode);
             queryWrapper.eq("currency_code", currencyCode);
             AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
@@ -751,9 +717,43 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                 accountBalance.setVersion(0L);
                 accountBalanceMapper.insert(accountBalance);
             }
+            return accountBalance;
+        }, financeThreadTaskPool);
+
+//        QueryWrapper<AccountBalance> queryWrapper = new QueryWrapper<>();
+//            queryWrapper.eq("cus_code", cusCode);
+//            queryWrapper.eq("currency_code", currencyCode);
+//            AccountBalance accountBalance = accountBalanceMapper.selectOne(queryWrapper);
+//            // 账户不存在 则为该用户开通相对应的币别账户
+//            if (accountBalance == null) {
+//                log.info("getBalance() cusCode: {} currencyCode: {}", cusCode, currencyCode);
+//                String currencyName = getCurrencyName(currencyCode);
+//                accountBalance = new AccountBalance(cusCode, currencyCode, currencyName);
+//                //判断是否有启用中的授信信息，有的话需要设置
+//                List<AccountBalance> accountBalances = accountBalanceMapper.selectList(Wrappers.<AccountBalance>lambdaQuery()
+//                        .eq(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue())
+//                        .eq(AccountBalance::getCreditStatus, CreditConstant.CreditStatusEnum.ACTIVE.getValue())
+//                        .eq(AccountBalance::getCusCode, cusCode));
+//                if (CollectionUtils.isNotEmpty(accountBalances)) {
+//                    log.info("查询到客户 {} 启用中的授信信息：{}", cusCode, JSON.toJSONString(accountBalances));
+//                    AccountBalance accountBalanceCredit = accountBalances.get(0);
+//                    BeanUtils.copyProperties(accountBalanceCredit, accountBalance);
+//                    accountBalance.setId(null);
+//                    accountBalance.setCurrencyCode(currencyCode).setCurrencyName(currencyName)
+//                            .setCreditUseAmount(BigDecimal.ZERO).setCreditType(CreditConstant.CreditTypeEnum.TIME_LIMIT.getValue().toString())
+//                            .setTotalBalance(BigDecimal.ZERO).setCurrentBalance(BigDecimal.ZERO).setFreezeBalance(BigDecimal.ZERO)
+//                            .setCreateTime(new Date());
+//                }
+//                // 如果没有CreditType 则设置默认值，防止后续操作空指针
+//                if (StringUtils.isBlank(accountBalance.getCreditType())) {
+//                    accountBalance.setCreditType(CreditConstant.CreditTypeEnum.QUOTA.getValue().toString());
+//                }
+//                accountBalance.setVersion(0L);
+//                accountBalanceMapper.insert(accountBalance);
+//            }
 
         try {
-            //AccountBalance accountBalance = accountBalanceCompletableFuture.get();
+            AccountBalance accountBalance = accountBalanceCompletableFuture.get();
             //creditUseAmount = creditUseAmountFuture.get();
             BalanceDTO balanceDTO = new BalanceDTO(accountBalance.getCurrentBalance(), accountBalance.getFreezeBalance(), accountBalance.getTotalBalance());
             CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
