@@ -1,5 +1,8 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.finance.api.feign.factory.RechargeFeignFallback,\
-  com.szmsd.finance.api.feign.factory.AccountSerialBillFeignFallback
+  com.szmsd.finance.api.feign.factory.AccountSerialBillFeignFallback,\
+  com.szmsd.finance.api.feign.factory.RefundRequestFeignFallback,\
+  com.szmsd.finance.api.feign.factory.ConvertUnitFeignFallback
+  
 
   
