@@ -97,6 +97,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -215,6 +216,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 查询出库单模块
@@ -820,9 +824,21 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     private void checkRefNo(DelOutboundDto dto, Long id) {
+
+        String refNo = dto.getRefNo();
+
         if (StringUtils.isNotEmpty(dto.getRefNo())) {
+
+            Integer refNoState = (Integer)redisTemplate.opsForValue().get(refNo);
+
+            if(refNoState != null){
+                throw new RuntimeException("refNo:"+refNo+"已经存在,不允许重复提交");
+            }
+
+            redisTemplate.opsForValue().set(refNoState,1,120L,TimeUnit.SECONDS);
+
             LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
-            queryWrapper.eq(DelOutbound::getRefNo, dto.getRefNo());
+            queryWrapper.eq(DelOutbound::getRefNo, refNo);
             if (id != null) {
                 queryWrapper.ne(DelOutbound::getId, dto.getId());
             }
