@@ -3,6 +3,7 @@ package com.szmsd.delivery.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.command.OfflineCreateCostCmd;
 import com.szmsd.delivery.command.OfflineDeliveryCreateOrderCmd;
@@ -11,11 +12,10 @@ import com.szmsd.delivery.command.OfflineDeliveryTrackYeeCmd;
 import com.szmsd.delivery.convert.OfflineDeliveryConvert;
 import com.szmsd.delivery.domain.OfflineCostImport;
 import com.szmsd.delivery.domain.OfflineDeliveryImport;
-import com.szmsd.delivery.dto.OfflineCostExcelDto;
-import com.szmsd.delivery.dto.OfflineDeliveryExcelDto;
-import com.szmsd.delivery.dto.OfflineReadDto;
-import com.szmsd.delivery.dto.OfflineResultDto;
+import com.szmsd.delivery.dto.*;
+import com.szmsd.delivery.enums.ChargeImportStateEnum;
 import com.szmsd.delivery.enums.OfflineDeliveryStateEnum;
+import com.szmsd.delivery.mapper.ChargeImportMapper;
 import com.szmsd.delivery.mapper.OfflineCostImportMapper;
 import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import com.szmsd.delivery.service.OfflineDeliveryService;
@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -131,7 +132,32 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
 
         log.info("推送TY：{}", JSON.toJSONString(createOrder));
 
+        //step 5.完成
+        this.complete(createOrder);
+
+        log.info("dealOfflineDelivery 完成 ：{}");
+
         return R.ok();
+    }
+
+    private void complete(OfflineResultDto createOrder) {
+
+        OfflineDeliveryImportMapper importMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
+        List<OfflineDeliveryImport> offlineDeliveryImports = createOrder.getOfflineDeliveryImports();
+
+        List<OfflineImportDto> updateData = new ArrayList<>();
+        for(OfflineDeliveryImport deliveryImport : offlineDeliveryImports){
+
+            OfflineImportDto offlineImportDto = new OfflineImportDto();
+            offlineImportDto.setTrackingNo(deliveryImport.getTrackingNo());
+            offlineImportDto.setId(deliveryImport.getId());
+            offlineImportDto.setDealStatus(OfflineDeliveryStateEnum.PUSH_TY.getCode());
+            updateData.add(offlineImportDto);
+        }
+
+        if(CollectionUtils.isNotEmpty(updateData)) {
+            importMapper.updateDealState(updateData);
+        }
     }
 
 
