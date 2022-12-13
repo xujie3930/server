@@ -122,7 +122,7 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
             return R.failed("创建退费费用异常");
         }
 
-        log.info("创建退费费用异常：{}");
+        log.info("创建退费费用异常：{}", JSON.toJSONString(createOrder));
 
         //step 4. 推送TY
         int trackYee = new OfflineDeliveryTrackYeeCmd(createOrder).execute();
