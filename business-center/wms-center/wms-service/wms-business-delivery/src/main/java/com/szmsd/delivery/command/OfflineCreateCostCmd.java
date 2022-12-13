@@ -1,5 +1,6 @@
 package com.szmsd.delivery.command;
 
+import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.SpringUtils;
@@ -38,12 +39,15 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
         RefundRequestFeignService refundRequestFeignService = SpringUtils.getBean(RefundRequestFeignService.class);
         RefundRequestListAutoDTO autoRefundData = this.generatorRefundRequest();
 
+        logger.info("autoRefund 退费参数：{}", JSON.toJSONString(autoRefundData));
         //自动退费
         R addRequest = refundRequestFeignService.autoRefund(autoRefundData);
 
         if(addRequest.getCode() != 200){
             throw new RuntimeException(addRequest.getMsg());
         }
+
+        logger.info("autoRefund 退费返回：{}", JSON.toJSONString(addRequest));
 
         OfflineDeliveryImportMapper importMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
         List<OfflineDeliveryImport> offlineDeliveryImports = offlineResultDto.getOfflineDeliveryImports();
