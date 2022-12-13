@@ -50,6 +50,7 @@ public class OfflineDeliveryTrackYeeCmd extends BasicCommand<Integer> {
             iDelOutboundService.manualTrackingYee(ids);
             logger.info("推送TP结束",JSON.toJSONString(ids));
         }catch (Exception e){
+            e.printStackTrace();
             logger.error("推送PY失败：",e.getMessage());
             return 0;
         }
