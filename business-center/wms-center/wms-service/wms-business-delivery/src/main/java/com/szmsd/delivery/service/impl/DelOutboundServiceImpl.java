@@ -829,13 +829,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         if (StringUtils.isNotEmpty(dto.getRefNo())) {
 
-            Integer refNoState = (Integer)redisTemplate.opsForValue().get(refNo);
+            boolean refNoState = redisTemplate.hasKey(refNo);
 
-            if(refNoState != null){
+            if(refNoState){
                 throw new RuntimeException("refNo:"+refNo+"已经存在,不允许重复提交");
             }
 
-            redisTemplate.opsForValue().set(refNoState,1,120L,TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(refNo,1,120L,TimeUnit.SECONDS);
 
             LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
             queryWrapper.eq(DelOutbound::getRefNo, refNo);
