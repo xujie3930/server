@@ -97,6 +97,9 @@ public class CustPayDTO implements Serializable {
     @ApiModelProperty(value = "附注")
     private String note;
 
+    @ApiModelProperty(value = "流水号")
+    private String serialNumber;
+
 
     @Override
     public String toString() {
