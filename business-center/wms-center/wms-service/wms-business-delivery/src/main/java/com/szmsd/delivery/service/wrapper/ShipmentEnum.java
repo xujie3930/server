@@ -9,6 +9,7 @@ import com.szmsd.bas.dto.BasMeteringConfigDto;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.MessageUtil;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -24,9 +25,10 @@ import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundRetryLabelService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
-import com.szmsd.delivery.util.BigDecimalUtil;
 import com.szmsd.delivery.util.Utils;
+import com.szmsd.finance.api.feign.ConvertUnitFeignService;
 import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.domain.FssConvertUnit;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.*;
@@ -742,6 +744,29 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
             //判断计泡拦截
             BasMeteringConfigFeignService basMeteringConfigFeignService = SpringUtils.getBean(BasMeteringConfigFeignService.class);
+            ConvertUnitFeignService convertUnitFeignService = SpringUtils.getBean(ConvertUnitFeignService.class);
+
+            R<List<FssConvertUnit>> fssConvertUnitRs  =  convertUnitFeignService.findAll();
+
+            if(fssConvertUnitRs.getCode() != 200){
+                throw new CommonException("400", "计泡拦截异常,无法获取ConvertUnit数据");
+            }
+
+            List<FssConvertUnit> fssConvertUnitList = fssConvertUnitRs.getData();
+
+            if(CollectionUtils.isEmpty(fssConvertUnitList)){
+                throw new CommonException("400", "计泡拦截异常,ConvertUnit数据为空");
+            }
+
+            Map<String,FssConvertUnit> fssConvertUnitMap = fssConvertUnitList.stream().collect(Collectors.toMap(FssConvertUnit::getCalcUnit,v->v));
+            String calcWeightUnit = delOutbound.getCalcWeightUnit();
+            BigDecimal packcalcWeight = packageInfo.getCalcWeight().getValue();
+            FssConvertUnit fssConvertUnit = fssConvertUnitMap.get(calcWeightUnit);
+
+            if(fssConvertUnit != null){
+                BigDecimal convertValue = fssConvertUnit.getConvertValue();
+                packcalcWeight = BigDecimalUtil.setScale(packcalcWeight.multiply(convertValue));
+            }
 
             BasMeteringConfigDto dto = new BasMeteringConfigDto()
                     .setOrderType(delOutbound.getOrderType())
@@ -752,7 +777,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                     //下单重量
                     .setWeight(delOutbound.getForecastWeight() != null ? new BigDecimal(delOutbound.getForecastWeight()) : BigDecimal.ZERO)
                     //PRC返回的计费重
-                    .setCalcWeight(packageInfo.getCalcWeight().getValue())
+                    .setCalcWeight(packcalcWeight)
                     //仓库返回的实重
                     .setVolume(delOutbound.getWeight() != null ? new BigDecimal(delOutbound.getWeight()): null);
 

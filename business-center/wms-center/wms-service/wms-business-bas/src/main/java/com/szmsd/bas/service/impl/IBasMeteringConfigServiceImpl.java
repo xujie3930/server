@@ -149,14 +149,14 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                 list.forEach(x -> {
                     //0表示重量差，1表示百分比
                     if (x.getWeightTypeNameOneCode().equals("billableWeight") && x.getWeightTypeNameTwoCode().equals("volumeWeight")) {
-                        if (x.getDifferenceType() == 0) {
+                        if (x.getDifferenceType().equals(0)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
                                 throw new CommonException("Exceeding the set range, intercept");
                             }
-                        } else if (x.getDifferenceType() == 1) {
+                        } else if (x.getDifferenceType().equals(1)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             BigDecimal c[] = {basMeteringConfigDto.getVolume(), basMeteringConfigDto.getCalcWeight()};
@@ -176,14 +176,14 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
 
                     }
                     if (x.getWeightTypeNameOneCode().equals("volumeWeight") && x.getWeightTypeNameTwoCode().equals("billableWeight")) {
-                        if (x.getDifferenceType() == 0) {
+                        if (x.getDifferenceType().equals(0)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
                                 throw new CommonException("Exceeding the set range, intercept");
                             }
-                        } else if (x.getDifferenceType() == 1) {
+                        } else if (x.getDifferenceType().equals(1)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             BigDecimal c[] = {basMeteringConfigDto.getVolume(), basMeteringConfigDto.getCalcWeight()};
@@ -202,14 +202,14 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                         }
                     }
                     if (x.getWeightTypeNameOneCode().equals("billableWeight") && x.getWeightTypeNameTwoCode().equals("forecastWeight")) {
-                        if (x.getDifferenceType() == 0) {
+                        if (x.getDifferenceType().equals(0)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
                                 throw new CommonException("Exceeding the set range, intercept");
                             }
-                        } else if (x.getDifferenceType() == 1) {
+                        } else if (x.getDifferenceType().equals(1)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             BigDecimal c[] = {basMeteringConfigDto.getWeight(), basMeteringConfigDto.getCalcWeight()};
@@ -228,14 +228,14 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                         }
                     }
                     if (x.getWeightTypeNameOneCode().equals("forecastWeight") && x.getWeightTypeNameTwoCode().equals("billableWeight")) {
-                        if (x.getDifferenceType() == 0) {
+                        if (x.getDifferenceType().equals(0)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
                                 throw new CommonException("Exceeding the set range, intercept");
                             }
-                        } else if (x.getDifferenceType() == 1) {
+                        } else if (x.getDifferenceType().equals(1)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             BigDecimal c[] = {basMeteringConfigDto.getWeight(), basMeteringConfigDto.getCalcWeight()};
@@ -254,14 +254,14 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                         }
                     }
                     if (x.getWeightTypeNameOneCode().equals("forecastWeight") && x.getWeightTypeNameTwoCode().equals("volumeWeight")) {
-                        if (x.getDifferenceType() == 0) {
+                        if (x.getDifferenceType().equals(0)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
                                 throw new CommonException("Exceeding the set range, intercept");
                             }
-                        } else if (x.getDifferenceType() == 1) {
+                        } else if (x.getDifferenceType().equals(1)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             BigDecimal c[] = {basMeteringConfigDto.getWeight(), basMeteringConfigDto.getVolume()};
@@ -280,14 +280,14 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                         }
                     }
                     if (x.getWeightTypeNameOneCode().equals("volumeWeight") && x.getWeightTypeNameTwoCode().equals("forecastWeight")) {
-                        if (x.getDifferenceType() == 0) {
+                        if (x.getDifferenceType().equals(0)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             int a = bigDecimal.compareTo(bigDecimal1);
                             if (a == 1) {
                                 throw new CommonException("Exceeding the set range, intercept");
                             }
-                        } else if (x.getDifferenceType() == 1) {
+                        } else if (x.getDifferenceType().equals(1)) {
                             BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
                             BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
                             BigDecimal c[] = {basMeteringConfigDto.getWeight(), basMeteringConfigDto.getVolume()};
@@ -313,7 +313,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                     list3.forEach(x -> {
                         //0表示重量差，1表示百分比
                         if (x.getWeightTypeNameOneCode().equals("billableWeight") && x.getWeightTypeNameTwoCode().equals("volumeWeight")) {
-                            if (x.getDifferenceType() == 0) {
+                            if (x.getDifferenceType().equals(0)) {
                                 if (basMeteringConfigDto.getVolume() != null && basMeteringConfigDto.getCalcWeight() != null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                                     BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -322,7 +322,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                                         throw new CommonException("Exceeding the set range, intercept");
                                     }
                                 }
-                            } else if (x.getDifferenceType() == 1) {
+                            } else if (x.getDifferenceType().equals(1)) {
                                 if (basMeteringConfigDto.getVolume() != null && basMeteringConfigDto.getCalcWeight() != null) {
 
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
@@ -345,7 +345,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
 
                         }
                         if (x.getWeightTypeNameOneCode().equals("volumeWeight") && x.getWeightTypeNameTwoCode().equals("billableWeight")) {
-                            if (x.getDifferenceType() == 0) {
+                            if (x.getDifferenceType().equals(0)) {
                                 if (basMeteringConfigDto.getVolume()!=null&&basMeteringConfigDto.getCalcWeight()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                                     BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -354,7 +354,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                                         throw new CommonException("Exceeding the set range, intercept");
                                     }
                                 }
-                            } else if (x.getDifferenceType() == 1) {
+                            } else if (x.getDifferenceType().equals(1)) {
                                 if (basMeteringConfigDto.getVolume() != null && basMeteringConfigDto.getCalcWeight() != null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getVolume().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                                     BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -375,7 +375,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
                         }
                         if (x.getWeightTypeNameOneCode().equals("billableWeight") && x.getWeightTypeNameTwoCode().equals("forecastWeight")) {
-                            if (x.getDifferenceType() == 0) {
+                            if (x.getDifferenceType().equals(0)) {
                                 if (basMeteringConfigDto.getWeight()!=null&&basMeteringConfigDto.getCalcWeight()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                                     BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -384,7 +384,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                                         throw new CommonException("Exceeding the set range, intercept");
                                     }
                                 }
-                            } else if (x.getDifferenceType() == 1) {
+                            } else if (x.getDifferenceType().equals(1)) {
                                 if (basMeteringConfigDto.getWeight() != null && basMeteringConfigDto.getCalcWeight() != null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                                     BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -405,7 +405,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
                         }
                         if (x.getWeightTypeNameOneCode().equals("forecastWeight") && x.getWeightTypeNameTwoCode().equals("billableWeight")) {
-                            if (x.getDifferenceType() == 0) {
+                            if (x.getDifferenceType().equals(0)) {
                                 if (basMeteringConfigDto.getWeight()!=null&&basMeteringConfigDto.getCalcWeight()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                                     BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -414,7 +414,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                                         throw new CommonException("Exceeding the set range, intercept");
                                     }
                                 }
-                            } else if (x.getDifferenceType() == 1) {
+                            } else if (x.getDifferenceType().equals(1)) {
                                 if (basMeteringConfigDto.getWeight()!=null&&basMeteringConfigDto.getCalcWeight()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getCalcWeight())).abs();
                                     BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -435,7 +435,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
                         }
                         if (x.getWeightTypeNameOneCode().equals("forecastWeight") && x.getWeightTypeNameTwoCode().equals("volumeWeight")) {
-                            if (x.getDifferenceType() == 0) {
+                            if (x.getDifferenceType().equals(0)) {
                                 if (basMeteringConfigDto.getWeight()!=null&&basMeteringConfigDto.getVolume()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
                                     BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -444,7 +444,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                                         throw new CommonException("Exceeding the set range, intercept");
                                     }
                                 }
-                            } else if (x.getDifferenceType() == 1) {
+                            } else if (x.getDifferenceType().equals(1)) {
                                 if (basMeteringConfigDto.getWeight()!=null&&basMeteringConfigDto.getVolume()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
                                     BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -465,7 +465,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                             }
                         }
                         if (x.getWeightTypeNameOneCode().equals("volumeWeight") && x.getWeightTypeNameTwoCode().equals("forecastWeight")) {
-                            if (x.getDifferenceType() == 0) {
+                            if (x.getDifferenceType().equals(0)) {
                                 if (basMeteringConfigDto.getWeight()!=null&&basMeteringConfigDto.getVolume()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
                                     BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
@@ -474,7 +474,7 @@ public class IBasMeteringConfigServiceImpl implements IBasMeteringConfigService 
                                         throw new CommonException("Exceeding the set range, intercept");
                                     }
                                 }
-                            } else if (x.getDifferenceType() == 1) {
+                            } else if (x.getDifferenceType().equals(1)) {
                                 if (basMeteringConfigDto.getWeight()!=null&&basMeteringConfigDto.getVolume()!=null) {
                                     BigDecimal bigDecimal = (basMeteringConfigDto.getWeight().subtract(basMeteringConfigDto.getVolume())).abs();
                                     BigDecimal bigDecimal1 = BigDecimal.valueOf(x.getDifferenceScope());
