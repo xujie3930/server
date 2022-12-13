@@ -2594,7 +2594,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             String referenceNumber = delOutbound.getReferenceNumber();
 
             if(StringUtils.isEmpty(referenceNumber)){
-                log.error("订单号["+delOutbound.getOrderNo()+"] referenceNumber 为空");
+                //log.error("订单号["+delOutbound.getOrderNo()+"] referenceNumber 为空");
                 return;
             }
 
