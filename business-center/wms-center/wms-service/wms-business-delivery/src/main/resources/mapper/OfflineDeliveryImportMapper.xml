@@ -4,10 +4,10 @@
 
     <insert id="saveBatch" parameterType="java.util.List">
         INSERT INTO `offline_delivery_import`
-        (`tracking_no`, `ref_no`, `amazon_logistics_route_id`, `seller_code`, `supplier_name`, `warehouse_code`, `shipment_service`, `custom_code`, `street1`, `street2`, `house_no`, `state_or_province`, `city`, `post_code`, `country_code`, `country`, `phone_no`, `email`, `tax_number`, `cod`, `weight`, `calc_weight`, `specifications`, `bring_time`, `delivery_time`, `remark`, `create_by`, `create_by_name`, `create_time`, `deal_status`, `order_no`)
+        (`tracking_no`, `ref_no`, `amazon_logistics_route_id`, `seller_code`, `supplier_name`, `warehouse_code`, `shipment_service`, `custom_code`, `street1`, `street2`, `house_no`, `state_or_province`, `city`, `post_code`, `country_code`, `country`, `phone_no`, `email`, `tax_number`, `cod`, `weight`, `calc_weight`, `specifications`, `bring_time`, `delivery_time`, `remark`, `create_by`, `create_by_name`, `create_time`, `deal_status`, `order_no`,`amount`,`version`)
         VALUES
         <foreach collection ="list" item="item" separator =",">
-            (#{item.trackingNo}, #{item.refNo}, #{item.amazonLogisticsRouteId},#{item.sellerCode},#{item.supplierName},#{item.warehouseCode},#{item.shipmentService},#{item.customCode},#{item.street1},#{item.street2},#{item.houseNo},#{item.stateOrProvince},#{item.city},#{item.postCode},#{item.countryCode},#{item.country},#{item.phoneNo},#{item.email},#{item.taxNumber},#{item.cod},#{item.weight},#{item.calcWeight},#{item.specifications},#{item.bringTime},#{item.deliveryTime},#{item.remark},#{item.createBy},#{item.createByName},#{item.createTime},#{item.dealStatus},#{item.orderNo})
+            (#{item.trackingNo}, #{item.refNo}, #{item.amazonLogisticsRouteId},#{item.sellerCode},#{item.supplierName},#{item.warehouseCode},#{item.shipmentService},#{item.customCode},#{item.street1},#{item.street2},#{item.houseNo},#{item.stateOrProvince},#{item.city},#{item.postCode},#{item.countryCode},#{item.country},#{item.phoneNo},#{item.email},#{item.taxNumber},#{item.cod},#{item.weight},#{item.calcWeight},#{item.specifications},#{item.bringTime},#{item.deliveryTime},#{item.remark},#{item.createBy},#{item.createByName},#{item.createTime},#{item.dealStatus},#{item.orderNo},#{item.amount},0)
         </foreach >
     </insert>
 
