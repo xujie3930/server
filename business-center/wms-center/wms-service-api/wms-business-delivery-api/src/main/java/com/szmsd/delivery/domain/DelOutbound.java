@@ -362,4 +362,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "尾程标签状态")
     private Integer endTagState;
+
+    @ApiModelProperty(value = "提审、核重产品服务是否一致 1 一致")
+    private Integer reviewState;
 }
