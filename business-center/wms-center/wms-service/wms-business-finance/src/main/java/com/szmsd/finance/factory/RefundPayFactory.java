@@ -14,8 +14,6 @@ import com.szmsd.finance.factory.abstractFactory.AbstractPayFactory;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,7 +25,6 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 退费
@@ -42,7 +39,7 @@ public class RefundPayFactory extends AbstractPayFactory {
     private AccountSerialBillMapper accountSerialBillMapper;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Boolean updateBalance(final CustPayDTO dto) {
         log.info("RefundPayFactory {}", JSONObject.toJSONString(dto));
         try {
@@ -141,10 +138,14 @@ public class RefundPayFactory extends AbstractPayFactory {
                 }
             }
 
+            if(StringUtils.isBlank(dto.getSerialNumber())) {
                 String serialNumber = createSerialNumber();
                 accountSerialBill.setSerialNumber(serialNumber);
+            }else{
+                accountSerialBill.setSerialNumber(dto.getSerialNumber());
+            }
 
-                accountSerialBillService.save(accountSerialBill);
+            accountSerialBillService.save(accountSerialBill);
         });
     }
 
