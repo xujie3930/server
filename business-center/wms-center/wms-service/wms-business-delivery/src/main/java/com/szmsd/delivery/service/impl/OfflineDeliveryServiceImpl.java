@@ -1,5 +1,6 @@
 package com.szmsd.delivery.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -18,6 +19,7 @@ import com.szmsd.delivery.enums.OfflineDeliveryStateEnum;
 import com.szmsd.delivery.mapper.OfflineCostImportMapper;
 import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import com.szmsd.delivery.service.OfflineDeliveryService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
 
     @Autowired
@@ -102,11 +105,15 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
             return R.failed("无数据");
         }
 
+        log.info("查询INIT 状态的导入数据：{}");
+
         //step 2. 生成线下出库单，offline 状态修改成CREATE_ORDER
         OfflineResultDto createOrder = new OfflineDeliveryCreateOrderCmd(offlineResultDto).execute();
         if(createOrder == null){
             return R.failed("创建订单异常");
         }
+
+        log.info("生成线下出库单，offline 状态修改成CREATE_ORDER：{}", JSON.toJSONString(createOrder));
 
         //step 3. 生成退费、补收费用，自动审核退费
         int createCost = new OfflineCreateCostCmd(createOrder).execute();
@@ -114,11 +121,16 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
             return R.failed("创建退费费用异常");
         }
 
+        log.info("创建退费费用异常：{}");
+
         //step 4. 推送TY
         int trackYee = new OfflineDeliveryTrackYeeCmd(createOrder).execute();
         if(trackYee != 1){
             return R.failed("推送TY异常");
         }
+
+        log.info("推送TY：{}", JSON.toJSONString(createOrder));
+
         return R.ok();
     }
 
