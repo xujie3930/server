@@ -42,7 +42,7 @@ public class RefundPayFactory extends AbstractPayFactory {
     private AccountSerialBillMapper accountSerialBillMapper;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Boolean updateBalance(final CustPayDTO dto) {
         log.info("RefundPayFactory {}", JSONObject.toJSONString(dto));
         try {
