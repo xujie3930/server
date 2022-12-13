@@ -1,5 +1,6 @@
 package com.szmsd.delivery.command;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.command.BasicCommand;
@@ -45,8 +46,11 @@ public class OfflineDeliveryTrackYeeCmd extends BasicCommand<Integer> {
         }
 
         try {
+            logger.info("推送TP开始:{}", JSON.toJSONString(ids));
             iDelOutboundService.manualTrackingYee(ids);
+            logger.info("推送TP结束",JSON.toJSONString(ids));
         }catch (Exception e){
+            logger.error("推送PY失败：",e.getMessage());
             return 0;
         }
         return 1;
@@ -54,6 +58,8 @@ public class OfflineDeliveryTrackYeeCmd extends BasicCommand<Integer> {
 
     @Override
     protected void afterExecuted(Integer result) throws Exception {
+
+        logger.info("OfflineDeliveryTrackYeeCmd afterExecuted:{}", result);
 
         if(result == 1){
 
