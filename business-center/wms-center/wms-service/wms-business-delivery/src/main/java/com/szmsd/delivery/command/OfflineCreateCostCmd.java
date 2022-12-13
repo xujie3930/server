@@ -13,6 +13,7 @@ import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import com.szmsd.finance.api.feign.RefundRequestFeignService;
 import com.szmsd.finance.dto.RefundRequestAutoDTO;
 import com.szmsd.finance.dto.RefundRequestListAutoDTO;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -49,6 +50,12 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
 
         logger.info("autoRefund 退费返回：{}", JSON.toJSONString(addRequest));
 
+        return 1;
+    }
+
+    @Override
+    protected void afterExecuted(Integer result) throws Exception {
+
         OfflineDeliveryImportMapper importMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
         List<OfflineDeliveryImport> offlineDeliveryImports = offlineResultDto.getOfflineDeliveryImports();
 
@@ -61,10 +68,13 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
             offlineImportDto.setDealStatus(OfflineDeliveryStateEnum.CREATE_COST.getCode());
             updateData.add(offlineImportDto);
         }
-        //更新状态成 已创建费用
-        importMapper.updateDealState(updateData);
 
-        return 1;
+        if(CollectionUtils.isNotEmpty(updateData)) {
+            //更新状态成 已创建费用
+            importMapper.updateDealState(updateData);
+        }
+
+        super.afterExecuted(result);
     }
 
     private RefundRequestListAutoDTO generatorRefundRequest() {

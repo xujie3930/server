@@ -6,7 +6,10 @@ import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.OfflineDeliveryImport;
+import com.szmsd.delivery.dto.OfflineImportDto;
 import com.szmsd.delivery.dto.OfflineResultDto;
+import com.szmsd.delivery.enums.OfflineDeliveryStateEnum;
+import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import com.szmsd.delivery.service.IDelOutboundService;
 
 import java.util.ArrayList;
@@ -47,5 +50,31 @@ public class OfflineDeliveryTrackYeeCmd extends BasicCommand<Integer> {
             return 0;
         }
         return 1;
+    }
+
+    @Override
+    protected void afterExecuted(Integer result) throws Exception {
+
+        if(result == 1){
+
+            OfflineDeliveryImportMapper importMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
+            List<OfflineDeliveryImport> offlineDeliveryImports = offlineResultDto.getOfflineDeliveryImports();
+
+            List<OfflineImportDto> updateData = new ArrayList<>();
+            for(OfflineDeliveryImport deliveryImport : offlineDeliveryImports){
+
+                OfflineImportDto offlineImportDto = new OfflineImportDto();
+                offlineImportDto.setTrackingNo(deliveryImport.getTrackingNo());
+                offlineImportDto.setId(deliveryImport.getId());
+                offlineImportDto.setDealStatus(OfflineDeliveryStateEnum.PUSH_TY.getCode());
+                updateData.add(offlineImportDto);
+            }
+
+            if(CollectionUtils.isNotEmpty(updateData)) {
+                importMapper.updateDealState(updateData);
+            }
+        }
+
+        super.afterExecuted(result);
     }
 }
