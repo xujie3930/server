@@ -1439,6 +1439,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 TaskConfigInfo taskConfigInfo = delOutboundWrapperContext.getTaskConfigInfo();
                 if (null != taskConfigInfo) {
                     boolean flag = "AfterMeasured".equals(taskConfigInfo.getReceiveShippingType()) && DelOutboundTrackingAcquireTypeEnum.ORDER_SUPPLIER.getCode().equals(delOutbound.getTrackingAcquireType());
+                    logger.info("{},更新出库单{}标签,taskConfigInfo:{},trackingAcquireType:{}",delOutbound.getOrderNo(),flag,taskConfigInfo.getReceiveShippingType(),delOutbound.getTrackingAcquireType());
                     if (flag) {
                         return;
                     }
