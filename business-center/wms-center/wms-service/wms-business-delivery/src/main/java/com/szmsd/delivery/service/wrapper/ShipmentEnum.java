@@ -699,6 +699,15 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             // 更新：计费重，金额
             ShipmentChargeInfo data = chargeWrapper.getData();
             PricingPackageInfo packageInfo = data.getPackageInfo();
+
+            String prcInterfaceProductCode = delOutbound.getPrcInterfaceProductCode();
+
+            logger.info("计算包裹运费开始,单号：{},prcInterfaceProductCode:{},prcCode : {}",delOutbound.getOrderNo(),prcInterfaceProductCode,data.getProductCode());
+
+            if(prcInterfaceProductCode.equals(data.getProductCode())){
+                delOutbound.setReviewState(1);
+            }
+
             // 包裹信息
             Packing packing = packageInfo.getPacking();
             delOutbound.setPrcInterfaceProductCode(data.getProductCode());
@@ -1091,6 +1100,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setAmount(delOutbound.getAmount());
             updateDelOutbound.setCurrencyCode(delOutbound.getCurrencyCode());
             updateDelOutbound.setCurrencyDescribe(delOutbound.getCurrencyDescribe());
+            updateDelOutbound.setReviewState(delOutbound.getReviewState());
 
             if(delOutboundWrapperContext.getExecShipmentShipping()) {
                 updateDelOutbound.setShipmentService(delOutbound.getShipmentService());

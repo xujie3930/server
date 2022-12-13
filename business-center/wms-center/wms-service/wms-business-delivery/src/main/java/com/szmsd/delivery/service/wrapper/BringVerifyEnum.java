@@ -1435,6 +1435,15 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     return;
                 }
 
+                //13040 【调整】出库业务-标签给WMS的逻辑调整
+                TaskConfigInfo taskConfigInfo = delOutboundWrapperContext.getTaskConfigInfo();
+                if (null != taskConfigInfo) {
+                    boolean flag = "AfterMeasured".equals(taskConfigInfo.getReceiveShippingType()) && DelOutboundTrackingAcquireTypeEnum.ORDER_SUPPLIER.getCode().equals(delOutbound.getTrackingAcquireType());
+                    if (flag) {
+                        return;
+                    }
+                }
+
                 try {
                     byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
                     String encode = Base64.encode(byteArray);
