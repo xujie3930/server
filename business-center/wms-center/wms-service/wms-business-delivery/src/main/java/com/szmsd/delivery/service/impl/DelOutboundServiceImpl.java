@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.BasEmployees;
@@ -2749,7 +2750,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             List<DelOutbound> delOutbounds = baseMapper.selectByState(DelOutboundStateEnum.DELIVERED.getCode(), i, pageSize);
             List<DelOutbound> updateData = new ArrayList<>();
-            List<DelOutbound> updateDataAsy = new ArrayList<>();
 
             for (DelOutbound delOutbound : delOutbounds) {
 
@@ -2773,8 +2773,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 logger.info("订单号DirectExpressOrder2：{},返回数据：{}",delOutbound.getOrderNo(),JSON.toJSONString(directExpressOrderApiDTO));
 
                 if (handleStatus.equals(DelOutboundOperationTypeEnum.SHIPPED.getCode())) {
-
-                    updateDataAsy.add(delOutbound);
 
                     DelOutbound updatedata = new DelOutbound();
                     updatedata.setId(delOutbound.getId());
@@ -2816,16 +2814,24 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 if(flag){
                     logger.info("DirectExpressOrder 更新成功：");
                 }
-            }
 
-            if(CollectionUtils.isNotEmpty(updateDataAsy)) {
-                for(DelOutbound delOutbound : updateDataAsy){
-                    Long s = System.currentTimeMillis();
-                    this.bringThridPartyAsync(delOutbound);
-                    Long e = System.currentTimeMillis();
-                    logger.info("bringThridPartyAsync：{},执行时间：{}", delOutbound.getOrderNo(), e - s);
+                List<Long> orderNoList = updateData.stream().map(DelOutbound::getId).collect(Collectors.toList());
+
+                List<List<Long>> partionOrderNoList = Lists.partition(orderNoList,300);
+
+                for(List<Long> ids : partionOrderNoList){
+
+                    List<DelOutbound> delOutboundList = baseMapper.selectList(Wrappers.<DelOutbound>query().lambda().in(DelOutbound::getOrderNo,ids).eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode()));
+
+                    for(DelOutbound delOutbound : delOutboundList){
+                        Long s = System.currentTimeMillis();
+                        this.bringThridPartyAsync(delOutbound);
+                        Long e = System.currentTimeMillis();
+                        logger.info("bringThridPartyAsync：{},执行时间：{}", delOutbound.getOrderNo(), e - s);
+                    }
                 }
             }
+
         }
 
     }
