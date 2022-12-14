@@ -572,6 +572,7 @@ public enum NuclearWeightEnum implements ApplicationState, ApplicationRegister{
                 DelOutbound delOutboundUpd = new DelOutbound();
                 delOutboundUpd.setId(delOutbound.getId());
                 delOutboundUpd.setReferenceNumber(delOutbound.getReferenceNumber());
+                delOutboundUpd.setTrackingNo(delOutbound.getTrackingNo());
                 iDelOutboundService.updateById(delOutboundUpd);
 
                 logger.info(">>>>>[创建出库单{}]创建承运商 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
