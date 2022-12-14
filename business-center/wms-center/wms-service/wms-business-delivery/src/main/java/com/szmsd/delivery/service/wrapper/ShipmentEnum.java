@@ -702,9 +702,9 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
 
             String prcInterfaceProductCode = delOutbound.getPrcInterfaceProductCode();
 
-            logger.info("计算包裹运费开始,单号：{},prcInterfaceProductCode:{},prcCode : {}",delOutbound.getOrderNo(),prcInterfaceProductCode,data.getProductCode());
+            //logger.info("计算包裹运费开始,单号：{},prcInterfaceProductCode:{},prcCode : {}",delOutbound.getOrderNo(),prcInterfaceProductCode,data.getProductCode());
 
-            if(prcInterfaceProductCode.equals(data.getProductCode())){
+            if(prcInterfaceProductCode != null && prcInterfaceProductCode.equals(data.getProductCode())){
                 delOutbound.setReviewState(1);
             }
 
