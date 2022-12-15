@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.domain.BasWarehouse;
@@ -18,7 +19,7 @@ import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +28,8 @@ import java.util.stream.Collectors;
 public class OfflineDeliveryReadExcelCmd extends BasicCommand<OfflineReadDto> {
 
     private MultipartFile file;
+
+    private static final int BATCH_NUM = 300;
 
     public OfflineDeliveryReadExcelCmd(MultipartFile file){
         this.file = file;
@@ -66,17 +69,32 @@ public class OfflineDeliveryReadExcelCmd extends BasicCommand<OfflineReadDto> {
         List<String> trackingNoList = dtoList.stream().map(OfflineDeliveryExcelDto::getTrackingNo).collect(Collectors.toList());
 
         OfflineDeliveryImportMapper offlineDeliveryImportMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
-        List<OfflineDeliveryImport> importsData = offlineDeliveryImportMapper.selectList(Wrappers.<OfflineDeliveryImport>query().lambda().in(OfflineDeliveryImport::getTrackingNo,trackingNoList));
+
+        List<List<String>> partionOrderList = Lists.partition(trackingNoList,BATCH_NUM);
+
+        List<OfflineDeliveryImport> importsData = new ArrayList<>();
+
+        for(List<String> partionData: partionOrderList) {
+
+            List<OfflineDeliveryImport> resultData = offlineDeliveryImportMapper.selectList(Wrappers.<OfflineDeliveryImport>query().lambda().in(OfflineDeliveryImport::getTrackingNo, partionData));
+            importsData.addAll(resultData);
+        }
 
         if(CollectionUtils.isNotEmpty(importsData)){
             List<String> trackNoList = importsData.stream().map(OfflineDeliveryImport::getTrackingNo).collect(Collectors.toList());
             throw new RuntimeException("跟踪号"+JSON.toJSONString(trackNoList)+"已存在");
         }
 
-        List<String> warehouseCodeList = dtoList.stream().map(OfflineDeliveryExcelDto::getWarehouseCode).collect(Collectors.toList());
+        List<String> warehouseCodeList = dtoList.stream().map(OfflineDeliveryExcelDto::getWarehouseCode).distinct().collect(Collectors.toList());
 
         BasWarehouseClientService basWarehouseClientService = SpringUtils.getBean(BasWarehouseClientService.class);
-        List<BasWarehouse> basWarehouses = basWarehouseClientService.queryByWarehouseCodes(warehouseCodeList);
+
+        List<List<String>> partionWarehouseCodeList = Lists.partition(warehouseCodeList,BATCH_NUM);
+        List<BasWarehouse> basWarehouses = new ArrayList<>();
+        for(List<String> strings : partionWarehouseCodeList) {
+            List<BasWarehouse> bas = basWarehouseClientService.queryByWarehouseCodes(strings);
+            basWarehouses.addAll(bas);
+        }
 
         if(CollectionUtils.isEmpty(basWarehouses)){
             throw new RuntimeException("无法获取仓库信息");
