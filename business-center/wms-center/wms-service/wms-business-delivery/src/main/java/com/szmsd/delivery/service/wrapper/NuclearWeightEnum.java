@@ -282,6 +282,7 @@ public enum NuclearWeightEnum implements ApplicationState, ApplicationRegister{
                     .map(e -> e.getValue() + e.getKey()).collect(Collectors.toList()).toArray(), "；");
 
             delOutbound.setCurrencyDescribe(currencyDescribe);
+            delOutbound.setSpecifications(delOutbound.getLength() + "*" + delOutbound.getWidth() + "*" + delOutbound.getHeight());
 
 
             //更新PRC发货服务
@@ -561,6 +562,8 @@ public enum NuclearWeightEnum implements ApplicationState, ApplicationRegister{
                 IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
                 stopWatch.start();
                 ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
+
+                logger.info("{}-创建承运商物流订单返回：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(shipmentOrderResult));
                 stopWatch.stop();
                 if(shipmentOrderResult != null){
                     delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());

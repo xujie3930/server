@@ -28,9 +28,7 @@ public class DelOutUpdWeightListener {
 
         DelOutbound outbound = iDelOutboundService.getOne(Wrappers.<DelOutbound>query().lambda().eq(DelOutbound::getOrderNo,orderNo));
 
-        if(outbound.getState().equals(DelOutboundStateEnum.DELIVERED.getCode())) {
-            iDelOutboundService.nuclearWeight(outbound);
-        }
+        iDelOutboundService.nuclearWeight(outbound);
 
     }
 }
