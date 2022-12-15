@@ -494,7 +494,7 @@ public final class DelOutboundServiceImplUtil {
         document.setMargins(10f, 10f, 0f, 0f);
         // 页面大小
         int width = 100;
-        int height = 100;
+        int height = 150;
         float dpi = 72f;
         Rectangle rec = new Rectangle(ITextPdfUtil.mm2px(width, dpi), ITextPdfUtil.mm2px(height, dpi));
         rec.rotate();
@@ -506,9 +506,14 @@ public final class DelOutboundServiceImplUtil {
         byte[] fontBytes = ITextPdfFontUtil.getFont("fonts/ARIALUNI.TTF");
         BaseFont bf = BaseFont.createFont("ARIALUNI.TTF", BaseFont.IDENTITY_H, BaseFont.EMBEDDED, BaseFont.NOT_CACHED, fontBytes, fontBytes);
 
-//        BufferedImage logoBufferedImage = ImageIO.read(logoImageUrl);
-//        Image logoImg = Image.getInstance(logoBufferedImage, null);
-//        document.add(logoImg);
+        String prcCarrier = delOutbound.getPrcTerminalCarrier();
+
+        if(StringUtils.isEmpty(prcCarrier)){
+            BufferedImage logoBufferedImage = ImageIO.read(logoImageUrl);
+            Image logoImg = Image.getInstance(logoBufferedImage, null);
+            logoImg.scalePercent(25f);
+            document.add(logoImg);
+        }
 
         //3. 注册字体
         Font font = new Font(bf, 18);
@@ -522,7 +527,20 @@ public final class DelOutboundServiceImplUtil {
         //3. 添加段落,并设置字体
         // 文本块(Chunk)、短语(Phrase)和段落(paragraph)处理文本
         font.setSize(18f);
-        Paragraph paragraph = new Paragraph(delOutbound.getShipmentRule(), font);
+        StringBuffer stringBuffer = new StringBuffer();
+        String texts = delOutboundAddress.getCountryCode();
+        if (StringUtils.isEmpty(texts)) {
+            // 二字码是空的就取国家名称
+            texts = delOutboundAddress.getCountry();
+        }
+
+        stringBuffer.append(texts+"    ");
+
+        String shipmentRule = delOutbound.getShipmentRule();
+
+        stringBuffer.append(shipmentRule);
+
+        Paragraph paragraph = new Paragraph(stringBuffer.toString(), font);
         paragraph.setAlignment(Element.ALIGN_RIGHT);
         paragraph.setSpacingBefore(-26f);
         paragraph.setSpacingAfter(0f);
@@ -582,8 +600,17 @@ public final class DelOutboundServiceImplUtil {
         // 计算缩放比例
         // 渲染在画布上的宽度只有200，以200作为基础比例
         image1.scalePercent(55f);
+
+        String trackingNo = delOutbound.getTrackingNo();
+        BufferedImage bufferedtrackingNoImage = ITextPdfUtil.getBarCode(trackingNo);
+        BufferedImage imagetrackingNo = ITextPdfUtil.insertWords(bufferedtrackingNoImage, trackingNo);
+        Image imagetracking = Image.getInstance(imagetrackingNo, null);
+        // 计算缩放比例
+        // 渲染在画布上的宽度只有200，以200作为基础比例
+        imagetracking.scalePercent(55f);
         // image1.setSpacingBefore(-10f);
         // image1.setAbsolutePosition(10f, 25f);
+        document.add(imagetracking);
         document.add(image1);
         if (StringUtils.isNotEmpty(skuLabel)) {
             font.setSize(10f);
