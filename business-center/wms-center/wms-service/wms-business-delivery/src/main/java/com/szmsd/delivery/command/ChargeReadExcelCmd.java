@@ -15,8 +15,8 @@ import com.szmsd.delivery.domain.ChargeImport;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.ChargeExcelDto;
 import com.szmsd.delivery.enums.ChargeImportStateEnum;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
-import com.szmsd.delivery.service.IDelOutboundService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -108,6 +108,17 @@ public class ChargeReadExcelCmd extends BasicCommand<List<ChargeImport>> {
 
         if(CollectionUtils.isNotEmpty(orderNoList)){
             throw new RuntimeException("订单号["+ JSON.toJSONString(orderNoList)+"]不存在,无法导入");
+        }
+
+        List<String> comOrderNoList = new ArrayList<>();
+        for(DelOutbound delOutbound : resultDelOutbound){
+            if(!DelOutboundStateEnum.COMPLETED.getCode().equals(delOutbound.getState())){
+                comOrderNoList.add(delOutbound.getOrderNo());
+            }
+        }
+
+        if(CollectionUtils.isNotEmpty(comOrderNoList)){
+            throw new RuntimeException("订单号:["+JSON.toJSONString(comOrderNoList)+"]属于非完成状态，无法导入");
         }
 
         return chargeImportList;
