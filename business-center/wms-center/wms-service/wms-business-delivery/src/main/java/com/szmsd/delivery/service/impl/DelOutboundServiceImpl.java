@@ -2882,9 +2882,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             throw new CommonException("400", "该客户下订单不存在");
         }
 
+        logger.info("updateWeightDelOutbound:{}单据状态，{}",data.getOrderNo(),data.getState());
+
         boolean checkState = DelOutboundStateEnum.REVIEWED.getCode().equals(data.getState())
                 || DelOutboundStateEnum.DELIVERED.getCode().equals(data.getState())
                 || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(data.getState());
+
+        logger.info("updateWeightDelOutbound:{}单据状态，{}",data.getOrderNo(),checkState);
 
         if (!checkState) {
             throw new CommonException("400", "单据不能修改");
