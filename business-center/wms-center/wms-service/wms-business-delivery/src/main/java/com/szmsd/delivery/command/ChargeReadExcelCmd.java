@@ -2,6 +2,9 @@ package com.szmsd.delivery.command;
 
 import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.read.builder.ExcelReaderSheetBuilder;
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.collect.Lists;
 import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.SpringUtils;
@@ -9,12 +12,16 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.convert.ChargeImportConvert;
 import com.szmsd.delivery.domain.ChargeImport;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.ChargeExcelDto;
 import com.szmsd.delivery.enums.ChargeImportStateEnum;
+import com.szmsd.delivery.mapper.DelOutboundMapper;
+import com.szmsd.delivery.service.IDelOutboundService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +29,8 @@ import java.util.stream.Collectors;
 public class ChargeReadExcelCmd extends BasicCommand<List<ChargeImport>> {
 
     private MultipartFile file;
+
+    private static final int BATCH_NUM = 300;
 
     public ChargeReadExcelCmd(MultipartFile file){
         this.file = file;
@@ -80,6 +89,25 @@ public class ChargeReadExcelCmd extends BasicCommand<List<ChargeImport>> {
             chargeImport.setCreateTime(new Date());
             chargeImport.setState(ChargeImportStateEnum.INIT.getCode());
             chargeImport.setDelFlag(0);
+        }
+
+        List<String> orderNoList = chargeImportList.stream().map(ChargeImport::getOrderNo).distinct().collect(Collectors.toList());
+
+        List<List<String>> parttionList = Lists.partition(orderNoList,BATCH_NUM);
+        DelOutboundMapper delOutboundMapper = SpringUtils.getBean(DelOutboundMapper.class);
+        List<DelOutbound> resultDelOutbound = new ArrayList<>();
+
+        for(List<String> strings : parttionList) {
+
+            List<DelOutbound> delOutboundList = delOutboundMapper.selectList(Wrappers.<DelOutbound>query().lambda().in(DelOutbound::getOrderNo,strings));
+            resultDelOutbound.addAll(delOutboundList);
+        }
+        //求差集
+        List<String> resultDelOrderNoList = resultDelOutbound.stream().map(DelOutbound::getOrderNo).collect(Collectors.toList());
+        orderNoList.removeAll(resultDelOrderNoList);
+
+        if(CollectionUtils.isNotEmpty(orderNoList)){
+            throw new RuntimeException("订单号["+ JSON.toJSONString(orderNoList)+"]不存在,无法导入");
         }
 
         return chargeImportList;
