@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = BusinessFinanceApplication.class)
+@SpringBootTest(classes = BusinessFinanceApplication.class,webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ReturnTest {
 
     @Resource
@@ -65,7 +65,7 @@ public class ReturnTest {
             refundReviewDTO.setIdList(collect);
             refundReviewDTO.setReviewRemark("通过");
             refundReviewDTO.setStatus(RefundStatusEnum.COMPLETE);
-            HttpResponse authorization = HttpRequest.put("https://web-client.dmfulfillment.cn/api/wms-finance/refundRequest/approve").header("Authorization", "Bearer 9980ad62-9bcf-4b68-97c8-749488415889")
+            HttpResponse authorization = HttpRequest.put("https://client.dmfcn.net/api/wms-finance/refundRequest/approve").header("Authorization", "Bearer ca616952-1c36-4fe4-8252-94f3e4d58df6")
                     .body(JSONObject.toJSONString(refundReviewDTO)).executeAsync();
             log.info("次数：{} | 耗时：{} s,请求id:{},响应：{}", index, System.currentTimeMillis() - start, collect, authorization.body());
         }
@@ -74,8 +74,8 @@ public class ReturnTest {
 
     public List<RefundRequestListVO> getRow() {
         List<RefundRequestListVO> rows = new ArrayList<>();
-        HttpResponse httpResponse = HttpRequest.get("https://web-client.dmfulfillment.cn/api/wms-finance/refundRequest/page?auditStatus=1&treatmentPropertiesCode=025001&pageNum=1&pageSize=1")
-                .header("Authorization", "Bearer 9980ad62-9bcf-4b68-97c8-749488415889").executeAsync();
+        HttpResponse httpResponse = HttpRequest.get("https://client.dmfcn.net/api/wms-finance/refundRequest/page?auditStatus=1&pageNum=1&pageSize=100")
+                .header("Authorization", "Bearer ca616952-1c36-4fe4-8252-94f3e4d58df6").executeAsync();
         if (httpResponse.isOk()) {
             String body = httpResponse.body();
             TableDataInfo tableDataInfo = JSONObject.parseObject(body, TableDataInfo.class);
