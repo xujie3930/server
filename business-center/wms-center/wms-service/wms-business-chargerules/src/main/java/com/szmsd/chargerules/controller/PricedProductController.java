@@ -97,6 +97,9 @@ public class PricedProductController extends BaseController {
                 if (map.get("recevieWarehouseStatus")!=null&&String.valueOf(map.get("recevieWarehouseStatus")) != null) {
                     pricedProductInfoVO.setRecevieWarehouseStatus(Integer.parseInt(String.valueOf(map.get("recevieWarehouseStatus"))));
                 }
+                if (map.get("customCode")!=null&&String.valueOf(map.get("customCode")) != null) {
+                    pricedProductInfoVO.setCustomCode(String.valueOf(map.get("customCode")));
+                }
             }
 
         String type = pricedProductInfoVO.getSupplierCalcType();
