@@ -191,6 +191,12 @@ public class PricedProductInfoVO {
     @ApiModelProperty(value = "是否收货仓库 1 是")
     private Integer recevieWarehouseStatus;
 
+    @ApiModelProperty(value = "客户代码")
+    private String customCode;
+
+    @ApiModelProperty(value = "客户名字")
+    private String customName;
+
 
     public void processDTO() {
         //参数转换
