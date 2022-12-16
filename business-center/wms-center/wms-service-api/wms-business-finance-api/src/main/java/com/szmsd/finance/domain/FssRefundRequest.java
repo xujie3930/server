@@ -213,6 +213,8 @@ public class FssRefundRequest extends BaseEntity {
     private String noteAppended;
 
 
+    @ApiModelProperty(value = "等级")
+    private String gradeName;
 
     @ApiModelProperty(value = "跟踪号")
     @TableField(exist = false)
@@ -252,6 +254,9 @@ public class FssRefundRequest extends BaseEntity {
     @ApiModelProperty(value = "国家代码")
     @TableField(exist = false)
     private String countryCode;
+
+
+
 
 
 
