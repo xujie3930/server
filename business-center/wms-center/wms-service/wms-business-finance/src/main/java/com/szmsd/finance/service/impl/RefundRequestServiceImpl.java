@@ -347,6 +347,8 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 RefundStatusEnum status = refundReviewDTO.getStatus();
                 String reviewRemark = refundReviewDTO.getReviewRemark();
                 LoginUser loginUser = SecurityUtils.getLoginUser();
+                //因为自动审核的原因，这个需要放在前面
+                List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>lambdaQuery().in(FssRefundRequest::getId, ids).eq(FssRefundRequest::getAuditStatus,1));
                 int update = baseMapper.update(null, Wrappers.<FssRefundRequest>lambdaUpdate()
                         .in(FssRefundRequest::getId, ids)
                         .eq(FssRefundRequest::getAuditStatus, RefundStatusEnum.BRING_INTO_COURT.getStatus())
@@ -360,7 +362,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 );
                 AssertUtil.isTrue(update == ids.size(), "审核异常!");
                 //审核完成触发扣减
-                this.afterApprove(status, ids);
+                this.afterApprove(status, fssRefundRequests);
                 return update;
             } else {
                 log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(refundReviewDTO));
@@ -390,13 +392,13 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
      * @param idList 审核id集合
      */
     @Transactional(rollbackFor = Exception.class)
-    public void afterApprove(RefundStatusEnum status, List<String> idList) {
+    public void afterApprove(RefundStatusEnum status,  List<FssRefundRequest> fssRefundRequests) {
         if (RefundStatusEnum.COMPLETE != status){
             return;
         }
-        log.info("审核通过-进行相应的越扣减 {}", idList);
+        log.info("审核通过-进行相应的越扣减 {}");
 
-        List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>lambdaQuery().in(FssRefundRequest::getId, idList).eq(FssRefundRequest::getAuditStatus,1));
+
         fssRefundRequests.forEach(x->{
           List<Map> list =baseMapper.selectOutbounds(x.getOrderNo());
           if (list.size()>0){
@@ -587,7 +589,9 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         }
 
         try {
-            this.afterApprove(RefundStatusEnum.COMPLETE, ids);
+            //因为自动审核的原因，这个需要放在前面
+            //List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>lambdaQuery().in(FssRefundRequest::getId, ids).eq(FssRefundRequest::getAuditStatus,1));
+            this.afterApprove(RefundStatusEnum.COMPLETE, fssRefundRequests);
         }catch (Exception e){
             throw new RuntimeException("审核退费失败:"+e.getMessage());
         }
