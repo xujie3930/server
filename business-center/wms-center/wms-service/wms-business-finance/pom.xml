@@ -141,6 +141,11 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/helipay-cross-border-trx-facade-20200709.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-quartz</artifactId>
+        </dependency>
+
 
 
     </dependencies>

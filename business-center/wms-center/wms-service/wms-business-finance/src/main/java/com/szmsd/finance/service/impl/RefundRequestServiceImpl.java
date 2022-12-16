@@ -19,11 +19,13 @@ import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.finance.compont.ConfigData;
 import com.szmsd.finance.compont.IRemoteApi;
 import com.szmsd.finance.config.FileVerifyUtil;
+import com.szmsd.finance.domain.BasRefundRequest;
 import com.szmsd.finance.domain.FssRefundRequest;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.enums.RefundProcessEnum;
 import com.szmsd.finance.enums.RefundStatusEnum;
+import com.szmsd.finance.mapper.BasRefundRequestMapper;
 import com.szmsd.finance.mapper.RefundRequestMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
 import com.szmsd.finance.service.IRefundRequestService;
@@ -38,6 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -72,6 +75,9 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
     private RedissonClient redissonClient;
     @Resource
     private IAccountBalanceService accountBalanceService;
+
+    @Autowired
+    private BasRefundRequestMapper basRefundRequestMapper;
 
     @Override
     @DataScope(value = "cus_code")
@@ -131,10 +137,15 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         }).collect(Collectors.toList());
         int a=this.saveBatch(collect) ? addList.size() : 0;
         List<String> ids=collect.stream().map(x->String.valueOf(x.getId())).collect(Collectors.toList());
-        RefundReviewDTO refundReviewDTO=new RefundReviewDTO();
-        refundReviewDTO.setIdList(ids);
-        refundReviewDTO.setStatus(RefundStatusEnum.valueOf("COMPLETE"));
-        approve(refundReviewDTO);
+        BasRefundRequest basRefundRequest=new BasRefundRequest();
+        ids.forEach(x->{
+            basRefundRequest.setFssRefundId(Integer.parseInt(x));
+            basRefundRequestMapper.insertSelective(basRefundRequest);
+        });
+//        RefundReviewDTO refundReviewDTO=new RefundReviewDTO();
+//        refundReviewDTO.setIdList(ids);
+//        refundReviewDTO.setStatus(RefundStatusEnum.valueOf("COMPLETE"));
+//        approve(refundReviewDTO);
         return a;
     }
 
