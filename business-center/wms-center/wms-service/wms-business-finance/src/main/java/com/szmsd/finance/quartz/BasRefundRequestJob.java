@@ -26,6 +26,7 @@ public class BasRefundRequestJob extends QuartzJobBean {
         RefundReviewDTO refundReviewDTO=new RefundReviewDTO();
         refundReviewDTO.setIdList(ids);
         refundReviewDTO.setStatus(RefundStatusEnum.valueOf("COMPLETE"));
+        refundReviewDTO.setReviewRemark("系统自动审核");
         iRefundRequestService.approve(refundReviewDTO);
 
 

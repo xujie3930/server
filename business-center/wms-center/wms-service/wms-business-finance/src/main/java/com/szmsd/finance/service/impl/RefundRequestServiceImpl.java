@@ -395,7 +395,8 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
             return;
         }
         log.info("审核通过-进行相应的越扣减 {}", idList);
-        List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>lambdaQuery().in(FssRefundRequest::getId, idList));
+
+        List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>lambdaQuery().in(FssRefundRequest::getId, idList).eq(FssRefundRequest::getAuditStatus,1));
         fssRefundRequests.forEach(x->{
           List<Map> list =baseMapper.selectOutbounds(x.getOrderNo());
           if (list.size()>0){
