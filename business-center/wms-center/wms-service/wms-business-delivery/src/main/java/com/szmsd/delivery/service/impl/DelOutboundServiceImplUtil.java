@@ -611,15 +611,17 @@ public final class DelOutboundServiceImplUtil {
         image1.scalePercent(50f);
 
         String trackingNo = delOutbound.getTrackingNo();
-        BufferedImage bufferedtrackingNoImage = ITextPdfUtil.getBarCode(trackingNo);
-        BufferedImage imagetrackingNo = ITextPdfUtil.insertWords(bufferedtrackingNoImage, trackingNo);
-        Image imagetracking = Image.getInstance(imagetrackingNo, null);
-        // 计算缩放比例
-        // 渲染在画布上的宽度只有200，以200作为基础比例
-        imagetracking.scalePercent(55f);
-        // image1.setSpacingBefore(-10f);
-        // image1.setAbsolutePosition(10f, 25f);
-        document.add(imagetracking);
+        if(StringUtils.isNotEmpty(trackingNo)) {
+            BufferedImage bufferedtrackingNoImage = ITextPdfUtil.getBarCode(trackingNo);
+            BufferedImage imagetrackingNo = ITextPdfUtil.insertWords(bufferedtrackingNoImage, trackingNo);
+            Image imagetracking = Image.getInstance(imagetrackingNo, null);
+            // 计算缩放比例
+            // 渲染在画布上的宽度只有200，以200作为基础比例
+            imagetracking.scalePercent(55f);
+            // image1.setSpacingBefore(-10f);
+            // image1.setAbsolutePosition(10f, 25f);
+            document.add(imagetracking);
+        }
         document.add(image1);
         if (StringUtils.isNotEmpty(skuLabel)) {
             font.setSize(10f);
