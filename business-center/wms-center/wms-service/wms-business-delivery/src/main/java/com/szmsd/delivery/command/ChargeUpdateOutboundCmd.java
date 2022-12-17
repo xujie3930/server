@@ -1,9 +1,13 @@
 package com.szmsd.delivery.command;
 
+import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.ChargeImport;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.dto.ChargePricingOrderMsgDto;
+import com.szmsd.delivery.enums.ChargeImportStateEnum;
+import com.szmsd.delivery.mapper.ChargeImportMapper;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,7 +37,7 @@ public class ChargeUpdateOutboundCmd extends BasicCommand<List<String>> {
 
         List<DelOutbound> delOutbounds = new ArrayList<>();
 
-        for(ChargeImport chargeImport : chargeImportList){
+        for (ChargeImport chargeImport : chargeImportList) {
 
             DelOutbound delOutbound = new DelOutbound();
             delOutbound.setOrderNo(chargeImport.getOrderNo());
@@ -51,14 +55,37 @@ public class ChargeUpdateOutboundCmd extends BasicCommand<List<String>> {
 
         DelOutboundMapper delOutboundMapper = SpringUtils.getBean(DelOutboundMapper.class);
 
-        int updBatch = delOutboundMapper.updateDeloutByOrder(delOutbounds);
+        if (CollectionUtils.isNotEmpty(delOutbounds)){
 
-        if(updBatch == 0){
-            return null;
+            log.info("ChargeUpdateOutboundCmd 更新单据：", JSON.toJSONString(delOutbounds));
+            int updBatch = delOutboundMapper.updateDeloutByOrder(delOutbounds);
+            log.info("ChargeUpdateOutboundCmd updBatch：", updBatch);
+
+            if (updBatch == 0) {
+                return null;
+            }
         }
 
         List<String> orders = delOutbounds.stream().map(DelOutbound::getOrderNo).collect(Collectors.toList());
 
         return orders;
+    }
+
+    @Override
+    protected void afterExecuted(List<String> result) throws Exception {
+
+        ChargeImportMapper chargeImportMapper = SpringUtils.getBean(ChargeImportMapper.class);
+        List<ChargePricingOrderMsgDto> allData = new ArrayList<>();
+
+        if(CollectionUtils.isNotEmpty(result)) {
+            for (String s : result) {
+                ChargePricingOrderMsgDto chargePricingOrderMsgDto = new ChargePricingOrderMsgDto();
+                chargePricingOrderMsgDto.setState(ChargeImportStateEnum.UPDATE_ORDER.getCode());
+                chargePricingOrderMsgDto.setOrderNo(s);
+            }
+            chargeImportMapper.batchUpd(allData);
+        }
+
+        super.afterExecuted(result);
     }
 }

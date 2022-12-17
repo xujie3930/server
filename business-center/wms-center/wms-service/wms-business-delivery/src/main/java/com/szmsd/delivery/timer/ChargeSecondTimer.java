@@ -19,10 +19,10 @@ public class ChargeSecondTimer {
     /**
      * 二次计费定时器
      * <p/>
-     * 每10分执行一次
+     * 每1分执行一次
      */
     @Async
-    @Scheduled(cron = "0 */10 * * * ?")
+    @Scheduled(cron = "0 */1 * * * ?")
     public void autoOfflineDelivery() {
         logger.info("ChargeSecondTimer  二次计费开始========");
         chargeService.doSecondCharge();
