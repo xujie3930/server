@@ -60,13 +60,9 @@ public class ChargeUpdateOutboundCmd extends BasicCommand<List<String>> {
             log.info("ChargeUpdateOutboundCmd 更新单据：{}", JSON.toJSONString(delOutbounds));
             int updBatch = delOutboundMapper.updateDeloutByOrder(delOutbounds);
             log.info("ChargeUpdateOutboundCmd updBatch：{}", updBatch);
-
-            if (updBatch == 0) {
-                return null;
-            }
         }
 
-        List<String> orders = delOutbounds.stream().map(DelOutbound::getOrderNo).collect(Collectors.toList());
+        List<String> orders = delOutbounds.stream().map(DelOutbound::getOrderNo).distinct().collect(Collectors.toList());
 
         return orders;
     }
