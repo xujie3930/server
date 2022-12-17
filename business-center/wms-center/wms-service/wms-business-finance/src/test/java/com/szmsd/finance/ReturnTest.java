@@ -65,7 +65,7 @@ public class ReturnTest {
             refundReviewDTO.setIdList(collect);
             refundReviewDTO.setReviewRemark("通过");
             refundReviewDTO.setStatus(RefundStatusEnum.COMPLETE);
-            HttpResponse authorization = HttpRequest.put("https://client.dmfcn.net/api/wms-finance/refundRequest/approve").header("Authorization", "Bearer ca616952-1c36-4fe4-8252-94f3e4d58df6")
+            HttpResponse authorization = HttpRequest.put("https://client.dmfcn.net/api/wms-finance/refundRequest/approve").header("Authorization", "Bearer 2f89ac7a-e031-471e-8fb1-ee64b06fa83e")
                     .body(JSONObject.toJSONString(refundReviewDTO)).executeAsync();
             log.info("次数：{} | 耗时：{} s,请求id:{},响应：{}", index, System.currentTimeMillis() - start, collect, authorization.body());
         }
@@ -75,7 +75,7 @@ public class ReturnTest {
     public List<RefundRequestListVO> getRow() {
         List<RefundRequestListVO> rows = new ArrayList<>();
         HttpResponse httpResponse = HttpRequest.get("https://client.dmfcn.net/api/wms-finance/refundRequest/page?auditStatus=1&pageNum=1&pageSize=100")
-                .header("Authorization", "Bearer ca616952-1c36-4fe4-8252-94f3e4d58df6").executeAsync();
+                .header("Authorization", "Bearer 2f89ac7a-e031-471e-8fb1-ee64b06fa83e").executeAsync();
         if (httpResponse.isOk()) {
             String body = httpResponse.body();
             TableDataInfo tableDataInfo = JSONObject.parseObject(body, TableDataInfo.class);
@@ -111,7 +111,7 @@ public class ReturnTest {
 //                }
 
 
-                refundRequestService.afterApprove(RefundStatusEnum.COMPLETE, idList);
+                refundRequestService.afterApprove(RefundStatusEnum.COMPLETE, null);
                 countDownLatch.countDown();
                 log.info("执1111行：---------" + countDownLatch.getCount());
             }).start();

@@ -227,6 +227,14 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         String serialNumber = this.createSerialNumber();
         accountSerialBill.setSerialNumber(serialNumber);
 
+        String bcategory = accountSerialBill.getBusinessCategory();
+        if(bcategory != null){
+            boolean prcState = bcategory.equals("操作费") || bcategory.equals("仓租") || bcategory.equals("增值消费") || bcategory.equals("物料费");
+            if(prcState){
+                accountSerialBill.setPrcState(1);
+            }
+        }
+
         return accountSerialBillMapper.insert(accountSerialBill);
     }
 
@@ -269,6 +277,14 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
             String serialNumber = this.createSerialNumber();
             value.setSerialNumber(serialNumber);
+
+            String bcategory = value.getBusinessCategory();
+            if(bcategory != null){
+                boolean prcState = bcategory.equals("操作费") || bcategory.equals("仓租") || bcategory.equals("增值消费") || bcategory.equals("物料费");
+                if(prcState){
+                    value.setPrcState(1);
+                }
+            }
 
             return value;
         }).collect(Collectors.toList());

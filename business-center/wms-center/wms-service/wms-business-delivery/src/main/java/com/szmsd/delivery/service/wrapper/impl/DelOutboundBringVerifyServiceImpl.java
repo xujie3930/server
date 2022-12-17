@@ -616,6 +616,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         calcShipmentFeeCommand.setShipmentType(delOutbound.getShipmentType());
         calcShipmentFeeCommand.setIoss(delOutbound.getIoss());
         calcShipmentFeeCommand.setPackageInfos(packageInfos);
+        calcShipmentFeeCommand.setSheetCode(delOutbound.getSheetCode());
 
         Address toAddress =  new Address(address.getStreet1(),
                 address.getStreet2(),

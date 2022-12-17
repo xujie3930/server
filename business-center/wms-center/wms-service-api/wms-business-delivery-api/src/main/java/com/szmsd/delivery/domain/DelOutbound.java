@@ -365,4 +365,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "提审、核重产品服务是否一致 1 一致")
     private Integer reviewState;
+
+    @ApiModelProperty(value = "报价表")
+    private String sheetCode;
 }

@@ -61,6 +61,7 @@
         <result column="amazon_logistics_route_id" property="amazonLogisticsRouteId"/>
         <result column="country" property="country"/>
         <result column="country_code" property="countryCode"/>
+        <result column="note" property="note"/>
     </resultMap>
 
     <select id="selectPageList" resultType="com.szmsd.finance.domain.AccountSerialBill" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
@@ -457,7 +458,7 @@
         select
         FASB.charge_category as chargeCategory,FASB.currency_code as currencyCode,
         '补收' as nature,
-        round(ceil(sum(FASB.amount)*100)/100,2) as amount,FASB.remark
+        round(ceil(sum(0-FASB.amount)*100)/100,2) as amount,FASB.remark
         from fss_account_serial_bill as FASB
         <where>
 
@@ -672,7 +673,7 @@
         a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
         a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
         a.calc_weight,a.specifications,a.nature,a.serial_number,a.amazon_logistics_route_id,a.country_code,a.country,
-        a.charge_type,a.shipment_rule_name,a.shipment_rule
+        a.charge_type,a.shipment_rule_name,a.shipment_rule,a.note
         FROM `fss_account_serial_bill` a
         <include refid="SelectSerialBillWhere"/>
         ORDER BY a.id DESC
