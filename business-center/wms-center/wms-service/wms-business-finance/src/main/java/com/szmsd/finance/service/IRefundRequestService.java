@@ -45,6 +45,10 @@ public interface IRefundRequestService extends IService<FssRefundRequest> {
 
     int importByTemplate(MultipartFile file);
 
+
+    int importByTemplateus(MultipartFile file);
+
+
     int approve(RefundReviewDTO refundReviewDTO);
 
     int confirmOperation(ConfirmOperationDTO confirmOperationDTO);

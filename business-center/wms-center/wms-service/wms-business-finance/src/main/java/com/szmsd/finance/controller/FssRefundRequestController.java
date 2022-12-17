@@ -116,10 +116,22 @@ public class FssRefundRequestController extends BaseController {
     @PreAuthorize("@ss.hasPermi('FssRefundRequest:FssRefundRequest:add')")
     @Log(title = "退费记录表模块", businessType = BusinessType.INSERT)
     @PostMapping("import/byTemplateFile")
-    @ApiOperation(value = "导入", notes = "导入退费记录表模块")
+    @ApiOperation(value = "导入自动审核", notes = "导入退费记录表模块")
     public R importByTemplate(MultipartFile file) {
         return toOk(fssRefundRequestService.importByTemplate(file));
     }
+
+    /**
+     * 新增退费记录表模块
+     */
+    @PreAuthorize("@ss.hasPermi('FssRefundRequest:FssRefundRequest:add')")
+    @Log(title = "退费记录表模块", businessType = BusinessType.INSERT)
+    @PostMapping("import/byTemplateFileus")
+    @ApiOperation(value = "导入", notes = "导入退费记录表模块")
+    public R byTemplateFileus(MultipartFile file) {
+        return toOk(fssRefundRequestService.importByTemplateus(file));
+    }
+
 
     /**
      * 获取退费记录表模块详细信息
