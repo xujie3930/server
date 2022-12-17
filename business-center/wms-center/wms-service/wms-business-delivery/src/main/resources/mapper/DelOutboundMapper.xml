@@ -411,6 +411,9 @@
                 <if test="item.calcWeightUnit != null">
                     calc_weight_unit = #{item.calcWeightUnit},
                 </if>
+                <if test="item.sheetCode != null">
+                    sheet_code = #{item.sheetCode},
+                </if>
             </set>
             where order_no = #{item.orderNo}
         </foreach>

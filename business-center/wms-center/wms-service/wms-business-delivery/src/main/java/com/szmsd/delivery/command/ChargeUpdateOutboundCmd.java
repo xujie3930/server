@@ -44,6 +44,7 @@ public class ChargeUpdateOutboundCmd extends BasicCommand<List<String>> {
             delOutbound.setHeight(chargeImport.getHeight().doubleValue());
             delOutbound.setCalcWeight(chargeImport.getCalcWeight());
             delOutbound.setCalcWeightUnit(chargeImport.getWeightUnit());
+            delOutbound.setSheetCode(chargeImport.getQuotationNo());
 
             delOutbounds.add(delOutbound);
         }

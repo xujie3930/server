@@ -51,7 +51,7 @@ public class ChargeServiceImpl extends ServiceImpl<ChargeImportMapper, ChargeImp
 
         log.info("step 1.获取导入数据");
 
-        //step 2. 更新出库单数据，尺寸、重量
+        //step 2. 更新出库单数据，尺寸、重量、报价表
         List<String> orderNos = new ChargeUpdateOutboundCmd(chargeImportList).execute();
         log.info("step 2.更新出库单数据，尺寸、重量");
 
