@@ -284,7 +284,7 @@ public class DelOutboundController extends BaseController {
     @ApiOperation(value = "出库管理 - 第三方订单查看专用接口", position = 202)
     @AutoValue
     public R<DelOutboundThirdPartyVO> getInfoForThirdParty(@RequestBody DelOutboundVO vo) {
-        return R.ok(delOutboundService.getInfoForThirdParty(vo));
+        return delOutboundService.getInfoForThirdParty(vo);
     }
 
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:queryDetailsLabelByNos')")

@@ -270,7 +270,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     }
 
     @Override
-    public DelOutboundThirdPartyVO getInfoForThirdParty(DelOutboundVO vo) {
+    public R<DelOutboundThirdPartyVO> getInfoForThirdParty(DelOutboundVO vo) {
         LambdaQueryWrapper<DelOutbound> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(DelOutbound::getSellerCode, vo.getSellerCode());
         queryWrapper.eq(DelOutbound::getOrderNo, vo.getOrderNo());
@@ -283,7 +283,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         String amazonReferenceId = delOutbound.getAmazonReferenceId();
 
         if(StringUtils.isEmpty(amazonLogisticsRouteId1) && StringUtils.isNotEmpty(amazonReferenceId)){
-            throw new CommonException("200","The order number is being obtained");
+            return R.failed(200,"The order number is being obtained");
         }
 
         DelOutboundThirdPartyVO delOutboundThirdPartyVO =
@@ -298,7 +298,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             delOutboundThirdPartyVO.setTrackingNo(amazonLogisticsRouteId1);
         }
 
-        return delOutboundThirdPartyVO;
+        return R.ok(delOutboundThirdPartyVO);
     }
 
 
