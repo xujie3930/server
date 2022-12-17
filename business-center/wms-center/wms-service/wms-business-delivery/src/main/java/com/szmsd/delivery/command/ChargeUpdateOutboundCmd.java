@@ -57,9 +57,9 @@ public class ChargeUpdateOutboundCmd extends BasicCommand<List<String>> {
 
         if (CollectionUtils.isNotEmpty(delOutbounds)){
 
-            log.info("ChargeUpdateOutboundCmd 更新单据：", JSON.toJSONString(delOutbounds));
+            log.info("ChargeUpdateOutboundCmd 更新单据：{}", JSON.toJSONString(delOutbounds));
             int updBatch = delOutboundMapper.updateDeloutByOrder(delOutbounds);
-            log.info("ChargeUpdateOutboundCmd updBatch：", updBatch);
+            log.info("ChargeUpdateOutboundCmd updBatch：{}", updBatch);
 
             if (updBatch == 0) {
                 return null;
