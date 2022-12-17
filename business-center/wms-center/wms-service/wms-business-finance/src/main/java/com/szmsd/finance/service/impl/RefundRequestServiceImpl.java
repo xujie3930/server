@@ -169,6 +169,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 .in(FssRefundRequest::getAuditStatus, RefundStatusEnum.BRING_INTO_COURT.getStatus(), RefundStatusEnum.INITIAL.getStatus()));
     }
 
+    //导入自动审核
     @Override
 //    @Transactional(rollbackFor = Exception.class)
     public int importByTemplate(MultipartFile file) {
@@ -236,6 +237,75 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         }
         return 1;
 
+    }
+
+
+    //导入
+    @Override
+    public int importByTemplateus(MultipartFile file) {
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(8, 16, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1000), new NamedThreadFactory("【RefundImport】==", false), new ThreadPoolExecutor.CallerRunsPolicy());
+        try (InputStream inputStream = file.getInputStream()) {
+            List<RefundRequestDTO> basPackingAddList = EasyExcel.read(inputStream, RefundRequestDTO.class, new SyncReadListener()).sheet().doReadSync();
+            int count = 500;
+            int size = basPackingAddList.size();
+            int segments = size / count;
+            segments = size % count == 0 ? segments : segments + 1;
+            CountDownLatch countDownLatch = new CountDownLatch(segments);
+            List<Future<String>> futures = new ArrayList<>();
+
+            for (int i = 0; i < segments; i++) {
+                List<RefundRequestDTO> refundRequestDTOS;
+                if (i == segments - 1) {
+                    refundRequestDTOS = basPackingAddList.subList(count * i, size);
+                } else {
+                    refundRequestDTOS = basPackingAddList.subList(count * i, count * (i + 1));
+                }
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                Future<String> submit = threadPoolExecutor.submit(() -> {
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    LoginUser loginUser = SecurityUtils.getLoginUser();
+                    String errorMsg = "";
+                    try {
+                        handleInsertData(refundRequestDTOS, true);
+                        this.insertBatchRefundRequest(refundRequestDTOS);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        errorMsg = e.getMessage();
+                        log.error("=================导入失败=================：\n{} \n", JSONObject.toJSONString(refundRequestDTOS), e);
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                    return errorMsg;
+                });
+                futures.add(submit);
+            }
+
+
+            countDownLatch.await();
+            StringBuilder stringBuilder = new StringBuilder();
+            futures.forEach(errorMsg -> {
+                String s = "";
+                try {
+                    s = errorMsg.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                    log.error("执行等待异常：", e);
+                    s = e.getMessage();
+                }
+                stringBuilder.append(s);
+            });
+            AssertUtil.isTrue(StringUtils.isBlank(stringBuilder.toString()), stringBuilder.toString());
+            return 1;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            log.error("执行等待异常22：", e);
+        } finally {
+            threadPoolExecutor.shutdown();
+        }
+        return 1;
     }
 
     @Resource
