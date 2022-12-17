@@ -457,7 +457,7 @@
         select
         FASB.charge_category as chargeCategory,FASB.currency_code as currencyCode,
         '补收' as nature,
-        round(ceil(sum(FASB.amount)*100)/100,2) as amount,FASB.remark
+        round(ceil(sum(0-FASB.amount)*100)/100,2) as amount,FASB.remark
         from fss_account_serial_bill as FASB
         <where>
 
