@@ -3117,39 +3117,39 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             String pathname = null;
             byte[] fb = null;
-//            if(outbound.getEndTagState() != null && outbound.getEndTagState().equals(DelOutboundEndTagStateEnum.REVIEWED.getCode())){
-//                pathname = outbound.getShipmentRetryLabel();
-//                File labelFile = new File(pathname);
-//                if (labelFile.exists()) {
-//                    FileInputStream fileInputStream = null;
-//                    try {
-//                        fileInputStream = new FileInputStream(labelFile);
-//                        fb = IOUtils.toByteArray(fileInputStream);
-//                    } catch (Exception e) {
-//                        logger.error(e.getMessage(), e);
-//                        response.setStatus(false);
-//                        response.setMessage("获取标签文件失败," + e.getMessage());
-//                        responseList.add(response);
-//                        continue;
-//                    } finally {
-//                        IOUtils.closeQuietly(fileInputStream);
-//                    }
-//                }
-//
-//            }else{
-//
-//                if (!(DelOutboundStateEnum.DELIVERED.getCode().equals(outbound.getState())
-//                        || DelOutboundStateEnum.PROCESSING.getCode().equals(outbound.getState())
-//                        || DelOutboundStateEnum.COMPLETED.getCode().equals(outbound.getState())
-//                        || DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(outbound.getState())
-//                        || DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(outbound.getState())
-//                        || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(outbound.getState())
-//                )) {
-//                    throw new CommonException("400", "订单当前状态不允许获取");
-//                }
-//
-//                pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(outbound) + "/" + orderNo + ".pdf";
-//                File labelFile = new File(pathname);
+            if(outbound.getEndTagState() != null && outbound.getEndTagState().equals(DelOutboundEndTagStateEnum.REVIEWED.getCode())){
+                pathname = outbound.getShipmentRetryLabel();
+                File labelFile = new File(pathname);
+                if (labelFile.exists()) {
+                    FileInputStream fileInputStream = null;
+                    try {
+                        fileInputStream = new FileInputStream(labelFile);
+                        fb = IOUtils.toByteArray(fileInputStream);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                        response.setStatus(false);
+                        response.setMessage("获取标签文件失败," + e.getMessage());
+                        responseList.add(response);
+                        continue;
+                    } finally {
+                        IOUtils.closeQuietly(fileInputStream);
+                    }
+                }
+
+            }else{
+
+                if (!(DelOutboundStateEnum.DELIVERED.getCode().equals(outbound.getState())
+                        || DelOutboundStateEnum.PROCESSING.getCode().equals(outbound.getState())
+                        || DelOutboundStateEnum.COMPLETED.getCode().equals(outbound.getState())
+                        || DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(outbound.getState())
+                        || DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(outbound.getState())
+                        || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(outbound.getState())
+                )) {
+                    throw new CommonException("400", "订单当前状态不允许获取");
+                }
+
+                pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(outbound) + "/" + orderNo + ".pdf";
+                File labelFile = new File(pathname);
 //
 //                if (labelFile.exists()) {
 //                    FileInputStream fileInputStream = null;
@@ -3166,45 +3166,45 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 //                        IOUtils.closeQuietly(fileInputStream);
 //                    }
 //                } else {
-//                    // 查询地址信息
-//                    DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
-//                    try {
-//                        // 查询SKU信息
-//                        List<String> nos = new ArrayList<>();
-//                        nos.add(orderNo);
-//                        Map<String, String> skuLabelMap = this.delOutboundDetailService.queryDetailsLabelByNos(nos);
-//                        String skuLabel = skuLabelMap.get(orderNo);
-//                        ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress, skuLabel);
-//                        FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
-//                    } catch (Exception e) {
-//                        log.error(e.getMessage(), e);
-//                        response.setStatus(false);
-//                        response.setMessage("生成标签文件失败," + e.getMessage());
-//                        responseList.add(response);
-//                        continue;
-//                    }
-//                }
-//            }
-
-            pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(outbound) + "/" + orderNo + ".pdf";
-            File labelFile = new File(pathname);
-            // 查询地址信息
-            DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
-            try {
-                // 查询SKU信息
-                List<String> nos = new ArrayList<>();
-                nos.add(orderNo);
-                Map<String, String> skuLabelMap = this.delOutboundDetailService.queryDetailsLabelByNos(nos);
-                String skuLabel = skuLabelMap.get(orderNo);
-                ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress, skuLabel);
-                FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                response.setStatus(false);
-                response.setMessage("生成标签文件失败," + e.getMessage());
-                responseList.add(response);
-                continue;
+                    // 查询地址信息
+                    DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
+                    try {
+                        // 查询SKU信息
+                        List<String> nos = new ArrayList<>();
+                        nos.add(orderNo);
+                        Map<String, String> skuLabelMap = this.delOutboundDetailService.queryDetailsLabelByNos(nos);
+                        String skuLabel = skuLabelMap.get(orderNo);
+                        ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress, skuLabel);
+                        FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                        response.setStatus(false);
+                        response.setMessage("生成标签文件失败," + e.getMessage());
+                        responseList.add(response);
+                        continue;
+                    }
+                //}
             }
+
+//            pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(outbound) + "/" + orderNo + ".pdf";
+//            File labelFile = new File(pathname);
+//            // 查询地址信息
+//            DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
+//            try {
+//                // 查询SKU信息
+//                List<String> nos = new ArrayList<>();
+//                nos.add(orderNo);
+//                Map<String, String> skuLabelMap = this.delOutboundDetailService.queryDetailsLabelByNos(nos);
+//                String skuLabel = skuLabelMap.get(orderNo);
+//                ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress, skuLabel);
+//                FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
+//            } catch (Exception e) {
+//                log.error(e.getMessage(), e);
+//                response.setStatus(false);
+//                response.setMessage("生成标签文件失败," + e.getMessage());
+//                responseList.add(response);
+//                continue;
+//            }
 
             if(fb == null){
                 continue;
