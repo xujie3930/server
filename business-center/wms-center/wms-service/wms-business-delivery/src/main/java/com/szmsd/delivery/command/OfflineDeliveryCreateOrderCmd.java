@@ -2,6 +2,7 @@ package com.szmsd.delivery.command;
 
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
+import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -114,17 +115,18 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         delOutbound.setVersion(deliveryImport.getVersion());
         delOutbound.setSellerCode(deliveryImport.getSellerCode());
         delOutbound.setCustomCode(deliveryImport.getCustomCode());
-        delOutbound.setShipmentService(deliveryImport.getShipmentService());
+        delOutbound.setShipmentRule(deliveryImport.getShipmentService());
         delOutbound.setHouseNo(deliveryImport.getHouseNo());
         delOutbound.setBringVerifyTime(deliveryImport.getBringTime());
         delOutbound.setDeliveryTime(deliveryImport.getDeliveryTime());
+        delOutbound.setOrderType(DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode());
         //delOutbound.setDeliveryAgent(deliveryImport.getSupplierName());
         delOutbound.setShipmentState("END");
         delOutbound.setCompletedState("END");
         if(deliveryImport.getCod() != null) {
             delOutbound.setCodAmount(new BigDecimal(deliveryImport.getCod()));
         }
-        delOutbound.setAmazonReferenceId(deliveryImport.getAmazonLogisticsRouteId());
+        delOutbound.setAmazonLogisticsRouteId(deliveryImport.getAmazonLogisticsRouteId());
 
         return delOutbound;
     }

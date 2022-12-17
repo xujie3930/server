@@ -2,6 +2,9 @@ package com.szmsd.delivery.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
+import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
+import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -43,6 +46,9 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
     @Autowired
     private OfflineCostImportMapper offlineCostImportMapper;
 
+    @Autowired
+    private BasRegionFeignService basRegionFeignService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public R importExcel(MultipartFile file) {
@@ -55,13 +61,33 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
         if(CollectionUtils.isEmpty(deliveryExcelDtoList) || CollectionUtils.isEmpty(offlineCostExcelDtos)){
             return R.failed("无法解析excel数据");
         }
-
         //step 2. 转换
         List<OfflineDeliveryImport> offlineDeliveryImports = OfflineDeliveryConvert.INSTANCE.toOfflineDeliveryImportList(deliveryExcelDtoList);
         List<OfflineCostImport> offlineCostImports = OfflineDeliveryConvert.INSTANCE.toOfflineCostImportList(offlineCostExcelDtos);
 
         String loginUser = SecurityUtils.getUsername();
         Date date = new Date();
+
+        BasRegionSelectListQueryDto queryDto = new BasRegionSelectListQueryDto();
+        queryDto.setType(1);
+        R<List<BasRegionSelectListVO>> regionRs = basRegionFeignService.countryList(queryDto);
+        if(regionRs == null || regionRs.getCode() != 200){
+            throw new RuntimeException("无法获取地区basRegion 基础数据，请联系管理员");
+        }
+
+        List<BasRegionSelectListVO> basRegionSelectListVOList = regionRs.getData();
+        if(CollectionUtils.isEmpty(basRegionSelectListVOList)) {
+            throw new RuntimeException("地区basRegion 基础数据为空，请联系管理员");
+        }
+
+        Map<String, BasRegionSelectListVO> basRegionSelectListVOMap = basRegionSelectListVOList.stream().collect(Collectors.toMap(BasRegionSelectListVO::getAddressCode, v -> v));
+        for(OfflineDeliveryImport excelDto : offlineDeliveryImports){
+            BasRegionSelectListVO basRegionSelectListVO = basRegionSelectListVOMap.get(excelDto.getCountryCode());
+            if(basRegionSelectListVO == null){
+                throw new RuntimeException("跟踪号:"+excelDto.getTrackingNo()+",国家代码异常无法导入，请输入正确的国家代码");
+            }
+            excelDto.setCountry(basRegionSelectListVO.getName());
+        }
 
         //一张跟踪号的费用，等于改出库单单的金额
         Map<String,List<OfflineCostImport>> costExcelMap = offlineCostImports.stream().collect(Collectors.groupingBy(OfflineCostImport::getTrackingNo));
