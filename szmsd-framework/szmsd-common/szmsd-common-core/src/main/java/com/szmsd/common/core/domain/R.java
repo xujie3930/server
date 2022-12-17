@@ -44,6 +44,10 @@ public class R<T> implements Serializable {
         return restResult(null, Constants.FAIL, logisticsException.getMessage());
     }
 
+    public static <T> R<T> failed(Integer code,String message) {
+        return restResult(null, code, message);
+    }
+
     //区分语言默认返回的失败
     public static <T> R<T> onFailed() {
         LogisticsException logisticsException = LogisticsExceptionUtil.getException(ExceptionMessageEnum.FAIL, null);
