@@ -114,7 +114,7 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         delOutbound.setWarehouseCode(deliveryImport.getWarehouseCode());
         delOutbound.setVersion(deliveryImport.getVersion());
         delOutbound.setSellerCode(deliveryImport.getSellerCode());
-        delOutbound.setCustomCode(deliveryImport.getCustomCode());
+        delOutbound.setCustomCode(deliveryImport.getSellerCode());
         delOutbound.setShipmentRule(deliveryImport.getShipmentService());
         delOutbound.setHouseNo(deliveryImport.getHouseNo());
         delOutbound.setBringVerifyTime(deliveryImport.getBringTime());
