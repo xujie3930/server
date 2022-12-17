@@ -416,9 +416,13 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 List<String> ids = refundReviewDTO.getIdList();
                 RefundStatusEnum status = refundReviewDTO.getStatus();
                 String reviewRemark = refundReviewDTO.getReviewRemark();
-                LoginUser loginUser = SecurityUtils.getLoginUser();
+                if (!refundReviewDTO.getReviewRemark().equals("系统自动审核")){
+
+
+                    LoginUser loginUser = SecurityUtils.getLoginUser();
                 //因为自动审核的原因，这个需要放在前面
                 List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>lambdaQuery().in(FssRefundRequest::getId, ids).eq(FssRefundRequest::getAuditStatus,1));
+
                 int update = baseMapper.update(null, Wrappers.<FssRefundRequest>lambdaUpdate()
                         .in(FssRefundRequest::getId, ids)
                         .eq(FssRefundRequest::getAuditStatus, RefundStatusEnum.BRING_INTO_COURT.getStatus())
@@ -430,10 +434,31 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                         .set(FssRefundRequest::getReviewerCode, loginUser.getSellerCode())
                         .set(FssRefundRequest::getReviewerName, loginUser.getUsername())
                 );
-                AssertUtil.isTrue(update == ids.size(), "审核异常!");
-                //审核完成触发扣减
-                this.afterApprove(status, fssRefundRequests);
-                return update;
+                    AssertUtil.isTrue(update == ids.size(), "审核异常!");
+                    //审核完成触发扣减
+                    this.afterApprove(status, fssRefundRequests);
+                    return update;
+                }else if (refundReviewDTO.getReviewRemark().equals("系统自动审核")){
+                    //因为自动审核的原因，这个需要放在前面
+                    List<FssRefundRequest> fssRefundRequests = baseMapper.selectList(Wrappers.<FssRefundRequest>lambdaQuery().in(FssRefundRequest::getId, ids).eq(FssRefundRequest::getAuditStatus,1));
+
+                    int update = baseMapper.update(null, Wrappers.<FssRefundRequest>lambdaUpdate()
+                            .in(FssRefundRequest::getId, ids)
+                            .eq(FssRefundRequest::getAuditStatus, RefundStatusEnum.BRING_INTO_COURT.getStatus())
+
+                            .set(FssRefundRequest::getReviewRemark, reviewRemark)
+                            .set(FssRefundRequest::getAuditStatus, status.getStatus())
+                            .set(FssRefundRequest::getAuditTime, LocalDateTime.now())
+                            .set(FssRefundRequest::getReviewerId, 1)
+                            .set(FssRefundRequest::getReviewerCode, "admin")
+                            .set(FssRefundRequest::getReviewerName, "系统")
+                    );
+                    AssertUtil.isTrue(update == ids.size(), "审核异常!");
+                    //审核完成触发扣减
+                    this.afterApprove(status, fssRefundRequests);
+                    return update;
+                }
+
             } else {
                 log.error("退费业务处理超时,请稍候重试{}", JSONObject.toJSONString(refundReviewDTO));
                 throw new RuntimeException("退费业务处理超时,请稍候重试");
@@ -449,6 +474,7 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
             }
             log.info("【退费】RefundPayFactory --结束--");
         }
+        return 0;
     }
 
     /**
