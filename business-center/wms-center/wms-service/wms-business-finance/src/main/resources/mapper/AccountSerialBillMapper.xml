@@ -248,7 +248,7 @@
             DOB.specifications,DOB.amazon_logistics_route_id,
             DOA.country,DOA.country_code,
             round(ceil(sum(FASB.amount)*100)/100,2) as total_amount,
-            round(ceil(sum(case when FASB.charge_category = '物流基础费' then abs(FASB.amount) else 0 end )*100)/100,2) as freight_fee,
+            round(ceil(sum(case when FASB.charge_category = '运费' then abs(FASB.amount) else 0 end )*100)/100,2) as freight_fee,
             round(ceil(sum(case when FASB.charge_category in ('操作费','业务操作') then abs(FASB.amount) else 0 end)*100)/100,2) as ex_warehourse_fee,
             round(ceil(sum(case when FASB.charge_category = '物料费' then abs(FASB.amount) else 0 end)*100)/100,2) as package_fee,
             round(ceil(sum(case when FASB.charge_category = '处理费' then abs(FASB.amount) else 0 end)*100)/100,2) as hander_fee,
