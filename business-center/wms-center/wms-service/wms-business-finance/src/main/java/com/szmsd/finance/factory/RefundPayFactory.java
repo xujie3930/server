@@ -134,6 +134,12 @@ public class RefundPayFactory extends AbstractPayFactory {
                         accountSerialBill.setWeight(delOutbound.getWeight());
                         accountSerialBill.setCalcWeight(delOutbound.getCalcWeight());
                         accountSerialBill.setSpecifications(delOutbound.getSpecifications());
+                        accountSerialBill.setTrackingNo(delOutbound.getTrackingNo());
+                        accountSerialBill.setWarehouseCode(delOutbound.getWarehouseCode());
+                        accountSerialBill.setWarehouseName(delOutbound.getWarehouseCode());
+                        accountSerialBill.setShipmentService(delOutbound.getShipmentService());
+                        accountSerialBill.setShipmentRule(delOutbound.getShipmentRule());
+                        accountSerialBill.setCurrencyCode(delOutbound.getCurrencyCode());
                     }
                 }
             }
@@ -143,6 +149,14 @@ public class RefundPayFactory extends AbstractPayFactory {
                 accountSerialBill.setSerialNumber(serialNumber);
             }else{
                 accountSerialBill.setSerialNumber(dto.getSerialNumber());
+            }
+
+            String bcategory = accountSerialBill.getBusinessCategory();
+            if(bcategory != null){
+                boolean prcState = bcategory.equals("操作费") || bcategory.equals("仓租") || bcategory.equals("增值消费") || bcategory.equals("物料费");
+                if(prcState){
+                    accountSerialBill.setPrcState(1);
+                }
             }
 
             accountSerialBillService.save(accountSerialBill);
