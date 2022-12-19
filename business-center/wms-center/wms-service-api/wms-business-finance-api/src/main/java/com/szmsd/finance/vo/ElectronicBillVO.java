@@ -26,7 +26,7 @@ public class ElectronicBillVO implements Serializable {
     @JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")
     private Date billEndTime;
 
-    @ApiModelProperty(value = "状态 0 未处理 1 处理中 2 处理完成")
+    @ApiModelProperty(value = "状态 0 未处理 1 处理中 2 处理完成 3 生成失败")
     private Integer buildStatus;
 
     @ApiModelProperty(value = "文件名称")

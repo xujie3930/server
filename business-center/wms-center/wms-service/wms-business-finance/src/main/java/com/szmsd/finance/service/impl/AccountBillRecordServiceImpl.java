@@ -144,6 +144,13 @@ public class AccountBillRecordServiceImpl implements AccountBillRecordService {
 
         },ex -> {
             log.error("生成失败,",ex);
+            //根据业务id，更新状态已处理
+
+            LambdaUpdateWrapper<AccountBillRecord> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+            lambdaUpdateWrapper.set(AccountBillRecord::getBuildStatus,3);
+            lambdaUpdateWrapper.set(AccountBillRecord::getErrorMsg,ex.getMessage());
+            lambdaUpdateWrapper.eq(AccountBillRecord::getRecordId, recordId);
+            accountBillRecordMapper.update(null, lambdaUpdateWrapper);
         });
 
         return R.ok();

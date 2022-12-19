@@ -45,6 +45,9 @@ public class AccountBillRecord extends FssBaseEntity {
     @ApiModelProperty(value = "业务ID")
     private String recordId;
 
+    @ApiModelProperty(value = "文件生成失败原因")
+    private String errorMsg;
+
 
 
 }
