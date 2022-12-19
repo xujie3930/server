@@ -2899,9 +2899,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             DelOutboundSpecialDto dto = new DelOutboundSpecialDto();
             dto.setOrderNo(orderNo);
             if(isTh){
-                dto.setSpecialGoods("特货");
+                dto.setSpecialGoods("TH");
             }else{
-                dto.setSpecialGoods("普货");
+                dto.setSpecialGoods("PH");
             }
             dataList.add(dto);
         }
