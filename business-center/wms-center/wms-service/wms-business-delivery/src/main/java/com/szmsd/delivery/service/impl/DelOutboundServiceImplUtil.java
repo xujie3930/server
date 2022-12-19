@@ -532,9 +532,9 @@ public final class DelOutboundServiceImplUtil {
         String shipmentType = delOutbound.getShipmentType();
 
         if(shipmentType.equals("GeneralCargo")){
-            stringBuffer.append("普货  ");
+            stringBuffer.append("PH  ");
         }else{
-            stringBuffer.append("特货  ");
+            stringBuffer.append("TH  ");
         }
 
         String texts = delOutboundAddress.getCountryCode();
