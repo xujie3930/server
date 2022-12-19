@@ -202,6 +202,13 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     @Override
     public int add(AccountSerialBillDTO dto) {
+
+        List<String> isPrcStateList = new ArrayList();
+        isPrcStateList.add("操作费");
+        isPrcStateList.add("仓租");
+        isPrcStateList.add("增值消费");
+        isPrcStateList.add("物料费");
+        
         AccountSerialBill accountSerialBill = BeanMapperUtil.map(dto, AccountSerialBill.class);
         if (StringUtils.isBlank(accountSerialBill.getWarehouseName())) {
             accountSerialBill.setWarehouseName(sysDictDataService.getWarehouseNameByCode(accountSerialBill.getWarehouseCode()));
@@ -229,8 +236,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
         String bcategory = accountSerialBill.getBusinessCategory();
         if(bcategory != null){
-            boolean prcState = bcategory.equals("操作费") || bcategory.equals("仓租") || bcategory.equals("增值消费") || bcategory.equals("物料费");
-            if(prcState){
+
+            boolean prcState = isPrcStateList.contains(bcategory);
+            if(!prcState){
                 accountSerialBill.setPrcState(1);
             }
         }
@@ -248,6 +256,13 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     @Override
     public boolean saveBatch(List<AccountSerialBillDTO> dto) {
+
+        List<String> isPrcStateList = new ArrayList();
+        isPrcStateList.add("操作费");
+        isPrcStateList.add("仓租");
+        isPrcStateList.add("增值消费");
+        isPrcStateList.add("物料费");
+
         List<AccountSerialBill> accountSerialBill = BeanMapperUtil.mapList(dto, AccountSerialBill.class);
         List<AccountSerialBill> collect = accountSerialBill.stream().map(value -> {
             if (StringUtils.isBlank(value.getWarehouseName())) {
@@ -280,8 +295,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
             String bcategory = value.getBusinessCategory();
             if(bcategory != null){
-                boolean prcState = bcategory.equals("操作费") || bcategory.equals("仓租") || bcategory.equals("增值消费") || bcategory.equals("物料费");
-                if(prcState){
+
+                boolean prcState =  isPrcStateList.contains(bcategory);
+                if(!prcState){
                     value.setPrcState(1);
                 }
             }

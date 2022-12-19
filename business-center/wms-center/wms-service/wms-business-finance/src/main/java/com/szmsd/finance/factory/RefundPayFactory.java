@@ -23,6 +23,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -114,6 +115,13 @@ public class RefundPayFactory extends AbstractPayFactory {
 
     @Override
     public void setSerialBillLog(CustPayDTO dto) {
+
+        List<String> isPrcStateList = new ArrayList();
+        isPrcStateList.add("操作费");
+        isPrcStateList.add("仓租");
+        isPrcStateList.add("增值消费");
+        isPrcStateList.add("物料费");
+
         financeThreadTaskPool.execute(() -> {
             log.info("setSerialBillLog {}", JSONObject.toJSONString(dto));
             List<AccountSerialBillDTO> serialBillInfoList = dto.getSerialBillInfoList();
@@ -153,8 +161,9 @@ public class RefundPayFactory extends AbstractPayFactory {
 
             String bcategory = accountSerialBill.getBusinessCategory();
             if(bcategory != null){
-                boolean prcState = bcategory.equals("操作费") || bcategory.equals("仓租") || bcategory.equals("增值消费") || bcategory.equals("物料费");
-                if(prcState){
+
+                boolean prcState = isPrcStateList.contains(bcategory);
+                if(!prcState){
                     accountSerialBill.setPrcState(1);
                 }
             }
