@@ -147,7 +147,7 @@ public class RefundPayFactory extends AbstractPayFactory {
                         accountSerialBill.setWarehouseName(delOutbound.getWarehouseCode());
                         accountSerialBill.setShipmentService(delOutbound.getShipmentService());
                         accountSerialBill.setShipmentRule(delOutbound.getShipmentRule());
-                        accountSerialBill.setCurrencyCode(delOutbound.getCurrencyCode());
+                        //accountSerialBill.setCurrencyCode(delOutbound.getCurrencyCode());
                     }
                 }
             }
