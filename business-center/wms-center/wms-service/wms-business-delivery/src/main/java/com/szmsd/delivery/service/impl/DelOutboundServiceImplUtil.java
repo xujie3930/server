@@ -43,11 +43,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author zhangyuyuan
@@ -481,7 +477,7 @@ public final class DelOutboundServiceImplUtil {
         return byteArrayOutputStream;
     }
 
-    public static ByteArrayOutputStream renderPackageTransfer(DelOutbound delOutbound, DelOutboundAddress delOutboundAddress, String skuLabel) throws Exception {
+    public static ByteArrayOutputStream renderPackageTransfer(boolean isTh,DelOutbound delOutbound, DelOutboundAddress delOutboundAddress, String skuLabel) throws Exception {
 
         String modelPath = "classpath:fonts/logo.png";
         URL logoImageUrl = ResourceUtils.getURL(modelPath);
@@ -515,6 +511,8 @@ public final class DelOutboundServiceImplUtil {
             document.add(logoImg);
         }
 
+        //this.querySpecialGoods(Arrays.asList(delOutbound.getOrderNo()));
+
         //3. 注册字体
         Font font = new Font(bf, 18);
         font.setSize(12f);
@@ -531,7 +529,7 @@ public final class DelOutboundServiceImplUtil {
 
         String shipmentType = delOutbound.getShipmentType();
 
-        if(shipmentType.equals("GeneralCargo")){
+        if(!isTh){
             stringBuffer.append("PH  ");
         }else{
             stringBuffer.append("TH  ");
