@@ -2873,7 +2873,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 for(List<Long> ids : partionOrderNoList){
 
-                    List<DelOutbound> delOutboundList = baseMapper.selectList(Wrappers.<DelOutbound>query().lambda().in(DelOutbound::getOrderNo,ids).eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode()));
+                    List<DelOutbound> delOutboundList = baseMapper.selectList(Wrappers.<DelOutbound>query().lambda().in(DelOutbound::getId,ids).eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode()));
 
                     for(DelOutbound delOutbound : delOutboundList){
                         Long s = System.currentTimeMillis();
