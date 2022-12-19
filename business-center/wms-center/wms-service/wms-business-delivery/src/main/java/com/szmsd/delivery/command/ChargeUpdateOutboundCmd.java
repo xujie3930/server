@@ -78,6 +78,7 @@ public class ChargeUpdateOutboundCmd extends BasicCommand<List<String>> {
                 ChargePricingOrderMsgDto chargePricingOrderMsgDto = new ChargePricingOrderMsgDto();
                 chargePricingOrderMsgDto.setState(ChargeImportStateEnum.UPDATE_ORDER.getCode());
                 chargePricingOrderMsgDto.setOrderNo(s);
+                allData.add(chargePricingOrderMsgDto);
             }
             chargeImportMapper.batchUpd(allData);
         }

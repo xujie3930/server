@@ -253,7 +253,7 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
 
             String businessCategory = billDirectDeliveryTotalVO.getBusinessCategory();
 
-            if(businessCategory.equals("物流消费")){
+            if(businessCategory != null && businessCategory.equals("物流消费")){
 
                 billDirectDeliveryTotalVO.setTotalAmount(billDirectDeliveryTotalVO.getTotalAmount().negate());
                 billDirectDeliveryTotalVO.setFreightFee(billDirectDeliveryTotalVO.getFreightFee().negate());

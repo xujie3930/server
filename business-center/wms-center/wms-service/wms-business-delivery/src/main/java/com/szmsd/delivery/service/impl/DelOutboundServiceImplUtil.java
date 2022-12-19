@@ -518,12 +518,12 @@ public final class DelOutboundServiceImplUtil {
         //3. 注册字体
         Font font = new Font(bf, 18);
         font.setSize(12f);
-        Paragraph weight = new Paragraph(delOutbound.getWeight() + " g", font);
-        weight.setAlignment(Element.ALIGN_LEFT);
-        weight.setSpacingBefore(0f);
-        weight.setSpacingAfter(0f);
-        weight.setPaddingTop(0f);
-        document.add(weight);
+//        Paragraph weight = new Paragraph(delOutbound.getWeight() + " g", font);
+//        weight.setAlignment(Element.ALIGN_LEFT);
+//        weight.setSpacingBefore(0f);
+//        weight.setSpacingAfter(0f);
+//        weight.setPaddingTop(0f);
+//        document.add(weight);
         //3. 添加段落,并设置字体
         // 文本块(Chunk)、短语(Phrase)和段落(paragraph)处理文本
         font.setSize(15f);
@@ -532,9 +532,9 @@ public final class DelOutboundServiceImplUtil {
         String shipmentType = delOutbound.getShipmentType();
 
         if(shipmentType.equals("GeneralCargo")){
-            stringBuffer.append("普货  ");
+            stringBuffer.append("PH  ");
         }else{
-            stringBuffer.append("特货  ");
+            stringBuffer.append("TH  ");
         }
 
         String texts = delOutboundAddress.getCountryCode();
