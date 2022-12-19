@@ -1,7 +1,12 @@
 package com.szmsd.delivery.command;
 
 import com.alibaba.fastjson.JSON;
+import com.szmsd.bas.api.feign.BasSubFeignService;
+import com.szmsd.bas.api.feign.BasWarehouseFeignService;
+import com.szmsd.bas.domain.BasWarehouse;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.command.BasicCommand;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.OfflineCostImport;
@@ -85,6 +90,54 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
         List<OfflineCostImport> offlineCostImports = offlineResultDto.getOfflineCostImportList();
         List<OfflineDeliveryImport> offlineDeliveryImports = offlineResultDto.getOfflineDeliveryImports();
 
+//        DelOutboundMapper delOutboundMapper = SpringUtils.getBean(DelOutboundMapper.class);
+//
+//        List<String> orderNoList = offlineDeliveryImports.stream().map(OfflineDeliveryImport::getOrderNo).distinct().collect(Collectors.toList());
+//
+//        List<List<String>> orderPartions = Lists.partition(orderNoList,200);
+//
+//        List<DelOutbound> allDelOutboundList = new ArrayList<>();
+//
+//        for(List<String> strings : orderPartions){
+//
+//            List<DelOutbound> delOutboundList = delOutboundMapper.selectList(Wrappers.<DelOutbound>query().lambda().in(DelOutbound::getOrderNo,strings));
+//            allDelOutboundList.addAll(delOutboundList);
+//        }
+//
+//        Map<String,DelOutbound> delOutboundMap = allDelOutboundList.stream().collect(Collectors.toMap(DelOutbound::getOrderNo,v->v));
+
+
+        List<String> warehouseCodeList = offlineDeliveryImports.stream().map(OfflineDeliveryImport::getWarehouseCode).distinct().collect(Collectors.toList());
+        BasWarehouseFeignService basWarehouseFeignService = SpringUtils.getBean(BasWarehouseFeignService.class);
+        Map<String,BasWarehouse> basWarehouseMap = null;
+        if(CollectionUtils.isNotEmpty(warehouseCodeList)){
+            R<List<BasWarehouse>> warehouseRs = basWarehouseFeignService.queryByWarehouseCodes(warehouseCodeList);
+            if(warehouseRs == null){
+                throw new RuntimeException("无法获取仓库基本信息");
+            }
+
+            List<BasWarehouse> basWarehouses = warehouseRs.getData();
+
+            basWarehouseMap = basWarehouses.stream().collect(Collectors.toMap(BasWarehouse::getWarehouseCode,v->v));
+        }
+
+        //List<String> currencyCodeList = offlineCostImports.stream().map(OfflineCostImport::getCurrencyCode).distinct().collect(Collectors.toList());
+
+        BasSubFeignService basSubFeignService = SpringUtils.getBean(BasSubFeignService.class);
+        R<Map<String, List<BasSubWrapperVO>>> basSubCurrencyRs = basSubFeignService.getSub("008");
+
+        if(!Constants.SUCCESS.equals(basSubCurrencyRs.getCode())){
+            throw  new RuntimeException("无法获取币种信息");
+        }
+
+        List<BasSubWrapperVO> baslist = basSubCurrencyRs.getData().get("008");
+
+        if(CollectionUtils.isEmpty(baslist)){
+            throw  new RuntimeException("无法获取币种信息");
+        }
+
+        Map<String,BasSubWrapperVO> basSubWrapperCodeVOMap = baslist.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue,v->v));
+
         Map<String,OfflineDeliveryImport> deliveryImportMap = offlineDeliveryImports.stream().collect(Collectors.toMap(OfflineDeliveryImport::getTrackingNo, v->v));
 
         for(OfflineCostImport costImport :offlineCostImports){
@@ -113,6 +166,17 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
             refundRequestDTO.setAttributes("自动退费");
             refundRequestDTO.setRemark(costImport.getRemark());
             refundRequestDTO.setOrderNo(deliveryImport.getOrderNo());
+            refundRequestDTO.setProcessNo(deliveryImport.getTrackingNo());
+
+            if(basWarehouseMap != null){
+                BasWarehouse basWarehouse = basWarehouseMap.get(refundRequestDTO.getWarehouseCode());
+                refundRequestDTO.setWarehouseName(basWarehouse.getWarehouseNameCn());
+            }
+
+            if(basSubWrapperCodeVOMap != null){
+                BasSubWrapperVO basSubCodeWrapperVO = basSubWrapperCodeVOMap.get(refundRequestDTO.getCurrencyCode());
+                refundRequestDTO.setCurrencyName(basSubCodeWrapperVO.getSubNameEn());
+            }
 
             refundRequestList.add(refundRequestDTO);
         }
