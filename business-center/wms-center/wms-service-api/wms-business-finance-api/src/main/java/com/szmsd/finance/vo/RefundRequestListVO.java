@@ -185,6 +185,9 @@ public class RefundRequestListVO {
     @ApiModelProperty(value = "处理号类型")
     private String orderType;
 
+    @ApiModelProperty(value = "等级")
+    private String gradeName;
+
     @ApiModelProperty(value = "附件")
     private List<AttachmentFileDTO> attachment;
 
