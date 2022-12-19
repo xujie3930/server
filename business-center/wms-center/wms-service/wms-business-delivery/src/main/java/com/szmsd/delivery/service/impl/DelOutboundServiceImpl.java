@@ -2437,13 +2437,23 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 String orderNo = delOutbound.getOrderNo();
                 // 查询地址信息
                 DelOutboundAddress delOutboundAddress = this.delOutboundAddressService.getByOrderNo(orderNo);
+
+                List<DelOutboundDetail> delOutboundDetailList = this.delOutboundDetailService.list(Wrappers.<DelOutboundDetail>query().lambda().eq(DelOutboundDetail::getOrderNo,orderNo));
+                boolean isTh = false;
+                for(DelOutboundDetail detail: delOutboundDetailList){
+                    String productAttribute = detail.getProductAttribute();
+                    if(!"GeneralCargo".equals(productAttribute)){
+                        isTh = true;
+                    }
+                }
+
                 try {
                     // 查询SKU信息
                     List<String> nos = new ArrayList<>();
                     nos.add(orderNo);
                     Map<String, String> skuLabelMap = this.delOutboundDetailService.queryDetailsLabelByNos(nos);
                     String skuLabel = skuLabelMap.get(orderNo);
-                    ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(delOutbound, delOutboundAddress, skuLabel);
+                    ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(isTh,delOutbound, delOutboundAddress, skuLabel);
                     byte[] fb = null;
                     FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
                     ServletOutputStream outputStream = null;
@@ -3150,6 +3160,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 pathname = DelOutboundServiceImplUtil.getPackageTransferLabelFilePath(outbound) + "/" + orderNo + ".pdf";
                 File labelFile = new File(pathname);
+
+                List<DelOutboundDetail> delOutboundDetailList = this.delOutboundDetailService.list(Wrappers.<DelOutboundDetail>query().lambda().eq(DelOutboundDetail::getOrderNo,orderNo));
+                boolean isTh = false;
+                for(DelOutboundDetail detail: delOutboundDetailList){
+
+                    String productAttribute = detail.getProductAttribute();
+
+                    if(!"GeneralCargo".equals(productAttribute)){
+                        isTh = true;
+                    }
+                }
 //
 //                if (labelFile.exists()) {
 //                    FileInputStream fileInputStream = null;
@@ -3174,7 +3195,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         nos.add(orderNo);
                         Map<String, String> skuLabelMap = this.delOutboundDetailService.queryDetailsLabelByNos(nos);
                         String skuLabel = skuLabelMap.get(orderNo);
-                        ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(outbound, delOutboundAddress, skuLabel);
+                        ByteArrayOutputStream byteArrayOutputStream = DelOutboundServiceImplUtil.renderPackageTransfer(isTh,outbound, delOutboundAddress, skuLabel);
                         FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
