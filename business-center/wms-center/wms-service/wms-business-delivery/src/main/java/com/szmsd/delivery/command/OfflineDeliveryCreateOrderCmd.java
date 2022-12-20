@@ -7,6 +7,7 @@ import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
+import com.szmsd.delivery.domain.OfflineCostImport;
 import com.szmsd.delivery.domain.OfflineDeliveryImport;
 import com.szmsd.delivery.dto.OfflineImportDto;
 import com.szmsd.delivery.dto.OfflineResultDto;
@@ -20,6 +21,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto> {
 
@@ -41,6 +44,10 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
 
         List<OfflineDeliveryImport> offlineDeliveryImports = offlineResultDto.getOfflineDeliveryImports();
 
+        List<OfflineCostImport> offlineCostImports = offlineResultDto.getOfflineCostImportList();
+
+        Map<String,List<OfflineCostImport>> offCostMap = offlineCostImports.stream().collect(Collectors.groupingBy(OfflineCostImport::getTrackingNo));
+
         List<DelOutbound> delOutbounds = new ArrayList<>();
         List<DelOutboundAddress> delOutboundAddresses = new ArrayList<>();
         List<OfflineImportDto> updateData = new ArrayList<>();
@@ -51,6 +58,18 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
             DelOutbound delOutbound = this.generatorDeloutbond(deliveryImport);
             DelOutboundAddress delOutboundAddress = this.generatorOutAddress(deliveryImport);
             OfflineImportDto offlineImportDto = new OfflineImportDto();
+
+            String trackIngNo = deliveryImport.getTrackingNo();
+            List<OfflineCostImport> offlineCostImportList = offCostMap.get(trackIngNo);
+
+            StringBuilder currencyDescribe = new StringBuilder();
+
+            for(OfflineCostImport offlineCostImport : offlineCostImportList){
+                currencyDescribe.append(offlineCostImport.getAmount());
+                currencyDescribe.append(offlineCostImport.getCurrencyCode());
+                currencyDescribe.append(";");
+            }
+
             //生产单号
             String serNumber = serialNumberClientService.generatorNumber(SerialNumberConstant.DEL_OUTBOUND_NO);
             StringBuilder stringBuilder = new StringBuilder();
@@ -66,6 +85,7 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
 
             deliveryImport.setOrderNo(orderNo);
             delOutbound.setOrderNo(orderNo);
+            delOutbound.setCurrencyDescribe(currencyDescribe.toString());
             delOutboundAddress.setOrderNo(orderNo);
             delOutbounds.add(delOutbound);
             delOutboundAddresses.add(delOutboundAddress);
@@ -118,8 +138,9 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         delOutbound.setShipmentRule(deliveryImport.getShipmentService());
         delOutbound.setHouseNo(deliveryImport.getHouseNo());
         delOutbound.setBringVerifyTime(deliveryImport.getBringTime());
-        delOutbound.setDeliveryTime(deliveryImport.getDeliveryTime());
+        //delOutbound.setDeliveryTime(deliveryImport.getDeliveryTime());
         delOutbound.setOrderType(DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode());
+        delOutbound.setShipmentsTime(deliveryImport.getDeliveryTime());
         //delOutbound.setDeliveryAgent(deliveryImport.getSupplierName());
         delOutbound.setShipmentState("END");
         delOutbound.setCompletedState("END");
