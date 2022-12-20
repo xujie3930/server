@@ -60,12 +60,14 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
             //自动退费
             R addRequest = refundRequestFeignService.autoRefund(partData);
 
-            if (addRequest != null && addRequest.getCode() != 200) {
+            if (addRequest == null || addRequest.getCode() != 200) {
 
                 logger.error("autoRefund 退费返回失败数据:{}",JSON.toJSONString(partData));
                 List<String> errorOrderNoList = refundRequestAutoDTOS1.stream().map(RefundRequestAutoDTO::getOrderNo).distinct().collect(Collectors.toList());
-
-                String errorMsg = addRequest.getMsg();
+                String errorMsg = "生成退费、补收费用，自动审核退费失败，需要重新执行";
+                if(addRequest != null && addRequest.getMsg() != null) {
+                    errorMsg = addRequest.getMsg();
+                }
                 this.errorHander(errorOrderNoList,errorMsg);
                 //throw new RuntimeException(addRequest.getMsg());
                 continue;
@@ -142,13 +144,7 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
 
             OfflineImportDto offlineImportDto = new OfflineImportDto();
             offlineImportDto.setDealStatus(OfflineDeliveryStateEnum.CREATE_COST.getCode());
-
-            if(StringUtils.isNotEmpty(errorMsg)) {
-                offlineImportDto.setErrorMsg(errorMsg);
-            }else{
-                offlineImportDto.setErrorMsg("生成退费、补收费用，自动审核退费失败，需要重新执行");
-            }
-
+            offlineImportDto.setErrorMsg(errorMsg);
             offlineImportDto.setOrderNo(orderNo);
             updateData.add(offlineImportDto);
         }
