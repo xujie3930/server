@@ -157,6 +157,12 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "处理编号")
     private String processNo;
 
+    @ApiModelProperty(value = "跟踪号")
+    private String trackingNo;
+
+    @ApiModelProperty(value = "服务")
+    private String shipmentRule;
+
     @ApiModelProperty(value = "数量")
     private String num;
 

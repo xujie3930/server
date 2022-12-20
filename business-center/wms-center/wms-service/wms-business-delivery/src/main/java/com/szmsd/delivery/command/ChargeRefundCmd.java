@@ -11,8 +11,8 @@ import com.szmsd.finance.api.feign.AccountSerialBillFeignService;
 import com.szmsd.finance.api.feign.RefundRequestFeignService;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountOrderQueryDTO;
-import com.szmsd.finance.dto.RefundRequestAutoDTO;
-import com.szmsd.finance.dto.RefundRequestListAutoDTO;
+import com.szmsd.finance.dto.RefundRequestDTO;
+import com.szmsd.finance.dto.RefundRequestListDTO;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class ChargeRefundCmd extends BasicCommand<List<AccountSerialBill>> {
 
             if(resultRs.getCode() == 200 && CollectionUtils.isNotEmpty(resultRs.getData())){
                 List<AccountSerialBill> accountSerialBills = resultRs.getData();
-                RefundRequestListAutoDTO refundReviewDTO = this.generatorRefundAutoData(accountSerialBills);
+                RefundRequestListDTO refundReviewDTO = this.generatorRefundAutoData(accountSerialBills);
                 //退费
                 R autoRefundRs = refundRequestFeignService.autoRefund(refundReviewDTO);
 
@@ -83,15 +83,15 @@ public class ChargeRefundCmd extends BasicCommand<List<AccountSerialBill>> {
         super.afterExecuted(result);
     }
 
-    private RefundRequestListAutoDTO generatorRefundAutoData(List<AccountSerialBill> accountSerialBills) {
+    private RefundRequestListDTO generatorRefundAutoData(List<AccountSerialBill> accountSerialBills) {
 
-        RefundRequestListAutoDTO autoDTO = new RefundRequestListAutoDTO();
-        List<RefundRequestAutoDTO> refundRequestList = new ArrayList<>();
+        RefundRequestListDTO autoDTO = new RefundRequestListDTO();
+        List<RefundRequestDTO> refundRequestList = new ArrayList<>();
 
 
         for(AccountSerialBill accountSerialBill : accountSerialBills){
 
-            RefundRequestAutoDTO refundRequestAutoDTO = new RefundRequestAutoDTO();
+            RefundRequestDTO refundRequestAutoDTO = new RefundRequestDTO();
             refundRequestAutoDTO.setOrderNo(accountSerialBill.getNo());
             refundRequestAutoDTO.setAmount(accountSerialBill.getAmount());
             refundRequestAutoDTO.setCusCode(accountSerialBill.getCusCode());

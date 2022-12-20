@@ -13,5 +13,5 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface RefundRequestFeignService {
 
     @PostMapping("/refundRequest/autoRefund")
-    R autoRefund(@RequestBody RefundRequestListAutoDTO refundReviewDTO);
+    R autoRefund(@RequestBody RefundRequestListDTO refundReviewDTO);
 }
