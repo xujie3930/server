@@ -135,7 +135,9 @@ public class RefundPayFactory extends AbstractPayFactory {
             AccountSerialBill accountSerialBill = new AccountSerialBill();
             BeanUtils.copyProperties(serialBill, accountSerialBill);
             if (StringUtils.isNotBlank(dto.getNo())) {
+                log.info("setSerialBillLog selectDelOutbound :{}",dto.getNo());
                 DelOutbound delOutbound = accountSerialBillMapper.selectDelOutbound(dto.getNo());
+                log.info("setSerialBillLog selectDelOutbound 返回:{}",JSON.toJSONString(delOutbound));
                 if (delOutbound!=null) {
                     accountSerialBill.setRefNo(delOutbound.getRefNo());
                     accountSerialBill.setShipmentService(delOutbound.getShipmentService());
