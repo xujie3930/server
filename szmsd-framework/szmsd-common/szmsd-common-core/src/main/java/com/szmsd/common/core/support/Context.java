@@ -39,34 +39,30 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class Context implements ApplicationContextAware {
+public final class Context implements BeanFactoryPostProcessor, ApplicationContextAware {
 
-    public static ApplicationContext applicationContext;
-    private final static ObjectMapper OBJECT_MAPPER;
-
-    static {
-        OBJECT_MAPPER = new ObjectMapper();
-        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        OBJECT_MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-    }
+    /** Spring应用上下文环境 */
+    private static ConfigurableListableBeanFactory beanFactory;
+    private static ApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         Context.applicationContext = applicationContext;
     }
 
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
+        Context.beanFactory = configurableListableBeanFactory;
+    }
 
-    /**
-     * 获取spring上下文中的bean对象
-     */
-    public static <T> T getBean(Class<T> beanClass, Class... genericTypes) {
-        if (genericTypes == null) {
-            return Context.applicationContext.getBean(beanClass);
-        } else {
-            ResolvableType resolvableType = ResolvableType.forClassWithGenerics(beanClass, genericTypes);
-            ObjectProvider<?> beanProvider = Context.applicationContext.getBeanProvider(resolvableType);
-            return (T) beanProvider.getIfAvailable();
-        }
+
+    public static <T> T getBean(String name) throws BeansException{
+        return (T) beanFactory.getBean(name);
+    }
+
+    public static <T> T getBean(Class<T> clz) throws BeansException{
+        T result = (T) beanFactory.getBean(clz);
+        return result;
     }
 
     /**
@@ -484,6 +480,7 @@ public final class Context implements ApplicationContextAware {
                 .stream()
                 .collect(Collectors.toMap(keyMapper, valueMapper));
     }
+
 
 
 }
