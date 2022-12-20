@@ -2,6 +2,8 @@ package com.szmsd.finance;
 
 import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.support.Context;
+import com.szmsd.finance.domain.FssBank;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.service.AccountBillRecordService;
@@ -17,11 +19,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = BusinessFinanceApplication.class)
+@SpringBootTest(classes = BusinessFinanceApplication.class,webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AccountSerialBillTest {
 
     @Resource
@@ -42,6 +45,27 @@ public class AccountSerialBillTest {
         dto.setPaymentTimeEnd("2022-11-23");
 
         iAccountSerialBillService.asyncExport(null,dto);
+    }
+
+    @Test
+    public void contextTest(){
+
+        List<FssBank> fssBanks = new ArrayList<>();
+        FssBank fssBank = new FssBank();
+        fssBank.setBankCode("US1");
+        fssBank.setBankName("工商");
+        fssBank.setBankAccount("dds");
+        fssBank.setCurrencyCode("USD");
+
+        FssBank fssBank1 = new FssBank();
+        fssBank1.setBankCode("US11");
+        fssBank1.setBankName("工商1");
+        fssBank1.setBankAccount("dds1");
+        fssBank1.setCurrencyCode("USD");
+        fssBanks.add(fssBank1);
+        fssBanks.add(fssBank);
+
+        Context.batchInsert("fss_bank",fssBanks,"id");
     }
 
     @Test
