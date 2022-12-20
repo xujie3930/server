@@ -22,6 +22,8 @@ public abstract class BasicCommand<R> implements Command<R>, ApplicationBeanAwar
 
     private boolean rollbacked = false;
 
+    private String errorMsg;
+
     private Long executeTimeMillis;
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getSimpleName());
@@ -72,6 +74,7 @@ public abstract class BasicCommand<R> implements Command<R>, ApplicationBeanAwar
             afterExecuted(r);
         } catch (Exception ex) {
             rollbacked = true;
+            errorMsg = ex.getMessage();
             throw new RuntimeException(ex.getMessage(), ex);
         } finally {
             executeTimeMillis = System.currentTimeMillis() - startTime;
@@ -82,7 +85,7 @@ public abstract class BasicCommand<R> implements Command<R>, ApplicationBeanAwar
             }
 
             if(rollbacked){
-                rollback();
+                rollback(errorMsg);
             }
         }
         return r;
@@ -106,7 +109,7 @@ public abstract class BasicCommand<R> implements Command<R>, ApplicationBeanAwar
      * 异常执行
      * @throws Exception
      */
-    protected void rollback() {
+    protected void rollback(String errorMsg) {
 
     }
 

@@ -3730,7 +3730,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 if ("OK".equals(jsonObject.getString("status"))) {
                     // 判断结果明细是不是成功的
                     JSONObject data = jsonObject.getJSONObject("data");
-                    if (1 != data.getIntValue("successNumber")) {
+
+                    int successNumber = data.getIntValue("successNumber");
+
+                    if (successNumber != 1) {
                         // 返回的成功数量不是1，判定为异常
                         success = false;
                         // 获取异常信息
@@ -3744,16 +3747,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                             throw new CommonException("500", "[" + errorCode + "]" + errorMessage);
                         }
                     }
-                }
 
-                if(StringUtils.isNotEmpty(trackingNo)) {
+                    if(StringUtils.isNotEmpty(trackingNo) && successNumber == 1) {
 
-                    offlineDeliveryImportMapper.update(null, Wrappers.<OfflineDeliveryImport>lambdaUpdate()
-                            .set(OfflineDeliveryImport::getDealStatus, OfflineDeliveryStateEnum.PUSH_TY.getCode())
-                            .set(OfflineDeliveryImport::getUpdateBy, SecurityUtils.getUsername())
-                            .set(OfflineDeliveryImport::getUpdateTime, new Date())
-                            .eq(OfflineDeliveryImport::getTrackingNo, trackingNo)
-                    );
+                        offlineDeliveryImportMapper.update(null, Wrappers.<OfflineDeliveryImport>lambdaUpdate()
+                                .set(OfflineDeliveryImport::getDealStatus, OfflineDeliveryStateEnum.PUSH_TY.getCode())
+                                .set(OfflineDeliveryImport::getUpdateBy, SecurityUtils.getUsername())
+                                .set(OfflineDeliveryImport::getUpdateTime, new Date())
+                                .eq(OfflineDeliveryImport::getTrackingNo, trackingNo)
+                        );
+                    }
+
                 }
 
             } catch (Exception e) {

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.OfflineDeliveryImport;
 import com.szmsd.delivery.dto.OfflineImportDto;
@@ -55,6 +56,36 @@ public class OfflineDeliveryTrackYeeCmd extends BasicCommand<Integer> {
             return 0;
         }
         return 1;
+    }
+
+    @Override
+    protected void rollback(String errorMsg) {
+
+        logger.error("OfflineDeliveryTrackYeeCmd 异常回滚:{}",errorMsg);
+
+        OfflineDeliveryImportMapper importMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
+        List<OfflineDeliveryImport> offlineDeliveryImports = offlineResultDto.getOfflineDeliveryImports();
+
+        List<OfflineImportDto> updateData = new ArrayList<>();
+        for(OfflineDeliveryImport deliveryImport : offlineDeliveryImports){
+
+            OfflineImportDto offlineImportDto = new OfflineImportDto();
+            offlineImportDto.setTrackingNo(deliveryImport.getTrackingNo());
+            offlineImportDto.setId(deliveryImport.getId());
+            offlineImportDto.setDealStatus(OfflineDeliveryStateEnum.PUSH_TY.getCode());
+            if(StringUtils.isNotEmpty(errorMsg)) {
+                offlineImportDto.setErrorMsg(errorMsg);
+            }else{
+                offlineImportDto.setErrorMsg("推送TY异常");
+            }
+            updateData.add(offlineImportDto);
+        }
+
+        if(CollectionUtils.isNotEmpty(updateData)) {
+            importMapper.updateDealState(updateData);
+        }
+
+        super.rollback(errorMsg);
     }
 
     @Override

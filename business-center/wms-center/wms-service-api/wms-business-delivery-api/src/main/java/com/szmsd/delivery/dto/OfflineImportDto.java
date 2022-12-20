@@ -13,4 +13,6 @@ public class OfflineImportDto {
 
     private String dealStatus;
 
+    private String errorMsg;
+
 }

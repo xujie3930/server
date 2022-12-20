@@ -22,6 +22,9 @@
                 <if test="item.orderNo != null and item.orderNo != ''">
                     order_no = #{item.orderNo},
                 </if>
+                <if test="item.errorMsg != null and item.errorMsg != ''">
+                    error_msg = #{item.errorMsg},
+                </if>
             </set>
             where id = #{item.id}
         </foreach>

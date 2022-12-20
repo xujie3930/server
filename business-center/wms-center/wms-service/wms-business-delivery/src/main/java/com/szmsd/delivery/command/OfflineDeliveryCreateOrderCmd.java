@@ -4,6 +4,7 @@ import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.common.core.command.BasicCommand;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -66,7 +67,7 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
             StringBuilder currencyDescribe = new StringBuilder();
 
             for(OfflineCostImport offlineCostImport : offlineCostImportList){
-                currencyDescribe.append(offlineCostImport.getAmount());
+                currencyDescribe.append(BigDecimalUtil.setScale(offlineCostImport.getAmount(),2));
                 currencyDescribe.append(offlineCostImport.getCurrencyCode());
                 currencyDescribe.append(";");
             }
@@ -113,6 +114,35 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         return offlineResultDto;
     }
 
+    @Override
+    protected void rollback(String errorMsg) {
+
+        logger.error("OfflineDeliveryCreateOrderCmd 异常回滚:{}",errorMsg);
+
+        OfflineDeliveryImportMapper importMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
+        List<OfflineDeliveryImport> offlineDeliveryImports = offlineResultDto.getOfflineDeliveryImports();
+
+        List<OfflineImportDto> updateData = new ArrayList<>();
+        for(OfflineDeliveryImport deliveryImport : offlineDeliveryImports){
+
+            OfflineImportDto offlineImportDto = new OfflineImportDto();
+            offlineImportDto.setTrackingNo(deliveryImport.getTrackingNo());
+            offlineImportDto.setId(deliveryImport.getId());
+            offlineImportDto.setDealStatus(OfflineDeliveryStateEnum.CREATE_ORDER.getCode());
+            if(StringUtils.isNotEmpty(errorMsg)) {
+                offlineImportDto.setErrorMsg(errorMsg);
+            }else{
+                offlineImportDto.setErrorMsg("创建订单失败");
+            }
+            updateData.add(offlineImportDto);
+        }
+
+        if(com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isNotEmpty(updateData)) {
+            importMapper.updateDealState(updateData);
+        }
+
+        super.rollback(errorMsg);
+    }
 
     private DelOutbound generatorDeloutbond(OfflineDeliveryImport deliveryImport){
         DelOutbound delOutbound = new DelOutbound();
@@ -148,6 +178,7 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         //delOutbound.setDeliveryTime(deliveryImport.getDeliveryTime());
         delOutbound.setOrderType(DelOutboundOrderEnum.PACKAGE_TRANSFER.getCode());
         delOutbound.setShipmentsTime(deliveryImport.getDeliveryTime());
+        delOutbound.setCreateTime(deliveryImport.getBringTime());
         //delOutbound.setDeliveryAgent(deliveryImport.getSupplierName());
         delOutbound.setShipmentState("END");
         delOutbound.setCompletedState("END");

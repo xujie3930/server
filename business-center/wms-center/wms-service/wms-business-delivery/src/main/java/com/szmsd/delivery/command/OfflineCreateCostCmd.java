@@ -9,6 +9,7 @@ import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.OfflineCostImport;
 import com.szmsd.delivery.domain.OfflineDeliveryImport;
 import com.szmsd.delivery.dto.OfflineImportDto;
@@ -17,9 +18,7 @@ import com.szmsd.delivery.enums.OfflineDeliveryStateEnum;
 import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import com.szmsd.finance.api.feign.RefundRequestFeignService;
 import com.szmsd.finance.dto.RefundRequestAutoDTO;
-import com.szmsd.finance.dto.RefundRequestDTO;
 import com.szmsd.finance.dto.RefundRequestListAutoDTO;
-import com.szmsd.finance.dto.RefundRequestListDTO;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -82,6 +81,36 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
         }
 
         super.afterExecuted(result);
+    }
+
+    @Override
+    protected void rollback(String errorMsg) {
+
+        logger.error("OfflineCreateCostCmd 异常回滚:{}",errorMsg);
+
+        OfflineDeliveryImportMapper importMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
+        List<OfflineDeliveryImport> offlineDeliveryImports = offlineResultDto.getOfflineDeliveryImports();
+
+        List<OfflineImportDto> updateData = new ArrayList<>();
+        for(OfflineDeliveryImport deliveryImport : offlineDeliveryImports){
+
+            OfflineImportDto offlineImportDto = new OfflineImportDto();
+            offlineImportDto.setTrackingNo(deliveryImport.getTrackingNo());
+            offlineImportDto.setId(deliveryImport.getId());
+            offlineImportDto.setDealStatus(OfflineDeliveryStateEnum.CREATE_COST.getCode());
+            if(StringUtils.isNotEmpty(errorMsg)) {
+                offlineImportDto.setErrorMsg(errorMsg);
+            }else{
+                offlineImportDto.setErrorMsg("生成退费、补收费用，自动审核退费失败");
+            }
+            updateData.add(offlineImportDto);
+        }
+
+        if(com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isNotEmpty(updateData)) {
+            importMapper.updateDealState(updateData);
+        }
+
+        super.rollback(errorMsg);
     }
 
     private RefundRequestListAutoDTO generatorRefundRequest() {
