@@ -7,6 +7,7 @@ import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.command.OfflineCreateCostCmd;
 import com.szmsd.delivery.command.OfflineDeliveryCreateOrderCmd;
@@ -102,6 +103,20 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
             deliveryImport.setCreateTime(date);
             deliveryImport.setCreateByName(loginUser);
             deliveryImport.setDealStatus(OfflineDeliveryStateEnum.INIT.getCode());
+
+
+            String specifications = deliveryImport.getSpecifications();
+            if(StringUtils.isNotEmpty(specifications)){
+                String s[] = specifications.split("\\*");
+
+                if(s.length < 3){
+                    throw new RuntimeException(deliveryImport.getTrackingNo()+"单号，尺寸规则异常");
+                }
+
+                deliveryImport.setLength(toDecimal(s[0]));
+                deliveryImport.setWidth(toDecimal(s[1]));
+                deliveryImport.setHeight(toDecimal(s[2]));
+            }
         }
 
         for(OfflineCostImport costImport : offlineCostImports){
@@ -202,6 +217,14 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
         offlineResultDto.setOfflineCostImportList(offlineCostImportList);
 
         return offlineResultDto;
+    }
+
+
+    private BigDecimal toDecimal(String s){
+        if(StringUtils.isEmpty(s)){
+            return BigDecimal.ZERO;
+        }
+        return new BigDecimal(s);
     }
 
 }

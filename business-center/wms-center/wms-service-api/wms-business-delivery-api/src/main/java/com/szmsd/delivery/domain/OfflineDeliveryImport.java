@@ -114,5 +114,16 @@ public class OfflineDeliveryImport extends BaseEntity {
     @ApiModelProperty(value = "金额")
     private BigDecimal amount;
 
+    @ApiModelProperty(value = "长 CM")
+    private BigDecimal length;
+
+    @ApiModelProperty(value = "宽 CM")
+    private BigDecimal width;
+
+    @ApiModelProperty(value = "高 CM")
+    private BigDecimal height;
+
+
+
 
 }

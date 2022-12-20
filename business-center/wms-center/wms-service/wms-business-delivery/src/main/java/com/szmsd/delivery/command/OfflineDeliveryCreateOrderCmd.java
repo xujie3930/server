@@ -5,6 +5,7 @@ import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.utils.SpringUtils;
+import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.OfflineCostImport;
@@ -115,12 +116,18 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
 
     private DelOutbound generatorDeloutbond(OfflineDeliveryImport deliveryImport){
         DelOutbound delOutbound = new DelOutbound();
+        String specifications = deliveryImport.getSpecifications();
 
         delOutbound.setCreateBy(deliveryImport.getCreateBy());
         delOutbound.setCreateByName(deliveryImport.getCreateByName());
         delOutbound.setCreateTime(deliveryImport.getCreateTime());
         delOutbound.setDelFlag("0");
-        delOutbound.setSpecifications(deliveryImport.getSpecifications());
+        if(StringUtils.isNotEmpty(specifications)) {
+            delOutbound.setSpecifications(specifications);
+            delOutbound.setLength(deliveryImport.getLength().doubleValue());
+            delOutbound.setWidth(deliveryImport.getWidth().doubleValue());
+            delOutbound.setHeight(deliveryImport.getHeight().doubleValue());
+        }
         delOutbound.setWeight(deliveryImport.getWeight().doubleValue());
         delOutbound.setTrackingNo(deliveryImport.getTrackingNo());
         delOutbound.setRefNo(deliveryImport.getRefNo());
