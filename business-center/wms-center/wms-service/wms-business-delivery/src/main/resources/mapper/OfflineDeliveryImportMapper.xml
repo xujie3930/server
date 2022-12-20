@@ -31,4 +31,21 @@
 
     </update>
 
+    <update id="updateDealStateByOrder" parameterType="java.util.List">
+
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update offline_delivery_import
+            <set>
+                <if test="item.dealStatus != null and item.dealStatus != ''">
+                    deal_status = #{item.dealStatus},
+                </if>
+                <if test="item.errorMsg != null and item.errorMsg != ''">
+                    error_msg = #{item.errorMsg},
+                </if>
+            </set>
+            where order_no = #{item.orderNo}
+        </foreach>
+
+    </update>
+
 </mapper>

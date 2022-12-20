@@ -1,6 +1,7 @@
 package com.szmsd.delivery.command;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.api.feign.BasWarehouseFeignService;
 import com.szmsd.bas.domain.BasWarehouse;
@@ -47,14 +48,31 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
         RefundRequestListAutoDTO autoRefundData = this.generatorRefundRequest();
 
         logger.info("autoRefund 退费参数：{}", JSON.toJSONString(autoRefundData));
-        //自动退费
-        R addRequest = refundRequestFeignService.autoRefund(autoRefundData);
 
-        if(addRequest.getCode() != 200){
-            throw new RuntimeException(addRequest.getMsg());
+        List<RefundRequestAutoDTO> refundRequestAutoDTOS = autoRefundData.getRefundRequestList();
+
+        List<List<RefundRequestAutoDTO>> autoRefundDataPart = Lists.partition(refundRequestAutoDTOS,100);
+
+        for(List<RefundRequestAutoDTO> refundRequestAutoDTOS1 : autoRefundDataPart) {
+
+            RefundRequestListAutoDTO partData = new RefundRequestListAutoDTO();
+            partData.setRefundRequestList(refundRequestAutoDTOS1);
+            //自动退费
+            R addRequest = refundRequestFeignService.autoRefund(partData);
+
+            if (addRequest != null && addRequest.getCode() != 200) {
+
+                logger.error("autoRefund 退费返回失败数据:{}",JSON.toJSONString(partData));
+                List<String> errorOrderNoList = refundRequestAutoDTOS1.stream().map(RefundRequestAutoDTO::getOrderNo).distinct().collect(Collectors.toList());
+
+                String errorMsg = addRequest.getMsg();
+                this.errorHander(errorOrderNoList,errorMsg);
+                //throw new RuntimeException(addRequest.getMsg());
+                continue;
+            }
+
+            logger.info("autoRefund 退费返回：{}", JSON.toJSONString(addRequest));
         }
-
-        logger.info("autoRefund 退费返回：{}", JSON.toJSONString(addRequest));
 
         return 1;
     }
@@ -111,6 +129,33 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
         }
 
         super.rollback(errorMsg);
+    }
+
+    private void errorHander(List<String> orderNoList,String errorMsg) {
+
+        logger.error("OfflineCreateCostCmd 异常:{}",orderNoList);
+
+        OfflineDeliveryImportMapper importMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
+
+        List<OfflineImportDto> updateData = new ArrayList<>();
+        for(String orderNo : orderNoList){
+
+            OfflineImportDto offlineImportDto = new OfflineImportDto();
+            offlineImportDto.setDealStatus(OfflineDeliveryStateEnum.CREATE_COST.getCode());
+
+            if(StringUtils.isNotEmpty(errorMsg)) {
+                offlineImportDto.setErrorMsg(errorMsg);
+            }else{
+                offlineImportDto.setErrorMsg("生成退费、补收费用，自动审核退费失败，需要重新执行");
+            }
+
+            offlineImportDto.setOrderNo(orderNo);
+            updateData.add(offlineImportDto);
+        }
+
+        if(com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isNotEmpty(updateData)) {
+            importMapper.updateDealStateByOrder(updateData);
+        }
     }
 
     private RefundRequestListAutoDTO generatorRefundRequest() {

@@ -153,7 +153,7 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
             return R.failed("创建订单异常");
         }
 
-        log.info("生成线下出库单，offline 状态修改成CREATE_ORDER：{}", JSON.toJSONString(createOrder));
+        log.info("生成线下出库单，offline 状态修改成CREATE_ORDER：{}");
 
         //step 3. 生成退费、补收费用，自动审核退费
         int createCost = new OfflineCreateCostCmd(createOrder).execute();
@@ -161,7 +161,7 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
             return R.failed("创建退费费用异常");
         }
 
-        log.info("创建退费费用异常：{}", JSON.toJSONString(createOrder));
+        log.info("创建退费费用异常：{}");
 
         //step 4. 推送TY
         int trackYee = new OfflineDeliveryTrackYeeCmd(createOrder).execute();
@@ -169,7 +169,7 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
             return R.failed("推送TY异常");
         }
 
-        log.info("推送TY：{}", JSON.toJSONString(createOrder));
+        log.info("推送TY：{}",trackYee);
 
         //step 5.完成
         this.complete(createOrder);
