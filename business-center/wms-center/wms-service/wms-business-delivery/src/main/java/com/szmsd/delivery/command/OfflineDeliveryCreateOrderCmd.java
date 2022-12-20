@@ -22,6 +22,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -65,10 +66,21 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
             List<OfflineCostImport> offlineCostImportList = offCostMap.get(trackIngNo);
 
             StringBuilder currencyDescribe = new StringBuilder();
+            Map<String,List<OfflineCostImport>> offlineCostImportMap = offlineCostImportList.stream().collect(Collectors.groupingBy(OfflineCostImport::getCurrencyCode));
 
-            for(OfflineCostImport offlineCostImport : offlineCostImportList){
-                currencyDescribe.append(BigDecimalUtil.setScale(offlineCostImport.getAmount(),2));
-                currencyDescribe.append(offlineCostImport.getCurrencyCode());
+            Iterator<Map.Entry<String,List<OfflineCostImport>>> iter = offlineCostImportMap.entrySet().iterator();
+
+            while(iter.hasNext()){
+
+                Map.Entry<String,List<OfflineCostImport>> it = iter.next();
+                List<OfflineCostImport> offlineCostImports1 = it.getValue();
+
+                BigDecimal amount = BigDecimal.ZERO;
+                for(OfflineCostImport offlineCostImport1 : offlineCostImports1){
+                    amount = amount.add(offlineCostImport1.getAmount());
+                }
+                currencyDescribe.append(BigDecimalUtil.setScale(amount,2));
+                currencyDescribe.append(it.getKey());
                 currencyDescribe.append(";");
             }
 
@@ -166,7 +178,7 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         delOutbound.setAmount(deliveryImport.getAmount());
         delOutbound.setCalcWeight(deliveryImport.getCalcWeight());
         delOutbound.setRemark(deliveryImport.getRemark());
-        delOutbound.setCurrencyCode(deliveryImport.getCountryCode());
+        delOutbound.setCurrencyCode("CNY");
         delOutbound.setBringVerifyState("END");
         delOutbound.setWarehouseCode(deliveryImport.getWarehouseCode());
         delOutbound.setVersion(deliveryImport.getVersion());
