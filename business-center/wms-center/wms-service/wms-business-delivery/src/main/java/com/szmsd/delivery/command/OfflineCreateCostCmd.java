@@ -175,7 +175,7 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
 
             if(basSubWrapperCodeVOMap != null){
                 BasSubWrapperVO basSubCodeWrapperVO = basSubWrapperCodeVOMap.get(refundRequestDTO.getCurrencyCode());
-                refundRequestDTO.setCurrencyName(basSubCodeWrapperVO.getSubNameEn());
+                refundRequestDTO.setCurrencyName(basSubCodeWrapperVO.getSubName());
             }
 
             refundRequestList.add(refundRequestDTO);

@@ -4,6 +4,7 @@ import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.thread.NamedThreadFactory;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.event.SyncReadListener;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -494,15 +495,16 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         }
         log.info("审核通过-进行相应的越扣减 {}");
 
-
         fssRefundRequests.forEach(x->{
           List<Map> list =baseMapper.selectOutbounds(x.getOrderNo());
+          log.info("afterApprove:{}", JSON.toJSONString(list));
           if (list.size()>0){
-              if (String.valueOf(list.get(0).get("trackingNo"))!=null&&!String.valueOf(list.get(0).get("trackingNo")).equals("")){
-                  x.setTrackingNo(String.valueOf(list.get(0).get("trackingNo")));
+              Map map = list.get(0);
+              if (map.get("trackingNo") != null){
+                  x.setTrackingNo(map.get("trackingNo").toString());
               }
-              if (String.valueOf(list.get(0).get("shipmentRule"))!=null&&!String.valueOf(list.get(0).get("shipmentRule")).equals("")){
-                  x.setShipmentRule(String.valueOf(list.get(0).get("shipmentRule")));
+              if (map.get("shipmentRule") != null){
+                  x.setShipmentRule(map.get("shipmentRule").toString());
               }
               if (String.valueOf(list.get(0).get("calcWeight"))!=null&&!String.valueOf(list.get(0).get("calcWeight")).equals("")){
                   x.setCalcWeight((BigDecimal) list.get(0).get("calcWeight"));

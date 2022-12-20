@@ -1,6 +1,7 @@
 package com.szmsd.finance.factory;
 
 import cn.hutool.core.util.RandomUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.szmsd.common.core.utils.DateUtils;
@@ -136,19 +137,18 @@ public class RefundPayFactory extends AbstractPayFactory {
             if (StringUtils.isNotBlank(dto.getNo())) {
                 DelOutbound delOutbound = accountSerialBillMapper.selectDelOutbound(dto.getNo());
                 if (delOutbound!=null) {
-                    if (delOutbound.getId() != null) {
-                        accountSerialBill.setRefNo(delOutbound.getRefNo());
-                        accountSerialBill.setShipmentService(delOutbound.getShipmentService());
-                        accountSerialBill.setWeight(delOutbound.getWeight());
-                        accountSerialBill.setCalcWeight(delOutbound.getCalcWeight());
-                        accountSerialBill.setSpecifications(delOutbound.getSpecifications());
-                        accountSerialBill.setTrackingNo(delOutbound.getTrackingNo());
-                        accountSerialBill.setWarehouseCode(delOutbound.getWarehouseCode());
-                        accountSerialBill.setWarehouseName(delOutbound.getWarehouseCode());
-                        accountSerialBill.setShipmentService(delOutbound.getShipmentService());
-                        accountSerialBill.setShipmentRule(delOutbound.getShipmentRule());
+                    accountSerialBill.setRefNo(delOutbound.getRefNo());
+                    accountSerialBill.setShipmentService(delOutbound.getShipmentService());
+                    accountSerialBill.setWeight(delOutbound.getWeight());
+                    accountSerialBill.setCalcWeight(delOutbound.getCalcWeight());
+                    accountSerialBill.setSpecifications(delOutbound.getSpecifications());
+                    accountSerialBill.setTrackingNo(delOutbound.getTrackingNo());
+                    accountSerialBill.setWarehouseCode(delOutbound.getWarehouseCode());
+                    accountSerialBill.setWarehouseName(delOutbound.getWarehouseCode());
+                    accountSerialBill.setShipmentService(delOutbound.getShipmentService());
+                    accountSerialBill.setShipmentRule(delOutbound.getShipmentRule());
+                    accountSerialBill.setProductCode(delOutbound.getPrcProductCode());
                         //accountSerialBill.setCurrencyCode(delOutbound.getCurrencyCode());
-                    }
                 }
             }
 
@@ -167,7 +167,7 @@ public class RefundPayFactory extends AbstractPayFactory {
                     accountSerialBill.setPrcState(1);
                 }
             }
-
+            log.info("save accountSerialBill :{}", JSON.toJSONString(accountSerialBill));
             accountSerialBillService.save(accountSerialBill);
         });
     }
