@@ -8,8 +8,6 @@ import com.szmsd.common.core.utils.SpringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
@@ -39,30 +37,38 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class Context implements BeanFactoryPostProcessor, ApplicationContextAware {
+public final class Context implements ApplicationContextAware {
 
     /** Spring应用上下文环境 */
-    private static ConfigurableListableBeanFactory beanFactory;
-    private static ApplicationContext applicationContext;
+    public static ApplicationContext applicationContext;
+    private final static ObjectMapper OBJECT_MAPPER;
+
+    static {
+        OBJECT_MAPPER = new ObjectMapper();
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        OBJECT_MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         Context.applicationContext = applicationContext;
     }
 
-    @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
-        Context.beanFactory = configurableListableBeanFactory;
-    }
+    /**
+     * 获取spring上下文中的bean对象
+     */
+    public static <T> T getBean(Class<T> beanClass) {
 
+        //SpringUtils.getBean(beanClass);
 
-    public static <T> T getBean(String name) throws BeansException{
-        return (T) beanFactory.getBean(name);
-    }
-
-    public static <T> T getBean(Class<T> clz) throws BeansException{
-        T result = (T) beanFactory.getBean(clz);
-        return result;
+        return SpringUtils.getBean(beanClass);
+//        if (genericTypes == null) {
+//
+//        } else {
+//            ResolvableType resolvableType = ResolvableType.forClassWithGenerics(beanClass, genericTypes);
+//            ObjectProvider<?> beanProvider = Context.applicationContext.getBeanProvider(resolvableType);
+//            return (T) beanProvider.getIfAvailable();
+//        }
     }
 
     /**
