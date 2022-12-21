@@ -34,7 +34,10 @@ public class IBasEmailServiceImpl implements IBasEmailService {
                 basEmail.setEmpTo(x.getEmail());
                 basEmail.setEmpCode(emailDto.getEmpCode());
                 basEmail.setCreateTime(new Date());
-                basEmailMapper.insertSelective(basEmail);
+                if (x.getEmailType().equals("是")){
+                    basEmailMapper.insertSelective(basEmail);
+                }
+
 
             });
 

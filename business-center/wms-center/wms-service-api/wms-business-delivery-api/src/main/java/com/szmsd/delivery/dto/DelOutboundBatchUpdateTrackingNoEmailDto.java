@@ -17,6 +17,8 @@ public class DelOutboundBatchUpdateTrackingNoEmailDto {
     @Excel(name = "挂号",width = 30)
     private String trackingNo;
 
+    private String emailType;
+
     private String customCode;
 
     //员工编号

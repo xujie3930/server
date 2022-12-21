@@ -1593,6 +1593,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             //更新业务明细对应出库单的挂号
             baseMapper.updateFssAccountSerial(list.get(i));
 
+            //更新出库表的平台标识单号字段
+            if (StringUtils.isNotEmpty(updateTrackingNoDto.getAmazonLogisticsRouteId())){
+                baseMapper.updateamazonLogisticsRouteId(list.get(i));
+
+            }
+            if (StringUtils.isEmpty(updateTrackingNoDto.getEmailType())){
+               list.get(i).setEmailType("是");
+            }
+
+
+
             //导入挂号记录表
             DelOutbound delOutbound=baseMapper.selectTrackingNo(updateTrackingNoDto.getOrderNo());
             if (delOutbound!=null){

@@ -21,7 +21,7 @@
     select
       id, custom_code, service_manager_name, service_staff_name, order_no, no_tracking_no,
       tracking_no, emp_to, emp_code, modular_type,ref_no,DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') as createTimes
-    from bas_email where send_type=0
+    from bas_email where send_type=0 and email_type='是'
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from bas_email
@@ -79,6 +79,9 @@
       <if test="createTime != null">
         create_time,
       </if>
+      <if test="emailType != null">
+        email_type,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -116,6 +119,9 @@
       </if>
       <if test="createTime != null">
         #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="emailType != null">
+        #{emailType,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
