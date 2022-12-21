@@ -101,4 +101,6 @@ public interface DelOutboundMapper extends BaseMapper<DelOutbound> {
     List<DelOutbound> selectOmsWmsLogerror(@Param("createTime") String createTime);
 
     List<DelOutbound>  selectOmsWmsLogsuccess(@Param("createTime") String createTime);
+
+    void  updateamazonLogisticsRouteId(DelOutboundBatchUpdateTrackingNoDto delOutboundBatchUpdateTrackingNoDto);
 }

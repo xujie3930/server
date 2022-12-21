@@ -419,4 +419,7 @@
         </foreach>
 
     </update>
+    <update id="updateamazonLogisticsRouteId" parameterType="com.szmsd.delivery.dto.DelOutboundBatchUpdateTrackingNoDto">
+        UPDATE del_outbound SET amazon_logistics_route_id=#{amazonLogisticsRouteId}  WHERE order_no =#{orderNo}
+    </update>
 </mapper>

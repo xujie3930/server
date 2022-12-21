@@ -59,6 +59,9 @@ public class BasEmail {
     @ApiModelProperty(value = "更新时间")
     private String createTimes;
 
+    @ApiModelProperty(value = "邮件是否发送")
+    private String emailType;
+
 
 
 }
