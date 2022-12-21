@@ -191,5 +191,8 @@ public class DelOutboundDto implements Serializable {
     @ApiModelProperty(value = "预报单号")
     private String expectedNo;
 
+    @ApiModelProperty(value = "同步获取挂号信息状态")
+    private int syncTrackingNoState;
+
 
 }

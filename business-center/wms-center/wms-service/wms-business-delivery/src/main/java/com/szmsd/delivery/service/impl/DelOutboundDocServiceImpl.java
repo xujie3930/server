@@ -17,6 +17,7 @@ import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
 import com.szmsd.delivery.service.IDelOutboundDocService;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
@@ -24,6 +25,7 @@ import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.Address;
 import com.szmsd.http.dto.CountryInfo;
 import com.szmsd.http.dto.PricedProductInServiceCriteria;
+import com.szmsd.http.dto.ShipmentOrderResult;
 import com.szmsd.http.vo.PricedProduct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -139,6 +141,42 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
                 DelOutbound delOutbound = delOutboundMap.get(response.getId());
                 if (null != delOutbound) {
                     response.setTrackingNo(delOutbound.getTrackingNo());
+                }
+            }
+
+            //同步返回trackingNo
+            List<Integer> syncTrackingNoStateList = list.stream().map(DelOutboundDto::getSyncTrackingNoState).distinct().collect(Collectors.toList());
+
+            if(CollectionUtils.isNotEmpty(syncTrackingNoStateList)){
+                int syncTrackingNoState = syncTrackingNoStateList.get(0);
+
+                if(syncTrackingNoState == 1){
+
+                    for(DelOutbound delOutbound : delOutboundList) {
+                        DelOutboundWrapperContext delOutboundWrapperContext = delOutboundBringVerifyService.initContext(delOutbound);
+                        stopWatch.start();
+                        ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
+                        stopWatch.stop();
+                        logger.info(">>>>>[同步获取创建出库单{}]创建承运商 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
+                        if(shipmentOrderResult != null){
+                            delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
+                            delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
+                            delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
+                            delOutbound.setReferenceNumber(shipmentOrderResult.getReferenceNumber());
+                        }
+                    }
+
+                    Map<String,DelOutbound> delOutboundMap1 = delOutboundList.stream().collect(Collectors.toMap(DelOutbound::getOrderNo,v->v));
+
+                    for(DelOutboundAddResponse response : responses){
+
+                        String orderNo = response.getOrderNo();
+                        DelOutbound delOutbound = delOutboundMap1.get(orderNo);
+
+                        if(delOutbound!= null){
+                            response.setTrackingNo(delOutbound.getTrackingNo());
+                        }
+                    }
                 }
             }
         }

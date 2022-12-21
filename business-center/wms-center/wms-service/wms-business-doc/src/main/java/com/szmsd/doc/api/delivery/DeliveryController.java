@@ -128,6 +128,28 @@ public class DeliveryController {
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
     }
 
+    @PreAuthorize("hasAuthority('client')")
+    @PostMapping("/package-transfer-sync")
+    @ApiOperation(value = "#2.1 出库管理 - 单据创建（转运出库）同步返回trackingNo", position = 200)
+    @ApiImplicitParam(name = "request", value = "请求参数", dataType = "DelOutboundPackageTransferListRequest", required = true)
+    public R<List<DelOutboundPackageTransferResponse>> packageTransferSync(@RequestBody @Validated(value = {DelOutboundGroup.PackageTransfer.class}) DelOutboundPackageTransferListRequest request) {
+        List<DelOutboundPackageTransferRequest> requestList = request.getRequestList();
+        if (CollectionUtils.isEmpty(requestList)) {
+            throw new CommonException("400", "The request object cannot be empty");
+        }
+        String sellerCode = AuthenticationUtil.getSellerCode();
+        List<DelOutboundDto> dtoList = BeanMapperUtil.mapList(requestList, DelOutboundDto.class);
+        for (DelOutboundDto dto : dtoList) {
+            dto.setSellerCode(sellerCode);
+            dto.setOrderType(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode());
+            dto.setSourceType(DelOutboundConstant.SOURCE_TYPE_DOC);
+            dto.setSyncTrackingNoState(1);
+            this.setAddressCountry(dto);
+        }
+        List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
+        return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
+    }
+
     private void setAddressCountry(DelOutboundDto dto) {
         DelOutboundAddressDto address = dto.getAddress();
         if (null == address) {
