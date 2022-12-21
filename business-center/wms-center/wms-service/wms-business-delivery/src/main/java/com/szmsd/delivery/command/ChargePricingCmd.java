@@ -191,6 +191,7 @@ public class ChargePricingCmd extends BasicCommand<ChargePricingResultDto> {
             updateDelOutbound.setPrcInterfaceProductCode(delOutbound.getPrcInterfaceProductCode());
             updateDelOutbound.setPrcTerminalCarrier(delOutbound.getPrcTerminalCarrier());
             updateDelOutbound.setAmazonReferenceId(data.getAmazonLogisticsRouteId());
+            updateDelOutbound.setCurrencyDescribe(delOutbound.getCurrencyDescribe());
 
             iDelOutboundService.updateById(updateDelOutbound);
 
