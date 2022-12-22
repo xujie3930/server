@@ -130,5 +130,14 @@ public class PackageMangAddDTO implements BOConvert {
     @ApiModelProperty(value = "备注")
     private String remark;
 
+    @ApiModelProperty(value = "件数")
+    private Integer pieceNumber;
+
+    @ApiModelProperty(value = "方数")
+    private Integer squareNumber;
+
+    @ApiModelProperty(value = "袋数")
+    private Integer bagNumber;
+
 
 }

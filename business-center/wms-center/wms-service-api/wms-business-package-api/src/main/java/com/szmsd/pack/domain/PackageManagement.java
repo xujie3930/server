@@ -171,4 +171,14 @@ public class PackageManagement extends BaseEntity implements BOConvert {
     @Excel(name = "货物类型【 0：入库，1：转运】")
     private Integer operationType;
 
+    @ApiModelProperty(value = "件数")
+    private Integer pieceNumber;
+
+    @ApiModelProperty(value = "方数")
+    private Integer squareNumber;
+
+    @ApiModelProperty(value = "袋数")
+    private Integer bagNumber;
+
+
 }
