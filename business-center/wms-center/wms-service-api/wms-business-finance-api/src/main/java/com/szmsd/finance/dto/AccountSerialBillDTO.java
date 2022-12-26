@@ -174,7 +174,8 @@ public class AccountSerialBillDTO implements Serializable {
     @ApiModelProperty(value = "费用类别转换后")
     private String chargeCategoryChange;
 
-
+    @ApiModelProperty(value = "平台类型 0 管理端 1 客户端")
+    private int platformType;
 
     @ApiModelProperty(value = "备注")
     private String remark;
