@@ -271,7 +271,7 @@ public class ExcelUtil {
         //获取第一行数据
         Row row2 =sheet.getRow(0);
 
-        for (int i=0;i<25;i++){
+        for (int i=0;i<26;i++){
             Cell deliveryTimeCell = row2.getCell(i);
 
             CellStyle styleMain = workbook.createCellStyle();

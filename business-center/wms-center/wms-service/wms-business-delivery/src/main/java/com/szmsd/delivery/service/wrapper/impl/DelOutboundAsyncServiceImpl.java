@@ -392,6 +392,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                                     serialBill.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
                                     serialBill.setCountry(address.getCountry());
                                     serialBill.setCountryCode(address.getCountryCode());
+                                    serialBill.setGrade(delOutbound.getGrade());
 
                                     serialBillInfoList.add(serialBill);
                                 }
@@ -470,6 +471,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             dto.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
                             dto.setCountryCode(address.getCountryCode());
                             dto.setCountry(address.getCountry());
+                            dto.setGrade(delOutbound.getGrade());
 
                             list.add(dto);
                             custPayDTO.setSerialBillInfoList(list);

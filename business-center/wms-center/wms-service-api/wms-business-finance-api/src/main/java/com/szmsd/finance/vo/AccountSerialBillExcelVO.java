@@ -128,6 +128,10 @@ public class AccountSerialBillExcelVO implements Serializable {
     @Excel(name = "国家名称",width = 20)
     private String country;
 
+    @ApiModelProperty(value = "计价等级")
+    @Excel(name = "计价等级",width = 10)
+    private String grade;
+
     @ApiModelProperty(value = "附注")
     @Excel(name = "附注",width = 40)
     private String note;

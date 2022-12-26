@@ -36,6 +36,7 @@ import com.szmsd.finance.vo.AccountSerialBillExcelVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -526,7 +527,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             //获取第一行数据
             Row row2 =sheet.getRow(0);
 
-            for (int i=0;i<25;i++){
+            for (int i=0;i<26;i++){
                 Cell deliveryTimeCell = row2.getCell(i);
 
                 CellStyle styleMain = workbook.createCellStyle();
