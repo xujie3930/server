@@ -36,6 +36,7 @@ import com.szmsd.finance.vo.AccountSerialBillExcelVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

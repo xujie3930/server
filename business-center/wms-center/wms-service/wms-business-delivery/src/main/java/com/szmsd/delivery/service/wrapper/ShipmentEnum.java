@@ -723,6 +723,7 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
             delOutbound.setShipmentRule(data.getShipmentRule());
             delOutbound.setProductShipmentRule(data.getShipmentRule());
             delOutbound.setLogisticsProviderCode(data.getLogisticsProviderCode());
+            delOutbound.setGrade(data.getGrade());
 
             // 费用信息
             Weight calcWeight = packageInfo.getCalcWeight();

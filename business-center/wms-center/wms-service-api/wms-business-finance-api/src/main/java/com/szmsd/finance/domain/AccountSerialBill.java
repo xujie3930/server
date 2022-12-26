@@ -160,6 +160,9 @@ public class AccountSerialBill extends FssBaseEntity {
     @ApiModelProperty(value = "是否PRC费用")
     private Integer prcState;
 
+    @ApiModelProperty(value = "计费等级")
+    private String grade;
+
 
     public void setRemark(String remark) {
         this.remark = remark;

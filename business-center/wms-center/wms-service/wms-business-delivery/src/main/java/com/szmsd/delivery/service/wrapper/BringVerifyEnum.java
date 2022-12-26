@@ -375,6 +375,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             delOutbound.setHeight(Utils.valueOf(packing.getHeight()));
             delOutbound.setSupplierCalcType(data.getSupplierCalcType());
             delOutbound.setSupplierCalcId(data.getSupplierCalcId());
+            delOutbound.setGrade(data.getGrade());
 
             if(StringUtils.isNotBlank(data.getAmazonLogisticsRouteId())){
                 delOutbound.setAmazonLogisticsRouteId(data.getAmazonLogisticsRouteId());
@@ -453,6 +454,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setPrcInterfaceProductCode(delOutbound.getPrcInterfaceProductCode());
             updateDelOutbound.setPrcTerminalCarrier(delOutbound.getPrcTerminalCarrier());
             updateDelOutbound.setAmazonReferenceId(data.getAmazonLogisticsRouteId());
+            updateDelOutbound.setGrade(data.getGrade());
 
             if(basProductServiceR != null && basProductServiceR.getCode() == 200){
 

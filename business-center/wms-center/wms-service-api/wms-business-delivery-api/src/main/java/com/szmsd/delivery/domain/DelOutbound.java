@@ -368,4 +368,7 @@ public class DelOutbound extends BaseEntity {
 
     @ApiModelProperty(value = "报价表")
     private String sheetCode;
+
+    @ApiModelProperty(value = "计价等级")
+    private String grade;
 }
