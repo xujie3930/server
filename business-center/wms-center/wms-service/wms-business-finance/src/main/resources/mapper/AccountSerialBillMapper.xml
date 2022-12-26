@@ -62,6 +62,7 @@
         <result column="country" property="country"/>
         <result column="country_code" property="countryCode"/>
         <result column="note" property="note"/>
+        <result column="grade" property="grade"/>
     </resultMap>
 
     <select id="selectPageList" resultType="com.szmsd.finance.domain.AccountSerialBill" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
@@ -692,7 +693,7 @@
         a.charge_category,a.charge_type,a.create_by_name,a.create_time,a.update_by_name,a.update_time,
         a.create_by,a.update_by,a.remark,a.order_time,a.payment_time,a.ref_no,a.shipment_service,a.weight,
         a.calc_weight,a.specifications,a.nature,a.serial_number,a.amazon_logistics_route_id,a.country_code,a.country,
-        a.charge_type,a.shipment_rule_name,a.shipment_rule
+        a.charge_type,a.shipment_rule_name,a.shipment_rule,a.grade
         <if test="platformType == 0">
             ,a.note
         </if>
