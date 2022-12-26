@@ -294,7 +294,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 BasSubWrapperVO::getSubName, (key1, key2) -> key2));
         delOutboundThirdPartyVO.setStateName(map.get(delOutboundThirdPartyVO.getState()));
 
-        if(StringUtils.isNotEmpty(amazonLogisticsRouteId1)){
+        //如果amazonReferenceId不为空,返回amazonLogisticsRouteId1 这时候amazonLogisticsRouteId1不会为空 285判断了
+        //如果amazonReferenceId为空 返回tracking_no 保持不变 amazonLogisticsRouteId1空不空不关心
+        if (StringUtils.isNotEmpty(amazonReferenceId)) {
             delOutboundThirdPartyVO.setTrackingNo(amazonLogisticsRouteId1);
         }
 
@@ -1592,6 +1594,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             //更新业务明细对应出库单的挂号
             baseMapper.updateFssAccountSerial(list.get(i));
+
+            //更新出库表的平台标识单号字段
+            if (StringUtils.isNotEmpty(updateTrackingNoDto.getAmazonLogisticsRouteId())){
+                baseMapper.updateamazonLogisticsRouteId(list.get(i));
+
+            }
+            if (StringUtils.isEmpty(updateTrackingNoDto.getEmailType())){
+               list.get(i).setEmailType("是");
+            }
+
+
 
             //导入挂号记录表
             DelOutbound delOutbound=baseMapper.selectTrackingNo(updateTrackingNoDto.getOrderNo());

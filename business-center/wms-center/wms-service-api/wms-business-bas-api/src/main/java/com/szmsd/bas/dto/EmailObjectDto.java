@@ -47,6 +47,8 @@ public class EmailObjectDto {
     @ApiModelProperty(value = "邮箱")
     private String email;
 
+    private String emailType;
+
 
 
 
