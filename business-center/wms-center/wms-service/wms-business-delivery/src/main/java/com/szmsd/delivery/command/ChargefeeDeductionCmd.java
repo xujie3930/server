@@ -1,5 +1,6 @@
 package com.szmsd.delivery.command;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.constant.Constants;
@@ -15,7 +16,6 @@ import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.finance.api.feign.RechargesFeignService;
-import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
@@ -59,6 +59,8 @@ public class ChargefeeDeductionCmd extends BasicCommand<List<String>> {
             for(DelOutbound delOutbound : delOutboundList){
 
                 List<DelOutboundCharge> chargeList = iDelOutboundChargeService.listCharges(delOutbound.getOrderNo());
+
+                logger.info("ChargefeeDeductionCmd 记录：{}", JSON.toJSONString(chargeList));
 
                 //汪总说：一个出库只会有一个地址
                 List<DelOutboundAddress> addresses = iDelOutboundAddressService.list(Wrappers.<DelOutboundAddress>query().lambda().eq(DelOutboundAddress::getOrderNo,delOutbound.getOrderNo()));

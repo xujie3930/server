@@ -13,6 +13,7 @@ import com.szmsd.delivery.dto.ChargePricingResultDto;
 import com.szmsd.delivery.enums.ChargeImportStateEnum;
 import com.szmsd.delivery.mapper.ChargeImportMapper;
 import com.szmsd.delivery.service.ChargeService;
+import com.szmsd.http.dto.ChargeWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,6 +69,7 @@ public class ChargeServiceImpl extends ServiceImpl<ChargeImportMapper, ChargeImp
             //step 4. 旧数据退费
             new ChargeRefundCmd(orderNoPrcs).execute();
             log.info("step 4. 旧数据退费");
+            Map<String, ChargeWrapper> chargeWrapperMap = chargePricingResultDto.getChargeWrapperMap();
             //step 5. 重新扣费
             List<String> completedOrderList = new ChargefeeDeductionCmd(orderNoPrcs).execute();
             log.info("step 3. 重新扣费{}", JSON.toJSONString(completedOrderList));
