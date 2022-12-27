@@ -6,6 +6,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasSub;
@@ -20,10 +21,12 @@ import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.finance.compont.ConfigData;
 import com.szmsd.finance.compont.IRemoteApi;
 import com.szmsd.finance.config.FileVerifyUtil;
+import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.BasRefundRequest;
 import com.szmsd.finance.domain.FssRefundRequest;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.finance.enums.PrcStateEnum;
 import com.szmsd.finance.enums.RefundProcessEnum;
 import com.szmsd.finance.enums.RefundStatusEnum;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
@@ -673,7 +676,9 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         List<Long> accountSerialBillIds = refundRequestDTOS.stream().map(RefundRequestDTO::getAccountSerialBillId).collect(Collectors.toList());
 
         if(CollectionUtils.isNotEmpty(accountSerialBillIds)){
-            accountSerialBillMapper.deleteBatchIds(accountSerialBillIds);
+            LambdaUpdateWrapper<AccountSerialBill> update = Wrappers.lambdaUpdate();
+            update.set(AccountSerialBill::getPrcState, PrcStateEnum.SECOND.getCode()).in(AccountSerialBill::getId, accountSerialBillIds);
+            accountSerialBillMapper.update(null,update);
         }
 
         int add = this.insertBatchRefundRequest(refundRequestDTOS);
