@@ -109,6 +109,7 @@ public class ChargeRefundCmd extends BasicCommand<List<AccountSerialBill>> {
             refundRequestAutoDTO.setFeeCategoryCode(accountSerialBill.getChargeCategory());
             refundRequestAutoDTO.setFeeCategoryName(accountSerialBill.getChargeCategory());
             refundRequestAutoDTO.setPrcState(PrcStateEnum.SECOND.getCode());
+            refundRequestAutoDTO.setAccountSerialBillId(accountSerialBill.getId());
 
             refundRequestList.add(refundRequestAutoDTO);
         }
