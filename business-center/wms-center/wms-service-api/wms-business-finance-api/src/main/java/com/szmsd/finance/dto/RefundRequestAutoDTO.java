@@ -198,4 +198,7 @@ public class RefundRequestAutoDTO implements Serializable {
     @ApiModelProperty(value = "附注")
     @Excel(name = "附注")
     private String noteAppended;
+
+    @ApiModelProperty(value = "prc类型")
+    private Integer prcState;
 }

@@ -162,11 +162,14 @@ public class RefundPayFactory extends AbstractPayFactory {
             }
 
             String bcategory = accountSerialBill.getBusinessCategory();
-            if(bcategory != null){
+            Integer prcstate = accountSerialBill.getPrcState();
 
-                boolean prcState = isPrcStateList.contains(bcategory);
-                if(!prcState){
-                    accountSerialBill.setPrcState(1);
+            if(prcstate == null) {
+                if (bcategory != null) {
+                    boolean prcState = isPrcStateList.contains(bcategory);
+                    if (!prcState) {
+                        accountSerialBill.setPrcState(1);
+                    }
                 }
             }
             log.info("save accountSerialBill :{}", JSON.toJSONString(accountSerialBill));

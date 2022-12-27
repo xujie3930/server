@@ -11,6 +11,7 @@ import com.szmsd.finance.api.feign.AccountSerialBillFeignService;
 import com.szmsd.finance.api.feign.RefundRequestFeignService;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.*;
+import com.szmsd.finance.enums.PrcStateEnum;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class ChargeRefundCmd extends BasicCommand<List<AccountSerialBill>> {
         for(List<String> orderNoList : orderParts){
             AccountOrderQueryDTO accountOrderQueryDTO = new AccountOrderQueryDTO();
             accountOrderQueryDTO.setOrderNoList(orderNoList);
-            accountOrderQueryDTO.setPrcState(1);
+            accountOrderQueryDTO.setPrcState(PrcStateEnum.PRC.getCode());
             R<List<AccountSerialBill>> resultRs = accountSerialBillFeignService.selectAccountPrcSerialBill(accountOrderQueryDTO);
 
             if(resultRs.getCode() == 200 && CollectionUtils.isNotEmpty(resultRs.getData())){
@@ -107,6 +108,7 @@ public class ChargeRefundCmd extends BasicCommand<List<AccountSerialBill>> {
             refundRequestAutoDTO.setFeeTypeName(accountSerialBill.getChargeType());
             refundRequestAutoDTO.setFeeCategoryCode(accountSerialBill.getChargeCategory());
             refundRequestAutoDTO.setFeeCategoryName(accountSerialBill.getChargeCategory());
+            refundRequestAutoDTO.setPrcState(PrcStateEnum.SECOND.getCode());
 
             refundRequestList.add(refundRequestAutoDTO);
         }
