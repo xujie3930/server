@@ -19,6 +19,9 @@ import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
+import com.szmsd.http.dto.ChargeItem;
+import com.szmsd.http.dto.ChargeWrapper;
+import com.szmsd.http.dto.Money;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -31,8 +34,11 @@ public class ChargefeeDeductionCmd extends BasicCommand<List<String>> {
 
     private List<String> orderNos;
 
-    public ChargefeeDeductionCmd(List<String> orderNos){
+    private Map<String, ChargeWrapper> chargeWrapperMap;
+
+    public ChargefeeDeductionCmd(List<String> orderNos,Map<String, ChargeWrapper> chargeWrapperMap){
         this.orderNos = orderNos;
+        this.chargeWrapperMap = chargeWrapperMap;
     }
 
     @Override
@@ -45,11 +51,11 @@ public class ChargefeeDeductionCmd extends BasicCommand<List<String>> {
 
         List<String> successOrderNos = new ArrayList<>();
 
-        if(CollectionUtils.isNotEmpty(orderNos)){
+        if(CollectionUtils.isNotEmpty(orderNos) && chargeWrapperMap != null){
 
             IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             RechargesFeignService rechargesFeignService = SpringUtils.getBean(RechargesFeignService.class);
-            IDelOutboundChargeService iDelOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
+            //IDelOutboundChargeService iDelOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
             IDelOutboundAddressService iDelOutboundAddressService = SpringUtils.getBean(IDelOutboundAddressService.class);
 
             List<DelOutbound> delOutboundList = iDelOutboundService.list(Wrappers.<DelOutbound>query().lambda()
@@ -58,7 +64,9 @@ public class ChargefeeDeductionCmd extends BasicCommand<List<String>> {
 
             for(DelOutbound delOutbound : delOutboundList){
 
-                List<DelOutboundCharge> chargeList = iDelOutboundChargeService.listCharges(delOutbound.getOrderNo());
+                ChargeWrapper chargeList = chargeWrapperMap.get(delOutbound.getOrderNo());
+
+                //List<DelOutboundCharge> chargeList = iDelOutboundChargeService.listCharges(delOutbound.getOrderNo());
 
                 logger.info("ChargefeeDeductionCmd 记录：{}", JSON.toJSONString(chargeList));
 
@@ -69,55 +77,48 @@ public class ChargefeeDeductionCmd extends BasicCommand<List<String>> {
                     address = addresses.get(0);
                 }
 
-                Map<String, List<DelOutboundCharge>> groupByCharge =
-                        chargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
-                for (String currencyCode: groupByCharge.keySet()) {
-                    BigDecimal bigDecimal = new BigDecimal(0);
-                    for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
-                        if (c.getAmount() != null) {
-                            bigDecimal = bigDecimal.add(c.getAmount());
-                        }
-                    }
+                List<ChargeItem> chargeItems = chargeList.getCharges();
+                CustPayDTO custPayDTO = new CustPayDTO();
+                List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>(chargeItems.size());
+
+                for (ChargeItem item: chargeItems) {
+
+                    Money money = item.getMoney();
 
                     // 扣减费用
-                    CustPayDTO custPayDTO = new CustPayDTO();
                     custPayDTO.setCusCode(delOutbound.getSellerCode());
-                    custPayDTO.setCurrencyCode(currencyCode);
-                    custPayDTO.setAmount(bigDecimal);
+                    custPayDTO.setCurrencyCode(money.getCurrencyCode());
+                    custPayDTO.setAmount(new BigDecimal(money.getAmount()));
                     custPayDTO.setNo(delOutbound.getOrderNo());
                     custPayDTO.setPayMethod(BillEnum.PayMethod.BALANCE_DEDUCTIONS);
                     // 查询费用明细
-                    if (CollectionUtils.isNotEmpty(groupByCharge.get(currencyCode))) {
-                        List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>(chargeList.size());
-                        for (DelOutboundCharge charge : groupByCharge.get(currencyCode)) {
-                            AccountSerialBillDTO serialBill = new AccountSerialBillDTO();
-                            serialBill.setNo(delOutbound.getOrderNo());
-                            serialBill.setTrackingNo(delOutbound.getTrackingNo());
-                            serialBill.setCusCode(delOutbound.getSellerCode());
-                            serialBill.setCurrencyCode(charge.getCurrencyCode());
-                            serialBill.setAmount(charge.getAmount());
-                            serialBill.setWarehouseCode(delOutbound.getWarehouseCode());
-                            serialBill.setChargeCategory(charge.getChargeNameCn());
-                            serialBill.setChargeType(charge.getChargeNameCn());
-                            serialBill.setOrderTime(delOutbound.getCreateTime());
-                            serialBill.setPaymentTime(delOutbound.getShipmentsTime());
-                            serialBill.setProductCode(delOutbound.getShipmentRule());
-                            serialBill.setShipmentRule(delOutbound.getShipmentRule());
-                            serialBill.setShipmentRuleName(delOutbound.getShipmentRuleName());
-                            serialBill.setRemark(delOutbound.getRemark());
-                            serialBill.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
-                            serialBill.setCountry(address.getCountry());
-                            serialBill.setCountryCode(address.getCountryCode());
+                    AccountSerialBillDTO serialBill = new AccountSerialBillDTO();
+                    serialBill.setNo(delOutbound.getOrderNo());
+                    serialBill.setTrackingNo(delOutbound.getTrackingNo());
+                    serialBill.setCusCode(delOutbound.getSellerCode());
+                    serialBill.setCurrencyCode(money.getCurrencyCode());
+                    serialBill.setAmount(new BigDecimal(money.getAmount()));
+                    serialBill.setWarehouseCode(delOutbound.getWarehouseCode());
+                    serialBill.setChargeCategory(item.getChargeCategory().getChargeNameCN());
+                    serialBill.setChargeType(item.getChargeCategory().getChargeNameCN());
+                    serialBill.setOrderTime(delOutbound.getCreateTime());
+                    serialBill.setPaymentTime(delOutbound.getShipmentsTime());
+                    serialBill.setProductCode(delOutbound.getShipmentRule());
+                    serialBill.setShipmentRule(delOutbound.getShipmentRule());
+                    serialBill.setShipmentRuleName(delOutbound.getShipmentRuleName());
+                    serialBill.setRemark(delOutbound.getRemark());
+                    serialBill.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
+                    serialBill.setCountry(address.getCountry());
+                    serialBill.setCountryCode(address.getCountryCode());
 
-                            serialBillInfoList.add(serialBill);
-                        }
-                        custPayDTO.setSerialBillInfoList(serialBillInfoList);
-                    }
-                    custPayDTO.setOrderType("Freight");
-                    R<?> r = rechargesFeignService.feeDeductions(custPayDTO);
-                    if (Constants.SUCCESS == r.getCode()) {
-                        successOrderNos.add(delOutbound.getOrderNo());
-                    }
+                    serialBillInfoList.add(serialBill);
+                }
+                custPayDTO.setSerialBillInfoList(serialBillInfoList);
+                custPayDTO.setOrderType("Freight");
+                logger.info("ChargefeeDeductionCmd feeDeductions 记录：{}", JSON.toJSONString(custPayDTO));
+                R<?> r = rechargesFeignService.feeDeductions(custPayDTO);
+                if (Constants.SUCCESS == r.getCode()) {
+                    successOrderNos.add(delOutbound.getOrderNo());
                 }
             }
         }
