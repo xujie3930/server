@@ -26,6 +26,7 @@ import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.BillEnum;
 import com.szmsd.finance.enums.RefundProcessEnum;
 import com.szmsd.finance.enums.RefundStatusEnum;
+import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.mapper.BasRefundRequestMapper;
 import com.szmsd.finance.mapper.RefundRequestMapper;
 import com.szmsd.finance.service.IAccountBalanceService;
@@ -79,6 +80,9 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
 
     @Autowired
     private BasRefundRequestMapper basRefundRequestMapper;
+
+    @Autowired
+    private AccountSerialBillMapper accountSerialBillMapper;
 
     @Override
     @DataScope(value = "cus_code")
@@ -664,6 +668,12 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
 
         if(CollectionUtils.isEmpty(refundRequestDTOS)){
             return R.failed("参数异常");
+        }
+
+        List<Long> accountSerialBillIds = refundRequestDTOS.stream().map(RefundRequestDTO::getAccountSerialBillId).collect(Collectors.toList());
+
+        if(CollectionUtils.isNotEmpty(accountSerialBillIds)){
+            accountSerialBillMapper.deleteBatchIds(accountSerialBillIds);
         }
 
         int add = this.insertBatchRefundRequest(refundRequestDTOS);

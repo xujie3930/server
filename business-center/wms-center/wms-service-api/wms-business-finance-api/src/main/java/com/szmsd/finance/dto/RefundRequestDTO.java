@@ -32,7 +32,7 @@ import java.util.List;
 public class RefundRequestDTO {
 
     @ApiModelProperty(value = "id")
-    private Integer id;
+    private Long id;
 
     @ApiModelProperty(value = "客户id")
     private Integer cusId;
@@ -246,6 +246,9 @@ public class RefundRequestDTO {
 
     @ApiModelProperty(value = "prc类型")
     private Integer prcState;
+
+    @ApiModelProperty(value = "业务明细ID")
+    private Long accountSerialBillId;
 
     @Override
     public String toString() {
