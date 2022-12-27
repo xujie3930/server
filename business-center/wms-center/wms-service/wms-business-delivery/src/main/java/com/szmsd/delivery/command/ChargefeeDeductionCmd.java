@@ -78,12 +78,12 @@ public class ChargefeeDeductionCmd extends BasicCommand<List<String>> {
                 }
 
                 List<ChargeItem> chargeItems = chargeList.getCharges();
-                CustPayDTO custPayDTO = new CustPayDTO();
-                List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>(chargeItems.size());
 
                 for (ChargeItem item: chargeItems) {
 
                     Money money = item.getMoney();
+                    CustPayDTO custPayDTO = new CustPayDTO();
+                    List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>(chargeItems.size());
 
                     // 扣减费用
                     custPayDTO.setCusCode(delOutbound.getSellerCode());
@@ -112,13 +112,13 @@ public class ChargefeeDeductionCmd extends BasicCommand<List<String>> {
                     serialBill.setCountryCode(address.getCountryCode());
 
                     serialBillInfoList.add(serialBill);
-                }
-                custPayDTO.setSerialBillInfoList(serialBillInfoList);
-                custPayDTO.setOrderType("Freight");
-                logger.info("ChargefeeDeductionCmd feeDeductions 记录：{}", JSON.toJSONString(custPayDTO));
-                R<?> r = rechargesFeignService.feeDeductions(custPayDTO);
-                if (Constants.SUCCESS == r.getCode()) {
-                    successOrderNos.add(delOutbound.getOrderNo());
+                    custPayDTO.setSerialBillInfoList(serialBillInfoList);
+                    custPayDTO.setOrderType("Freight");
+                    logger.info("ChargefeeDeductionCmd feeDeductions 记录：{}", JSON.toJSONString(custPayDTO));
+                    R<?> r = rechargesFeignService.feeDeductions(custPayDTO);
+                    if (Constants.SUCCESS == r.getCode()) {
+                        successOrderNos.add(delOutbound.getOrderNo());
+                    }
                 }
             }
         }
