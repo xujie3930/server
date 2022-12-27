@@ -71,7 +71,7 @@ public class ChargeServiceImpl extends ServiceImpl<ChargeImportMapper, ChargeImp
             log.info("step 4. 旧数据退费");
             Map<String, ChargeWrapper> chargeWrapperMap = chargePricingResultDto.getChargeWrapperMap();
             //step 5. 重新扣费
-            List<String> completedOrderList = new ChargefeeDeductionCmd(orderNoPrcs).execute();
+            List<String> completedOrderList = new ChargefeeDeductionCmd(orderNoPrcs,chargeWrapperMap).execute();
             log.info("step 3. 重新扣费{}", JSON.toJSONString(completedOrderList));
 
             //step 6.更新已经完成
