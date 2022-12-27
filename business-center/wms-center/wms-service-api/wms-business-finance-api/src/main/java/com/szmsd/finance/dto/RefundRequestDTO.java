@@ -244,6 +244,9 @@ public class RefundRequestDTO {
     @Excel(name = "附注")
     private String noteAppended;
 
+    @ApiModelProperty(value = "prc类型")
+    private Integer prcState;
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(this);

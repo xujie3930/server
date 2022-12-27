@@ -253,6 +253,9 @@ public class FssRefundRequest extends BaseEntity {
     @TableField(exist = false)
     private String countryCode;
 
+    @ApiModelProperty(value = "prc类型")
+    private Integer prcState;
+
 
 
 

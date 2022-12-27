@@ -624,10 +624,12 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         accountSerialBillDTO.setShipmentRule(x.getShipmentRule());
         accountSerialBillDTO.setNote(x.getNoteAppended());
         accountSerialBillDTO.setChargeType(x.getFeeCategoryName());
+        accountSerialBillDTO.setPrcState(x.getPrcState());
         accountSerialBillList.add(accountSerialBillDTO);
         custPayDTO.setSerialBillInfoList(accountSerialBillList);
         custPayDTO.setRemark(x.getRemark());
         custPayDTO.setSerialNumber(x.getProcessNo());
+
         return custPayDTO;
     }
 

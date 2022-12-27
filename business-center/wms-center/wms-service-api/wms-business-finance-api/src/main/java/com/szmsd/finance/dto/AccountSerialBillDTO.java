@@ -186,6 +186,9 @@ public class AccountSerialBillDTO implements Serializable {
     @ApiModelProperty(value = "计费等级")
     private String grade;
 
+    @ApiModelProperty(value = "prc类型")
+    private Integer prcState;
+
     public AccountSerialBillDTO(CustPayDTO dto, AccountSerialBillDTO details) {
         this.no = dto.getNo();
         this.trackingNo = details.getTrackingNo();

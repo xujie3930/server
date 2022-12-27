@@ -1,17 +1,13 @@
 package com.szmsd.finance.dto;
 
 import com.alibaba.fastjson.JSONObject;
-import com.szmsd.common.core.annotation.Excel;
-import com.szmsd.putinstorage.domain.dto.AttachmentFileDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.apache.commons.collections4.CollectionUtils;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
