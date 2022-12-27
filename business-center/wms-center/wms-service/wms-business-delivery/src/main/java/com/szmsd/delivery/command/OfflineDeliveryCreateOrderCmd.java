@@ -21,10 +21,7 @@ import com.szmsd.delivery.service.IDelOutboundService;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto> {
@@ -111,9 +108,12 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
             return null;
         }
 
+        List<DelOutbound> newdelOutbounds = delOutbounds.stream().collect(Collectors.collectingAndThen(Collectors
+                        .toCollection(()->new TreeSet<>(Comparator.comparing(DelOutbound::getTrackingNo))), ArrayList::new));
+
         //批量添加出口单据
         IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
-        iDelOutboundService.saveBatch(delOutbounds);
+        iDelOutboundService.saveBatch(newdelOutbounds);
         IDelOutboundAddressService iDelOutboundAddressService = SpringUtils.getBean(IDelOutboundAddressService.class);
         iDelOutboundAddressService.saveBatch(delOutboundAddresses);
 
