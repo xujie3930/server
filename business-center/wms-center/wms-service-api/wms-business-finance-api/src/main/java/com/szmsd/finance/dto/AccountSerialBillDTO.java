@@ -213,5 +213,6 @@ public class AccountSerialBillDTO implements Serializable {
         this.amazonLogisticsRouteId = details.getAmazonLogisticsRouteId();
         this.country = details.getCountry();
         this.countryCode = details.getCountryCode();
+        this.grade = details.getGrade();
     }
 }
