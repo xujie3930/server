@@ -25,10 +25,10 @@ public class BasQuartzConfig {
 
     @Bean
     public Trigger EmailJobTrigger() {
-        //0/3 * * * * ? 3秒测试 0 0 12 * * ?
+        //0/3 * * * * ? 3秒测试 "0 0 12 * * ?"
         return TriggerBuilder.newTrigger().forJob(EmailJob())
                 .withIdentity("EmailJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 12 * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * * * ?"))
                 .build();
     }
 
