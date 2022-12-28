@@ -251,22 +251,22 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
             // throw e;
             boolean partnerDeleteOrderFlag = false;
             String partnerCode = delOutbound.getPartnerCode();
-            if (StringUtils.isNotEmpty(partnerCode)) {
-                try {
-                    BasPartner queryBasPartner = new BasPartner();
-                    queryBasPartner.setPartnerCode(partnerCode);
-                    R<BasPartner> basPartnerR = this.partnerFeignService.getByCode(queryBasPartner);
-                    if (null != basPartnerR) {
-                        BasPartner basPartner = basPartnerR.getData();
-                        if (null != basPartner && (partnerDeleteOrderFlag = isTrue(basPartner.getDeleteOrderFlag()))) {
-                            // 修改订单标识为已删除
-                            this.delOutboundService.deleteFlag(delOutbound);
-                        }
-                    }
-                } catch (Exception e2) {
-                    logger.error(e2.getMessage(), e2);
-                }
-            }
+//            if (StringUtils.isNotEmpty(partnerCode)) {
+//                try {
+//                    BasPartner queryBasPartner = new BasPartner();
+//                    queryBasPartner.setPartnerCode(partnerCode);
+//                    R<BasPartner> basPartnerR = this.partnerFeignService.getByCode(queryBasPartner);
+//                    if (null != basPartnerR) {
+//                        BasPartner basPartner = basPartnerR.getData();
+//                        if (null != basPartner && (partnerDeleteOrderFlag = isTrue(basPartner.getDeleteOrderFlag()))) {
+//                            // 修改订单标识为已删除
+//                            this.delOutboundService.deleteFlag(delOutbound);
+//                        }
+//                    }
+//                } catch (Exception e2) {
+//                    logger.error(e2.getMessage(), e2);
+//                }
+//            }
             logger.info("(5)出库单提审失败，判断是否删除出库单。partnerCode: {}, partnerDeleteOrderFlag: {}", partnerCode, partnerDeleteOrderFlag);
             if("408".equals(e.getCode()) || "[408]请求超时".equals(e.getMessage()) || "412".equals(e.getCode())){
                 throw new RuntimeException(e);

@@ -6,11 +6,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.domain.BasDeliveryServiceMatching;
+import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
+import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCompleted;
 import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
+import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.util.LockerUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RLock;
@@ -53,6 +56,9 @@ public class DelOutboundTimer {
     private DelOutboundTimerAsyncTask delOutboundTimerAsyncTask;
     @Autowired
     private DelOutboundTimerAsyncTaskAdapter delOutboundTimerAsyncTaskAdapter;
+
+    @Autowired
+    private IDelOutboundService delOutboundService;
 
     @Value("${thread.trialLimit}")
     private int trialLimit;
@@ -377,6 +383,16 @@ public class DelOutboundTimer {
                         logger.error(e.getMessage(), e);
                         // 处理失败
                         this.delOutboundCompletedService.fail(delOutboundCompleted.getId(), e.getMessage());
+
+                        Integer handleSize = delOutboundCompleted.getHandleSize();
+
+                        if(handleSize > 5){
+
+                            LambdaUpdateWrapper<DelOutbound> update = Wrappers.lambdaUpdate();
+                            update.set(DelOutbound::getDelFlag, "2").eq(DelOutbound::getOrderNo, delOutboundCompleted.getOrderNo());
+                            delOutboundService.update(null,update);
+                        }
+
                         // 线程池任务满了，停止执行
                         if (e instanceof RejectedExecutionException) {
                             logger.error("=============================================");
@@ -396,6 +412,15 @@ public class DelOutboundTimer {
                         logger.error(e.getMessage(), e);
                         // 处理失败
                         this.delOutboundCompletedService.fail(delOutboundCompleted.getId(), e.getMessage());
+
+                        Integer handleSize = delOutboundCompleted.getHandleSize();
+
+                        if(handleSize > 5){
+                            LambdaUpdateWrapper<DelOutbound> update = Wrappers.lambdaUpdate();
+                            update.set(DelOutbound::getDelFlag, "2").eq(DelOutbound::getOrderNo, delOutboundCompleted.getOrderNo());
+                            delOutboundService.update(null,update);
+                        }
+
                         // 线程池任务满了，停止执行
                         if (e instanceof RejectedExecutionException) {
                             logger.error("=============================================");
