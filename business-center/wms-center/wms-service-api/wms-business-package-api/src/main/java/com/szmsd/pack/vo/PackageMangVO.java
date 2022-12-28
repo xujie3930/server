@@ -159,6 +159,15 @@ public class PackageMangVO {
     @ApiModelProperty(value = "选中的地址")
     private String showChoose;
 
+    @ApiModelProperty(value = "件数")
+    private Integer pieceNumber;
+
+    @ApiModelProperty(value = "方数")
+    private Integer squareNumber;
+
+    @ApiModelProperty(value = "袋数")
+    private Integer bagNumber;
+
     public void setShowChoose() {
         this.showChoose = String.join(" ", provinceNameZh, cityNameZh, districtNameZh);
     }
