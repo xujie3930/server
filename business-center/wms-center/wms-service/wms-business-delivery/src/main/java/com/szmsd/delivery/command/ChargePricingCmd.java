@@ -9,6 +9,7 @@ import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.MessageUtil;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.delivery.domain.ChargeImport;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.dto.ChargePricingOrderMsgDto;
@@ -52,6 +53,8 @@ public class ChargePricingCmd extends BasicCommand<ChargePricingResultDto> {
         IDelOutboundChargeService delOutboundChargeService = SpringUtils.getBean(IDelOutboundChargeService.class);
         IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
 
+        ChargeImportMapper chargeImportMapper = SpringUtils.getBean(ChargeImportMapper.class);
+
         //查询订单数据
         List<DelOutbound> delOutbounds = iDelOutboundService.list(Wrappers.<DelOutbound>query().lambda().in(DelOutbound::getOrderNo,orderNos));
         StopWatch stopWatch = new StopWatch();
@@ -64,9 +67,27 @@ public class ChargePricingCmd extends BasicCommand<ChargePricingResultDto> {
 
         for(DelOutbound delOutbound : delOutbounds) {
 
+            List<ChargeImport> chargeImportList = chargeImportMapper.selectList(Wrappers.<ChargeImport>query().lambda()
+                    .eq(ChargeImport::getOrderNo,delOutbound.getOrderNo())
+                    .eq(ChargeImport::getState,ChargeImportStateEnum.UPDATE_ORDER.getCode()));
+
             ChargePricingOrderMsgDto chargePricingOrderMsgDto = new ChargePricingOrderMsgDto();
 
             DelOutboundWrapperContext delOutboundWrapperContext = delOutboundBringVerifyService.initContext(delOutbound);
+
+            if(CollectionUtils.isNotEmpty(chargeImportList)) {
+
+                ChargeImport chargeImport = chargeImportList.get(0);
+
+                DelOutbound outbound = delOutboundWrapperContext.getDelOutbound();
+                outbound.setLength(1D);
+                outbound.setWidth(1D);
+                outbound.setHeight(1D);
+                outbound.setWeight(chargeImport.getCalcWeight().doubleValue());
+
+                delOutboundWrapperContext.setDelOutbound(outbound);
+            }
+
             stopWatch.start();
             ResponseObject<ChargeWrapper, ProblemDetails> responseObject = delOutboundBringVerifyService.pricing(delOutboundWrapperContext, PricingEnum.PACKAGE);
             stopWatch.stop();
