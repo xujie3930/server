@@ -125,6 +125,7 @@ public class DeliveryController {
             this.setAddressCountry(dto);
         }
         List<DelOutboundAddResponse> responseList = delOutboundClientService.add(dtoList);
+        log.info("responseList:{}",JSON.toJSONString(responseList));
         return R.ok(BeanMapperUtil.mapList(responseList, DelOutboundPackageTransferResponse.class));
     }
 
