@@ -832,11 +832,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         if (StringUtils.isNotEmpty(refNo)) {
 
-            int refNoState = (Integer)redisTemplate.opsForValue().get(refNo);
+            Object refNoState = redisTemplate.opsForValue().get(refNo);
 
             logger.info("refNo:{},{}",refNo,refNoState);
 
-            if(refNoState == 1){
+            if(refNoState != null){
                 throw new RuntimeException("refNo:"+refNo+"已经存在,不允许重复提交");
             }
 
