@@ -830,11 +830,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         String refNo = dto.getRefNo();
 
-        if (StringUtils.isNotEmpty(dto.getRefNo())) {
+        if (StringUtils.isNotEmpty(refNo)) {
 
-            boolean refNoState = redisTemplate.hasKey(refNo);
+            int refNoState = (Integer)redisTemplate.opsForValue().get(refNo);
 
-            if(refNoState){
+            logger.info("refNo:{},{}",refNo,refNoState);
+
+            if(refNoState == 1){
                 throw new RuntimeException("refNo:"+refNo+"已经存在,不允许重复提交");
             }
 
@@ -860,6 +862,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             queryWrapper.eq(DelOutbound::getDelFlag, "0");
             Integer size = baseMapper.selectCount(queryWrapper);
             if (size > 0) {
+
+                redisTemplate.opsForValue().set(refNo,1,120L,TimeUnit.SECONDS);
+
                 throw new CommonException("400", "Refno 必须唯一值" + dto.getRefNo());
             }
         }
