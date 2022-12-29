@@ -26,6 +26,8 @@ public class TaskConfigInfoAdapter {
             return buildTaskConfigInfo("NotReceive", true, false, "NotPrint");
         } else if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(orderType)) {
             return buildTaskConfigInfo("NotReceive", false, false, "NotPrint");
+        } else if(DelOutboundOrderTypeEnum.BATCH.getCode().equals(orderType)){
+            return buildTaskConfigInfo("NotReceive", false, false, "NotPrint");
         }
         return null;
     }
