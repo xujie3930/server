@@ -871,29 +871,22 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         TimeInterval timer = DateUtil.timer();
         DelOutboundAddResponse response = new DelOutboundAddResponse();
         String orderNo;
-        if (StringUtils.equals(dto.getSourceType(), DelOutboundConstant.SOURCE_TYPE_ADD)) {
-            //单数据处理直接抛异常
-            logger.info(">>>>>[创建出库单]1.1 校验Refno");
-            try {
-                this.checkRefNo(dto, null);
-                logger.info(">>>>>[创建出库单]1.2 校验Refno完成，{}", timer.intervalRestart());
-            }catch (CommonException e){
-                logger.info(">>>>>[创建出库单]1.2 校验Refno失败，{}", timer.intervalRestart());
-                response.setStatus(false);
-                response.setMessage(e.getMessage());
-                return response;
-            }
+        //单数据处理直接抛异常
+        logger.info(">>>>>[创建出库单]1.1 校验Refno");
+        try {
+            this.checkRefNo(dto, null);
+            logger.info(">>>>>[创建出库单]1.2 校验Refno完成，{}", timer.intervalRestart());
+        }catch (CommonException e){
+            logger.info(">>>>>[创建出库单]1.2 校验Refno失败，{}", timer.intervalRestart());
+            response.setStatus(false);
+            response.setMessage(e.getMessage());
+            return response;
         }
         // 创建出库单
         try {
             // DOC的验证SKU
             logger.info(">>>>>[创建出库单]2.0 doc校验");
             this.docValid(dto);
-
-
-
-
-
 
             logger.info(">>>>>[创建出库单]2.1 doc校验完成，{}", timer.intervalRestart());
 
