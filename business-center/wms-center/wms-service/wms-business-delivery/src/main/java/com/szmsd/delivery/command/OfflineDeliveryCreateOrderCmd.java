@@ -150,7 +150,17 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         }
 
         if(com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isNotEmpty(updateData)) {
-            importMapper.updateDealState(updateData);
+
+            for(OfflineImportDto importDto : updateData){
+
+                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+                offlineDeliveryImport.setId(importDto.getId());
+                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+                offlineDeliveryImport.setErrorMsg(importDto.getErrorMsg());
+                importMapper.updateById(offlineDeliveryImport);
+            }
+
+            //importMapper.updateDealState(updateData);
         }
 
         super.rollback(errorMsg);
