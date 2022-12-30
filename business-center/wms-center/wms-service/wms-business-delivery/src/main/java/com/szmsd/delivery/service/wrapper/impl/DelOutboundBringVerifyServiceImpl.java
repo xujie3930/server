@@ -1366,6 +1366,20 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         boxFilePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
                     }
                 }
+            }else{
+                //暴力写死
+                BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
+                basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
+                if (null != listR && null != listR.getData()) {
+                    List<BasAttachment> attachmentList = listR.getData();
+                    if (CollectionUtils.isNotEmpty(attachmentList)) {
+                        BasAttachment attachment = attachmentList.get(0);
+                        // 箱标文件 - 上传的
+                        boxFilePath = attachment.getAttachmentPath() + "/" + attachment.getAttachmentName() + attachment.getAttachmentFormat();
+                    }
+                }
             }
 
             // 判断从承运商获取的标签文件是否存在
