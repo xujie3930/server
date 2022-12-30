@@ -32,7 +32,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
             "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM",
             "yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss", "yyyy.MM.dd HH:mm", "yyyy.MM",
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'","yyyy-MM-dd'T'HH:mm:ss+08:00",
-            "yyyy-MM-dd HH:mm:ss.SSS"
+            "yyyy-MM-dd HH:mm:ss.SSS","yyyy-MM-dd'T'HH:mm:ss'Z'"
     };
 
     /**
