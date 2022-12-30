@@ -21,6 +21,12 @@ public class BasQuartzConfig {
         return JobBuilder.newJob(EmailJob.class).withIdentity("EmailJob").storeDurably().build();
     }
 
+    @Bean
+    public JobDetail YcMeetingJob() {
+        return JobBuilder.newJob(YcMeetingJob.class).withIdentity("YcMeetingJob").storeDurably().build();
+    }
+
+
 
 
     @Bean
@@ -29,6 +35,15 @@ public class BasQuartzConfig {
         return TriggerBuilder.newTrigger().forJob(EmailJob())
                 .withIdentity("EmailJob")
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 0 12 * * ?"))
+                .build();
+    }
+
+    @Bean
+    public Trigger YcMeetingJobTrigger() {
+        //0/3 * * * * ? 3秒测试 "0 0 12 * * ?"
+        return TriggerBuilder.newTrigger().forJob(YcMeetingJob())
+                .withIdentity("YcMeetingJob")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */50 * * * ?"))
                 .build();
     }
 
