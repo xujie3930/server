@@ -1377,6 +1377,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             if("Y".equals(delOutbound.getUploadBoxLabel())){
                 uploadBoxLabel = getBoxLabel(delOutbound);
             }
+            logger.info("更新出库单{}标签,文件{},自提标签{},箱标{}",delOutbound.getOrderNo(), pathname, selfPickLabelFilePath, uploadBoxLabel);
             pathname = this.mergeFile(delOutbound, pathname, boxFilePath, selfPickLabelFilePath, uploadBoxLabel);
 
         }
