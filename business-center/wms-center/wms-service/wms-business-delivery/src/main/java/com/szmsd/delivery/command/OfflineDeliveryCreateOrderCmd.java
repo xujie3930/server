@@ -120,7 +120,17 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
             //修改导入的数据
             if(CollectionUtils.isNotEmpty(updateData)) {
                 OfflineDeliveryImportMapper offlineDeliveryImportMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
-                int update = offlineDeliveryImportMapper.updateDealState(updateData);
+                //int update = offlineDeliveryImportMapper.updateDealState(updateData);
+                for(OfflineImportDto importDto : updateData){
+
+                    OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+                    offlineDeliveryImport.setId(importDto.getId());
+                    offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
+                    offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+                    offlineDeliveryImport.setOrderNo(importDto.getOrderNo());
+
+                    offlineDeliveryImportMapper.updateById(offlineDeliveryImport);
+                }
             }
 
             return offlineResultDto;
