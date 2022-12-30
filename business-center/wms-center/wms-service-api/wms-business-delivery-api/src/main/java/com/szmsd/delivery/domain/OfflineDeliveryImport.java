@@ -123,6 +123,9 @@ public class OfflineDeliveryImport extends BaseEntity {
     @ApiModelProperty(value = "高 CM")
     private BigDecimal height;
 
+    @ApiModelProperty(value = "错误信息")
+    private String errorMsg;
+
 
 
 
