@@ -144,5 +144,7 @@ public interface IExceptionInfoService extends IService<ExceptionInfo> {
     Integer  selectExceptionInfoQuery(ExceptionInfoQueryDto dto);
 
     R<Integer> updExceptionInfoState(ExceptionInfoStateDto stateDto);
+
+    void updateDelOutboundHouseNo(ExceptionInfoExportDto dto);
 }
 
