@@ -40,10 +40,10 @@ public class BasQuartzConfig {
 
     @Bean
     public Trigger YcMeetingJobTrigger() {
-        //0/3 * * * * ? 3秒测试 "0 0 12 * * ?"
+        //0/3 * * * * ? 3秒测试 "0 0 12 * * ?"，"0 */50 * * * ?" 五十分钟一次
         return TriggerBuilder.newTrigger().forJob(YcMeetingJob())
                 .withIdentity("YcMeetingJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 */50 * * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 12 * * ?"))
                 .build();
     }
 
