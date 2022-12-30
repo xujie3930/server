@@ -1,6 +1,7 @@
 package com.szmsd.delivery.command;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Lists;
 import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.api.feign.BasWarehouseFeignService;
@@ -20,6 +21,7 @@ import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import com.szmsd.finance.api.feign.RefundRequestFeignService;
 import com.szmsd.finance.dto.RefundRequestAutoDTO;
 import com.szmsd.finance.dto.RefundRequestListAutoDTO;
+import com.szmsd.pack.domain.PackageAddress;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -97,7 +99,18 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
 
         if(CollectionUtils.isNotEmpty(updateData)) {
             //更新状态成 已创建费用
-            importMapper.updateDealState(updateData);
+            //importMapper.updateDealState(updateData);
+
+            for(OfflineImportDto importDto : updateData){
+
+                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+                offlineDeliveryImport.setId(importDto.getId());
+                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
+                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+
+                importMapper.updateById(offlineDeliveryImport);
+            }
+
         }
 
         super.afterExecuted(result);
@@ -127,7 +140,18 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
         }
 
         if(com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isNotEmpty(updateData)) {
-            importMapper.updateDealState(updateData);
+
+            for(OfflineImportDto importDto : updateData){
+
+                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+                offlineDeliveryImport.setId(importDto.getId());
+                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
+                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+
+                importMapper.updateById(offlineDeliveryImport);
+            }
+
+            //importMapper.updateDealState(updateData);
         }
 
         super.rollback(errorMsg);
@@ -150,7 +174,22 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
         }
 
         if(com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isNotEmpty(updateData)) {
-            importMapper.updateDealStateByOrder(updateData);
+
+            for(OfflineImportDto importDto : updateData){
+
+                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+                offlineDeliveryImport.setId(importDto.getId());
+                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
+                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+
+                importMapper.update(null, Wrappers.<OfflineDeliveryImport>lambdaUpdate()
+                        .eq(OfflineDeliveryImport::getOrderNo,importDto.getOrderNo())
+                        .set(OfflineDeliveryImport::getDealStatus,importDto.getDealStatus())
+                        .set(OfflineDeliveryImport::getErrorMsg,importDto.getErrorMsg())
+                );
+            }
+
+            //importMapper.updateDealStateByOrder(updateData);
         }
     }
 

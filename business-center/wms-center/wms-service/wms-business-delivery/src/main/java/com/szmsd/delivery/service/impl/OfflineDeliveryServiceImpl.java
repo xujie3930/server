@@ -196,7 +196,16 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
         }
 
         if(CollectionUtils.isNotEmpty(updateData)) {
-            importMapper.updateDealState(updateData);
+            //importMapper.updateDealState(updateData);
+            for(OfflineImportDto importDto : updateData){
+
+                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+                offlineDeliveryImport.setId(importDto.getId());
+                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
+                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+
+                offlineDeliveryImportMapper.updateById(offlineDeliveryImport);
+            }
         }
     }
 
