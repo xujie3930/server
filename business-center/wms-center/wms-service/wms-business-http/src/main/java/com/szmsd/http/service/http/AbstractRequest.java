@@ -246,6 +246,10 @@ abstract class AbstractRequest extends BaseRequest {
                  inboundReceiptFeignService.updateInboundReceipt(String.valueOf(inboundReceiptMap.get("refOrderNo")));
              }
 
+            if (responseBody.getStatus()==400){
+                inboundReceiptFeignService.updateInboundReceipt(String.valueOf(inboundReceiptMap.get("refOrderNo")));
+            }
+
 
         }
         this.addLog(warehouseCode, urlGroupName, url, httpMethod.name(), headerMap, logRequestBody, requestTime, responseBody.getBody(), responseBody.getStatus());
