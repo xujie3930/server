@@ -3,6 +3,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.szmsd.http.api.feign.fallback.HtpWarMappingFeignFallback,\
   com.szmsd.http.config.CkThreadPool,\
   com.szmsd.http.config.CkConfig,\
+  com.szmsd.http.api.feign.fallback.YcMeetingFeignFallback,\
   com.szmsd.http.api.feign.fallback.HtpPickupPackageFeignFallback
 
 

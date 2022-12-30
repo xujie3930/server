@@ -95,6 +95,7 @@
             <if test="province != null and province != ''">AND t.province = #{province}</if>
             <if test="city != null and city != ''">AND t.city = #{city}</if>
             <if test="status != null and status != ''">AND t.status = #{status}</if>
+            <if test="warehouseSource != null and warehouseSource != ''">AND t.warehouse_source = #{warehouseSource}</if>
         </where>
     </select>
     <select id="selectInfo" resultMap="BasWarehouseInfoVO">
