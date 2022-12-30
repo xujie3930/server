@@ -23,6 +23,8 @@ public class ExceptionInfoDetailExportDto {
     @Excel(name="申报价值",width = 10,needMerge=true)
     private String declaredValue;
 
+
     private String orderNo;
+
 
 }

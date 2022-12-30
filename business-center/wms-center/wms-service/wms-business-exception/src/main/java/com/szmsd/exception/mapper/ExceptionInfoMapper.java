@@ -36,4 +36,6 @@ public interface ExceptionInfoMapper extends BaseMapper<ExceptionInfo> {
     int selectExceptionInfoQuery(@Param(Constants.WRAPPER) QueryWrapper<ExceptionInfo> queryWrapper);
 
     int updExceptionInfoState(@Param("state") String state, @Param("orderNos") List<String> orderNos);
+
+    void  updateDelOutboundHouseNo(ExceptionInfoExportDto dto);
 }
