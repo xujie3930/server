@@ -56,5 +56,8 @@ public class DelOutboundListExceptionMessageExportVO implements Serializable {
     @ApiModelProperty(value = "增值税号")
     private String ioss;
 
+    @ApiModelProperty(value = "houseNo")
+    private String houseNo;
+
 
 }

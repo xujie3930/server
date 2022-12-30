@@ -83,6 +83,10 @@ public class ExceptionInfoExportCustomerDto {
     @ApiModelProperty(value = "邮箱")
     private String email;
 
+    @Excel(name="houseNo",width = 30,needMerge = true)
+    @ApiModelProperty(value = "houseNo")
+    private String houseNo;
+
 
 
 
