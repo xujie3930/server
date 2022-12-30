@@ -29,4 +29,8 @@ public class BasWarehouseQueryDTO extends QueryDto {
     @ApiModelProperty(value = "状态：0无效，1有效")
     private String status;
 
+    @ApiModelProperty(value = "仓库来源")
+    private String warehouseSource;
+
+
 }

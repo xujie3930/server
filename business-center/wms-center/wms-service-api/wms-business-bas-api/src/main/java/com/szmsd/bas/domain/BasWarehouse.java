@@ -92,6 +92,16 @@ public class BasWarehouse extends BaseEntity {
     @ApiModelProperty(value = "入库单是否人工审核：0自动审核，1人工审核")
     private String inboundReceiptReview;
 
+    @ApiModelProperty(value = "API密钥")
+    private String appToken;
+
+    @ApiModelProperty(value = "API标识")
+    private String appKey;
+
+    @ApiModelProperty(value = "仓库来源")
+    private String warehouseSource;
+
+
     @ApiModelProperty(value = "创建ID",hidden = true)
     @TableField(fill = FieldFill.INSERT)
     private String createBy;

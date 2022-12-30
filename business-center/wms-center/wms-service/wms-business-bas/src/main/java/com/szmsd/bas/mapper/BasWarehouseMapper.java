@@ -21,4 +21,5 @@ public interface BasWarehouseMapper extends BaseMapper<BasWarehouse> {
     void insertWarehouseCus(BasWarehouseCus basWarehouseCusList);
 
     void deleteWarehouseCus(String warehouseCode);
+
 }

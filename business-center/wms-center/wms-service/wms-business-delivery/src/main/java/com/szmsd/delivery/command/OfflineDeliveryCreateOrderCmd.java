@@ -121,9 +121,11 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         if(CollectionUtils.isNotEmpty(updateData)) {
             OfflineDeliveryImportMapper offlineDeliveryImportMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
             offlineDeliveryImportMapper.updateDealState(updateData);
+
+            return offlineResultDto;
         }
 
-        return offlineResultDto;
+        return null;
     }
 
     @Override
