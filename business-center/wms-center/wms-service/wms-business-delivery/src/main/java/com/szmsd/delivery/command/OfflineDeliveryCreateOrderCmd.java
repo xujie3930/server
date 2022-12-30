@@ -101,7 +101,6 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
             delOutbounds.add(delOutbound);
             delOutboundAddresses.add(delOutboundAddress);
             updateData.add(offlineImportDto);
-
         }
 
         if(CollectionUtils.isEmpty(delOutbounds) || CollectionUtils.isEmpty(delOutboundAddresses)){
@@ -111,21 +110,25 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         List<DelOutbound> newdelOutbounds = delOutbounds.stream().collect(Collectors.collectingAndThen(Collectors
                         .toCollection(()->new TreeSet<>(Comparator.comparing(DelOutbound::getTrackingNo))), ArrayList::new));
 
-        //批量添加出口单据
-        IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
-        iDelOutboundService.saveBatch(newdelOutbounds);
-        IDelOutboundAddressService iDelOutboundAddressService = SpringUtils.getBean(IDelOutboundAddressService.class);
-        iDelOutboundAddressService.saveBatch(delOutboundAddresses);
+        try {
+            //批量添加出口单据
+            IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            iDelOutboundService.saveBatch(newdelOutbounds);
+            IDelOutboundAddressService iDelOutboundAddressService = SpringUtils.getBean(IDelOutboundAddressService.class);
+            iDelOutboundAddressService.saveBatch(delOutboundAddresses);
 
-        //修改导入的数据
-        if(CollectionUtils.isNotEmpty(updateData)) {
-            OfflineDeliveryImportMapper offlineDeliveryImportMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
-            offlineDeliveryImportMapper.updateDealState(updateData);
+            //修改导入的数据
+            if(CollectionUtils.isNotEmpty(updateData)) {
+                OfflineDeliveryImportMapper offlineDeliveryImportMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
+                int update = offlineDeliveryImportMapper.updateDealState(updateData);
+            }
 
             return offlineResultDto;
-        }
 
-        return null;
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
