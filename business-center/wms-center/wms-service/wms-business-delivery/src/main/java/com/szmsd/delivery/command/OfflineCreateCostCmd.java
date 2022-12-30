@@ -99,17 +99,17 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
 
         if(CollectionUtils.isNotEmpty(updateData)) {
             //更新状态成 已创建费用
-            //importMapper.updateDealState(updateData);
+            importMapper.updateDealState(updateData);
 
-            for(OfflineImportDto importDto : updateData){
-
-                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
-                offlineDeliveryImport.setId(importDto.getId());
-                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
-                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
-
-                importMapper.updateById(offlineDeliveryImport);
-            }
+//            for(OfflineImportDto importDto : updateData){
+//
+//                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+//                offlineDeliveryImport.setId(importDto.getId());
+//                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
+//                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+//
+//                importMapper.updateById(offlineDeliveryImport);
+//            }
 
         }
 
@@ -141,17 +141,17 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
 
         if(com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isNotEmpty(updateData)) {
 
-            for(OfflineImportDto importDto : updateData){
+//            for(OfflineImportDto importDto : updateData){
+//
+//                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+//                offlineDeliveryImport.setId(importDto.getId());
+//                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
+//                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+//
+//                importMapper.updateById(offlineDeliveryImport);
+//            }
 
-                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
-                offlineDeliveryImport.setId(importDto.getId());
-                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
-                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
-
-                importMapper.updateById(offlineDeliveryImport);
-            }
-
-            //importMapper.updateDealState(updateData);
+            importMapper.updateDealState(updateData);
         }
 
         super.rollback(errorMsg);

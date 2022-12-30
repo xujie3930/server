@@ -82,18 +82,18 @@ public class OfflineDeliveryTrackYeeCmd extends BasicCommand<Integer> {
         }
 
         if(CollectionUtils.isNotEmpty(updateData)) {
-            //importMapper.updateDealState(updateData);
-            for(OfflineImportDto importDto : updateData){
-
-                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
-                offlineDeliveryImport.setId(importDto.getId());
-                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
-                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
-                offlineDeliveryImport.setOrderNo(importDto.getOrderNo());
-                offlineDeliveryImport.setErrorMsg(importDto.getErrorMsg());
-
-                importMapper.updateById(offlineDeliveryImport);
-            }
+            importMapper.updateDealState(updateData);
+//            for(OfflineImportDto importDto : updateData){
+//
+//                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+//                offlineDeliveryImport.setId(importDto.getId());
+//                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
+//                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+//                offlineDeliveryImport.setOrderNo(importDto.getOrderNo());
+//                offlineDeliveryImport.setErrorMsg(importDto.getErrorMsg());
+//
+//                importMapper.updateById(offlineDeliveryImport);
+//            }
         }
 
         super.rollback(errorMsg);
@@ -120,17 +120,17 @@ public class OfflineDeliveryTrackYeeCmd extends BasicCommand<Integer> {
             }
 
             if(CollectionUtils.isNotEmpty(updateData)) {
-                //importMapper.updateDealState(updateData);
-                for(OfflineImportDto importDto : updateData){
-
-                    OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
-                    offlineDeliveryImport.setId(importDto.getId());
-                    offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
-                    offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
-                    offlineDeliveryImport.setOrderNo(importDto.getOrderNo());
-
-                    importMapper.updateById(offlineDeliveryImport);
-                }
+                importMapper.updateDealState(updateData);
+//                for(OfflineImportDto importDto : updateData){
+//
+//                    OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+//                    offlineDeliveryImport.setId(importDto.getId());
+//                    offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
+//                    offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+//                    offlineDeliveryImport.setOrderNo(importDto.getOrderNo());
+//
+//                    importMapper.updateById(offlineDeliveryImport);
+//                }
             }
         }
 

@@ -1,6 +1,8 @@
 package com.szmsd.delivery.timer;
 
 import com.szmsd.delivery.service.OfflineDeliveryService;
+import com.szmsd.delivery.util.LockerUtil;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,9 @@ public class OfflineDeliveryTimer {
     @Autowired
     private OfflineDeliveryService offlineDeliveryService;
 
+    @Autowired
+    private RedissonClient redissonClient;
+
     /**
      * 线下出库异步处理
      * <p/>
@@ -26,8 +31,15 @@ public class OfflineDeliveryTimer {
     @Scheduled(cron = "0/30 * * * * ?")
     public void autoOfflineDelivery() {
         logger.info("OfflineDeliveryTimer  线下出库开始========");
-        offlineDeliveryService.dealOfflineDelivery();
+        String key = "OfflineDeliveryTimer:autoOfflineDelivery";
+        this.doWorker(key, () -> {
+            offlineDeliveryService.dealOfflineDelivery();
+        });
         logger.info("OfflineDeliveryTimer  线下出库结束========");
+    }
+
+    private void doWorker(String key, LockerUtil.Worker worker) {
+        new LockerUtil<Integer>(redissonClient).tryLock(key, worker);
     }
 
 }
