@@ -2,6 +2,7 @@ package com.szmsd.delivery.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.collect.Lists;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
@@ -211,7 +212,16 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
         }
 
         List<String> trackNoList = offlineDeliveryImports.stream().map(OfflineDeliveryImport::getTrackingNo).collect(Collectors.toList());
-        List<OfflineCostImport> offlineCostImportList = offlineCostImportMapper.selectList(Wrappers.<OfflineCostImport>query().lambda().in(OfflineCostImport::getTrackingNo,trackNoList));
+
+        List<List<String>> trackNoPartions = Lists.partition(trackNoList,200);
+        List<OfflineCostImport> offlineCostImportList = new ArrayList<>();
+
+        for(List<String> orderNos : trackNoPartions) {
+
+            List<OfflineCostImport> offlineCostImports = offlineCostImportMapper.selectList(Wrappers.<OfflineCostImport>query().lambda().in(OfflineCostImport::getTrackingNo, orderNos));
+            offlineCostImportList.addAll(offlineCostImports);
+        }
+
         OfflineResultDto offlineResultDto = new OfflineResultDto();
         offlineResultDto.setOfflineDeliveryImports(offlineDeliveryImports);
         offlineResultDto.setOfflineCostImportList(offlineCostImportList);
