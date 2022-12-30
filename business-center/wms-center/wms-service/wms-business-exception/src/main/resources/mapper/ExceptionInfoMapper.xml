@@ -102,5 +102,12 @@
         </foreach>
 
     </update>
+    <update id="updateDelOutboundHouseNo" parameterType="com.szmsd.exception.dto.ExceptionInfoExportDto">
+        UPDATE del_outbound
+        set
+            house_no=#{houseNo}
+        where
+            order_no=#{orderNo}
+    </update>
 
 </mapper>

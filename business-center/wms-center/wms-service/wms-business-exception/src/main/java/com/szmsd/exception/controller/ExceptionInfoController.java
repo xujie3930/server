@@ -309,11 +309,11 @@ public class ExceptionInfoController extends BaseController {
             //获取第一行数据
             Row row2 = sheet.getRow(0);
 
-            for (int i = 0; i < 19 - a; i++) {
+            for (int i = 0; i < 20 - a; i++) {
                 Cell deliveryTimeCell = row2.getCell(i);
 
                 CellStyle styleMain = workbook.createCellStyle();
-                if (i == 18 - a) {
+                if (i == 19 - a) {
                     styleMain.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
                 } else {
                     styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
@@ -338,7 +338,7 @@ public class ExceptionInfoController extends BaseController {
 
             //获取第二行数据
             Row row3 = sheet.getRow(1);
-            for (int x = 18 - a; x < 23 - a; x++) {
+            for (int x = 19 - a; x < 24 - a; x++) {
 
                 Cell deliveryTimeCell1 = row3.getCell(x);
                 CellStyle styleMain1 = workbook.createCellStyle();
@@ -403,9 +403,9 @@ public class ExceptionInfoController extends BaseController {
 //        sheet.protectSheet("123456");
 
             if (dto.getType() == 1) {
-                sheet.setColumnHidden(18, true);
+                sheet.setColumnHidden(19, true);
             } else {
-                sheet.setColumnHidden(17, true);
+                sheet.setColumnHidden(18, true);
 
             }
             try {
@@ -626,6 +626,10 @@ public class ExceptionInfoController extends BaseController {
                                     if (dto.getIoss()!=null&&StringUtils.isNotEmpty(dto.getIoss().trim())){
                                         exceptionInfoService.updateDelOutboundIoss(dto);
                                     }
+
+                                    if (dto.getHouseNo()!=null&&StringUtils.isNotEmpty(dto.getHouseNo().trim())){
+                                        exceptionInfoService.updateDelOutboundHouseNo(dto);
+                                    }
                                 }
 
                                 if (exceptionInfoService.importAgainTrackingNo(dto, countryCode)) {
@@ -687,6 +691,9 @@ public class ExceptionInfoController extends BaseController {
 
                                 if (dto.getIoss()!=null&&StringUtils.isNotEmpty(dto.getIoss().trim())){
                                     exceptionInfoService.updateDelOutboundIoss(dto);
+                                }
+                                if (dto.getHouseNo()!=null&&StringUtils.isNotEmpty(dto.getHouseNo().trim())){
+                                    exceptionInfoService.updateDelOutboundHouseNo(dto);
                                 }
                             }
 

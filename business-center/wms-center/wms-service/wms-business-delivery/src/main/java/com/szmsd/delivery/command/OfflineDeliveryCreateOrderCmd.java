@@ -1,9 +1,11 @@
 package com.szmsd.delivery.command;
 
+import com.google.common.collect.Lists;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
 import com.szmsd.common.core.command.BasicCommand;
+import com.szmsd.common.core.support.Context;
 import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
@@ -110,35 +112,43 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         List<DelOutbound> newdelOutbounds = delOutbounds.stream().collect(Collectors.collectingAndThen(Collectors
                         .toCollection(()->new TreeSet<>(Comparator.comparing(DelOutbound::getTrackingNo))), ArrayList::new));
 
+
+        //List<List<DelOutbound>> delOutboundsps = Lists.partition(delOutbounds,100);
+
+        //List<List<DelOutboundAddress>> delOutboundsaddresps = Lists.partition(delOutboundAddresses,100);
+
         try {
             //批量添加出口单据
-            IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
-            iDelOutboundService.saveBatch(newdelOutbounds);
-            IDelOutboundAddressService iDelOutboundAddressService = SpringUtils.getBean(IDelOutboundAddressService.class);
-            iDelOutboundAddressService.saveBatch(delOutboundAddresses);
+            //IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
+            Context.batchInsert("del_outbound",delOutbounds,"id");
+            //iDelOutboundService.saveBatch(newdelOutbounds);
+            //IDelOutboundAddressService iDelOutboundAddressService = SpringUtils.getBean(IDelOutboundAddressService.class);
+            //iDelOutboundAddressService.saveBatch(delOutboundAddresses);
+            Context.batchInsert("del_outbound_address",delOutboundAddresses,"id");
 
             //修改导入的数据
-            if(CollectionUtils.isNotEmpty(updateData)) {
+            if (CollectionUtils.isNotEmpty(updateData)) {
                 OfflineDeliveryImportMapper offlineDeliveryImportMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
-                //int update = offlineDeliveryImportMapper.updateDealState(updateData);
-                for(OfflineImportDto importDto : updateData){
-
-                    OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
-                    offlineDeliveryImport.setId(importDto.getId());
-                    offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
-                    offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
-                    offlineDeliveryImport.setOrderNo(importDto.getOrderNo());
-
-                    offlineDeliveryImportMapper.updateById(offlineDeliveryImport);
-                }
+                int update = offlineDeliveryImportMapper.updateDealState(updateData);
+//                for (OfflineImportDto importDto : updateData) {
+//
+//                    OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+//                    offlineDeliveryImport.setId(importDto.getId());
+//                    offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
+//                    offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+//                    offlineDeliveryImport.setOrderNo(importDto.getOrderNo());
+//
+//                    offlineDeliveryImportMapper.updateById(offlineDeliveryImport);
+//                }
             }
 
             return offlineResultDto;
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+
     }
 
     @Override
@@ -166,16 +176,16 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
 
         if(com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isNotEmpty(updateData)) {
 
-            for(OfflineImportDto importDto : updateData){
+//            for(OfflineImportDto importDto : updateData){
+//
+//                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+//                offlineDeliveryImport.setId(importDto.getId());
+//                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+//                offlineDeliveryImport.setErrorMsg(importDto.getErrorMsg());
+//                importMapper.updateById(offlineDeliveryImport);
+//            }
 
-                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
-                offlineDeliveryImport.setId(importDto.getId());
-                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
-                offlineDeliveryImport.setErrorMsg(importDto.getErrorMsg());
-                importMapper.updateById(offlineDeliveryImport);
-            }
-
-            //importMapper.updateDealState(updateData);
+            importMapper.updateDealState(updateData);
         }
 
         super.rollback(errorMsg);

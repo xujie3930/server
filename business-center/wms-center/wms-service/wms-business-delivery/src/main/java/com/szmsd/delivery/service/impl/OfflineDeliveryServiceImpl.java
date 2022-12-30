@@ -146,36 +146,49 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
             return R.failed("无数据");
         }
 
-        log.info("查询INIT 状态的导入数据：{}");
+        List<OfflineDeliveryImport> offlineDeliveryImports = offlineResultDto.getOfflineDeliveryImports();
 
-        //step 2. 生成线下出库单，offline 状态修改成CREATE_ORDER
-        OfflineResultDto createOrder = new OfflineDeliveryCreateOrderCmd(offlineResultDto).execute();
-        if(createOrder == null){
-            return R.failed("创建订单异常");
+        List<List<OfflineDeliveryImport>> partition = Lists.partition(offlineDeliveryImports,10);
+
+        for(List<OfflineDeliveryImport> ps : partition) {
+
+            OfflineResultDto offlineResultDtops = new OfflineResultDto();
+
+            List<String> trackNoList = ps.stream().map(OfflineDeliveryImport::getTrackingNo).collect(Collectors.toList());
+            List<OfflineCostImport> offlineCostImports = offlineCostImportMapper.selectList(Wrappers.<OfflineCostImport>query().lambda().in(OfflineCostImport::getTrackingNo, trackNoList));
+
+            offlineResultDtops.setOfflineCostImportList(offlineCostImports);
+            offlineResultDtops.setOfflineDeliveryImports(ps);
+
+            //step 2. 生成线下出库单，offline 状态修改成CREATE_ORDER
+            OfflineResultDto createOrder = new OfflineDeliveryCreateOrderCmd(offlineResultDtops).execute();
+            if (createOrder == null) {
+                return R.failed("创建订单异常");
+            }
+
+            log.info("生成线下出库单，offline 状态修改成CREATE_ORDER：{}");
+
+            //step 3. 生成退费、补收费用，自动审核退费
+            int createCost = new OfflineCreateCostCmd(createOrder).execute();
+            if (createCost != 1) {
+                return R.failed("创建退费费用异常");
+            }
+
+            log.info("创建退费费用异常：{}");
+
+            //step 4. 推送TY
+            int trackYee = new OfflineDeliveryTrackYeeCmd(createOrder).execute();
+            if (trackYee != 1) {
+                return R.failed("推送TY异常");
+            }
+
+            log.info("推送TY：{}", trackYee);
+
+            //step 5.完成
+            this.complete(createOrder);
+
+            log.info("dealOfflineDelivery 完成 ：{}");
         }
-
-        log.info("生成线下出库单，offline 状态修改成CREATE_ORDER：{}");
-
-        //step 3. 生成退费、补收费用，自动审核退费
-        int createCost = new OfflineCreateCostCmd(createOrder).execute();
-        if(createCost != 1){
-            return R.failed("创建退费费用异常");
-        }
-
-        log.info("创建退费费用异常：{}");
-
-        //step 4. 推送TY
-        int trackYee = new OfflineDeliveryTrackYeeCmd(createOrder).execute();
-        if(trackYee != 1){
-            return R.failed("推送TY异常");
-        }
-
-        log.info("推送TY：{}",trackYee);
-
-        //step 5.完成
-        this.complete(createOrder);
-
-        log.info("dealOfflineDelivery 完成 ：{}");
 
         return R.ok();
     }
@@ -196,16 +209,16 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
         }
 
         if(CollectionUtils.isNotEmpty(updateData)) {
-            //importMapper.updateDealState(updateData);
-            for(OfflineImportDto importDto : updateData){
-
-                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
-                offlineDeliveryImport.setId(importDto.getId());
-                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
-                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
-
-                offlineDeliveryImportMapper.updateById(offlineDeliveryImport);
-            }
+            importMapper.updateDealState(updateData);
+//            for(OfflineImportDto importDto : updateData){
+//
+//                OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
+//                offlineDeliveryImport.setId(importDto.getId());
+//                offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
+//                offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
+//
+//                offlineDeliveryImportMapper.updateById(offlineDeliveryImport);
+//            }
         }
     }
 
@@ -225,11 +238,11 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
         List<List<String>> trackNoPartions = Lists.partition(trackNoList,200);
         List<OfflineCostImport> offlineCostImportList = new ArrayList<>();
 
-        for(List<String> orderNos : trackNoPartions) {
-
-            List<OfflineCostImport> offlineCostImports = offlineCostImportMapper.selectList(Wrappers.<OfflineCostImport>query().lambda().in(OfflineCostImport::getTrackingNo, orderNos));
-            offlineCostImportList.addAll(offlineCostImports);
-        }
+//        for(List<String> orderNos : trackNoPartions) {
+//
+//            List<OfflineCostImport> offlineCostImports = offlineCostImportMapper.selectList(Wrappers.<OfflineCostImport>query().lambda().in(OfflineCostImport::getTrackingNo, orderNos));
+//            offlineCostImportList.addAll(offlineCostImports);
+//        }
 
         OfflineResultDto offlineResultDto = new OfflineResultDto();
         offlineResultDto.setOfflineDeliveryImports(offlineDeliveryImports);

@@ -9,7 +9,7 @@ import java.util.List;
 public interface OfflineDeliveryImportMapper extends BaseMapper<OfflineDeliveryImport> {
     int saveBatch(List<OfflineDeliveryImport> offlineDeliveryImports);
 
-    //int updateDealState(List<OfflineImportDto> updateData);
+    int updateDealState(List<OfflineImportDto> updateData);
 
     //int updateDealStateByOrder(List<OfflineImportDto> updateData);
 }
