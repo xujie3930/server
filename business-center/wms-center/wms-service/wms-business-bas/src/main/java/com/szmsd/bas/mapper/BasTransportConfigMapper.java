@@ -2,7 +2,7 @@ package com.szmsd.bas.mapper;
 
 
 import com.szmsd.bas.domain.BasTransportConfig;
-import com.szmsd.bas.vo.BasWarehouseVO;
+import com.szmsd.bas.dto.BasTransportConfigDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -16,7 +16,7 @@ public interface BasTransportConfigMapper {
 
     int insertSelective(BasTransportConfig record);
 
-    BasTransportConfig selectByPrimaryKey(Integer id);
+    List<BasTransportConfig> selectByPrimaryKey(BasTransportConfigDTO queryDTO);
 
     int updateByPrimaryKeySelective(BasTransportConfig record);
 
