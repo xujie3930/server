@@ -8,6 +8,7 @@ import com.szmsd.delivery.dto.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -24,4 +25,6 @@ public interface DelTrackMapper extends BaseMapper<DelTrack> {
     List<TrackAnalysisDto> getProductServiceAnalysis(@Param(Constants.WRAPPER) QueryWrapper<TrackAnalysisRequestDto> queryWrapper);
 
     List<TrackAnalysisExportDto> getAnalysisExportData(@Param(Constants.WRAPPER) QueryWrapper<TrackAnalysisRequestDto> queryWrapper);
+
+    void  deletetrack(@Param("map") Map map);
 }
