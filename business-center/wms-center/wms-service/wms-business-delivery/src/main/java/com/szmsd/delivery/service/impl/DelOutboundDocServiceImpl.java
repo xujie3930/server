@@ -15,6 +15,7 @@ import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
+import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.service.IDelOutboundDocService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.ApplicationContainer;
@@ -165,8 +166,14 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
                     for(DelOutbound delOutbound : delOutboundList) {
                         DelOutboundWrapperContext delOutboundWrapperContext = delOutboundBringVerifyService.initContext(delOutbound);
                         stopWatch.start();
-                        ApplicationContainer applicationContainer = new ApplicationContainer(delOutboundWrapperContext, BringVerifyEnum.BEGIN, BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.BEGIN);
+                        ApplicationContainer applicationContainer = new ApplicationContainer(delOutboundWrapperContext, BringVerifyEnum.BEGIN, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
                         applicationContainer.action();
+
+                        DelOutbound upd = new DelOutbound();
+                        upd.setId(delOutbound.getId());
+                        upd.setState(DelOutboundStateEnum.DELIVERED.getCode());
+                        delOutboundService.updateById(upd);
+
                         stopWatch.stop();
                         logger.info(">>>>>[创建出库单{}]this.BringVerifyEnum(bringVerifyDto)耗时{}" + delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
                     }
