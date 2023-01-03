@@ -17,6 +17,8 @@ import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
 import com.szmsd.delivery.service.IDelOutboundDocService;
 import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.service.wrapper.ApplicationContainer;
+import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
 import com.szmsd.delivery.service.wrapper.IDelOutboundBringVerifyService;
 import com.szmsd.delivery.vo.DelOutboundAddResponse;
@@ -110,18 +112,30 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
         // 获取出库单ID
         List<Long> ids = responses.stream().map(DelOutboundAddResponse::getId).filter(Objects::nonNull).collect(Collectors.toList());
 
+        //同步返回trackingNo
+        List<Integer> syncTrackingNoStateList = list.stream().map(DelOutboundDto::getSyncTrackingNoState).distinct().collect(Collectors.toList());
+
         if (CollectionUtils.isNotEmpty(ids)) {
-            // 批量提审出库单
-            DelOutboundBringVerifyDto bringVerifyDto = new DelOutboundBringVerifyDto();
-            bringVerifyDto.setIds(ids);
-            stopWatch.start();
-            List<DelOutboundBringVerifyVO> bringVerifyVOList = this.delOutboundBringVerifyService.bringVerify(bringVerifyDto);
-            stopWatch.stop();
-            logger.info(">>>>>[创建出库单{}]this.delOutboundBringVerifyService.bringVerify(bringVerifyDto)耗时{}"+responses.get(0).getOrderNo(), stopWatch.getLastTaskTimeMillis());
+
+            int syncTrackingNoState = syncTrackingNoStateList.get(0);
+
+            List<DelOutboundBringVerifyVO> bringVerifyVOList = new ArrayList<>();
+
+            if(syncTrackingNoState != 1) {
+
+                // 批量提审出库单
+                DelOutboundBringVerifyDto bringVerifyDto = new DelOutboundBringVerifyDto();
+                bringVerifyDto.setIds(ids);
+                stopWatch.start();
+                bringVerifyVOList = this.delOutboundBringVerifyService.bringVerify(bringVerifyDto);
+                stopWatch.stop();
+                logger.info(">>>>>[创建出库单{}]this.delOutboundBringVerifyService.bringVerify(bringVerifyDto)耗时{}" + responses.get(0).getOrderNo(), stopWatch.getLastTaskTimeMillis());
+            }
             Map<String, DelOutboundBringVerifyVO> bringVerifyVOMap = new HashMap<>();
             for (DelOutboundBringVerifyVO bringVerifyVO : bringVerifyVOList) {
                 bringVerifyVOMap.put(bringVerifyVO.getOrderNo(), bringVerifyVO);
             }
+
 
             // 查询出库单信息
             List<DelOutbound> delOutboundList = this.delOutboundService.listByIds(ids);
@@ -144,29 +158,20 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
                 }
             }
 
-            //同步返回trackingNo
-            List<Integer> syncTrackingNoStateList = list.stream().map(DelOutboundDto::getSyncTrackingNoState).distinct().collect(Collectors.toList());
-
             if(CollectionUtils.isNotEmpty(syncTrackingNoStateList)){
-                int syncTrackingNoState = syncTrackingNoStateList.get(0);
 
                 if(syncTrackingNoState == 1){
 
                     for(DelOutbound delOutbound : delOutboundList) {
                         DelOutboundWrapperContext delOutboundWrapperContext = delOutboundBringVerifyService.initContext(delOutbound);
                         stopWatch.start();
-                        ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
-                        stopWatch.stop();
-                        logger.info(">>>>>[同步获取创建出库单{}]创建承运商 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());
-                        if(shipmentOrderResult != null){
-                            delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
-                            delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
-                            delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
-                            delOutbound.setReferenceNumber(shipmentOrderResult.getReferenceNumber());
-                        }
+                        ApplicationContainer applicationContainer = new ApplicationContainer(delOutboundWrapperContext, BringVerifyEnum.BEGIN, BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.BEGIN);
+                        applicationContainer.action();
                     }
 
-                    Map<String,DelOutbound> delOutboundMap1 = delOutboundList.stream().collect(Collectors.toMap(DelOutbound::getOrderNo,v->v));
+                    List<DelOutbound> delOutbounds = this.delOutboundService.listByIds(ids);
+
+                    Map<String,DelOutbound> delOutboundMap1 = delOutbounds.stream().collect(Collectors.toMap(DelOutbound::getOrderNo,v->v));
 
                     for(DelOutboundAddResponse response : responses){
 
