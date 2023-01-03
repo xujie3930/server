@@ -252,6 +252,13 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         return baseMapper.deleteById(id);
     }
 
+//    public static void main(String[] args) {
+//        String a="2022-10-18T23:20:00Z";
+//        String b="2022-10-19T09:17:00+08:00";
+//        String c="2022-12-19 21:18:27";
+//        Date trackingTime=DateUtils.parseDate(c);
+//        System.out.println(trackingTime);
+//    }
     @Override
     @Transactional
     public void traceCallback(TrackingYeeTraceDto trackingYeeTraceDto) {
@@ -260,6 +267,8 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         if (CollectionUtils.isEmpty(logisticsTrackingSections)) {
             return;
         }
+
+
         List<DelTrack> trackList = new ArrayList<>();
         logisticsTrackingSections.forEach(trackingSection -> {
             TrackingYeeTraceDto.LogisticsTrackingDto logisticsTracking = trackingSection.getLogisticsTracking();
@@ -277,10 +286,12 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                         String trackingTimeStr = trackingTimeDto.getUtcTime();
                         if (StringUtils.isNotBlank(trackingTimeStr)) {
                             // UTC Date
-                            trackingTime = DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeStr.replace("T", " ").replace("Z", ""));
+//                            trackingTime = DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeStr.replace("T", " ").replace("Z", ""));
+                            trackingTime=DateUtils.parseDate(trackingTimeStr);
                         }else {
                             // Normal Date
-                            trackingTime = DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeDto.getDateTime());
+//                            trackingTime = DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, trackingTimeDto.getDateTime());
+                            trackingTime=DateUtils.parseDate(trackingTimeDto.getDateTime());
                         }
                     }
 
