@@ -27,7 +27,7 @@ public class BasTransportConfigController extends BaseController {
     @PostMapping("/page")
     @ApiOperation(value = "查询", notes = "仓库列表 - 分页查询")
     public TableDataInfo<BasTransportConfig> page(@RequestBody BasTransportConfigDTO queryDTO) {
-        startPage();
+        startPage(queryDTO);
         List<BasTransportConfig> list = basTransportConfigService.selectList(queryDTO);
         return getDataTable(list);
     }
