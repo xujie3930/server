@@ -301,7 +301,13 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 //                            .eq(DelTrack::getTrackingTime, trackingTime)
                                     .eq(DelTrack::getNo, trackingItems.get(item).getNo())
                     );
-                    if (trackCount == 0) {
+                    if (trackCount != 0) {
+                        Map map=new HashMap();
+                        map.put("orderNo", trackingYeeTraceDto.getOrderNo());
+                        map.put("trackingNo", trackingYeeTraceDto.getTrackingNo());
+                        map.put("no", trackingItems.get(item).getNo());
+                        baseMapper.deletetrack(map);
+                    }
 
                         Map maps=new HashMap();
                         maps.put("carrierCode",trackingYeeTraceDto.getCarrierCode());
@@ -362,7 +368,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                             }
                         }
                         trackList.add(delTrack);
-                    }
+
                 }
             }
         });

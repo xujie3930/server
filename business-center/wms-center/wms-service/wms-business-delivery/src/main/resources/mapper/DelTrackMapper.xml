@@ -43,6 +43,9 @@
                 remark,
             id, create_by, update_by, version, tracking_no, carrier_code, shipment_id, order_no, tracking_status, no, description, tracking_time, action_code, display, country_code, country_name_en, country_name_cn, province, city, postcode, street1, street2, street3
         </sql>
+    <delete id="deletetrack" parameterType="java.util.Map">
+        DELETE   from del_track where order_no=#{map.orderNo} AND tracking_no=#{map.trackingNo} AND no=#{map.no}
+    </delete>
 
     <select id="getTrackAnalysis" resultType="com.szmsd.delivery.dto.TrackAnalysisDto">
         select

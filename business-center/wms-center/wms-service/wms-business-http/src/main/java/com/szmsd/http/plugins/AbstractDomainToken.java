@@ -38,10 +38,11 @@ public abstract class AbstractDomainToken implements DomainToken {
         }
         // 上锁，进行阻塞
         String lockKey = applicationName + ":DomainToken:getTokenValue:" + this.domainTokenValue.getDomainToken();
-        RLock lock = this.redissonClient.getLock(lockKey);
+        logger.info(">>>[获取Token]，2.获取lockKey:{}",lockKey);
+        //RLock lock = this.redissonClient.getLock(lockKey);
         try {
             // 锁超时60秒
-            if (lock.tryLock(60, TimeUnit.SECONDS)) {
+            //if (lock.tryLock(60, TimeUnit.SECONDS)) {
                 logger.info(">>>[获取Token]，3.获取到锁");
                 // 二次验证
                 accessToken = this.getAccessToken();
@@ -74,14 +75,14 @@ public abstract class AbstractDomainToken implements DomainToken {
                     this.setTokenValue(tokenValue);
                     return tokenValue.getAccessToken();
                 }
-            }
+           // }
         } catch (Exception e) {
             this.logger.error(">>>[获取Token]，8.获取Token失败，" + e.getMessage(), e);
             throw new CommonException("999", " Failed to get Token，" + e.getMessage());
         } finally {
-            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
+//            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//            }
         }
         throw new CommonException("999", "Failed to get Token");
     }

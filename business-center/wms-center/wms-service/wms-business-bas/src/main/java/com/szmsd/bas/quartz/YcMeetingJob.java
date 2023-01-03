@@ -48,6 +48,7 @@ public class YcMeetingJob extends QuartzJobBean {
                 basWarehouse.setAppToken(x.getAppToken());
                 basWarehouse.setAppKey(x.getAppKey());
                 basWarehouse.setWarehouseSource("YC");
+                basWarehouse.setStatus("1");
                 basWarehouseMapper.insert(basWarehouse);
             });
         });
