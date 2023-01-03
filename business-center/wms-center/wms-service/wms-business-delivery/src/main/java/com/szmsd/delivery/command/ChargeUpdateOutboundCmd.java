@@ -2,6 +2,11 @@ package com.szmsd.delivery.command;
 
 import com.alibaba.fastjson.JSON;
 import com.szmsd.common.core.command.BasicCommand;
+import com.szmsd.common.core.constant.Constants;
+import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.support.Context;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.delivery.domain.ChargeImport;
 import com.szmsd.delivery.domain.DelOutbound;
@@ -9,11 +14,15 @@ import com.szmsd.delivery.dto.ChargePricingOrderMsgDto;
 import com.szmsd.delivery.enums.ChargeImportStateEnum;
 import com.szmsd.delivery.mapper.ChargeImportMapper;
 import com.szmsd.delivery.mapper.DelOutboundMapper;
+import com.szmsd.finance.api.feign.ConvertUnitFeignService;
+import com.szmsd.finance.domain.FssConvertUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -36,6 +45,21 @@ public class ChargeUpdateOutboundCmd extends BasicCommand<List<String>> {
     protected List<String> doExecute() throws Exception {
 
         List<DelOutbound> delOutbounds = new ArrayList<>();
+        ConvertUnitFeignService convertUnitFeignService = Context.getBean(ConvertUnitFeignService.class);
+
+        R<List<FssConvertUnit>> convertUnitRs = convertUnitFeignService.findAll();
+
+        if(convertUnitRs == null || convertUnitRs.getCode() != Constants.SUCCESS){
+            throw new RuntimeException("无法获取单位换算关系基础信息");
+        }
+
+        List<FssConvertUnit> fssConvertUnitList = convertUnitRs.getData();
+
+        if(CollectionUtils.isEmpty(fssConvertUnitList)){
+            throw new CommonException("400", "ConvertUnit数据为空");
+        }
+
+        Map<String,FssConvertUnit> fssConvertUnitMap = fssConvertUnitList.stream().collect(Collectors.toMap(FssConvertUnit::getCalcUnit, v->v));
 
         for (ChargeImport chargeImport : chargeImportList) {
 
@@ -46,8 +70,16 @@ public class ChargeUpdateOutboundCmd extends BasicCommand<List<String>> {
             delOutbound.setWidth(chargeImport.getWidth().doubleValue());
             delOutbound.setSpecifications(chargeImport.getSpecifications());
             delOutbound.setHeight(chargeImport.getHeight().doubleValue());
-            delOutbound.setCalcWeight(chargeImport.getCalcWeight());
-            delOutbound.setCalcWeightUnit(chargeImport.getWeightUnit());
+
+            FssConvertUnit fssConvertUnit = fssConvertUnitMap.get(chargeImport.getWeightUnit());
+
+            if(fssConvertUnit != null){
+                BigDecimal convertValue = fssConvertUnit.getConvertValue();
+                BigDecimal packcalcWeight = BigDecimalUtil.setScale(chargeImport.getCalcWeight().multiply(convertValue));
+                delOutbound.setCalcWeight(packcalcWeight);
+                delOutbound.setCalcWeightUnit(fssConvertUnit.getConvertUnit());
+            }
+
             delOutbound.setSheetCode(chargeImport.getQuotationNo());
 
             delOutbounds.add(delOutbound);
