@@ -22,11 +22,14 @@
     product_name, create_by, create_by_name, create_time, update_by, update_by_name, 
     update_time, del_flag
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.szmsd.bas.dto.BasTransportConfigDTO" >
     select 
     <include refid="Base_Column_List" />
     from bas_transport_config
-    where id = #{id,jdbcType=INTEGER}
+    <where>
+    <if test="transportCode != null and transportCode != ''">AND transport_code = #{transportCode}</if>
+    <if test="productName != null and productName != ''">AND product_name = #{productName}</if>
+    </where>
   </select>
   <select id="selectListVO" resultType="com.szmsd.bas.domain.BasTransportConfig">
     select
