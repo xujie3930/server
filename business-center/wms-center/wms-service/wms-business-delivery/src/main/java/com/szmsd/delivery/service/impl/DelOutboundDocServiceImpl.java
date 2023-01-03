@@ -167,6 +167,8 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
                         stopWatch.start();
                         ApplicationContainer applicationContainer = new ApplicationContainer(delOutboundWrapperContext, BringVerifyEnum.BEGIN, BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.BEGIN);
                         applicationContainer.action();
+                        stopWatch.stop();
+                        logger.info(">>>>>[创建出库单{}]this.BringVerifyEnum(bringVerifyDto)耗时{}" + delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
                     }
 
                     List<DelOutbound> delOutbounds = this.delOutboundService.listByIds(ids);
