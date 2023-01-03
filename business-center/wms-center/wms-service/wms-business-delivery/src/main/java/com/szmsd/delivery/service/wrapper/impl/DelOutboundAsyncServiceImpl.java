@@ -393,6 +393,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                                     serialBill.setCountry(address.getCountry());
                                     serialBill.setCountryCode(address.getCountryCode());
                                     serialBill.setGrade(delOutbound.getGrade());
+                                    serialBill.setWeight(delOutbound.getWeight());
+                                    serialBill.setCalcWeight(delOutbound.getCalcWeight());
+                                    serialBill.setRefNo(delOutbound.getRefNo());
+                                    serialBill.setShipmentService(delOutbound.getShipmentService());
 
                                     serialBillInfoList.add(serialBill);
                                 }
@@ -472,6 +476,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             dto.setCountryCode(address.getCountryCode());
                             dto.setCountry(address.getCountry());
                             dto.setGrade(delOutbound.getGrade());
+                            dto.setWeight(delOutbound.getWeight());
+                            dto.setCalcWeight(delOutbound.getCalcWeight());
+                            dto.setRefNo(delOutbound.getRefNo());
+                            dto.setShipmentService(delOutbound.getShipmentService());
 
                             list.add(dto);
                             custPayDTO.setSerialBillInfoList(list);

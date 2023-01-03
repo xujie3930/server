@@ -37,6 +37,12 @@ public class AccountSerialBillDTO implements Serializable {
         Optional.ofNullable(no).filter(StringUtils::isNotBlank).ifPresent(x -> this.noList = StringToolkit.getCodeByArray(x));
     }
 
+    @ApiModelProperty(value = "refNo")
+    private String refNo;
+
+    @ApiModelProperty(value = "物流服务名称")
+    private String shipmentService;
+
     @ApiModelProperty(value = "单号")
     private List<String> noList;
 
@@ -214,5 +220,9 @@ public class AccountSerialBillDTO implements Serializable {
         this.country = details.getCountry();
         this.countryCode = details.getCountryCode();
         this.grade = details.getGrade();
+        this.refNo = details.getRefNo();
+        this.shipmentService = details.getShipmentService();
+        this.calcWeight = details.getCalcWeight();
+        this.weight = details.getWeight();
     }
 }

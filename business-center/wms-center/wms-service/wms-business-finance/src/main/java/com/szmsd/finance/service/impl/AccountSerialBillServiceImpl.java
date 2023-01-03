@@ -275,16 +275,16 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             value.setBusinessCategory(value.getChargeCategory());//性质列内容，同费用类别
             //单号不为空的时候
             if (StringUtils.isNotBlank(value.getNo())){
-                DelOutbound delOutbound=accountSerialBillMapper.selectDelOutbound(value.getNo());
-                if (delOutbound!=null) {
-                    if (delOutbound.getId() != null) {
-                        value.setRefNo(delOutbound.getRefNo());
-                        value.setShipmentService(delOutbound.getShipmentService());
-                        value.setWeight(delOutbound.getWeight());
-                        value.setCalcWeight(delOutbound.getCalcWeight());
-                        value.setSpecifications(delOutbound.getSpecifications());
-                    }
-                }
+//                DelOutbound delOutbound=accountSerialBillMapper.selectDelOutbound(value.getNo());
+//                if (delOutbound!=null) {
+//                    if (delOutbound.getId() != null) {
+//                        value.setRefNo(delOutbound.getRefNo());
+//                        value.setShipmentService(delOutbound.getShipmentService());
+//                        value.setWeight(delOutbound.getWeight());
+//                        value.setCalcWeight(delOutbound.getCalcWeight());
+//                        value.setSpecifications(delOutbound.getSpecifications());
+//                    }
+//                }
             }
 
             if(StringUtils.isEmpty(value.getAmazonLogisticsRouteId()) || value.getAmazonLogisticsRouteId().equals("null")){
