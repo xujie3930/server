@@ -131,7 +131,7 @@ public class YcMeetingInterface {
         Map map2= (Map) map1.get("ns1:callServiceResponse");
         String  response=  String.valueOf(map2.get("response"));
         Map map3 = JSON.parseObject(response, Map.class);
-        List<Map> list= (List<Map>) map3.get("data");
+//        List<Map> list= (List<Map>) map3.get("data");
 //        System.out.println(list);
         return map3;
     }

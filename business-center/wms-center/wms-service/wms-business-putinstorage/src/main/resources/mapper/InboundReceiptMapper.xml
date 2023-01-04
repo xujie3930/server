@@ -92,7 +92,8 @@
         t.total_declare_qty,
         t.total_put_qty,
         t.cus_code,
-        t.create_time
+        t.create_time,
+        t.yc_warehouse_no
     </sql>
 
     <sql id="Column_List_INFO_VO">
@@ -149,6 +150,12 @@
     </sql>
     <update id="updateInboundReceipt" parameterType="java.lang.String">
         UPDATE inbound_receipt SET `status`='2'  where  warehouse_no=#{warehouseNo}
+    </update>
+    <update id="upadateSkuSource" parameterType="com.szmsd.bas.domain.BaseProduct">
+        UPDATE base_product SET sku_source=#{skuSource} WHERE id=#{id}
+    </update>
+    <update id="upadateYcWarehouseNo" parameterType="com.szmsd.putinstorage.domain.InboundReceipt">
+        UPDATE inbound_receipt SET yc_warehouse_no=#{ycWarehouseNo} WHERE id=#{id}
     </update>
     <select id="selectListByCondiction" parameterType="com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO" resultType="com.szmsd.putinstorage.domain.vo.InboundReceiptVO">
         SELECT <include refid="Column_List_VO"/>

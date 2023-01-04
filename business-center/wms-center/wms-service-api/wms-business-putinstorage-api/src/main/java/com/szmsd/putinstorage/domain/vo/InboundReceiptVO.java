@@ -64,4 +64,8 @@ public class InboundReceiptVO {
 
     @ApiModelProperty(value = "数据来源")
     private String sourceType;
+
+    @ApiModelProperty(value = "易仓返回的入库单号")
+    private String ycWarehouseNo;
+
 }

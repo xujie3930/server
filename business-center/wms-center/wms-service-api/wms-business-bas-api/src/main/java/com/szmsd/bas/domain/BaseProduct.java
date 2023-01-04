@@ -267,4 +267,7 @@ public class BaseProduct extends BaseEntity {
     @ApiModelProperty(value = "自定义sku编码")
     private String customizeSkuCode;
 
+    @ApiModelProperty(value = "系统来源")
+    private String skuSource;
+
 }

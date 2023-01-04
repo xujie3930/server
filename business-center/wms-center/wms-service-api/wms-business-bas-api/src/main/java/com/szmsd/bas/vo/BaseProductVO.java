@@ -12,6 +12,10 @@ import java.util.List;
 
 @Data
 public class BaseProductVO {
+
+    @ApiModelProperty(value = "id")
+    private Long id;
+
     @ApiModelProperty(value = "客户（卖家）编码")
     @Excel(name = "客户（卖家）编码")
     private String sellerCode;
