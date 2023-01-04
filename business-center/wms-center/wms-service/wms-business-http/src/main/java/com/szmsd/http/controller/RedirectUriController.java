@@ -130,6 +130,27 @@ public class RedirectUriController {
         }
     }
 
+    @PostMapping(value = {"/token/setAccessToken"})
+    @ApiOperation(value = "HTTP回调接收接口 - #21", position = 210)
+    public R<Object> setAccessToken(@RequestParam(value = "key") String key,
+                                     @RequestParam(value = "accessToken") String accessToken) {
+
+        try {
+
+            this.logger.info("setAccessToken: {}", accessToken);
+            String accessTokenKey = RedirectUriUtil.wrapAccessTokenKey(key);
+            this.logger.info("setAccessToken: {}", accessTokenKey);
+            this.redisTemplate.opsForValue().set(key, accessToken);
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("accessTokenKey", key);
+            map.put("accessToken", accessToken);
+            return R.ok(map);
+        } catch (Exception e) {
+            return R.failed("Execution failed，error message：" + e.getMessage());
+        }
+    }
+
     @GetMapping(value = {"/token/info"})
     @ApiOperation(value = "HTTP回调接收接口 - #3", position = 300)
     @ApiImplicitParams({
