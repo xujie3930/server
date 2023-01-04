@@ -54,6 +54,8 @@ public interface BaseProductFeignService {
     @PostMapping(value = "/base/product/getSku")
     R<BaseProduct> getSku(@RequestBody BaseProduct baseProduct);
 
+
+
     /**
      * 批量查询SKU数值信息
      *

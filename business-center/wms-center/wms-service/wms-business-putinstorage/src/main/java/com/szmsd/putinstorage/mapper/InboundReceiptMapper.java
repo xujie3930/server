@@ -1,7 +1,7 @@
 package com.szmsd.putinstorage.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.szmsd.common.datascope.annotation.DataScope;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.putinstorage.domain.InboundReceipt;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
 import com.szmsd.putinstorage.domain.vo.InboundCountVO;
@@ -24,4 +24,8 @@ public interface InboundReceiptMapper extends BaseMapper<InboundReceipt> {
     InboundReceipt  selectwarehouseNo(@Param("warehouseNo") String warehouseNo);
 
     void  updateInboundReceipt(@Param("warehouseNo") String warehouseNo);
+
+    void  upadateSkuSource(BaseProduct data);
+
+    void  upadateYcWarehouseNo(InboundReceipt inboundReceipt);
 }
