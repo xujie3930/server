@@ -44,6 +44,9 @@ public final class PdfUtil {
                 }
             } else {
                 ByteArrayOutputStream byteArrayOutputStream = convertImgToPDF(source);
+                if(byteArrayOutputStream == null){
+                    continue;
+                }
                 ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
                 pdfMergerUtility.addSource(byteArrayInputStream);
                 mergeSize++;
@@ -81,6 +84,9 @@ public final class PdfUtil {
                 }
             } else {
                 ByteArrayOutputStream byteArrayOutputStream = convertImgToPDF(source);
+                if(byteArrayOutputStream == null){
+                    continue;
+                }
                 ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
                 pdfMergerUtility.addSource(byteArrayInputStream);
                 mergeSize++;
@@ -100,6 +106,9 @@ public final class PdfUtil {
         PDDocument document = new PDDocument();
         InputStream in = new FileInputStream(imagePath);
         BufferedImage bimg = ImageIO.read(in);
+        if(bimg == null){
+            return null;
+        }
         float width = bimg.getWidth();
         float height = bimg.getHeight();
         PDPage page = new PDPage(new PDRectangle(width, height));
