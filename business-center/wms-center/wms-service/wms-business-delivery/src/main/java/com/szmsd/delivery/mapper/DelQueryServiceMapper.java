@@ -26,7 +26,7 @@ public interface DelQueryServiceMapper extends BaseMapper<DelQueryService> {
 
     List<String>  selectsellerCodeus(@Param("username")String username);
 
-    List<DelOutbound>  selectDelOutbound();
+    List<DelOutbound>  selectDelOutbound(@Param("startTime")String startTime,@Param("endTime")String endTime);
 
     List<DelQueryService> selectListJobs(@Param("orderNo") String orderNo);
 
