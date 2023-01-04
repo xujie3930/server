@@ -1,5 +1,6 @@
 package com.szmsd.putinstorage.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -9,14 +10,18 @@ import com.google.common.collect.Lists;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
+import com.szmsd.bas.api.feign.BasWarehouseFeignService;
 import com.szmsd.bas.api.feign.BaseProductFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
+import com.szmsd.bas.domain.BasWarehouse;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.language.enums.LocalLanguageEnum;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.ObjectMapperUtils;
@@ -29,8 +34,10 @@ import com.szmsd.delivery.vo.DelOutboundAddResponse;
 import com.szmsd.delivery.vo.DelOutboundOperationVO;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.http.api.feign.HtpRmiFeignService;
+import com.szmsd.http.api.feign.YcMeetingFeignService;
 import com.szmsd.http.config.CkConfig;
 import com.szmsd.http.config.CkThreadPool;
+import com.szmsd.http.domain.YcAppParameter;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.enums.DomainEnum;
@@ -131,6 +138,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     private DelOutboundClientService delOutboundClientService;
     @Autowired
     private InboundReceiptDetailMapper inboundReceiptDetailMapper;
+    @Autowired
+    private BasWarehouseFeignService basWarehouseFeignService;
+
+    private String ycurl="http://pgl.yunwms.com/default/svc/web-service";
 
     /**
      * 入库单查询
@@ -268,7 +279,32 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         // 保存入库单明细
         List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS = createInboundReceiptDTO.getInboundReceiptDetails();
         inboundReceiptDetailDTOS.forEach(item -> item.setWarehouseNo(warehouseNo));
+
         iInboundReceiptDetailService.saveOrUpdate(inboundReceiptDetailDTOS, createInboundReceiptDTO.getReceiptDetailIds());
+
+        //是否易仓的仓库
+        BasWarehouse basWarehouse= basWarehouseFeignService.queryByWarehouseCode(inboundReceipt.getWarehouseCode()).getData();
+        if (basWarehouse.getWarehouseSource().equals("YC")){
+            //调用易仓服务
+            YcAppParameter ycAppParameter=new YcAppParameter();
+            ycAppParameter.setAppKey(basWarehouse.getAppKey());
+            ycAppParameter.setYcUrl(ycurl);
+            ycAppParameter.setAppToken(basWarehouse.getAppToken());
+            ycAppParameter.setService("createAsn");
+            JSONObject jsonObject=YcInboundJson(inboundReceipt,inboundReceiptDetailDTOS,basWarehouse);
+            ycAppParameter.setJsonObject(jsonObject);
+            YcMeetingFeignService ycMeetingFeignService= SpringUtils.getBean(YcMeetingFeignService.class);
+          R<Map>  r= ycMeetingFeignService.YcApiri(ycAppParameter);
+          Map mapsr=r.getData();
+           //回写易仓入库单号
+            if (mapsr.get("ask").equals("Success")){
+                String date=String.valueOf(mapsr.get("data"));
+                Map maps = mapStringToMap(date);
+                inboundReceipt.setYcWarehouseNo(String.valueOf(maps.get("receiving_code")));
+                baseMapper.upadateYcWarehouseNo(inboundReceipt);
+            }
+
+        }
 
         boolean isPackageTransfer = InboundReceiptEnum.OrderType.PACKAGE_TRANSFER.getValue().equals(createInboundReceiptDTO.getOrderType());
         // 判断自动审核
@@ -300,6 +336,73 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         return inboundReceiptInfoVO;
     }
 
+    private  Map<String, String> mapStringToMap(String str) {
+        str = str.substring(1, str.length() - 1);
+        String[] strs = str.split(",");
+        Map<String, String> map = new HashMap<String, String>();
+        for (String string : strs) {
+            String key = string.split("=")[0].trim();
+            String value = string.split("=")[1];
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    private JSONObject YcInboundJson(InboundReceipt inboundReceipt, List<InboundReceiptDetailDTO> inboundReceiptDetailDTOS,BasWarehouse basWarehouse) {
+        JSONObject jsonObject =new JSONObject();
+
+        jsonObject.put("reference_no",inboundReceipt.getWarehouseNo());
+        jsonObject.put("warehouse_code",inboundReceipt.getWarehouseCode());
+         List<Map> list=new ArrayList<>();
+        inboundReceiptDetailDTOS.forEach(x->{
+            BaseProduct baseProduct=new BaseProduct();
+            baseProduct.setCode(x.getSku());
+            R<BaseProduct> r= baseProductFeignService.getSku(baseProduct);
+            if (r.getData().getSkuSource()==null||!r.getData().getSkuSource().equals("YC")){
+                //调用易仓服务(创建sku)
+                YcAppParameter ycAppParameter=new YcAppParameter();
+                ycAppParameter.setAppKey(basWarehouse.getAppKey());
+                ycAppParameter.setAppToken(basWarehouse.getAppToken());
+                ycAppParameter.setYcUrl(ycurl);
+                ycAppParameter.setService("createProduct");
+                JSONObject jsonObject1=new JSONObject();
+                jsonObject1=createProductJson(r.getData());
+                ycAppParameter.setJsonObject(jsonObject1);
+                YcMeetingFeignService ycMeetingFeignService= SpringUtils.getBean(YcMeetingFeignService.class);
+                R<Map>  r1= ycMeetingFeignService.YcApiri(ycAppParameter);
+                if (r1.getData().get("ask").equals("Success")){
+                    //修改sku的系统来源
+                    r.getData().setSkuSource("YC");
+                    baseMapper.upadateSkuSource(r.getData());
+                }
+
+            }
+           Map map1=new HashMap();
+            map1.put("product_sku",x.getSku());
+            map1.put("quantity",x.getDeclareQty());
+            map1.put("box_no",x.getId());
+            list.add(map1);
+        });
+        jsonObject.put("items",list);
+        return  jsonObject;
+    }
+
+    private JSONObject createProductJson(BaseProduct baseProduct) {
+        JSONObject jsonObject=new JSONObject();
+        jsonObject.put("product_sku",baseProduct.getCode());
+        jsonObject.put("product_title",baseProduct.getProductName());
+        jsonObject.put("product_weight",baseProduct.getWeight());
+        jsonObject.put("product_length",baseProduct.getLength());
+        jsonObject.put("product_width",baseProduct.getWidth());
+        jsonObject.put("product_height",baseProduct.getHeight());
+        jsonObject.put("product_declared_value",baseProduct.getDeclaredValue());
+        jsonObject.put("product_declared_name",baseProduct.getProductName());
+        jsonObject.put("product_declared_name_zh",baseProduct.getProductNameChinese());
+        jsonObject.put("hs_code",baseProduct.getHsCode());
+
+       return jsonObject;
+    }
+
     /**
      * 校验快递单号重复
      *
@@ -329,6 +432,9 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
     @Transactional(rollbackFor = Exception.class)
     public int updateTrackingNo(UpdateTrackingNoRequest updateTrackingNoRequest) {
 
+
+        
+
         Enumeration<String> headerNames = httpServletRequest.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String name = headerNames.nextElement();
@@ -352,6 +458,26 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
         this.checkDeliveryNoRepeat(inboundReceipt.getId(), warehouseNo, deliveryNoList);
         AssertUtil.isTrue(!inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.CANCELLED.getValue()), "入库单已取消!");
         AssertUtil.isTrue(!inboundReceipt.getStatus().equals(InboundReceiptEnum.InboundReceiptStatus.COMPLETED.getValue()), "入库单已完成!");
+
+        //是否易仓的仓库
+        BasWarehouse basWarehouse= basWarehouseFeignService.queryByWarehouseCode(inboundReceipt.getWarehouseCode()).getData();
+        if (basWarehouse.getWarehouseSource().equals("YC")){
+            //调用易仓服务
+            YcAppParameter ycAppParameter=new YcAppParameter();
+            ycAppParameter.setAppKey(basWarehouse.getAppKey());
+            ycAppParameter.setAppToken(basWarehouse.getAppToken());
+            ycAppParameter.setYcUrl(ycurl);
+            ycAppParameter.setService("updateAsnTracking");
+            JSONObject jsonObject=new JSONObject();
+            jsonObject.put("receiving_code",inboundReceipt.getYcWarehouseNo());
+            jsonObject.put("tracking_number",updateTrackingNoRequest.getDeliveryNo());
+            ycAppParameter.setJsonObject(jsonObject);
+            YcMeetingFeignService ycMeetingFeignService= SpringUtils.getBean(YcMeetingFeignService.class);
+            R<Map>  r= ycMeetingFeignService.YcApiri(ycAppParameter);
+
+
+        }
+
         int update = baseMapper.update(new InboundReceipt(), Wrappers.<InboundReceipt>lambdaUpdate()
                 .eq(InboundReceipt::getWarehouseNo, warehouseNo)
                 .set(InboundReceipt::getDeliveryNo, updateTrackingNoRequest.getDeliveryNo()));
@@ -407,6 +533,24 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         InboundReceiptVO inboundReceiptVO = this.selectByWarehouseNo(warehouseNo);
         AssertUtil.notNull(inboundReceiptVO, "入库单[" + warehouseNo + "]不存在");
+
+        //是否易仓的仓库
+        BasWarehouse basWarehouse= basWarehouseFeignService.queryByWarehouseCode(inboundReceiptVO.getWarehouseCode()).getData();
+        if (basWarehouse.getWarehouseSource().equals("YC")){
+            //调用易仓服务
+            YcAppParameter ycAppParameter=new YcAppParameter();
+            ycAppParameter.setAppKey(basWarehouse.getAppKey());
+            ycAppParameter.setYcUrl(ycurl);
+            ycAppParameter.setAppToken(basWarehouse.getAppToken());
+            ycAppParameter.setService("cancelAsn");
+            JSONObject jsonObject=new JSONObject();
+            jsonObject.put("receiving_code",inboundReceiptVO.getYcWarehouseNo());
+            ycAppParameter.setJsonObject(jsonObject);
+            YcMeetingFeignService ycMeetingFeignService= SpringUtils.getBean(YcMeetingFeignService.class);
+            R<Map>  r= ycMeetingFeignService.YcApiri(ycAppParameter);
+             Map maps=r.getData();
+
+        }
 
         /** 审核通过、处理中、已完成3个状态需要调第三方接口 **/
         String status = inboundReceiptVO.getStatus();
