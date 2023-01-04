@@ -106,4 +106,8 @@ public class InboundReceipt extends BaseEntity {
 
     @ApiModelProperty(value = "批次号")
     private String batchNumber;
+
+    @ApiModelProperty(value = "易仓返回的入库单号")
+    private String ycWarehouseNo;
+
 }
