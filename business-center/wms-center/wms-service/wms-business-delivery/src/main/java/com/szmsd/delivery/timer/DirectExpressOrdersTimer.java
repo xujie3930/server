@@ -31,9 +31,9 @@ public class DirectExpressOrdersTimer {
     /**
      *
      * <p/>
-     * 30分钟执行一次
+     * 每天12点执行
      */
-    @Scheduled(cron = "0 */30 * * * ?")
+    @Scheduled(cron = "0 0 12 * * * ?")
     @Async
     public void doDirectExpressOrders() {
 
