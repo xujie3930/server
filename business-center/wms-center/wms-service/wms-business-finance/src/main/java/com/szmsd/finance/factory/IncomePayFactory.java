@@ -36,9 +36,6 @@ public class IncomePayFactory extends AbstractPayFactory {
     @Resource
     private IAccountSerialBillService accountSerialBillService;
 
-    private ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap<>();
-
-
     @Override
     @Transactional
     public Boolean updateBalance(final CustPayDTO dto) {
@@ -54,23 +51,6 @@ public class IncomePayFactory extends AbstractPayFactory {
                     return false;
                 }
 
-                String mKey = key + oldBalance.getVersion();
-
-                if(concurrentHashMap.get(mKey) != null){
-                    concurrentHashMap.remove(mKey);
-
-                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-                        log.info("释放redis锁 {}",dto.getNo());
-                        lock.unlock();
-                    }
-
-                    Thread.sleep(100);
-
-                    log.info("balance 重新执行 {}",mKey);
-                    return updateBalance(dto);
-                }
-
-                // BalanceDTO result = calculateBalance(oldBalance, changeAmount);
                 oldBalance.rechargeAndSetAmount(changeAmount);
                 super.addForCreditBillAsync(oldBalance.getCreditInfoBO().getRepaymentAmount(), dto.getCusCode(), dto.getCurrencyCode());
                 setBalance(dto.getCusCode(), dto.getCurrencyCode(), oldBalance, true);
@@ -78,9 +58,6 @@ public class IncomePayFactory extends AbstractPayFactory {
                 setSerialBillLog(dto);
                 recordDetailLogAsync(dto, oldBalance);
 
-                concurrentHashMap.put(mKey,oldBalance.getVersion());
-
-                //iAccountBalanceService.reloadCreditTime(Arrays.asList(dto.getCusCode()), dto.getCurrencyCode());
                 return true;
             } else {
                 log.error("充值操作超时,请稍候重试{}", JSONObject.toJSONString(dto));

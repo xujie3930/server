@@ -209,6 +209,9 @@ public class AccountBalanceController extends FssBaseController {
         try {
             if (lock.tryLock(time,leaseTime, TimeUnit.SECONDS)){
                 log.info("余额汇率转换-获取redis锁 {}成功",key);
+                dto.setNature("币别转换");
+                dto.setChargeCategoryChange("币别转换");
+                dto.setBusinessType("币别转换");
                 return accountBalanceService.balanceExchange(dto);
             }else {
                 log.info("余额汇率转换-获取redis锁 {}失败",key);
