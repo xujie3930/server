@@ -8,13 +8,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
-@ConditionalOnClass(WebMvcConfigurer.class)
-@Configuration
-public class PutinstorageliveryConfig implements WebMvcConfigurer {
-
-    @Override
-    public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
-        resolvers.add(0,new PutinstorageMvcExceptionResolver());
-    }
-
-}
+//@ConditionalOnClass(WebMvcConfigurer.class)
+//@Configuration
+//public class PutinstorageliveryConfig implements WebMvcConfigurer {
+//
+//    @Override
+//    public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
+//        resolvers.add(0,new PutinstorageMvcExceptionResolver());
+//    }
+//
+//}
