@@ -1,11 +1,14 @@
 package com.szmsd.http.plugins;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.http.config.DomainTokenValue;
+import com.szmsd.http.domain.HtpTyToken;
+import com.szmsd.http.mapper.HtpTyTokenMapper;
 import com.szmsd.http.utils.RedirectUriUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractDomainToken implements DomainToken {
@@ -26,6 +30,9 @@ public abstract class AbstractDomainToken implements DomainToken {
     protected String applicationName;
     @Autowired
     protected RedissonClient redissonClient;
+
+    @Autowired
+    private HtpTyTokenMapper htpTyTokenMapper;
 
     @Override
     public String getTokenValue() {
@@ -85,6 +92,54 @@ public abstract class AbstractDomainToken implements DomainToken {
 //            }
         }
         throw new CommonException("999", "Failed to get Token");
+    }
+
+    @Override
+    public String getLocalTokenValue() {
+
+        logger.info(">>>[获取getLocalTokenValue]，1.开始获取Token");
+        // 获取access token信息
+        String accessToken = this.getAccessToken();
+        logger.info(">>>[获取getLocalTokenValue]，2.获取Token值：{}", accessToken);
+        if (StringUtils.isNotEmpty(accessToken)) {
+            return accessToken;
+        }
+
+        List<HtpTyToken> tyTokenList = htpTyTokenMapper.selectList(Wrappers.<HtpTyToken>query().lambda());
+        logger.info(">>>[获取getLocalTokenValue]，3.获取数据库Token值：{}", JSON.toJSONString(tyTokenList));
+        if(CollectionUtils.isEmpty(tyTokenList)){
+            throw new RuntimeException("数据库htp_ty_token 表未配置token信息");
+        }
+
+        if(tyTokenList.size() > 1){
+            throw new RuntimeException("数据库htp_ty_token 表只允许配置一条最新accessToken");
+        }
+
+        HtpTyToken htpTyToken = tyTokenList.get(0);
+
+        String localaccessToken = htpTyToken.getAccessToken();
+        String localRefreshToken = htpTyToken.getRefreshToken();
+
+        if(StringUtils.isNotEmpty(localRefreshToken)){
+
+            TokenValue tokenValue = this.internalGetTokenValueByRefreshToken(localRefreshToken);
+            logger.info(">>>[获取getLocalTokenValue]，4.根据RefreshToken获取Token信息：{}", JSON.toJSONString(tokenValue));
+            if (null != tokenValue) {
+                this.setTokenValue(tokenValue);
+                String resultAccessToken = tokenValue.getAccessToken();
+
+                htpTyTokenMapper.delete(Wrappers.<HtpTyToken>query().lambda());
+
+                HtpTyToken tyToken = new HtpTyToken();
+                tyToken.setAccessToken(resultAccessToken);
+                tyToken.setRefreshToken(tokenValue.getRefreshToken());
+                htpTyTokenMapper.insert(tyToken);
+
+                return resultAccessToken;
+            }
+        }
+
+        throw new CommonException("999", "Failed to get localTokenValue");
     }
 
     private void setTokenValue(TokenValue tokenValue) {
