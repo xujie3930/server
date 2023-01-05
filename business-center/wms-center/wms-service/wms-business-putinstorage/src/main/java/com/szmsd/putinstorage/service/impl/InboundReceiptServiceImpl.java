@@ -284,7 +284,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         //是否易仓的仓库
         BasWarehouse basWarehouse= basWarehouseFeignService.queryByWarehouseCode(inboundReceipt.getWarehouseCode()).getData();
-        if (basWarehouse.getWarehouseSource().equals("YC")){
+        if (basWarehouse.getWarehouseSource()!=null&&basWarehouse.getWarehouseSource().equals("YC")){
             //调用易仓服务
             YcAppParameter ycAppParameter=new YcAppParameter();
             ycAppParameter.setAppKey(basWarehouse.getAppKey());
@@ -461,7 +461,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         //是否易仓的仓库
         BasWarehouse basWarehouse= basWarehouseFeignService.queryByWarehouseCode(inboundReceipt.getWarehouseCode()).getData();
-        if (basWarehouse.getWarehouseSource().equals("YC")){
+        if (basWarehouse.getWarehouseSource()!=null&&basWarehouse.getWarehouseSource().equals("YC")){
             //调用易仓服务
             YcAppParameter ycAppParameter=new YcAppParameter();
             ycAppParameter.setAppKey(basWarehouse.getAppKey());
@@ -536,7 +536,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         //是否易仓的仓库
         BasWarehouse basWarehouse= basWarehouseFeignService.queryByWarehouseCode(inboundReceiptVO.getWarehouseCode()).getData();
-        if (basWarehouse.getWarehouseSource().equals("YC")){
+        if (basWarehouse.getWarehouseSource()!=null&&basWarehouse.getWarehouseSource().equals("YC")){
             //调用易仓服务
             YcAppParameter ycAppParameter=new YcAppParameter();
             ycAppParameter.setAppKey(basWarehouse.getAppKey());
