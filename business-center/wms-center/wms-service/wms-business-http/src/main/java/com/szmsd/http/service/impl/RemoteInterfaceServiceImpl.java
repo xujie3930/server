@@ -106,7 +106,7 @@ public class RemoteInterfaceServiceImpl implements RemoteInterfaceService {
                     abstractDomainToken.setDomainTokenValue(domainTokenValue);
                 }
                 String tokenName = domainToken.getTokenName();
-                String tokenValue = domainToken.getTokenValue();
+                String tokenValue = domainToken.getLocalTokenValue();
                 if (StringUtils.isNotEmpty(tokenValue)) {
                     requestHeaders.put(tokenName, tokenValue);
                 }
