@@ -284,6 +284,7 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
 
         //是否易仓的仓库
         BasWarehouse basWarehouse= basWarehouseFeignService.queryByWarehouseCode(inboundReceipt.getWarehouseCode()).getData();
+        log.info("是否易仓的仓库返回数据：",basWarehouse);
         if (basWarehouse.getWarehouseSource()!=null&&basWarehouse.getWarehouseSource().equals("YC")){
             //调用易仓服务
             YcAppParameter ycAppParameter=new YcAppParameter();
