@@ -448,6 +448,9 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             dto.setCusCode(thirdRechargeRecord.getCusCode());
             dto.setRemark("The service charge is: ".concat(thirdRechargeRecord.getTransactionAmount().toString().concat(thirdRechargeRecord.getTransactionCurrency())));
             dto.setNo(thirdRechargeRecord.getRechargeNo());
+            dto.setNature("充值");
+            dto.setBusinessType("充值成功");
+            dto.setChargeCategoryChange("人工充值");
             return onlineIncome(dto);
         }
         return R.ok();

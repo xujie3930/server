@@ -122,6 +122,9 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
             custPayDTO.setCurrencyName(preRecharge.getCurrencyName().trim());
             custPayDTO.setOrderTime(preRecharge.getRemittanceTime());
             custPayDTO.setNo(preRecharge.getSerialNo());
+            custPayDTO.setNature("充值");
+            custPayDTO.setBusinessType("充值成功");
+            custPayDTO.setChargeCategoryChange("线上充值");
             R r = accountBalanceService.offlineIncome(custPayDTO);
             if (Constants.SUCCESS != r.getCode()) {
                 return r;
@@ -156,6 +159,7 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
             custPayDTO.setNo(dto.getSerialNo());
             custPayDTO.setNature("充值");
             custPayDTO.setBusinessType("线上充值");
+            custPayDTO.setChargeCategoryChange("线上充值");
             custPayDTO.setPayMethod(BillEnum.PayMethod.ONLINE_INCOME);
             custPayDTO.setPayType(BillEnum.PayType.INCOME);
             String note = this.generatorNote(domain);

@@ -104,6 +104,9 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
             custPayDTO.setCurrencyName(preWithdraw.getCurrencyName());
             custPayDTO.setNo(preWithdraw.getSerialNo());
             custPayDTO.setOrderTime(preWithdraw.getCreateTime());
+            custPayDTO.setNature("提现");
+            custPayDTO.setBusinessType("提现");
+            custPayDTO.setChargeCategoryChange("提现");
             accountBalanceService.withdraw(custPayDTO);
         }
         preWithdraw.setVerifyRemark(dto.getVerifyRemark());
