@@ -1,23 +1,28 @@
 package com.szmsd.delivery.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
 import com.szmsd.bas.api.service.BaseProductClientService;
 import com.szmsd.bas.domain.BasWarehouse;
+import com.szmsd.bas.domain.BaseProduct;
 import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.domain.BasProductService;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.*;
+import com.szmsd.delivery.dto.DelCk1OutboundDto;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
-import com.szmsd.delivery.enums.DelOutboundStateEnum;
-import com.szmsd.delivery.service.IDelOutboundDocService;
-import com.szmsd.delivery.service.IDelOutboundService;
+import com.szmsd.delivery.enums.*;
+import com.szmsd.delivery.event.DelCk1RequestLogEvent;
+import com.szmsd.delivery.event.EventUtil;
+import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.wrapper.ApplicationContainer;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
@@ -28,8 +33,11 @@ import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.Address;
 import com.szmsd.http.dto.CountryInfo;
 import com.szmsd.http.dto.PricedProductInServiceCriteria;
-import com.szmsd.http.dto.ShipmentOrderResult;
+import com.szmsd.http.util.Ck1DomainPluginUtil;
+import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.http.vo.PricedProduct;
+import com.szmsd.pack.api.feign.PackageDeliveryConditionsFeignService;
+import com.szmsd.pack.domain.PackageDeliveryConditions;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -67,6 +75,17 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
     private BaseProductClientService baseProductClientService;
     @Resource
     private ChargeFeignService chargeFeignService;
+
+    @Autowired
+    private IDelOutboundCompletedService delOutboundCompletedService;
+    @Autowired
+    private IDelOutboundRetryLabelService delOutboundRetryLabelService;
+    @Autowired
+    private IDelTrackService delTrackService;
+    @SuppressWarnings({"all"})
+    @Autowired
+    private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
+
     private List<DelOutboundAddResponse> addResponseList(List<DelOutboundDto> dtoList) {
         List<DelOutboundAddResponse> result = new ArrayList<>();
         int index = 1;
@@ -163,33 +182,142 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
 
                 if(syncTrackingNoState == 1){
 
-                    for(DelOutbound delOutbound : delOutboundList) {
-                        DelOutboundWrapperContext delOutboundWrapperContext = delOutboundBringVerifyService.initContext(delOutbound);
-                        stopWatch.start();
-                        ApplicationContainer applicationContainer = new ApplicationContainer(delOutboundWrapperContext, BringVerifyEnum.BEGIN, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
-                        applicationContainer.action();
+                    try {
 
-                        DelOutbound upd = new DelOutbound();
-                        upd.setId(delOutbound.getId());
-                        upd.setState(DelOutboundStateEnum.DELIVERED.getCode());
-                        delOutboundService.updateById(upd);
+                        for(DelOutbound delOutbound : delOutboundList) {
+                            DelOutboundWrapperContext delOutboundWrapperContext = delOutboundBringVerifyService.initContext(delOutbound);
+                            stopWatch.start();
+                            ApplicationContainer applicationContainer = new ApplicationContainer(delOutboundWrapperContext, BringVerifyEnum.BEGIN, BringVerifyEnum.END, BringVerifyEnum.BEGIN);
+                            applicationContainer.action();
 
-                        stopWatch.stop();
-                        logger.info(">>>>>[创建出库单{}]this.BringVerifyEnum(bringVerifyDto)耗时{}" + delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
-                    }
+                            DelOutbound upd = new DelOutbound();
+                            upd.setId(delOutbound.getId());
+                            upd.setState(DelOutboundStateEnum.DELIVERED.getCode());
+                            delOutboundService.updateById(upd);
 
-                    List<DelOutbound> delOutbounds = this.delOutboundService.listByIds(ids);
+                            // 提审成功，增加CK1数据
+                            if (DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
+                                    || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())) {
+                                DelCk1OutboundDto ck1OutboundDto = new DelCk1OutboundDto();
+                                ck1OutboundDto.setWarehouseId(Ck1DomainPluginUtil.wrapper(delOutbound.getWarehouseCode()));
+                                DelCk1OutboundDto.PackageDTO packageDTO = new DelCk1OutboundDto.PackageDTO();
+                                packageDTO.setPackageId(delOutbound.getOrderNo());
+                                // packageDTO.setServiceCode(delOutbound.getShipmentRule());
+                                packageDTO.setServiceCode("DMTCK");
+                                DelCk1OutboundDto.PackageDTO.ShipToAddressDTO shipToAddressDTO = new DelCk1OutboundDto.PackageDTO.ShipToAddressDTO();
+                                DelOutboundAddress outboundAddress = delOutboundWrapperContext.getAddress();
+                                if(outboundAddress != null) {
+                                    shipToAddressDTO.setCountry(outboundAddress.getCountry());
+                                    shipToAddressDTO.setProvince(outboundAddress.getStateOrProvince());
+                                    shipToAddressDTO.setCity(outboundAddress.getCity());
+                                    shipToAddressDTO.setStreet1(outboundAddress.getStreet1());
+                                    shipToAddressDTO.setStreet2(outboundAddress.getStreet2());
+                                    shipToAddressDTO.setPostcode(outboundAddress.getPostCode());
+                                    shipToAddressDTO.setContact(outboundAddress.getConsignee());
+                                    shipToAddressDTO.setPhone(outboundAddress.getPhoneNo());
+                                    shipToAddressDTO.setEmail(outboundAddress.getEmail());
+                                }
+                                packageDTO.setShipToAddress(shipToAddressDTO);
+                                List<DelCk1OutboundDto.PackageDTO.SkusDTO> skusDTOList = new ArrayList<>();
+                                List<DelOutboundDetail> detailList = delOutboundWrapperContext.getDetailList();
+                                List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
+                                Map<String, BaseProduct> productMap = null;
+                                if (CollectionUtils.isNotEmpty(productList)) {
+                                    productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+                                }
+                                for (DelOutboundDetail outboundDetail : detailList) {
+                                    DelCk1OutboundDto.PackageDTO.SkusDTO skusDTO = new DelCk1OutboundDto.PackageDTO.SkusDTO();
+                                    String sku = outboundDetail.getSku();
+                                    // String inventoryCode = CkConfig.genCk1SkuInventoryCode(delOutbound.getSellerCode(), delOutbound.getWarehouseCode(), sku);
+                                    // skusDTO.setSku(inventoryCode);
+                                    skusDTO.setSku(sku);
+                                    skusDTO.setQuantity(outboundDetail.getQty());
+                                    if (null != productMap && null != productMap.get(sku)) {
+                                        BaseProduct baseProduct = productMap.get(sku);
+                                        skusDTO.setProductName(baseProduct.getProductName());
+                                        skusDTO.setPrice(baseProduct.getDeclaredValue());
+                                        skusDTO.setPlatformItemId("" + baseProduct.getId());
+                                    } else {
+                                        skusDTO.setProductName(outboundDetail.getProductName());
+                                        skusDTO.setPrice(outboundDetail.getDeclaredValue());
+                                    }
+                                    skusDTO.setHsCode(outboundDetail.getHsCode());
+                                    skusDTOList.add(skusDTO);
+                                }
+                                packageDTO.setSkus(skusDTOList);
+                                ck1OutboundDto.setPackage(packageDTO);
+                                DelCk1RequestLog ck1RequestLog = new DelCk1RequestLog();
+                                Map<String, String> headers = new HashMap<>();
+                                headers.put(DomainInterceptorUtil.KEYWORD, delOutbound.getSellerCode());
+                                ck1RequestLog.setRemark(JSON.toJSONString(headers));
+                                ck1RequestLog.setOrderNo(delOutbound.getOrderNo());
+                                ck1RequestLog.setRequestBody(JSON.toJSONString(ck1OutboundDto));
+                                ck1RequestLog.setType(DelCk1RequestLogConstant.Type.create.name());
+                                EventUtil.publishEvent(new DelCk1RequestLogEvent(ck1RequestLog));
+                            }
+                            if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                                // 增加出库单已取消记录，异步处理，定时任务
+                                this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
+                            }
 
-                    Map<String,DelOutbound> delOutboundMap1 = delOutbounds.stream().collect(Collectors.toMap(DelOutbound::getOrderNo,v->v));
+                            String productCode = delOutbound.getShipmentRule();
+                            String prcProductCode = delOutboundWrapperContext.getPrcProductCode();
+                            if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(prcProductCode)) {
+                                productCode = prcProductCode;
+                            }
 
-                    for(DelOutboundAddResponse response : responses){
+                            boolean bool = false;
+                            // 查询发货条件
+                            if (StringUtils.isNotEmpty(delOutbound.getWarehouseCode())
+                                    && StringUtils.isNotEmpty(productCode)) {
+                                PackageDeliveryConditions packageDeliveryConditions = new PackageDeliveryConditions();
+                                packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
+                                packageDeliveryConditions.setProductCode(productCode);
+                                R<PackageDeliveryConditions> packageDeliveryConditionsR = this.packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
+                                logger.info("订单号{}查询发货条件接口成功{}，{}, 返回json:{}", delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), delOutbound.getShipmentService(),
+                                        JSONUtil.toJsonStr(packageDeliveryConditionsR));
+                                PackageDeliveryConditions packageDeliveryConditionsRData = null;
+                                if (null != packageDeliveryConditionsR && Constants.SUCCESS == packageDeliveryConditionsR.getCode()) {
+                                    packageDeliveryConditionsRData = packageDeliveryConditionsR.getData();
+                                }
+                                if (null != packageDeliveryConditionsRData && "AfterMeasured".equals(packageDeliveryConditionsRData.getCommandNodeCode())) {
+                                    //出库测量后接收发货指令 就不调用标签接口
+                                    bool = true;
+                                }
+                            }else{
+                                logger.info("订单号{}查询发货条件失败{}，{}", delOutbound.getOrderNo(), delOutbound.getWarehouseCode(), delOutbound.getShipmentService());
+                            }
+                            if(!bool){
+                                // 提交一个获取标签的任务
+                                delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), "pushLabel", "bringVerify");
+                            }
 
-                        String orderNo = response.getOrderNo();
-                        DelOutbound delOutbound = delOutboundMap1.get(orderNo);
+                            delTrackService.addData(new DelTrack()
+                                    .setOrderNo(delOutbound.getOrderNo())
+                                    .setTrackingNo(delOutbound.getTrackingNo())
+                                    .setTrackingStatus("Todo")
+                                    .setDescription("DMF, Parcel Infomation Received"));
+                            logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
 
-                        if(delOutbound!= null){
-                            response.setTrackingNo(delOutbound.getTrackingNo());
+                            stopWatch.stop();
+                            logger.info(">>>>>[创建出库单{}]this.BringVerifyEnum(bringVerifyDto)耗时{}" + delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());
                         }
+
+                        List<DelOutbound> delOutbounds = this.delOutboundService.listByIds(ids);
+
+                        Map<String,DelOutbound> delOutboundMap1 = delOutbounds.stream().collect(Collectors.toMap(DelOutbound::getOrderNo,v->v));
+
+                        for(DelOutboundAddResponse response : responses){
+
+                            String orderNo = response.getOrderNo();
+                            DelOutbound delOutbound = delOutboundMap1.get(orderNo);
+
+                            if(delOutbound!= null){
+                                response.setTrackingNo(delOutbound.getTrackingNo());
+                            }
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
                 }
             }
