@@ -2792,6 +2792,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public void doDirectExpressOrders() {
 
+        LambdaUpdateWrapper<DelOutbound> update = Wrappers.lambdaUpdate();
+        update.set(DelOutbound::getThridPartStatus, 0)
+                .eq(DelOutbound::getState, DelOutboundStateEnum.DELIVERED.getCode())
+                .eq(DelOutbound::getThridPartStatus,1);
+        int upda = baseMapper.update(null,update);
+
+        logger.info("doDirectExpressOrders 更新条数：{}",upda);
+
         Integer totalRecord = baseMapper.selectCount(Wrappers.<DelOutbound>query().lambda()
                         .eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode())
                 .eq(DelOutbound::getThridPartStatus,0)
