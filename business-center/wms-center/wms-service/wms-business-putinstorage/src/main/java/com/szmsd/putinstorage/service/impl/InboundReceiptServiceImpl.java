@@ -373,6 +373,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 if (r1.getData().get("ask").equals("Success")){
                     //修改sku的系统来源
                     r.getData().setSkuSource("YC");
+                    r.getData().setAppKey(basWarehouse.getAppKey());
+                    r.getData().setAppToken(basWarehouse.getAppToken());
                     baseMapper.upadateSkuSource(r.getData());
                 }
 

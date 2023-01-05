@@ -152,7 +152,7 @@
         UPDATE inbound_receipt SET `status`='2'  where  warehouse_no=#{warehouseNo}
     </update>
     <update id="upadateSkuSource" parameterType="com.szmsd.bas.domain.BaseProduct">
-        UPDATE base_product SET sku_source=#{skuSource} WHERE id=#{id}
+        UPDATE base_product SET sku_source=#{skuSource},app_token=#{appToken},app_key=#{appKey} WHERE id=#{id}
     </update>
     <update id="upadateYcWarehouseNo" parameterType="com.szmsd.putinstorage.domain.InboundReceipt">
         UPDATE inbound_receipt SET yc_warehouse_no=#{ycWarehouseNo} WHERE id=#{id}
