@@ -294,8 +294,10 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             JSONObject jsonObject=YcInboundJson(inboundReceipt,inboundReceiptDetailDTOS,basWarehouse);
             ycAppParameter.setJsonObject(jsonObject);
             YcMeetingFeignService ycMeetingFeignService= SpringUtils.getBean(YcMeetingFeignService.class);
+            log.info("创建入库单数据：",ycAppParameter);
           R<Map>  r= ycMeetingFeignService.YcApiri(ycAppParameter);
           Map mapsr=r.getData();
+            log.info("创建入库单数据返回数据：",r.getData());
            //回写易仓入库单号
             if (mapsr.get("ask").equals("Success")){
                 String date=String.valueOf(mapsr.get("data"));
