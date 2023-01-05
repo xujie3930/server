@@ -3,6 +3,7 @@ package com.szmsd.chargerules.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.chargerules.domain.BasSpecialOperation;
@@ -25,6 +26,8 @@ import com.szmsd.common.core.exception.com.BaseException;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.dto.AccountSerialBillDTO;
 import com.szmsd.finance.dto.CustPayDTO;
 import com.szmsd.finance.enums.BillEnum;
@@ -57,6 +60,9 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
 
     @Resource
     private IPayService payService;
+
+    @Resource
+    private DelOutboundFeignService delOutboundFeignService;
 
     @Override
     public void add(BasSpecialOperationRequestDTO basSpecialOperationRequestDTO) {
@@ -154,9 +160,19 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
      */
     private void charge(BasSpecialOperation basSpecialOperation, String customCode) {
         SpecialOperation specialOperation = specialOperationService.selectOne(basSpecialOperation);
+
         if (specialOperation == null) {
             throw new CommonException("999", ErrorMessageEnum.OPERATION_TYPE_NOT_FOUND.getMessage());
         }
+
+        R<DelOutboundVO> delOutboundVOR = delOutboundFeignService.getStatusByOrderNo(basSpecialOperation.getOrderNo());
+
+        if(delOutboundVOR == null || delOutboundVOR.getCode() != 200){
+            throw new CommonException("999","无法获取单据信息");
+        }
+
+        DelOutboundVO delOutboundVO = delOutboundVOR.getData();
+
         if(SpecialOperationStatusEnum.PASS.getStatus().equals(basSpecialOperation.getStatus())) {
             BigDecimal baseAmount = payService.calculate(specialOperation.getFirstPrice(),
                     specialOperation.getNextPrice(), basSpecialOperation.getQty().longValue());
@@ -164,7 +180,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
 
             //调用扣费接口扣费
             ChargeLog chargeLog = new ChargeLog(basSpecialOperation.getOrderNo(), basSpecialOperation.getOperationType(), basSpecialOperation.getWarehouseCode(),basSpecialOperation.getQty().longValue());
-            CustPayDTO custPayDTO = setCustPayDto(customCode,amount,basSpecialOperation,specialOperation);
+            CustPayDTO custPayDTO = setCustPayDto(customCode,amount,basSpecialOperation,specialOperation,delOutboundVO);
             R r = payService.pay(custPayDTO, chargeLog);
             if (r.getCode() != 200) {
                 log.error("pay failed: {} {}", r.getData(), r.getMsg());
@@ -187,7 +203,7 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
      * @param basSpecialOperation basSpecialOperation
      * @return CustPayDTO
      */
-    private CustPayDTO setCustPayDto(String customCode, BigDecimal amount, BasSpecialOperation basSpecialOperation,SpecialOperation specialOperation) {
+    private CustPayDTO setCustPayDto(String customCode, BigDecimal amount, BasSpecialOperation basSpecialOperation,SpecialOperation specialOperation,DelOutboundVO delOutboundVO) {
         CustPayDTO custPayDTO = new CustPayDTO();
         List<AccountSerialBillDTO> serialBillInfoList = new ArrayList<>();
         AccountSerialBillDTO accountSerialBillDTO = new AccountSerialBillDTO();
@@ -208,6 +224,21 @@ public class BaseInfoServiceImpl extends ServiceImpl<BaseInfoMapper, BasSpecialO
         custPayDTO.setNo(basSpecialOperation.getOrderNo());
         custPayDTO.setSerialBillInfoList(serialBillInfoList);
         custPayDTO.setOrderType(basSpecialOperation.getOperationType());
+
+        String orderType = basSpecialOperation.getOrderType();
+        custPayDTO.setNature("物流消费");
+        custPayDTO.setChargeCategoryChange("增值服务");
+        if(orderType.equals("入库单")){
+            custPayDTO.setBusinessType("仓储服务");
+        }else{
+            String delOutboundorderType = delOutboundVO.getOrderType();
+            if(delOutboundorderType.equals("PackageTransfer")){
+                custPayDTO.setBusinessType("国内直发");
+            }else{
+                custPayDTO.setBusinessType("仓储服务");
+            }
+        }
+
         return custPayDTO;
     }
 
