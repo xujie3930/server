@@ -2,6 +2,7 @@ package com.szmsd.delivery.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.vo.DelOutboundChargeVo;
 
 import java.util.List;
 
@@ -84,5 +85,7 @@ public interface IDelOutboundChargeService extends IService<DelOutboundCharge> {
      * @param orderNo orderNo
      */
     void clearCharges(String orderNo);
+
+    List<DelOutboundChargeVo>  selectDelOutboundChargeListexport(DelOutboundCharge delOutboundCharge);
 }
 

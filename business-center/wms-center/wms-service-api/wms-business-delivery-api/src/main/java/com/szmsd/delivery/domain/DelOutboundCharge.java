@@ -60,6 +60,17 @@ public class DelOutboundCharge extends BaseEntity {
     @Excel(name = "单号")
     private String orderNo;
 
+
+    @ApiModelProperty(value = "refNo")
+    @Excel(name = "refNo")
+    @TableField(exist = false)
+    private String refNo;
+
+    @ApiModelProperty(value = "跟踪号")
+    @Excel(name = "跟踪号")
+    @TableField(exist = false)
+    private String trackingNo;
+
     @ApiModelProperty(value = "费用编号")
     @Excel(name = "费用编号")
     private String billingNo;
@@ -102,7 +113,7 @@ public class DelOutboundCharge extends BaseEntity {
 
     @ApiModelProperty(value = "结束时间")
     @TableField(exist = false)
-    private String EndDate;
+    private String endDate;
 
     @ApiModelProperty(value = "单号集合")
     @TableField(exist = false)
@@ -111,6 +122,10 @@ public class DelOutboundCharge extends BaseEntity {
     @ApiModelProperty(value = "客户代码集合")
     @TableField(exist = false)
     private List<String> sellerCodeList;
+
+    @ApiModelProperty(value = "ids")
+    @TableField(exist = false)
+    private List<String> ids;
 
 
 }
