@@ -211,6 +211,7 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         delOutbound.setRefNo(deliveryImport.getRefNo());
         delOutbound.setState(DelOutboundStateEnum.COMPLETED.getCode());
         delOutbound.setSourceType("offline");
+        delOutbound.setReassignType("N");
         delOutbound.setAmount(deliveryImport.getAmount());
         delOutbound.setCalcWeight(deliveryImport.getCalcWeight());
         delOutbound.setRemark(deliveryImport.getRemark());
