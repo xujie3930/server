@@ -605,6 +605,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 queryDto.setCustomCode(cusCode);
             }
         }
+
+        logger.info("查询出库单模块列表条件：{}",JSON.toJSONString(queryDto));
+
         DelOutboundServiceImplUtil.handlerQueryWrapper(queryWrapper, queryDto);
 
         List<DelOutboundListVO> delOutboundListVOS = baseMapper.pageList(queryWrapper);
