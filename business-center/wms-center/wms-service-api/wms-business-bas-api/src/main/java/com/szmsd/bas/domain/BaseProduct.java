@@ -270,4 +270,11 @@ public class BaseProduct extends BaseEntity {
     @ApiModelProperty(value = "系统来源")
     private String skuSource;
 
+    @ApiModelProperty(value = "API密钥")
+    private String appToken;
+
+    @ApiModelProperty(value = "API标识")
+    private String appKey;
+
+
 }

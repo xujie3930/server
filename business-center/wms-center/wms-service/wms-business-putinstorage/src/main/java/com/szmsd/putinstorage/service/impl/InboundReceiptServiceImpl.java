@@ -293,9 +293,11 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
             ycAppParameter.setService("createAsn");
             JSONObject jsonObject=YcInboundJson(inboundReceipt,inboundReceiptDetailDTOS,basWarehouse);
             ycAppParameter.setJsonObject(jsonObject);
+            log.info("创建入库单json数据：{}",jsonObject);
             YcMeetingFeignService ycMeetingFeignService= SpringUtils.getBean(YcMeetingFeignService.class);
           R<Map>  r= ycMeetingFeignService.YcApiri(ycAppParameter);
           Map mapsr=r.getData();
+            log.info("创建入库单易仓返回数据：{}",r.getData());
            //回写易仓入库单号
             if (mapsr.get("ask").equals("Success")){
                 String date=String.valueOf(mapsr.get("data"));
@@ -373,6 +375,8 @@ public class InboundReceiptServiceImpl extends ServiceImpl<InboundReceiptMapper,
                 if (r1.getData().get("ask").equals("Success")){
                     //修改sku的系统来源
                     r.getData().setSkuSource("YC");
+                    r.getData().setAppKey(basWarehouse.getAppKey());
+                    r.getData().setAppToken(basWarehouse.getAppToken());
                     baseMapper.upadateSkuSource(r.getData());
                 }
 
