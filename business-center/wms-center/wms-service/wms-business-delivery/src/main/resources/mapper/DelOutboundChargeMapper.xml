@@ -2,4 +2,124 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.szmsd.delivery.mapper.DelOutboundChargeMapper">
 
+    <select id="selectDelOutboundChargeList" resultType="com.szmsd.delivery.domain.DelOutboundCharge" parameterType="com.szmsd.delivery.domain.DelOutboundCharge">
+        SELECT
+            a.id,
+            b.ref_no,
+            b.tracking_no,
+            b.seller_code,
+            a.currency_code,
+            a.amount,
+            CONCAT(a.charge_name_cn,":",a.remark)as remark,
+            a.order_no,
+            a.create_time
+
+        FROM
+            del_outbound_charge a
+            LEFT JOIN del_outbound b ON a.order_no = b.order_no
+            <where>
+                1=1
+        <if test="currencyCode != null and currencyCode != ''">
+          and  a.currency_code=#{currencyCode}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and  a.create_time &gt;=  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and  a.create_time &lt;= #{endDate}
+        </if>
+        <if test="orderNoList!= null and orderNoList.size()>0 ">
+            and  (a.order_no IN
+            <foreach collection="orderNoList" open="(" separator="," close=")" item="orderNo">
+                #{orderNo}
+            </foreach>
+         or
+            b.tracking_no IN
+            <foreach collection="orderNoList" open="(" separator="," close=")" item="orderNo">
+                #{orderNo}
+            </foreach>
+            or
+            b.ref_no IN
+            <foreach collection="orderNoList" open="(" separator="," close=")" item="orderNo">
+                #{orderNo}
+            </foreach>
+            )
+        </if>
+        <if test="ids!= null and ids.size()>0 ">
+            and   a.id IN
+            <foreach collection="ids" open="(" separator="," close=")" item="id">
+                #{id}
+            </foreach>
+        </if>
+
+
+        <if test="sellerCodeList!= null and sellerCodeList.size()>0 ">
+            and   b.seller_code IN
+            <foreach collection="sellerCodeList" open="(" separator="," close=")" item="sellerCode">
+                #{sellerCode}
+            </foreach>
+        </if>
+
+            </where>
+    </select>
+    <select id="selectDelOutboundChargeListexport" resultType="com.szmsd.delivery.vo.DelOutboundChargeVo" parameterType="com.szmsd.delivery.domain.DelOutboundCharge">
+        SELECT
+        a.id,
+        b.ref_no,
+        b.tracking_no,
+        b.seller_code,
+        a.currency_code,
+        a.amount,
+        CONCAT(a.charge_name_cn,":",a.remark)as remark,
+        a.order_no,
+        DATE_FORMAT(a.create_time,'%Y-%m-%d %H:%i:%s') as create_time
+
+        FROM
+        del_outbound_charge a
+        LEFT JOIN del_outbound b ON a.order_no = b.order_no
+        <where>
+            1=1
+            <if test="currencyCode != null and currencyCode != ''">
+                and  a.currency_code=#{currencyCode}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and  a.create_time &gt;=  #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and  a.create_time &lt;= #{endDate}
+            </if>
+            <if test="orderNoList!= null and orderNoList.size()>0 ">
+                and  (a.order_no IN
+                <foreach collection="orderNoList" open="(" separator="," close=")" item="orderNo">
+                    #{orderNo}
+                </foreach>
+                or
+                b.tracking_no IN
+                <foreach collection="orderNoList" open="(" separator="," close=")" item="orderNo">
+                    #{orderNo}
+                </foreach>
+                or
+                b.ref_no IN
+                <foreach collection="orderNoList" open="(" separator="," close=")" item="orderNo">
+                    #{orderNo}
+                </foreach>
+                )
+            </if>
+            <if test="ids!= null and ids.size()>0 ">
+                and   a.id IN
+                <foreach collection="ids" open="(" separator="," close=")" item="id">
+                    #{id}
+                </foreach>
+            </if>
+
+
+            <if test="sellerCodeList!= null and sellerCodeList.size()>0 ">
+                and   b.seller_code IN
+                <foreach collection="sellerCodeList" open="(" separator="," close=")" item="sellerCode">
+                    #{sellerCode}
+                </foreach>
+            </if>
+
+        </where>
+    </select>
 </mapper>

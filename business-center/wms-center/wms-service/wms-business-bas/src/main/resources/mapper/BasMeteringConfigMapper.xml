@@ -104,7 +104,7 @@
     SELECT b.*,a.difference_type from bas_metering_config a
                                         LEFT JOIN bas_metering_config_data b on a.id=b.metering_id
     where
-      a.logistics_ervices_code=#{logisticsErvicesCode} and (a.country_code=#{countryCode} or a.customer_code=#{customerCode})
+      a.logistics_ervices_code=#{logisticsErvicesCode} AND a.order_type=#{orderType}  and (a.country_code=#{countryCode} or a.customer_code=#{customerCode})
        AND (a.country_code is null or a.customer_code is NULL)
     GROUP BY b.id
   </select>

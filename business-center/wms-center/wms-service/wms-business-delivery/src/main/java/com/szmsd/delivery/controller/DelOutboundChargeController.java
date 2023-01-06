@@ -3,11 +3,13 @@ package com.szmsd.delivery.controller;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
+import com.szmsd.common.core.web.controller.QueryDto;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
+import com.szmsd.delivery.vo.DelOutboundChargeVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,10 +43,13 @@ public class DelOutboundChargeController extends BaseController {
      * 查询出库单费用明细模块列表
      */
     @PreAuthorize("@ss.hasPermi('DelOutboundCharge:DelOutboundCharge:list')")
-    @GetMapping("/list")
+    @PostMapping("/list")
     @ApiOperation(value = "查询出库单费用明细模块列表", notes = "查询出库单费用明细模块列表")
-    public TableDataInfo list(DelOutboundCharge delOutboundCharge) {
-        startPage();
+    public TableDataInfo list(@RequestBody DelOutboundCharge delOutboundCharge) {
+        QueryDto queryDto=new QueryDto();
+        queryDto.setPageSize(delOutboundCharge.getPageSize());
+        queryDto.setPageNum(delOutboundCharge.getPageNum());
+        startPage(queryDto);
         List<DelOutboundCharge> list = delOutboundChargeService.selectDelOutboundChargeList(delOutboundCharge);
         return getDataTable(list);
     }
@@ -54,11 +59,11 @@ public class DelOutboundChargeController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('DelOutboundCharge:DelOutboundCharge:export')")
     @Log(title = "出库单费用明细模块", businessType = BusinessType.EXPORT)
-    @GetMapping("/export")
+    @PostMapping("/export")
     @ApiOperation(value = "导出出库单费用明细模块列表", notes = "导出出库单费用明细模块列表")
-    public void export(HttpServletResponse response, DelOutboundCharge delOutboundCharge) throws IOException {
-        List<DelOutboundCharge> list = delOutboundChargeService.selectDelOutboundChargeList(delOutboundCharge);
-        ExcelUtil<DelOutboundCharge> util = new ExcelUtil<DelOutboundCharge>(DelOutboundCharge.class);
+    public void export(HttpServletResponse response,@RequestBody DelOutboundCharge delOutboundCharge) throws IOException {
+        List<DelOutboundChargeVo> list = delOutboundChargeService.selectDelOutboundChargeListexport(delOutboundCharge);
+        ExcelUtil<DelOutboundChargeVo> util = new ExcelUtil<DelOutboundChargeVo>(DelOutboundChargeVo.class);
         util.exportExcel(response, list, "DelOutboundCharge");
 
     }
