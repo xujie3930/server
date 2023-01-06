@@ -20,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
 import java.net.Inet4Address;
+import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.util.List;
 
@@ -59,8 +61,28 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
      */
     @Override
     public List<DelOutboundCharge> selectDelOutboundChargeList(DelOutboundCharge delOutboundCharge) {
-        QueryWrapper<DelOutboundCharge> where = new QueryWrapper<DelOutboundCharge>();
-        return baseMapper.selectList(where);
+        String orderNo = delOutboundCharge.getOrderNo();
+        if (StringUtils.isNotEmpty(orderNo)){
+            try {
+                orderNo = URLDecoder.decode(delOutboundCharge.getOrderNo(),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            List<String> orderNoList = DelOutboundServiceImplUtil.splitToArray(orderNo, "[\n,]");
+            delOutboundCharge.setOrderNoList(orderNoList);
+        }
+        String sellerCode = delOutboundCharge.getSellerCode();
+        if (StringUtils.isNotEmpty(sellerCode)){
+            try {
+                sellerCode = URLDecoder.decode(delOutboundCharge.getSellerCode(),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            List<String> sellerCodeList = DelOutboundServiceImplUtil.splitToArray(sellerCode, "[\n,]");
+            delOutboundCharge.setSellerCodeList(sellerCodeList);
+        }
+        List<DelOutboundCharge>  list= baseMapper.selectDelOutboundChargeList(delOutboundCharge);
+        return list;
     }
 
     /**
