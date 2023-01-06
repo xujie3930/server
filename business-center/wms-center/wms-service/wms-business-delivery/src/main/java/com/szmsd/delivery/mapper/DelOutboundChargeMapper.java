@@ -2,6 +2,7 @@ package com.szmsd.delivery.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.vo.DelOutboundChargeVo;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ import java.util.List;
 public interface DelOutboundChargeMapper extends BaseMapper<DelOutboundCharge> {
 
     List<DelOutboundCharge>  selectDelOutboundChargeList(DelOutboundCharge delOutboundCharge);
+
+    List<DelOutboundChargeVo>  selectDelOutboundChargeListexport(DelOutboundCharge delOutboundCharge);
 }

@@ -9,6 +9,7 @@ import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
+import com.szmsd.delivery.vo.DelOutboundChargeVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -61,8 +62,8 @@ public class DelOutboundChargeController extends BaseController {
     @PostMapping("/export")
     @ApiOperation(value = "导出出库单费用明细模块列表", notes = "导出出库单费用明细模块列表")
     public void export(HttpServletResponse response,@RequestBody DelOutboundCharge delOutboundCharge) throws IOException {
-        List<DelOutboundCharge> list = delOutboundChargeService.selectDelOutboundChargeList(delOutboundCharge);
-        ExcelUtil<DelOutboundCharge> util = new ExcelUtil<DelOutboundCharge>(DelOutboundCharge.class);
+        List<DelOutboundChargeVo> list = delOutboundChargeService.selectDelOutboundChargeListexport(delOutboundCharge);
+        ExcelUtil<DelOutboundChargeVo> util = new ExcelUtil<DelOutboundChargeVo>(DelOutboundChargeVo.class);
         util.exportExcel(response, list, "DelOutboundCharge");
 
     }
