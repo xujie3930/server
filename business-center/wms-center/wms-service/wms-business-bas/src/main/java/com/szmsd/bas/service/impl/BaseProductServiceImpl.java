@@ -34,6 +34,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.QueryWrapperUtil;
@@ -44,7 +45,9 @@ import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.api.feign.HtpRmiFeignService;
+import com.szmsd.http.api.feign.YcMeetingFeignService;
 import com.szmsd.http.config.CkThreadPool;
+import com.szmsd.http.domain.YcAppParameter;
 import com.szmsd.http.dto.HttpRequestSyncDTO;
 import com.szmsd.http.dto.ProductRequest;
 import com.szmsd.bas.api.dto.CkSkuCreateDTO;
@@ -110,6 +113,8 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
     private HtpRmiFeignService htpRmiFeignService;
     @Autowired
     private BasSubClientService basSubClientService;
+
+    private String ycurl="http://pgl.yunwms.com/default/svc/web-service";
 
     /**
      * 查询模块
@@ -636,7 +641,36 @@ public class BaseProductServiceImpl extends ServiceImpl<BaseProductMapper, BaseP
         R<ResponseVO> r = htpBasFeignService.createProduct(productRequest);
         //验证wms
         toWms(r);
+        if (baseProductDto.getSkuSource()!=null&&baseProductDto.getSkuSource().equals("YC")){
+            //调用易仓服务(创建sku)
+            YcAppParameter ycAppParameter=new YcAppParameter();
+            ycAppParameter.setAppKey(baseProductDto.getAppKey());
+            ycAppParameter.setAppToken(baseProductDto.getAppToken());
+            ycAppParameter.setYcUrl(ycurl);
+            ycAppParameter.setService("modifyProduct");
+            JSONObject jsonObject1=new JSONObject();
+            jsonObject1=createProductJson(baseProductDto);
+            ycAppParameter.setJsonObject(jsonObject1);
+            YcMeetingFeignService ycMeetingFeignService= SpringUtils.getBean(YcMeetingFeignService.class);
+            R<Map>  r1= ycMeetingFeignService.YcApiri(ycAppParameter);
+        }
         return baseMapper.updateById(baseProductDto);
+    }
+
+    private JSONObject createProductJson(BaseProduct baseProduct) {
+        JSONObject jsonObject=new JSONObject();
+        jsonObject.put("product_sku",baseProduct.getCode());
+        jsonObject.put("product_title",baseProduct.getProductName());
+        jsonObject.put("product_weight",baseProduct.getWeight());
+        jsonObject.put("product_length",baseProduct.getLength());
+        jsonObject.put("product_width",baseProduct.getWidth());
+        jsonObject.put("product_height",baseProduct.getHeight());
+        jsonObject.put("product_declared_value",baseProduct.getDeclaredValue());
+        jsonObject.put("product_declared_name",baseProduct.getProductName());
+        jsonObject.put("product_declared_name_zh",baseProduct.getProductNameChinese());
+        jsonObject.put("hs_code",baseProduct.getHsCode());
+
+        return jsonObject;
     }
 
     /**
