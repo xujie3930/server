@@ -48,6 +48,7 @@ import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.config.AsyncThreadObject;
+import com.szmsd.delivery.convert.DelOutboundChargeConvert;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.enums.*;
@@ -3024,6 +3025,32 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             this.logger.error("(4)nuclearWeight操作失败，出库单号：" + delOutbound.getOrderNo() + "，错误原因：" + e.getMessage(), e);
         } finally {
         }
+    }
+
+    @Override
+    public List<DelOutboundChargeData> findDelboundCharges(List<String> orderNoList) {
+
+        if(CollectionUtils.isEmpty(orderNoList)){
+            return new ArrayList<>();
+        }
+
+        List<DelOutbound> delOutbounds = baseMapper.selectList(Wrappers.<DelOutbound>query().lambda().in(DelOutbound::getOrderNo,orderNoList));
+
+        List<DelOutboundCharge> delOutboundCharges = delOutboundChargeService.list(Wrappers.<DelOutboundCharge>query().lambda().in(DelOutboundCharge::getOrderNo,orderNoList).eq(DelOutboundCharge::getDelFlag,0));
+
+        Map<String,List<DelOutboundCharge>> deloutboundChargeMap = delOutboundCharges.stream().collect(Collectors.groupingBy(DelOutboundCharge::getOrderNo));
+
+        List<DelOutboundChargeData> delOutboundChargeData = DelOutboundChargeConvert.INSTANCE.toDelOutboundChargeList(delOutbounds);
+
+        for(DelOutboundChargeData data : delOutboundChargeData){
+            String orderNo = data.getOrderNo();
+            List<DelOutboundCharge> delOutboundChargesList = deloutboundChargeMap.get(orderNo);
+            if(CollectionUtils.isNotEmpty(delOutboundChargesList)){
+                data.setDelOutboundCharges(delOutboundChargesList);
+            }
+        }
+
+        return delOutboundChargeData;
     }
 
     public void bringThridPartyAsync(DelOutbound delOutbound) {

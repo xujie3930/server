@@ -195,4 +195,11 @@ public interface DelOutboundClientService {
     int boxStatus(DelOutboundBoxStatusDto dto);
 
     List<DelOutboundBringVerifyVO> bringVerifyByOrderNo(DelOutboundBringVerifyNoDto dto);
+
+    /**
+     * 根据订单号查询订单与费用明细
+     * @param orderNoList
+     * @return
+     */
+    List<DelOutboundChargeData> findDelboundCharges(List<String> orderNoList);
 }

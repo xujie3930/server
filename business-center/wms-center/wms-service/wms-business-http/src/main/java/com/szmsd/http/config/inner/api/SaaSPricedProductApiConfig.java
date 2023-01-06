@@ -132,6 +132,9 @@ public class SaaSPricedProductApiConfig implements ApiConfig {
         // 导出产品信息列表
         private String exportFile;
 
+        //计算包裹的特定附加费用
+        private String tagSurcharge;
+
         public String getPageResult() {
             return pageResult;
         }
@@ -218,6 +221,14 @@ public class SaaSPricedProductApiConfig implements ApiConfig {
 
         public void setExportFile(String exportFile) {
             this.exportFile = exportFile;
+        }
+
+        public String getTagSurcharge() {
+            return tagSurcharge;
+        }
+
+        public void setTagSurcharge(String tagSurcharge) {
+            this.tagSurcharge = tagSurcharge;
         }
     }
 

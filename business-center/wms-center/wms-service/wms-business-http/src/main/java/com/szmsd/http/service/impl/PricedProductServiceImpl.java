@@ -99,4 +99,14 @@ public class PricedProductServiceImpl extends SaaSPricedProductRequest implement
     public List<PricedProduct> inService(PricedProductInServiceCriteria criteria) {
         return JSONArray.parseArray(httpPost("", "pricedProduct.inService", criteria), PricedProduct.class);
     }
+
+    @Override
+    public ChargeWrapper tagSurcharge(TagSurchargeRequest tagSurchargeRequest) {
+        HttpResponseBody responseBody = httpPostBody("", "pricedProduct.tagSurcharge", tagSurchargeRequest);
+        if (HttpStatus.SC_OK == responseBody.getStatus()) {
+            ChargeWrapper chargeWrapper = JSON.parseObject(responseBody.getBody(), ChargeWrapper.class);
+            return chargeWrapper;
+        }
+        return null;
+    }
 }

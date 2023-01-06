@@ -482,5 +482,7 @@ void emailBatchUpdateTrackingNo(List<Map<String, Object>> list,String filepath);
     boolean updateWeightDelOutbound(UpdateWeightDelOutboundDto dto);
 
     public void nuclearWeight(DelOutbound delOutbound);
+
+    List<DelOutboundChargeData> findDelboundCharges(List<String> orderNoList);
 }
 
