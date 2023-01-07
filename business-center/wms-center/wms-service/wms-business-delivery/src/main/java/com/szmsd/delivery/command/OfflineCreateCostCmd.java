@@ -21,6 +21,7 @@ import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import com.szmsd.finance.api.feign.RefundRequestFeignService;
 import com.szmsd.finance.dto.RefundRequestAutoDTO;
 import com.szmsd.finance.dto.RefundRequestListAutoDTO;
+import com.szmsd.finance.enums.RefundStatusEnum;
 import com.szmsd.pack.domain.PackageAddress;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -280,6 +281,8 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
             refundRequestDTO.setProcessNo(deliveryImport.getTrackingNo());
             refundRequestDTO.setShipmentRule(deliveryImport.getShipmentService());
             refundRequestDTO.setTrackingNo(deliveryImport.getTrackingNo());
+            //状态已完成
+            refundRequestDTO.setAuditStatus(RefundStatusEnum.COMPLETE.getStatus());
 
             if(basWarehouseMap != null){
                 BasWarehouse basWarehouse = basWarehouseMap.get(refundRequestDTO.getWarehouseCode());
