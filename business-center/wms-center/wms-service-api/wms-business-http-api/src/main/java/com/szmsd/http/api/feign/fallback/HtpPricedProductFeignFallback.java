@@ -70,6 +70,11 @@ public class HtpPricedProductFeignFallback implements FallbackFactory<HtpPricedP
             public R<ResponseVO> grade(ChangeSheetGradeCommand changeSheetGradeCommand) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<ChargeWrapper> tagSurcharge(TagSurchargeRequest tagSurchargeRequest) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

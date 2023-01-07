@@ -41,4 +41,11 @@ public interface IPricedProductService {
      * @return PricedProduct
      */
     List<PricedProduct> inService(PricedProductInServiceCriteria criteria);
+
+    /**
+     * 计算包裹的特定附加费用
+     * @param tagSurchargeRequest
+     * @return
+     */
+    ChargeWrapper tagSurcharge(TagSurchargeRequest tagSurchargeRequest);
 }

@@ -1,24 +1,13 @@
 package com.szmsd.delivery.api.feign;
 
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.validator.ValidationUpdateGroup;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.BusinessDeliveryInterface;
 import com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
-import com.szmsd.delivery.vo.DelOutboundAddResponse;
-import com.szmsd.delivery.vo.DelOutboundBringVerifyVO;
-import com.szmsd.delivery.vo.DelOutboundDetailListVO;
-import com.szmsd.delivery.vo.DelOutboundDetailVO;
-import com.szmsd.delivery.vo.DelOutboundLabelResponse;
-import com.szmsd.delivery.vo.DelOutboundListExceptionMessageExportVO;
-import com.szmsd.delivery.vo.DelOutboundListExceptionMessageVO;
-import com.szmsd.delivery.vo.DelOutboundListVO;
-import com.szmsd.delivery.vo.DelOutboundPackingVO;
-import com.szmsd.delivery.vo.DelOutboundThirdPartyVO;
-import com.szmsd.delivery.vo.DelOutboundVO;
+import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.vo.PricedProduct;
@@ -289,4 +278,8 @@ public interface DelOutboundFeignService {
 
     @PostMapping(value = "/api/outbound/open/delOutboundCarrierTimer")
     R<String> delOutboundCarrierTimer();
+
+    @PostMapping("/api/outbound/findDelboundCharges")
+    @ApiOperation(value = "出库管理 - 出库单和费用明细")
+    R<List<DelOutboundChargeData>> findDelboundCharges(@RequestBody List<String> orders);
 }

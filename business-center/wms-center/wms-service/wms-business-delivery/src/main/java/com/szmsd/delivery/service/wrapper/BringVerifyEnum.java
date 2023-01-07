@@ -455,6 +455,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             updateDelOutbound.setPrcTerminalCarrier(delOutbound.getPrcTerminalCarrier());
             updateDelOutbound.setAmazonReferenceId(data.getAmazonLogisticsRouteId());
             updateDelOutbound.setGrade(data.getGrade());
+            updateDelOutbound.setZoneName(data.getZoneName());
 
             if(basProductServiceR != null && basProductServiceR.getCode() == 200){
 

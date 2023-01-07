@@ -45,4 +45,7 @@ public interface HtpPricedProductFeignService {
 
     @PostMapping("/api/products/http/grade")
     R<ResponseVO> grade(@RequestBody ChangeSheetGradeCommand changeSheetGradeCommand);
+
+    @PostMapping("/api/products/http/tagSurcharge")
+    R<ChargeWrapper> tagSurcharge(@RequestBody TagSurchargeRequest tagSurchargeRequest);
 }

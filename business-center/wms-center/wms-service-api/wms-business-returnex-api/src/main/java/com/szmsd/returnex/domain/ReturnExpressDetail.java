@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.*;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.returnex.config.BOConvert;
-import com.szmsd.returnex.enums.ReturnExpressEnums;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -160,18 +159,37 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     @ApiModelProperty(value = "refNo")
     private String refNo;
 
-
     @ApiModelProperty(value = "国家代码")
     private String countryCode;
-
 
     @ApiModelProperty(value = "国家名称")
     private String country;
 
-
     @ApiModelProperty(value = "到期时长")
     @TableField(updateStrategy = FieldStrategy.IGNORED)
     private Integer expirationDuration;
+
+    @ApiModelProperty(value = "退件费状态 1 已生成退件费")
+    private Integer returnFeeStatus;
+
+    @ApiModelProperty(value = "退件时间")
+    private String returnFeeTime;
+
+    @ApiModelProperty(value = "退件费用")
+    private String returnFee;
+
+    @ApiModelProperty(value = "销毁费状态 1已生成销毁费")
+    private Integer destoryFeeStatus;
+
+    @ApiModelProperty(value = "销毁费生成时间")
+    private String destoryFeeTime;
+
+    @ApiModelProperty(value = "销毁费用")
+    private String destoryFee;
+
+    @ApiModelProperty(value = "费用生成异常信息")
+    private String errorMsg;
+
 
     @Override
     public String toString() {

@@ -97,4 +97,10 @@ public class PricedProductController extends BaseController {
         return R.ok(iPricedProductService.inService(criteria));
     }
 
+    @PostMapping("/tagSurcharge")
+    @ApiOperation(value = "计算包裹的特定附加费用")
+    public R<ChargeWrapper> tagSurcharge(@RequestBody TagSurchargeRequest tagSurchargeRequest) {
+        return R.ok(iPricedProductService.tagSurcharge(tagSurchargeRequest));
+    }
+
 }

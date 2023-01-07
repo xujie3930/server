@@ -6,9 +6,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.dto.DelQueryServiceImport;
 import com.szmsd.delivery.mapper.DelOutboundChargeMapper;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
+import com.szmsd.delivery.vo.DelOutboundChargeVo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
 import java.net.Inet4Address;
+import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.util.List;
 
@@ -59,8 +64,28 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
      */
     @Override
     public List<DelOutboundCharge> selectDelOutboundChargeList(DelOutboundCharge delOutboundCharge) {
-        QueryWrapper<DelOutboundCharge> where = new QueryWrapper<DelOutboundCharge>();
-        return baseMapper.selectList(where);
+        String orderNo = delOutboundCharge.getOrderNo();
+        if (StringUtils.isNotEmpty(orderNo)){
+            try {
+                orderNo = URLDecoder.decode(delOutboundCharge.getOrderNo(),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            List<String> orderNoList = DelOutboundServiceImplUtil.splitToArray(orderNo, "[\n,]");
+            delOutboundCharge.setOrderNoList(orderNoList);
+        }
+        String sellerCode = delOutboundCharge.getSellerCode();
+        if (StringUtils.isNotEmpty(sellerCode)){
+            try {
+                sellerCode = URLDecoder.decode(delOutboundCharge.getSellerCode(),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            List<String> sellerCodeList = DelOutboundServiceImplUtil.splitToArray(sellerCode, "[\n,]");
+            delOutboundCharge.setSellerCodeList(sellerCodeList);
+        }
+        List<DelOutboundCharge>  list= baseMapper.selectDelOutboundChargeList(delOutboundCharge);
+        return list;
     }
 
     /**
@@ -141,6 +166,32 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
             // 有数据就删除
             super.remove(queryWrapper);
         }
+    }
+
+    @Override
+    public List<DelOutboundChargeVo> selectDelOutboundChargeListexport(DelOutboundCharge delOutboundCharge) {
+        String orderNo = delOutboundCharge.getOrderNo();
+        if (StringUtils.isNotEmpty(orderNo)){
+            try {
+                orderNo = URLDecoder.decode(delOutboundCharge.getOrderNo(),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            List<String> orderNoList = DelOutboundServiceImplUtil.splitToArray(orderNo, "[\n,]");
+            delOutboundCharge.setOrderNoList(orderNoList);
+        }
+        String sellerCode = delOutboundCharge.getSellerCode();
+        if (StringUtils.isNotEmpty(sellerCode)){
+            try {
+                sellerCode = URLDecoder.decode(delOutboundCharge.getSellerCode(),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            List<String> sellerCodeList = DelOutboundServiceImplUtil.splitToArray(sellerCode, "[\n,]");
+            delOutboundCharge.setSellerCodeList(sellerCodeList);
+        }
+        List<DelOutboundChargeVo> list1= baseMapper.selectDelOutboundChargeListexport(delOutboundCharge);
+        return list1;
     }
 
     @Override

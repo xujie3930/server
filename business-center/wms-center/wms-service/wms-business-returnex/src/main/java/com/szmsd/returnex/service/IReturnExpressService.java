@@ -3,13 +3,15 @@ package com.szmsd.returnex.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
-import com.szmsd.returnex.dto.*;
+import com.szmsd.returnex.dto.ReturnExpressAddDTO;
+import com.szmsd.returnex.dto.ReturnExpressAssignDTO;
+import com.szmsd.returnex.dto.ReturnExpressListQueryDTO;
+import com.szmsd.returnex.dto.ReturnExpressServiceAddDTO;
 import com.szmsd.returnex.dto.wms.ReturnArrivalReqDTO;
 import com.szmsd.returnex.dto.wms.ReturnProcessingFinishReqDTO;
 import com.szmsd.returnex.dto.wms.ReturnProcessingReqDTO;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -117,4 +119,14 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * @param multipartFile
      */
     List<String> importByTemplateClient(MultipartFile multipartFile);
+
+    /**
+     * 自动生成退件费
+     */
+    void autoGeneratorFee();
+
+    /**
+     * 自动生成销毁费
+     */
+    void autoGeneratorDestoryFee();
 }

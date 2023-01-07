@@ -213,6 +213,7 @@ public enum ThridPartyEnum implements ApplicationState, ApplicationRegister{
             updateDelOutbound.setProductShipmentRule(data.getShipmentRule());
             updateDelOutbound.setPackingRule(delOutbound.getPackingRule());
             updateDelOutbound.setGrade(data.getGrade());
+            updateDelOutbound.setZoneName(data.getZoneName());
             delOutboundService.updateByIdTransactional(updateDelOutbound);
 
             DelOutboundOperationLogEnum.BRV_PRC_PRICING.listener(delOutbound);

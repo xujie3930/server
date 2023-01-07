@@ -3,9 +3,9 @@ package com.szmsd.returnex.service.impl;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Lists;
 import com.szmsd.bas.api.domain.BasCodeDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasFeignService;
@@ -15,14 +15,12 @@ import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
-import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
-import com.szmsd.delivery.domain.DelTrack;
 import com.szmsd.delivery.dto.DelOutboundAddressDto;
 import com.szmsd.delivery.dto.DelOutboundDto;
 import com.szmsd.delivery.dto.DelOutboundListQueryDto;
@@ -38,6 +36,8 @@ import com.szmsd.http.dto.returnex.ReturnDetailWMS;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.domain.dto.InventoryAdjustmentDTO;
 import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
+import com.szmsd.returnex.command.ReturnExpressAutoGeneratorDestoryFeeCmd;
+import com.szmsd.returnex.command.ReturnExpressAutoGeneratorFeeCmd;
 import com.szmsd.returnex.config.BeanCopyUtil;
 import com.szmsd.returnex.config.ConfigStatus;
 import com.szmsd.returnex.config.IRemoteApi;
@@ -53,7 +53,6 @@ import com.szmsd.returnex.service.IReturnExpressService;
 import com.szmsd.returnex.vo.ReturnExpressGoodVO;
 import com.szmsd.returnex.vo.ReturnExpressListVO;
 import com.szmsd.returnex.vo.ReturnExpressVO;
-import io.swagger.annotations.ApiModelProperty;
 import jodd.util.StringUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -76,14 +75,14 @@ import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -427,6 +426,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         if (returnExpressDetail.getScanCode()==null||returnExpressDetail.getScanCode().equals("")){
             returnExpressDetail.setScanCode(returnExpressDetail.getFromOrderNo());
         }
+        returnExpressDetail.setReturnFeeStatus(0);
+        returnExpressDetail.setDestoryFeeStatus(0);
         return returnExpressMapper.insert(returnExpressDetail);
     }
 
@@ -493,6 +494,8 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
                 returnExpressDetail.setDealStatus(configStatus.getDealStatus().getWaitAssigned());
                 returnExpressDetail.setDealStatusStr(configStatus.getDealStatus().getWaitAssignedStr());
             }
+            returnExpressDetail.setDestoryFeeStatus(0);
+            returnExpressDetail.setReturnFeeStatus(0);
             int insert = returnExpressMapper.insert(returnExpressDetail);
             // 其他处理
             return insert;
@@ -951,6 +954,62 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
             throw new RuntimeException("文件读取异常");
         }
 
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void autoGeneratorFee() {
+
+        //step 1.查询未退费的数据
+        List<ReturnExpressDetail> returnExpressDetails = this.selectAutoGeneratorFee();
+
+        if(CollectionUtils.isEmpty(returnExpressDetails)){
+            return;
+        }
+
+        //每次执行50条数据
+        List<List<ReturnExpressDetail>> partReturnExpressList = Lists.partition(returnExpressDetails,50);
+
+        for(List<ReturnExpressDetail> expressDetails : partReturnExpressList){
+            new ReturnExpressAutoGeneratorFeeCmd(expressDetails).execute();
+        }
+    }
+
+    @Override
+    public void autoGeneratorDestoryFee() {
+
+        //step 1.查询未退费的数据
+        List<ReturnExpressDetail> returnExpressDetails = this.selectAutoGeneratorDestoryFee();
+
+        if(CollectionUtils.isEmpty(returnExpressDetails)){
+            return;
+        }
+
+        //每次执行50条数据
+        List<List<ReturnExpressDetail>> partReturnExpressList = Lists.partition(returnExpressDetails,50);
+
+        for(List<ReturnExpressDetail> expressDetails : partReturnExpressList){
+            new ReturnExpressAutoGeneratorDestoryFeeCmd(expressDetails).execute();
+        }
+    }
+
+    private List<ReturnExpressDetail> selectAutoGeneratorFee(){
+
+        List<ReturnExpressDetail> returnExpressDetails = baseMapper.selectList(Wrappers.<ReturnExpressDetail>query().lambda()
+                .eq(ReturnExpressDetail::getReturnFeeStatus,0)
+        );
+
+        return returnExpressDetails;
+    }
+
+    private List<ReturnExpressDetail> selectAutoGeneratorDestoryFee(){
+
+        List<ReturnExpressDetail> returnExpressDetails = baseMapper.selectList(Wrappers.<ReturnExpressDetail>query().lambda()
+                .eq(ReturnExpressDetail::getReturnFeeStatus,1)
+                .eq(ReturnExpressDetail::getDestoryFeeStatus,0)
+        );
+
+        return returnExpressDetails;
     }
 
     /**

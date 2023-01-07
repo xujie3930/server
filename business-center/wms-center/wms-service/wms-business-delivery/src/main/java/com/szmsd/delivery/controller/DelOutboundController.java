@@ -1593,4 +1593,11 @@ public class DelOutboundController extends BaseController {
         return R.ok(delOutboundService.boxStatus(dto));
     }
 
+    @PostMapping("/findDelboundCharges")
+    @ApiOperation(value = "出库管理-查询订单和费用明细", position = 500)
+    public R findDelboundCharges(@RequestBody List<String> orderNoList) {
+        List<DelOutboundChargeData> delOutboundChargeData = delOutboundService.findDelboundCharges(orderNoList);
+        return R.ok(delOutboundChargeData);
+    }
+
 }

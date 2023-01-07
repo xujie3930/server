@@ -1,6 +1,7 @@
 package com.szmsd.delivery.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.web.domain.BaseEntity;
@@ -11,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 
 /**
@@ -58,6 +60,17 @@ public class DelOutboundCharge extends BaseEntity {
     @Excel(name = "单号")
     private String orderNo;
 
+
+    @ApiModelProperty(value = "refNo")
+    @Excel(name = "refNo")
+    @TableField(exist = false)
+    private String refNo;
+
+    @ApiModelProperty(value = "跟踪号")
+    @Excel(name = "跟踪号")
+    @TableField(exist = false)
+    private String trackingNo;
+
     @ApiModelProperty(value = "费用编号")
     @Excel(name = "费用编号")
     private String billingNo;
@@ -81,5 +94,38 @@ public class DelOutboundCharge extends BaseEntity {
     @ApiModelProperty(value = "币种")
     @Excel(name = "币种")
     private String currencyCode;
+
+    @ApiModelProperty("客户代码")
+    @TableField(exist = false)
+    private String sellerCode;
+
+    @ApiModelProperty("当前页，从1开始")
+    @TableField(exist = false)
+    private int pageNum = 1;
+
+    @ApiModelProperty("每页的数量")
+    @TableField(exist = false)
+    private int pageSize = 10;
+
+    @ApiModelProperty(value = "开始时间")
+    @TableField(exist = false)
+    private String startDate;
+
+    @ApiModelProperty(value = "结束时间")
+    @TableField(exist = false)
+    private String endDate;
+
+    @ApiModelProperty(value = "单号集合")
+    @TableField(exist = false)
+    private List<String> orderNoList;
+
+    @ApiModelProperty(value = "客户代码集合")
+    @TableField(exist = false)
+    private List<String> sellerCodeList;
+
+    @ApiModelProperty(value = "ids")
+    @TableField(exist = false)
+    private List<String> ids;
+
 
 }

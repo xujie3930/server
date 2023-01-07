@@ -1,10 +1,8 @@
 package com.szmsd.returnex.timer;
 
-import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.returnex.config.ConfigStatus;
 import com.szmsd.returnex.config.LockerUtil;
 import com.szmsd.returnex.domain.ReturnExpressDetail;
@@ -18,7 +16,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author zhangyuyuan

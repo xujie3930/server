@@ -167,4 +167,9 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     public List<DelOutboundBringVerifyVO> bringVerifyByOrderNo(DelOutboundBringVerifyNoDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.bringVerifyByOrderNo(dto));
     }
+
+    @Override
+    public List<DelOutboundChargeData> findDelboundCharges(List<String> orderNoList) {
+        return R.getDataAndException(this.delOutboundFeignService.findDelboundCharges(orderNoList));
+    }
 }

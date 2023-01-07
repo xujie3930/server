@@ -53,4 +53,9 @@ public class HtpPricedProductClientServiceImpl implements IHtpPricedProductClien
     public PageVO<PricedProduct> pageResult(PricedProductSearchCriteria pricedProductSearchCriteria) {
         return R.getDataAndException(this.htpPricedProductFeignService.pageResult(pricedProductSearchCriteria));
     }
+
+    @Override
+    public ChargeWrapper tagSurcharge(TagSurchargeRequest tagSurchargeRequest) {
+        return R.getDataAndException(this.htpPricedProductFeignService.tagSurcharge(tagSurchargeRequest));
+    }
 }

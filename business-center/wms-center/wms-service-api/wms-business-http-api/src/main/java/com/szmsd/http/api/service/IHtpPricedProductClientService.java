@@ -52,4 +52,11 @@ public interface IHtpPricedProductClientService {
      * @return PricedProduct
      */
     PageVO<PricedProduct> pageResult(PricedProductSearchCriteria pricedProductSearchCriteria);
+
+    /**
+     * 计算包裹的特定附加费用
+     * @param tagSurchargeRequest
+     * @return
+     */
+    ChargeWrapper tagSurcharge(TagSurchargeRequest tagSurchargeRequest);
 }

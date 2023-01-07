@@ -251,6 +251,11 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
             public R<String> delOutboundCarrierTimer() {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<List<DelOutboundChargeData>> findDelboundCharges(List<String> orders) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }

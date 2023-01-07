@@ -289,6 +289,7 @@ public enum NuclearWeightEnum implements ApplicationState, ApplicationRegister{
             IDelOutboundService delOutboundService = SpringUtils.getBean(IDelOutboundService.class);
             delOutbound.setAmazonReferenceId(data.getAmazonLogisticsRouteId());
             delOutbound.setGrade(data.getGrade());
+            delOutbound.setZoneName(data.getZoneName());
 
             delOutboundService.updateById(delOutbound);
 
