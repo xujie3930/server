@@ -118,8 +118,10 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         List<FssRefundRequest> collect = addList.stream().map(x -> {
             FssRefundRequest fssRefundRequest = new FssRefundRequest();
             BeanUtils.copyProperties(x, fssRefundRequest);
-            fssRefundRequest.setAuditStatus(RefundStatusEnum.BRING_INTO_COURT.getStatus())
-                    .setProcessNo(strings.get(noLine.getAndIncrement()));
+            if(fssRefundRequest.getAuditStatus() == null) {
+                fssRefundRequest.setAuditStatus(RefundStatusEnum.BRING_INTO_COURT.getStatus())
+                        .setProcessNo(strings.get(noLine.getAndIncrement()));
+            }
             return fssRefundRequest;
         }).collect(Collectors.toList());
 

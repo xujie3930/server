@@ -46,6 +46,9 @@ public class RefundRequestDTO {
     @ApiModelProperty(value = "客户名称")
     private String cusName;
 
+    @ApiModelProperty(value = "审核状态：0=初始,1=提审,2=异常,3=完成")
+    private Integer auditStatus;
+
     @ExcelProperty(  index = 1)
     @NotBlank(message = "处理性质不能为空")
     @ApiModelProperty(value = "处理性质")
