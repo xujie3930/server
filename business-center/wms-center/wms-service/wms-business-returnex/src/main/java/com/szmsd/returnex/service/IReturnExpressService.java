@@ -124,4 +124,9 @@ public interface IReturnExpressService extends IService<ReturnExpressDetail> {
      * 自动生成退件费
      */
     void autoGeneratorFee();
+
+    /**
+     * 自动生成销毁费
+     */
+    void autoGeneratorDestoryFee();
 }

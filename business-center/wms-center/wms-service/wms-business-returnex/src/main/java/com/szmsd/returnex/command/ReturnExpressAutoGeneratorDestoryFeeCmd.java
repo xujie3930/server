@@ -32,13 +32,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class ReturnExpressAutoGeneratorFeeCmd extends BasicCommand<List<ReturnExpressFeeDto>> {
+public class ReturnExpressAutoGeneratorDestoryFeeCmd extends BasicCommand<List<ReturnExpressFeeDto>> {
 
     private List<ReturnExpressDetail> expressDetails;
 
-    private static final String FEE_TYPE = "退件费";
+    private static final String FEE_TYPE = "销毁费";
 
-    public ReturnExpressAutoGeneratorFeeCmd(List<ReturnExpressDetail> expressDetails){
+    public ReturnExpressAutoGeneratorDestoryFeeCmd(List<ReturnExpressDetail> expressDetails){
         this.expressDetails = expressDetails;
     }
 
@@ -154,18 +154,18 @@ public class ReturnExpressAutoGeneratorFeeCmd extends BasicCommand<List<ReturnEx
     @Override
     protected void afterExecuted(List<ReturnExpressFeeDto> result) throws Exception {
 
-        //step 5.回写退费件数据
+        //step 5.回写销毁费数据
         ReturnExpressMapper expressMapper = SpringUtils.getBean(ReturnExpressMapper.class);
 
         if(CollectionUtils.isNotEmpty(result)){
 
-            log.info("回写退费件数据:{}",JSON.toJSONString(result));
+            log.info("回写销毁费数据:{}",JSON.toJSONString(result));
 
             for(ReturnExpressFeeDto feeDto : result) {
                 LambdaUpdateWrapper<ReturnExpressDetail> update = Wrappers.lambdaUpdate();
-                update.set(ReturnExpressDetail::getReturnFee, feeDto.getFee())
-                        .set(ReturnExpressDetail::getReturnFeeStatus,1)
-                        .set(ReturnExpressDetail::getReturnFeeTime,new Date())
+                update.set(ReturnExpressDetail::getDestoryFee, feeDto.getFee())
+                        .set(ReturnExpressDetail::getDestoryFeeStatus,1)
+                        .set(ReturnExpressDetail::getDestoryFeeTime,new Date())
                         .eq(ReturnExpressDetail::getId, feeDto.getId());
                 expressMapper.update(null, update);
             }

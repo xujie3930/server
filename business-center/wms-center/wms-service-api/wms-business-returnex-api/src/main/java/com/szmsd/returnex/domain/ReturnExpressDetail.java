@@ -176,7 +176,7 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     private String returnFeeTime;
 
     @ApiModelProperty(value = "退件费用")
-    private BigDecimal returnFee;
+    private String returnFee;
 
     @ApiModelProperty(value = "销毁费状态 1已生成销毁费")
     private Integer destoryFeeStatus;
@@ -185,7 +185,10 @@ public class ReturnExpressDetail extends BaseEntity implements BOConvert {
     private String destoryFeeTime;
 
     @ApiModelProperty(value = "销毁费用")
-    private BigDecimal destoryFee;
+    private String destoryFee;
+
+    @ApiModelProperty(value = "费用生成异常信息")
+    private String errorMsg;
 
 
     @Override

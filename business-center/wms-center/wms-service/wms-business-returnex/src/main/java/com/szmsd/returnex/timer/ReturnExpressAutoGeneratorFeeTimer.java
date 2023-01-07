@@ -30,7 +30,7 @@ public class ReturnExpressAutoGeneratorFeeTimer {
     private IReturnExpressService iReturnExpressService;
 
     /**
-     * 每5分钟执行一次
+     * 每5分钟执行一次,自动生成退件费
      */
     @Async
     @Scheduled(cron = "0 */5 * * * ?")
@@ -40,6 +40,20 @@ public class ReturnExpressAutoGeneratorFeeTimer {
             logger.info("自动生成退件费开始");
             iReturnExpressService.autoGeneratorFee();
             logger.info("自动生成退件费结束");
+        });
+    }
+
+    /**
+     * 每5分钟执行一次,自动生成销毁费
+     */
+    @Async
+    @Scheduled(cron = "0 */5 * * * ?")
+    public void autoGeneratorDestoryFee() {
+        String key = applicationName + ":ReturnExpressTimer:autoGeneratorDestoryFee";
+        this.doWorker(key, () -> {
+            logger.info("自动生成销毁费开始");
+            iReturnExpressService.autoGeneratorDestoryFee();
+            logger.info("自动生成销毁费结束");
         });
     }
 

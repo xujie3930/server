@@ -36,6 +36,7 @@ import com.szmsd.http.dto.returnex.ReturnDetailWMS;
 import com.szmsd.inventory.api.feign.InventoryFeignService;
 import com.szmsd.inventory.domain.dto.InventoryAdjustmentDTO;
 import com.szmsd.returnex.api.feign.client.IHttpFeignClientService;
+import com.szmsd.returnex.command.ReturnExpressAutoGeneratorDestoryFeeCmd;
 import com.szmsd.returnex.command.ReturnExpressAutoGeneratorFeeCmd;
 import com.szmsd.returnex.config.BeanCopyUtil;
 import com.szmsd.returnex.config.ConfigStatus;
@@ -970,18 +971,42 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         List<List<ReturnExpressDetail>> partReturnExpressList = Lists.partition(returnExpressDetails,50);
 
         for(List<ReturnExpressDetail> expressDetails : partReturnExpressList){
+            new ReturnExpressAutoGeneratorFeeCmd(expressDetails).execute();
+        }
+    }
 
-            List<String> orderNoList = expressDetails.stream().map(ReturnExpressDetail::getFromOrderNo).collect(Collectors.toList());
+    @Override
+    public void autoGeneratorDestoryFee() {
 
-            new ReturnExpressAutoGeneratorFeeCmd(orderNoList).execute();
+        //step 1.查询未退费的数据
+        List<ReturnExpressDetail> returnExpressDetails = this.selectAutoGeneratorDestoryFee();
+
+        if(CollectionUtils.isEmpty(returnExpressDetails)){
+            return;
         }
 
+        //每次执行50条数据
+        List<List<ReturnExpressDetail>> partReturnExpressList = Lists.partition(returnExpressDetails,50);
+
+        for(List<ReturnExpressDetail> expressDetails : partReturnExpressList){
+            new ReturnExpressAutoGeneratorDestoryFeeCmd(expressDetails).execute();
+        }
     }
 
     private List<ReturnExpressDetail> selectAutoGeneratorFee(){
 
         List<ReturnExpressDetail> returnExpressDetails = baseMapper.selectList(Wrappers.<ReturnExpressDetail>query().lambda()
                 .eq(ReturnExpressDetail::getReturnFeeStatus,0)
+        );
+
+        return returnExpressDetails;
+    }
+
+    private List<ReturnExpressDetail> selectAutoGeneratorDestoryFee(){
+
+        List<ReturnExpressDetail> returnExpressDetails = baseMapper.selectList(Wrappers.<ReturnExpressDetail>query().lambda()
+                .eq(ReturnExpressDetail::getReturnFeeStatus,1)
+                .eq(ReturnExpressDetail::getDestoryFeeStatus,0)
         );
 
         return returnExpressDetails;
