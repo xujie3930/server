@@ -17,6 +17,7 @@ import com.szmsd.delivery.dto.OfflineImportDto;
 import com.szmsd.delivery.dto.OfflineResultDto;
 import com.szmsd.delivery.enums.DelOutboundStateEnum;
 import com.szmsd.delivery.enums.OfflineDeliveryStateEnum;
+import com.szmsd.delivery.mapper.OfflineCostImportMapper;
 import com.szmsd.delivery.mapper.OfflineDeliveryImportMapper;
 import com.szmsd.delivery.service.IDelOutboundAddressService;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -120,26 +121,19 @@ public class OfflineDeliveryCreateOrderCmd extends BasicCommand<OfflineResultDto
         try {
             //批量添加出口单据
             //IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
-            Context.batchInsert("del_outbound",delOutbounds,"id");
+            int batchDeloutbound[] = Context.batchInsert("del_outbound",delOutbounds,"id");
             //iDelOutboundService.saveBatch(newdelOutbounds);
             //IDelOutboundAddressService iDelOutboundAddressService = SpringUtils.getBean(IDelOutboundAddressService.class);
             //iDelOutboundAddressService.saveBatch(delOutboundAddresses);
-            Context.batchInsert("del_outbound_address",delOutboundAddresses,"id");
+            int batchDeloutboundAddress[] = Context.batchInsert("del_outbound_address",delOutboundAddresses,"id");
 
             //修改导入的数据
-            if (CollectionUtils.isNotEmpty(updateData)) {
+            if (CollectionUtils.isNotEmpty(updateData) && batchDeloutbound.length > 0) {
                 OfflineDeliveryImportMapper offlineDeliveryImportMapper = SpringUtils.getBean(OfflineDeliveryImportMapper.class);
+                OfflineCostImportMapper offlineCostImportMapper = SpringUtils.getBean(OfflineCostImportMapper.class);
                 int update = offlineDeliveryImportMapper.updateDealState(updateData);
-//                for (OfflineImportDto importDto : updateData) {
-//
-//                    OfflineDeliveryImport offlineDeliveryImport = new OfflineDeliveryImport();
-//                    offlineDeliveryImport.setId(importDto.getId());
-//                    offlineDeliveryImport.setTrackingNo(importDto.getTrackingNo());
-//                    offlineDeliveryImport.setDealStatus(importDto.getDealStatus());
-//                    offlineDeliveryImport.setOrderNo(importDto.getOrderNo());
-//
-//                    offlineDeliveryImportMapper.updateById(offlineDeliveryImport);
-//                }
+                offlineCostImportMapper.updateOrderNo(updateData);
+
             }
 
             return offlineResultDto;
