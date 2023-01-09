@@ -1029,6 +1029,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             && !DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())
             ) {
                 AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
+
+                logger.info(">>>>>[创建出库单]3.7 保存附件信息参数:{}",JSON.toJSONString(attachmentDTO));
+
                 this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
             }
             logger.info(">>>>>[创建出库单]3.7 保存附件信息，{}", timer.intervalRestart());
