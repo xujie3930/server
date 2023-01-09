@@ -670,6 +670,8 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
     @Transactional(rollbackFor = Exception.class)
     public R autoRefund(RefundRequestListDTO addDTO) {
 
+        log.info("自动退费请求参数：{}",JSON.toJSONString(addDTO));
+
         List<RefundRequestDTO> refundRequestDTOS = addDTO.getRefundRequestList();
 
         if(CollectionUtils.isEmpty(refundRequestDTOS)){
@@ -691,7 +693,8 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
         }
 
         List<String> orderNoList = refundRequestDTOS.stream().map(RefundRequestDTO::getOrderNo).collect(Collectors.toList());
-        if(CollectionUtils.isEmpty(orderNoList)){
+        log.info("自动退费请求参数orderNoList：{}",JSON.toJSONString(orderNoList));
+        if(CollectionUtils.isEmpty(orderNoList) || orderNoList.size() == 0){
             throw new RuntimeException("自动退费order No 异常");
         }
 

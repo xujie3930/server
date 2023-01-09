@@ -17,6 +17,7 @@ import com.szmsd.finance.service.IAccountSerialBillService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,7 +124,7 @@ public class RefundPayFactory extends AbstractPayFactory {
         isPrcStateList.add("增值消费");
         isPrcStateList.add("物料费");
 
-        financeThreadTaskPool.execute(() -> {
+        //ListenableFuture<Object> taskResultVOFuture = exportThreadPoolTaskExecutor.submitListenable(() -> {
             log.info("setSerialBillLog {}", JSONObject.toJSONString(dto));
             List<AccountSerialBillDTO> serialBillInfoList = dto.getSerialBillInfoList();
             AccountSerialBillDTO serialBill = serialBillInfoList.get(0);
@@ -174,7 +175,8 @@ public class RefundPayFactory extends AbstractPayFactory {
             }
             log.info("save accountSerialBill :{}", JSON.toJSONString(accountSerialBill));
             accountSerialBillService.save(accountSerialBill);
-        });
+        //});
+
     }
 
     private String createSerialNumber(){
