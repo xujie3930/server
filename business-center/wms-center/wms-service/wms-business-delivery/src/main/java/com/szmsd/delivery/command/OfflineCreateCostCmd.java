@@ -1,5 +1,6 @@
 package com.szmsd.delivery.command;
 
+import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Lists;
@@ -10,6 +11,7 @@ import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.OfflineCostImport;
@@ -277,8 +279,9 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
             refundRequestDTO.setPayoutAmount(new BigDecimal("0.00"));
             refundRequestDTO.setAttributes("自动退费");
             refundRequestDTO.setRemark(costImport.getRemark());
+            String processNo = createSerialNumber();
             refundRequestDTO.setOrderNo(deliveryImport.getOrderNo());
-            //refundRequestDTO.setProcessNo(deliveryImport.getTrackingNo());
+            refundRequestDTO.setProcessNo(processNo);
             refundRequestDTO.setShipmentRule(deliveryImport.getShipmentService());
             refundRequestDTO.setTrackingNo(deliveryImport.getTrackingNo());
             //状态已完成
@@ -300,5 +303,12 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
         refundRequestListDTO.setRefundRequestList(refundRequestList);
 
         return refundRequestListDTO;
+    }
+
+    private String createSerialNumber(){
+
+        String s = DateUtils.dateTime();
+        String randomNums = RandomUtil.randomNumbers(8);
+        return s + randomNums;
     }
 }
