@@ -10,4 +10,18 @@
         </foreach >
     </insert>
 
+    <update id="updateOrderNo" parameterType="java.util.List">
+
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update offline_cost_import
+            <set>
+                <if test="item.orderNo != null and item.orderNo != ''">
+                    order_no = #{item.orderNo},
+                </if>
+            </set>
+            where tracking_no = #{item.trackingNo}
+        </foreach>
+
+    </update>
+
 </mapper>

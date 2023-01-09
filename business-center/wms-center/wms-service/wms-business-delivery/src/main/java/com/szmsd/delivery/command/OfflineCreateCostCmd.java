@@ -54,7 +54,7 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
 
         List<RefundRequestAutoDTO> refundRequestAutoDTOS = autoRefundData.getRefundRequestList();
 
-        List<List<RefundRequestAutoDTO>> autoRefundDataPart = Lists.partition(refundRequestAutoDTOS,100);
+        List<List<RefundRequestAutoDTO>> autoRefundDataPart = Lists.partition(refundRequestAutoDTOS,10);
 
         for(List<RefundRequestAutoDTO> refundRequestAutoDTOS1 : autoRefundDataPart) {
 
