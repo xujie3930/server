@@ -278,7 +278,7 @@ public class OfflineCreateCostCmd extends BasicCommand<Integer> {
             refundRequestDTO.setAttributes("自动退费");
             refundRequestDTO.setRemark(costImport.getRemark());
             refundRequestDTO.setOrderNo(deliveryImport.getOrderNo());
-            refundRequestDTO.setProcessNo(deliveryImport.getTrackingNo());
+            //refundRequestDTO.setProcessNo(deliveryImport.getTrackingNo());
             refundRequestDTO.setShipmentRule(deliveryImport.getShipmentService());
             refundRequestDTO.setTrackingNo(deliveryImport.getTrackingNo());
             //状态已完成

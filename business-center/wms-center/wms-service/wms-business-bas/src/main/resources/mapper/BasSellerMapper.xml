@@ -252,7 +252,7 @@
         GROUP BY cus_code
     </select>
     <select id="selectBasSellers" resultType="com.szmsd.bas.dto.BasSellerSysDto">
-        SELECT o.id,o.init_email,o.user_name,o.service_manager,o.service_manager_name,o.service_manager_nick_name,o.service_staff,
+        SELECT o.id,o.init_email,o.user_name,o.service_manager,o.service_manager_name,o.service_manager_nick_name,o.service_staff,o.second_sales_staff_name,
         o.service_staff_name,o.service_staff_nick_name,o.seller_code,if(count(s.vaild = '0' or null)=0,1,0) as reviewState,o.is_active
         FROM bas_seller o left join bas_seller_certificate s on o.seller_code = s.seller_code
         ${ew.customSqlSegment}
