@@ -229,6 +229,9 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
         //int count = baseMapper.countBasSeller(where,basSeller.getReviewState());
         /* where.last("limit "+(basSeller.getPageNum()-1)*basSeller.getPageSize()+","+basSeller.getPageSize());*/
+        if (basSeller.getIds()!=null&&basSeller.getIds().size()>0){
+            where.in("o.id",basSeller.getIds());
+        }
         List<BasSellerSysDto> basSellerSysDtos = baseMapper.selectBasSellers(where,basSeller.getReviewState());
 
         basSellerSysDtos.forEach(s->{

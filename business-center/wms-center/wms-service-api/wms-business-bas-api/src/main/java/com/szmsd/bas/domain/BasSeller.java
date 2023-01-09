@@ -48,17 +48,23 @@ public class BasSeller extends BaseEntity {
 //    @Excel(name = "删除标识：0未删除 1已删除")
     private String delFlag;
 
+    @ApiModelProperty(value = "客户代码")
+    @Excel(name = "客户代码")
+    private String sellerCode;
+
+    @ApiModelProperty(value = "初始注册邮箱")
+    @Excel(name = "注册邮箱")
+    private String initEmail;
+
     @ApiModelProperty(value = "用户名")
     @Excel(name = "用户名")
     private String userName;
 
-    @ApiModelProperty(value = "初始注册邮箱")
-//    @Excel(name = "初始注册邮箱")
-    private String initEmail;
+    @ApiModelProperty(value = "公司")
+    @Excel(name = "公司")
+    private String company;
 
-    @ApiModelProperty(value = "客户代码")
-    @Excel(name = "客户代码")
-    private String sellerCode;
+
 
     public void setSellerCode(String sellerCode) {
         this.sellerCode = sellerCode;
@@ -142,9 +148,7 @@ public class BasSeller extends BaseEntity {
 //    @Excel(name = "英文名")
     private String nameEn;
 
-    @ApiModelProperty(value = "公司")
-//    @Excel(name = "公司")
-    private String company;
+
 
     @ApiModelProperty(value = "性别 F 女 M 男")
 //    @Excel(name = "性别 F 女 M 男")
@@ -222,7 +226,7 @@ public class BasSeller extends BaseEntity {
 
     @ApiModelProperty(value = "0表示金额，1表示账期")
     @TableField(exist = false)
-    @Excel(name = "授信方式")
+//    @Excel(name = "授信方式")
     private String creditType;
 
     @ApiModelProperty(value = "客户basic认证秘钥")
@@ -233,6 +237,12 @@ public class BasSeller extends BaseEntity {
 
     @ApiModelProperty(value = "自定义尺寸")
     private String rulerCustomized;
+
+
+    @ApiModelProperty(value = "勾选id集合")
+    @TableField(exist = false)
+    private List<String> ids;
+
 
 
 
