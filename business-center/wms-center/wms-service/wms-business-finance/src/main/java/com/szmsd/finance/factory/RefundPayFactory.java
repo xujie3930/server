@@ -124,7 +124,7 @@ public class RefundPayFactory extends AbstractPayFactory {
         isPrcStateList.add("增值消费");
         isPrcStateList.add("物料费");
 
-        //ListenableFuture<Object> taskResultVOFuture = exportThreadPoolTaskExecutor.submitListenable(() -> {
+        financeThreadTaskPool.execute(() -> {
             log.info("setSerialBillLog {}", JSONObject.toJSONString(dto));
             List<AccountSerialBillDTO> serialBillInfoList = dto.getSerialBillInfoList();
             AccountSerialBillDTO serialBill = serialBillInfoList.get(0);
@@ -175,7 +175,7 @@ public class RefundPayFactory extends AbstractPayFactory {
             }
             log.info("save accountSerialBill :{}", JSON.toJSONString(accountSerialBill));
             accountSerialBillService.save(accountSerialBill);
-        //});
+        });
 
     }
 
