@@ -20,14 +20,19 @@ public class BasRefundRequestJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         List<String> ids =basRefundRequestMapper.selectFid();
+        //如果为了就不走自动审核
+        if (ids.size()>0) {
         ids.forEach(x->{
             basRefundRequestMapper.deleteByPrimaryKey(Integer.parseInt(x));
         });
-        RefundReviewDTO refundReviewDTO=new RefundReviewDTO();
-        refundReviewDTO.setIdList(ids);
-        refundReviewDTO.setStatus(RefundStatusEnum.valueOf("COMPLETE"));
-        refundReviewDTO.setReviewRemark("系统自动审核");
-        iRefundRequestService.approve(refundReviewDTO);
+
+
+            RefundReviewDTO refundReviewDTO = new RefundReviewDTO();
+            refundReviewDTO.setIdList(ids);
+            refundReviewDTO.setStatus(RefundStatusEnum.valueOf("COMPLETE"));
+            refundReviewDTO.setReviewRemark("系统自动审核");
+            iRefundRequestService.approve(refundReviewDTO);
+        }
 
 
     }
