@@ -3,6 +3,7 @@ package com.szmsd.delivery.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.enums.SqlLike;
+import com.github.pagehelper.util.StringUtil;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
@@ -568,11 +569,23 @@ public final class DelOutboundServiceImplUtil {
             pdfPCell.setBorder(15);
             pdfPCell.setBorderWidth(1.5f);
             if (i == 0) {
-                font.setSize(10f);
+                font.setSize(7f);
                 pdfPCell.setFixedHeight(100f);
                 Phrase element = new Phrase("To:"+delOutboundAddress.getConsignee(),font);
                 pdfPCell.addElement(element);
-                pdfPCell.addElement(new Phrase(delOutboundAddress.getStreet1()+" "+delOutboundAddress.getStreet2()+" "+ delOutbound.getHouseNo(),font));
+                StringBuffer stringBuffers = new StringBuffer();
+                stringBuffers.append(delOutboundAddress.getStreet1());
+                stringBuffers.append(" ");
+                if(StringUtil.isNotEmpty(delOutboundAddress.getStreet2())){
+                    stringBuffers.append(delOutboundAddress.getStreet2());
+                    stringBuffers.append(" ");
+                }
+
+                if(StringUtils.isNotEmpty(delOutbound.getHouseNo())){
+                    stringBuffers.append(delOutbound.getHouseNo());
+                }
+
+                pdfPCell.addElement(new Phrase(stringBuffers.toString(),font));
                 pdfPCell.addElement(new Phrase(delOutboundAddress.getCity() + " " + delOutboundAddress.getStateOrProvince(),font));
                 pdfPCell.addElement(new Phrase(delOutboundAddress.getPostCode(),font));
                 // 国家二字码
