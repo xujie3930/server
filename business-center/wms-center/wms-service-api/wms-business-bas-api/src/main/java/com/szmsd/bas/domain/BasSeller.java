@@ -239,5 +239,11 @@ public class BasSeller extends BaseEntity {
     private String rulerCustomized;
 
 
+    @ApiModelProperty(value = "勾选id集合")
+    @TableField(exist = false)
+    private List<String> ids;
+
+
+
 
 }
