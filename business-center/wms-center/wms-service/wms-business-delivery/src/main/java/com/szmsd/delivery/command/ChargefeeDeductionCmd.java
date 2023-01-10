@@ -110,6 +110,8 @@ public class ChargefeeDeductionCmd extends BasicCommand<List<String>> {
                     serialBill.setAmazonLogisticsRouteId(delOutbound.getAmazonLogisticsRouteId());
                     serialBill.setCountry(address.getCountry());
                     serialBill.setCountryCode(address.getCountryCode());
+                    serialBill.setWeight(delOutbound.getWeight());
+                    serialBill.setCalcWeight(delOutbound.getCalcWeight());
 
                     serialBillInfoList.add(serialBill);
                     custPayDTO.setSerialBillInfoList(serialBillInfoList);
