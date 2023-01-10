@@ -280,6 +280,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             throw new CommonException("400", "Order does not exist");
         }
 
+        String state = delOutbound.getState();
+
+        if(DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(state)){
+            throw new CommonException("400", delOutbound.getExceptionMessage());
+        }
+
         String amazonLogisticsRouteId1 = delOutbound.getAmazonLogisticsRouteId();
         String amazonReferenceId = delOutbound.getAmazonReferenceId();
 
