@@ -90,7 +90,7 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
         }
 
         //一张跟踪号的费用，等于改出库单单的金额
-        Map<String,List<OfflineCostImport>> costExcelMap = offlineCostImports.stream().collect(Collectors.groupingBy(OfflineCostImport::getTrackingNo));
+        Map<String,List<OfflineCostImport>> costExcelMap = offlineCostImports.stream().filter(item-> StringUtils.isNotBlank(item.getTrackingNo())).collect(Collectors.groupingBy(OfflineCostImport::getTrackingNo));
         for(OfflineDeliveryImport deliveryImport : offlineDeliveryImports){
             List<OfflineCostImport> trackingList = costExcelMap.get(deliveryImport.getTrackingNo());
             BigDecimal amount = BigDecimal.ZERO;
