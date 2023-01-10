@@ -774,6 +774,14 @@ public class DelOutboundController extends BaseController {
         return this.delOutboundService.label(response, dto);
     }
 
+    @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:label')")
+    @PostMapping("/label-batch")
+    @ApiOperation(value = "出库管理 - 批量获取标签", position = 1300)
+    @ApiImplicitParam(name = "dto", value = "出库单", dataType = "DelOutboundLabelDto")
+    public R labelBatch(HttpServletResponse response, @RequestBody @Validated DelOutboundLabelDto dto) {
+        return this.delOutboundService.labelBatch(response, dto);
+    }
+
     @PreAuthorize("@ss.hasPermi('DelOutbound:DelOutbound:SelfPick')")
     @PostMapping("/labelSelfPick")
     @ApiOperation(value = "出库管理 - 获取自提标签", position = 1300)
