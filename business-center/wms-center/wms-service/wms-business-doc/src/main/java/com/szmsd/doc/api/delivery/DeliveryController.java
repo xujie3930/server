@@ -574,6 +574,7 @@ public class DeliveryController {
                 byte[] bytes = Base64CheckUtils.checkAndConvert(x.getFile());
                 MultipartFile multipartFile = new MockMultipartFile("面单文件", "", "pdf", bytes);
                 MultipartFile[] multipartFiles = new MultipartFile[]{multipartFile};
+                log.info("remoteAttachmentService.uploadAttachment 参数：{}",JSON.toJSONString(multipartFiles));
                 R<List<BasAttachmentDataDTO>> listR = this.remoteAttachmentService.uploadAttachment(multipartFiles, AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT, "", "");
                 List<BasAttachmentDataDTO> attachmentDataDTOList = R.getDataAndException(listR);
                 if (CollectionUtils.isNotEmpty(attachmentDataDTOList)) {
