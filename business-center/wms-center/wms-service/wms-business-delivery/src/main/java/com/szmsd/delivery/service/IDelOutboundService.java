@@ -484,5 +484,13 @@ void emailBatchUpdateTrackingNo(List<Map<String, Object>> list,String filepath);
     public void nuclearWeight(DelOutbound delOutbound);
 
     List<DelOutboundChargeData> findDelboundCharges(List<String> orderNoList);
+
+    /**
+     * 批量获取标签
+     * @param response
+     * @param dto
+     * @return
+     */
+    R labelBatch(HttpServletResponse response, DelOutboundLabelDto dto);
 }
 

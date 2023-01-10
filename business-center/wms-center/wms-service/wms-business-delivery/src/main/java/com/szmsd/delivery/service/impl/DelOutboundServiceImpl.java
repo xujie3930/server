@@ -3062,6 +3062,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return delOutboundChargeData;
     }
 
+    @Override
+    public R labelBatch(HttpServletResponse response, DelOutboundLabelDto dto) {
+
+        return null;
+    }
+
     public void bringThridPartyAsync(DelOutbound delOutbound) {
 
         String key = applicationName + ":DelOutbound:bringThridPartyAsync:" + delOutbound.getOrderNo();
