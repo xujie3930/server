@@ -3,17 +3,17 @@ package com.szmsd.finance.service.impl;
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
 import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
-import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.szmsd.bas.api.feign.BasFileFeignService;
+import com.szmsd.bas.api.service.SerialNumberClientService;
+import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.bas.domain.BasFile;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -36,7 +36,6 @@ import com.szmsd.finance.vo.AccountSerialBillExcelVO;
 import com.szmsd.putinstorage.api.feign.InboundReceiptFeignService;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptQueryDTO;
 import com.szmsd.putinstorage.domain.vo.InboundReceiptVO;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +70,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
     @Autowired
     private BasFileFeignService basFileFeignService;
+
+    @Autowired
+    private SerialNumberClientService serialNumberClientService;
 
     @Value("${filepath}")
     private String filePath;
@@ -248,11 +250,8 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     }
 
     private String createSerialNumber(){
-
-        String s = DateUtils.dateTime();
-        String randomNums = RandomUtil.randomNumbers(8);
-
-        return s + randomNums;
+        String randomNums = serialNumberClientService.generatorNumber(SerialNumberConstant.FSS_ACCOUNT_SERIAL_NUMBER);
+        return randomNums;
     }
 
     @Override
@@ -292,6 +291,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             }
 
             String serialNumber = this.createSerialNumber();
+            log.info("serialbill serialNumber:{}",serialNumber);
             value.setSerialNumber(serialNumber);
 
             String bcategory = value.getBusinessCategory();

@@ -4,6 +4,8 @@ import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.szmsd.bas.api.service.SerialNumberClientService;
+import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.finance.domain.AccountBalanceChange;
@@ -40,6 +42,9 @@ public class RefundPayFactory extends AbstractPayFactory {
     private IAccountSerialBillService accountSerialBillService;
     @Autowired
     private AccountSerialBillMapper accountSerialBillMapper;
+
+    @Autowired
+    private SerialNumberClientService serialNumberClientService;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -180,10 +185,8 @@ public class RefundPayFactory extends AbstractPayFactory {
     }
 
     private String createSerialNumber(){
-
-        String s = DateUtils.dateTime();
-        String randomNums = RandomUtil.randomNumbers(8);
-        return s + randomNums;
+        String randomNums = serialNumberClientService.generatorNumber(SerialNumberConstant.FSS_ACCOUNT_SERIAL_NUMBER);
+        return randomNums;
     }
 
 }
