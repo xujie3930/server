@@ -6,11 +6,13 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.pack.domain.PackageManagementConfig;
 import com.szmsd.pack.dto.PackageAddressAddDTO;
 import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.service.IPackageMangClientService;
 import com.szmsd.pack.vo.PackageAddressVO;
+import com.szmsd.pack.vo.PackageManagementConfigVo;
 import com.szmsd.pack.vo.PackageMangVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -163,6 +165,45 @@ public class PackageMangClientController extends BaseController {
         return toOk(packageMangClientService.insertPackageManagement(packageManagement));
     }
 
+    @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:addPackageConfig')")
+    @Log(title = "交货管理", businessType = BusinessType.INSERT)
+    @PostMapping("addPackageConfig")
+    @ApiOperation(value = "交货管理-上门揽件模板【新增】", notes = "交货管理模板-上门揽件【新增】")
+    public R addPackageConfig(@RequestBody PackageManagementConfig packageManagementConfig) {
+        return toOk(packageMangClientService.addPackageConfig(packageManagementConfig));
+    }
+
+    @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:addPackageConfig')")
+    @Log(title = "交货管理", businessType = BusinessType.UPDATE)
+    @PostMapping("editPackageConfig")
+    @ApiOperation(value = "交货管理-修改揽件模板【编辑】", notes = "交货管理模板-上门揽件【编辑】")
+    public R editPackageConfig(@RequestBody PackageManagementConfig packageManagementConfig) {
+        return toOk(packageMangClientService.editPackageConfig(packageManagementConfig));
+    }
+
+    /**
+     * 查询package - 交货管理 - 揽件模板列表
+     */
+    @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:packageConfigList')")
+    @PostMapping("/packageConfigList")
+    @ApiOperation(value = "揽件模板-列表", notes = "揽件模板列表查询")
+    public TableDataInfo<PackageManagementConfigVo> packageConfigList(@RequestBody PackageMangQueryDTO packageMangQueryDTO) {
+        startPage(packageMangQueryDTO);
+        List<PackageManagementConfigVo> list = packageMangClientService.selectpackageConfigList(packageMangQueryDTO);
+        return getDataTable(list);
+    }
+
+    /**
+     * 查询package - 交货管理 - 揽件模板列表
+     */
+    @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:deletePackageConfig')")
+    @PostMapping("/deletePackageConfig")
+    @ApiOperation(value = "揽件模板-列表删除", notes = "揽件模板列表删除")
+    public R deletePackageConfig(@RequestBody PackageMangQueryDTO packageMangQueryDTO) {
+
+
+        return toOk(packageMangClientService.deletePackageConfig(packageMangQueryDTO));
+    }
     /**
      * 修改package - 交货管理 - 地址信息表模块
      */

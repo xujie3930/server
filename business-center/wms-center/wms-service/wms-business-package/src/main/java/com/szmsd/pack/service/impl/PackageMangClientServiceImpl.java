@@ -10,23 +10,28 @@ import com.szmsd.common.datascope.service.AwaitUserService;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.pack.domain.PackageAddress;
+import com.szmsd.pack.domain.PackageManagementConfig;
+import com.szmsd.pack.domain.PackageManagementConfigWeek;
 import com.szmsd.pack.dto.PackageAddressAddDTO;
 import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.mapper.PackageAddressMapper;
+import com.szmsd.pack.mapper.PackageManagementConfigMapper;
+import com.szmsd.pack.mapper.PackageManagementConfigWeekMapper;
 import com.szmsd.pack.service.IPackageMangClientService;
 import com.szmsd.pack.service.IPackageMangServeService;
 import com.szmsd.pack.vo.PackageAddressVO;
+import com.szmsd.pack.vo.PackageManagementConfigVo;
 import com.szmsd.pack.vo.PackageMangVO;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.*;
 
 /**
  * <p>
@@ -44,7 +49,11 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
 
     @Resource
     private IPackageMangServeService packageManagementService;
+    @Autowired
+    private PackageManagementConfigMapper packageManagementConfigMapper;
 
+    @Autowired
+    private PackageManagementConfigWeekMapper packageManagementConfigWeekMapper;
     /**
      * 获取用户sellerCode
      *
@@ -236,5 +245,80 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
     public int deletePackageManagementByIds(List<String> ids) {
         return packageManagementService.deletePackageManagementByIds(ids);
     }
+
+    @Override
+    public int addPackageConfig(PackageManagementConfig packageManagementConfig) {
+       int a= packageManagementConfigMapper.insertSelective(packageManagementConfig);
+        List<PackageManagementConfigWeek> list=packageManagementConfig.getPackageManagementConfigWeekList();
+        if (list.size()>0) {
+            list.forEach(x -> {
+                x.setPackageManagementConfigId(packageManagementConfig.getId());
+                packageManagementConfigWeekMapper.insertSelective(x);
+            });
+        }
+        return a;
+    }
+
+    @Override
+    public int editPackageConfig(PackageManagementConfig packageManagementConfig) {
+
+        int a= packageManagementConfigMapper.updateByPrimaryKeySelective(packageManagementConfig);
+        List<PackageManagementConfigWeek> list=packageManagementConfig.getPackageManagementConfigWeekList();
+        packageManagementConfigWeekMapper.deleteByPrimaryKey(packageManagementConfig.getId());
+        list.forEach(x->{
+            x.setPackageManagementConfigId(packageManagementConfig.getId());
+            packageManagementConfigWeekMapper.insertSelective(x);
+        });
+        return a;
+    }
+
+    @Override
+    public List<PackageManagementConfigVo> selectpackageConfigList(PackageMangQueryDTO packageMangQueryDTO) {
+        String sellerCode = packageMangQueryDTO.getSellerCode();
+
+        if (StringUtils.isNotEmpty(sellerCode)) {
+            try {
+                sellerCode = URLDecoder.decode(packageMangQueryDTO.getSellerCode(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            List<String> sellerCodeList = this.splitToArray(sellerCode, "[\n,]");
+
+            packageMangQueryDTO.setSellerCodeList(sellerCodeList);
+
+        }
+        List<PackageManagementConfigVo> list = packageManagementConfigMapper.selectByPrimaryKey(packageMangQueryDTO);
+
+        return list;
+    }
+
+    @Override
+    public int deletePackageConfig(PackageMangQueryDTO packageMangQueryDTO) {
+         if (packageMangQueryDTO.getIds().size()>0){
+             packageMangQueryDTO.getIds().forEach(x->{
+                 packageManagementConfigMapper.deleteByPrimaryKey(x);
+                 packageManagementConfigWeekMapper.deleteByPrimaryKey(x);
+             });
+
+         }
+        return 1;
+    }
+
+    public static List<String> splitToArray(String text, String split) {
+        String[] arr = text.split(split);
+        if (arr.length == 0) {
+            return Collections.emptyList();
+        }
+        List<String> list = new ArrayList<>();
+        for (String s : arr) {
+            if (com.szmsd.common.core.utils.StringUtils.isEmpty(s)) {
+                continue;
+            }
+            list.add(s);
+        }
+        return list;
+    }
+
+
 }
 

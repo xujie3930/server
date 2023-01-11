@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.szmsd.pack.mapper.PackageManagementConfigWeekMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.pack.domain.PackageManagementConfigWeek" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="package_management_config_id" property="packageManagementConfigId" jdbcType="INTEGER" />
+    <result column="week_name" property="weekName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, package_management_config_id, week_name
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from package_management_config_week
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from package_management_config_week
+    where package_management_config_id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.szmsd.pack.domain.PackageManagementConfigWeek" >
+    insert into package_management_config_week (id, package_management_config_id, week_name
+      )
+    values (#{id,jdbcType=INTEGER}, #{packageManagementConfigId,jdbcType=INTEGER}, #{weekName,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.szmsd.pack.domain.PackageManagementConfigWeek" >
+    insert into package_management_config_week
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="packageManagementConfigId != null" >
+        package_management_config_id,
+      </if>
+      <if test="weekName != null" >
+        week_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="packageManagementConfigId != null" >
+        #{packageManagementConfigId,jdbcType=INTEGER},
+      </if>
+      <if test="weekName != null" >
+        #{weekName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.pack.domain.PackageManagementConfigWeek" >
+    update package_management_config_week
+    <set >
+      <if test="packageManagementConfigId != null" >
+        package_management_config_id = #{packageManagementConfigId,jdbcType=INTEGER},
+      </if>
+      <if test="weekName != null" >
+        week_name = #{weekName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.pack.domain.PackageManagementConfigWeek" >
+    update package_management_config_week
+    set package_management_config_id = #{packageManagementConfigId,jdbcType=INTEGER},
+      week_name = #{weekName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
