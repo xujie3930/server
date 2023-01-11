@@ -2,6 +2,7 @@ package com.szmsd.pack.dto;
 
 import com.google.common.collect.Lists;
 import com.szmsd.common.core.utils.StringUtils;
+import com.szmsd.common.core.web.controller.QueryDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import jodd.util.StringUtil;
@@ -28,7 +29,7 @@ import java.util.Optional;
 @EqualsAndHashCode
 @Accessors(chain = true)
 @ApiModel(value = "揽件列表查询条件", description = "揽件列表查询条件")
-public class PackageMangQueryDTO{
+public class PackageMangQueryDTO extends QueryDto {
 
     private static final long serialVersionUID = 1L;
 
@@ -81,6 +82,14 @@ public class PackageMangQueryDTO{
 
     @ApiModelProperty(value = "客户代码")
     private String customCode;
+
+    @ApiModelProperty(value = "周")
+    private List<String> weekNameList;
+
+    @ApiModelProperty(value = "客户代码集合")
+    private List<String> sellerCodeList;
+
+
 
     @ApiModelProperty(value = "客户编码list")
     private List<String> customCodeList;
