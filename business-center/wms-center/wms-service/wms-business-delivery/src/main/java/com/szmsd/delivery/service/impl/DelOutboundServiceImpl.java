@@ -2622,6 +2622,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         byte[] fb = null;
                         FileUtils.writeByteArrayToFile(labelFile, fb = byteArrayOutputStream.toByteArray(), false);
 
+                        if(fb == null){
+                            continue;
+                        }
+
                         PdfImportedPage impage = pdfCopy.getImportedPage(new PdfReader(fb),1);
                         pdfCopy.addPage(impage);
                     }
@@ -2629,7 +2633,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            //throw new RuntimeException(e);
+            logger.error("labelBatch:{}",e.getMessage());
+            return R.failed(e.getMessage());
         }finally {
             doc.close();
         }

@@ -115,7 +115,7 @@ public class CreditInfoBO {
         log.info("creditTypeEnum:{}",creditTypeEnum);
         switch (creditTypeEnum) {
             case QUOTA:
-                log.info("creditTypeEnum:QUOTA");
+                log.info("creditTypeEnum:canUseAmount:{}",canUseAmount);
                 // 授信额度扣减 足额可扣减 反之不行
                 if (amount.compareTo(canUseAmount) > 0) {
                     return false;
@@ -130,11 +130,13 @@ public class CreditInfoBO {
                     return true;
                 }
             case TIME_LIMIT:
+
                 log.info("creditTypeEnum:TIME_LIMIT");
                 // 余额 不足 但是在授信期间（A+B）则都可以支付
                 LocalDateTime now = LocalDateTime.now();
                 boolean after = now.isAfter(this.creditBeginTime);
                 boolean before = now.isBefore(this.creditEndTime);
+                log.info("creditTypeEnum:canUseAmount:{},{}",after,before);
                 if (after && before) {
 
                     if (updateCredit) {
