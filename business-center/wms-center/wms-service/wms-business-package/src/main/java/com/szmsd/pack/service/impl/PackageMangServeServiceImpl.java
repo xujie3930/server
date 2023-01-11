@@ -110,6 +110,12 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
         return baseMapper.insert(packageManagement.convertThis(PackageManagement.class));
     }
 
+    @Override
+    public int insertPackageManagementjob(PackageManagement packageManagement) {
+        packageManagement.setOrderNo(genNo());
+        return baseMapper.insert(packageManagement);
+    }
+
     /**
      * 修改package - 交货管理 - 地址信息表模块
      *

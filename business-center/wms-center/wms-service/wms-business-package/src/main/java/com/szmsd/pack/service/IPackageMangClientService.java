@@ -2,10 +2,12 @@ package com.szmsd.pack.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.pack.domain.PackageAddress;
+import com.szmsd.pack.domain.PackageManagementConfig;
 import com.szmsd.pack.dto.PackageAddressAddDTO;
 import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.vo.PackageAddressVO;
+import com.szmsd.pack.vo.PackageManagementConfigVo;
 import com.szmsd.pack.vo.PackageMangVO;
 
 import java.util.List;
@@ -79,5 +81,13 @@ public interface IPackageMangClientService extends IService<PackageAddress> {
     int updatePackageManagement(PackageMangAddDTO packageManagement);
 
     int deletePackageManagementByIds(List<String> ids);
+
+    int  addPackageConfig(PackageManagementConfig packageManagementConfig);
+
+    int editPackageConfig(PackageManagementConfig packageManagementConfig);
+
+    List<PackageManagementConfigVo>  selectpackageConfigList(PackageMangQueryDTO packageMangQueryDTO);
+
+    int  deletePackageConfig(PackageMangQueryDTO packageMangQueryDTO);
 }
 
