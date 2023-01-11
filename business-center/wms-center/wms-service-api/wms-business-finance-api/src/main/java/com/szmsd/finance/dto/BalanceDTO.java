@@ -83,6 +83,7 @@ public class BalanceDTO {
                     function.apply(this, amount);
                 }
                 b = this.creditInfoBO.changeCreditAmount(needDeducted, updateCredit);
+                log.info("creditInfoBO.changeCreditAmount:{}",b);
                 return b;
             }
         } else {

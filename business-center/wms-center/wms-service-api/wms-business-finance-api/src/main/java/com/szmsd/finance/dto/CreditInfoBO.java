@@ -115,7 +115,7 @@ public class CreditInfoBO {
         log.info("creditTypeEnum:{}",creditTypeEnum);
         switch (creditTypeEnum) {
             case QUOTA:
-                log.info("creditTypeEnum:canUseAmount:{}",canUseAmount);
+                log.info("creditTypeEnum:canUseAmount:{},amount:{},updateCredit:{}",canUseAmount,amount,updateCredit);
                 // 授信额度扣减 足额可扣减 反之不行
                 if (amount.compareTo(canUseAmount) > 0) {
                     return false;
