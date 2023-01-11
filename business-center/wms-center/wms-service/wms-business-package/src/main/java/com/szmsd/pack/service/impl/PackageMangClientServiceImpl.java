@@ -304,6 +304,11 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
         return 1;
     }
 
+    @Override
+    public PackageManagementConfig packageConfigBy(PackageMangQueryDTO packageMangQueryDTO) {
+      return   packageManagementConfigMapper.packageConfigBy(packageMangQueryDTO.getIdu());
+    }
+
     public static List<String> splitToArray(String text, String split) {
         String[] arr = text.split(split);
         if (arr.length == 0) {
