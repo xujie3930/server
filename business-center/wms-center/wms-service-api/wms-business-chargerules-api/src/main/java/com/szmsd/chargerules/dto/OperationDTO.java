@@ -118,7 +118,7 @@ public class OperationDTO implements Serializable {
                 int indexThis = index2.getAndIncrement();
                 BigDecimal minimumWeight = x.getMinimumWeight();
                 BigDecimal maximumWeight = x.getMaximumWeight();
-                AssertUtil.isTrue(minimumWeight.compareTo(maximumWeight) <= 0, String.format("第%s条规则中%s不能小于%s", indexThis, "最大重量", "最小重量"));
+                AssertUtil.isTrue(minimumWeight.compareTo(maximumWeight) < 0, String.format("第%s条规则中%s不能小于%s", indexThis, "最大重量", "最小重量"));
             }).sorted(Comparator.comparing(ChaOperationDetailsDTO::getFirstPrice)).reduce((x1, x2) -> {
                 int indexThis = index.getAndIncrement();
                 //判断是否相交
