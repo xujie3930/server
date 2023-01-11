@@ -2586,6 +2586,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             return R.failed("无法获取订单信息");
         }
 
+        if(delOutbounds.size() == 1){
+
+            DelOutbound delOutbound = delOutbounds.get(0);
+            Long id = delOutbound.getId();
+            dto.setId(id);
+
+            return label(response,dto);
+        }
+
         Document doc = new Document();
 
         try {
