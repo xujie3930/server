@@ -42,6 +42,8 @@ public interface IPackageMangServeService extends IService<PackageManagement> {
      */
     int insertPackageManagement(PackageMangAddDTO packageManagement);
 
+    int insertPackageManagementjob(PackageManagement packageManagement);
+
     /**
      * 修改package - 交货管理 - 地址信息表模块
      *

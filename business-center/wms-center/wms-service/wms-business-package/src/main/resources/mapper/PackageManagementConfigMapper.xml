@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.szmsd.pack.mapper.PackageManagementConfigMapper" >
+  <resultMap id="BaseResultMap" type="com.szmsd.pack.domain.PackageManagementConfig" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="create_by_name" property="createByName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+    <result column="update_by_name" property="updateByName" jdbcType="VARCHAR" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="version" property="version" jdbcType="DECIMAL" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="del_flag" property="delFlag" jdbcType="INTEGER" />
+    <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+    <result column="seller_code" property="sellerCode" jdbcType="VARCHAR" />
+    <result column="link_user_name" property="linkUserName" jdbcType="VARCHAR" />
+    <result column="link_phone" property="linkPhone" jdbcType="VARCHAR" />
+    <result column="country_name_zh" property="countryNameZh" jdbcType="VARCHAR" />
+    <result column="country_code" property="countryCode" jdbcType="VARCHAR" />
+    <result column="country_name_en" property="countryNameEn" jdbcType="VARCHAR" />
+    <result column="province_name_zh" property="provinceNameZh" jdbcType="VARCHAR" />
+    <result column="province_code" property="provinceCode" jdbcType="VARCHAR" />
+    <result column="province_name_en" property="provinceNameEn" jdbcType="VARCHAR" />
+    <result column="city_name_zh" property="cityNameZh" jdbcType="VARCHAR" />
+    <result column="city_code" property="cityCode" jdbcType="VARCHAR" />
+    <result column="city_name_en" property="cityNameEn" jdbcType="VARCHAR" />
+    <result column="district_name_zh" property="districtNameZh" jdbcType="VARCHAR" />
+    <result column="district_code" property="districtCode" jdbcType="VARCHAR" />
+    <result column="district_name_en" property="districtNameEn" jdbcType="VARCHAR" />
+    <result column="address_zh" property="addressZh" jdbcType="VARCHAR" />
+    <result column="delivery_address" property="deliveryAddress" jdbcType="VARCHAR" />
+    <result column="address_en" property="addressEn" jdbcType="VARCHAR" />
+    <result column="submit_time" property="submitTime" jdbcType="TIMESTAMP" />
+    <result column="export_type" property="exportType" jdbcType="INTEGER" />
+    <result column="export_time" property="exportTime" jdbcType="TIMESTAMP" />
+    <result column="delivery_time" property="deliveryTime" jdbcType="TIMESTAMP" />
+    <result column="expected_delivery_time" property="expectedDeliveryTime" jdbcType="DATE" />
+    <result column="receive_package_num" property="receivePackageNum" jdbcType="INTEGER" />
+    <result column="driver_name" property="driverName" jdbcType="VARCHAR" />
+    <result column="driver_phone" property="driverPhone" jdbcType="VARCHAR" />
+    <result column="package_num" property="packageNum" jdbcType="INTEGER" />
+    <result column="operation_type" property="operationType" jdbcType="INTEGER" />
+    <result column="piece_number" property="pieceNumber" jdbcType="INTEGER" />
+    <result column="square_number" property="squareNumber" jdbcType="INTEGER" />
+    <result column="bag_number" property="bagNumber" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, create_by, create_by_name, create_time, update_by, update_by_name, update_time, 
+    version, remark, del_flag, order_no, seller_code, link_user_name, link_phone, country_name_zh, 
+    country_code, country_name_en, province_name_zh, province_code, province_name_en, 
+    city_name_zh, city_code, city_name_en, district_name_zh, district_code, district_name_en, 
+    address_zh, delivery_address, address_en, submit_time, export_type, export_time, 
+    delivery_time, expected_delivery_time, receive_package_num, driver_name, driver_phone, 
+    package_num, operation_type, piece_number, square_number, bag_number
+  </sql>
+  <select id="selectByPrimaryKey" resultType="com.szmsd.pack.vo.PackageManagementConfigVo" parameterType="com.szmsd.pack.dto.PackageMangQueryDTO" >
+    SELECT
+      a.id,
+      a.seller_code,
+      a.link_user_name,
+      a.link_phone,
+      a.delivery_address,
+      b.week_name
+    FROM
+      package_management_config a
+        LEFT JOIN package_management_config_week b ON a.id = b.package_management_config_id
+   <where>
+
+     <if test="weekNameList!=null and weekNameList.size() > 0">
+       AND b.week_name IN
+       <foreach collection="weekNameList" open="(" separator="," close=")" item="weekName">
+         #{weekName}
+       </foreach>
+     </if>
+     <if test="sellerCodeList!=null and sellerCodeList.size() > 0">
+       AND a.seller_code IN
+       <foreach collection="sellerCodeList" open="(" separator="," close=")" item="sellerCode">
+         #{sellerCode}
+       </foreach>
+     </if>
+   </where>
+  </select>
+  <select id="selectPackageManagementConfigJob" resultType="com.szmsd.pack.domain.PackageManagementConfig">
+    SELECT
+      a.*,b.week_name
+    FROM
+      package_management_config a
+        LEFT JOIN package_management_config_week b ON a.id = b.package_management_config_id
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from package_management_config
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.szmsd.pack.domain.PackageManagementConfig" >
+    insert into package_management_config (id, create_by, create_by_name, 
+      create_time, update_by, update_by_name, 
+      update_time, version, remark, 
+      del_flag, order_no, seller_code, 
+      link_user_name, link_phone, country_name_zh, 
+      country_code, country_name_en, province_name_zh, 
+      province_code, province_name_en, city_name_zh, 
+      city_code, city_name_en, district_name_zh, 
+      district_code, district_name_en, address_zh, 
+      delivery_address, address_en, submit_time, 
+      export_type, export_time, delivery_time, 
+      expected_delivery_time, receive_package_num, driver_name, 
+      driver_phone, package_num, operation_type, 
+      piece_number, square_number, bag_number
+      )
+    values (#{id,jdbcType=INTEGER}, #{createBy,jdbcType=VARCHAR}, #{createByName,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, #{updateByName,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{version,jdbcType=DECIMAL}, #{remark,jdbcType=VARCHAR}, 
+      #{delFlag,jdbcType=INTEGER}, #{orderNo,jdbcType=VARCHAR}, #{sellerCode,jdbcType=VARCHAR}, 
+      #{linkUserName,jdbcType=VARCHAR}, #{linkPhone,jdbcType=VARCHAR}, #{countryNameZh,jdbcType=VARCHAR}, 
+      #{countryCode,jdbcType=VARCHAR}, #{countryNameEn,jdbcType=VARCHAR}, #{provinceNameZh,jdbcType=VARCHAR}, 
+      #{provinceCode,jdbcType=VARCHAR}, #{provinceNameEn,jdbcType=VARCHAR}, #{cityNameZh,jdbcType=VARCHAR}, 
+      #{cityCode,jdbcType=VARCHAR}, #{cityNameEn,jdbcType=VARCHAR}, #{districtNameZh,jdbcType=VARCHAR}, 
+      #{districtCode,jdbcType=VARCHAR}, #{districtNameEn,jdbcType=VARCHAR}, #{addressZh,jdbcType=VARCHAR}, 
+      #{deliveryAddress,jdbcType=VARCHAR}, #{addressEn,jdbcType=VARCHAR}, #{submitTime,jdbcType=TIMESTAMP}, 
+      #{exportType,jdbcType=INTEGER}, #{exportTime,jdbcType=TIMESTAMP}, #{deliveryTime,jdbcType=TIMESTAMP}, 
+      #{expectedDeliveryTime,jdbcType=DATE}, #{receivePackageNum,jdbcType=INTEGER}, #{driverName,jdbcType=VARCHAR}, 
+      #{driverPhone,jdbcType=VARCHAR}, #{packageNum,jdbcType=INTEGER}, #{operationType,jdbcType=INTEGER}, 
+      #{pieceNumber,jdbcType=INTEGER}, #{squareNumber,jdbcType=INTEGER}, #{bagNumber,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.szmsd.pack.domain.PackageManagementConfig" useGeneratedKeys="true" keyProperty="id">
+    insert into package_management_config
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="createByName != null" >
+        create_by_name,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateBy != null" >
+        update_by,
+      </if>
+      <if test="updateByName != null" >
+        update_by_name,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+      <if test="version != null" >
+        version,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="delFlag != null" >
+        del_flag,
+      </if>
+      <if test="orderNo != null" >
+        order_no,
+      </if>
+      <if test="sellerCode != null" >
+        seller_code,
+      </if>
+      <if test="linkUserName != null" >
+        link_user_name,
+      </if>
+      <if test="linkPhone != null" >
+        link_phone,
+      </if>
+      <if test="countryNameZh != null" >
+        country_name_zh,
+      </if>
+      <if test="countryCode != null" >
+        country_code,
+      </if>
+      <if test="countryNameEn != null" >
+        country_name_en,
+      </if>
+      <if test="provinceNameZh != null" >
+        province_name_zh,
+      </if>
+      <if test="provinceCode != null" >
+        province_code,
+      </if>
+      <if test="provinceNameEn != null" >
+        province_name_en,
+      </if>
+      <if test="cityNameZh != null" >
+        city_name_zh,
+      </if>
+      <if test="cityCode != null" >
+        city_code,
+      </if>
+      <if test="cityNameEn != null" >
+        city_name_en,
+      </if>
+      <if test="districtNameZh != null" >
+        district_name_zh,
+      </if>
+      <if test="districtCode != null" >
+        district_code,
+      </if>
+      <if test="districtNameEn != null" >
+        district_name_en,
+      </if>
+      <if test="addressZh != null" >
+        address_zh,
+      </if>
+      <if test="deliveryAddress != null" >
+        delivery_address,
+      </if>
+      <if test="addressEn != null" >
+        address_en,
+      </if>
+      <if test="submitTime != null" >
+        submit_time,
+      </if>
+      <if test="exportType != null" >
+        export_type,
+      </if>
+      <if test="exportTime != null" >
+        export_time,
+      </if>
+      <if test="deliveryTime != null" >
+        delivery_time,
+      </if>
+      <if test="expectedDeliveryTime != null" >
+        expected_delivery_time,
+      </if>
+      <if test="receivePackageNum != null" >
+        receive_package_num,
+      </if>
+      <if test="driverName != null" >
+        driver_name,
+      </if>
+      <if test="driverPhone != null" >
+        driver_phone,
+      </if>
+      <if test="packageNum != null" >
+        package_num,
+      </if>
+      <if test="operationType != null" >
+        operation_type,
+      </if>
+      <if test="pieceNumber != null" >
+        piece_number,
+      </if>
+      <if test="squareNumber != null" >
+        square_number,
+      </if>
+      <if test="bagNumber != null" >
+        bag_number,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createByName != null" >
+        #{createByName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateByName != null" >
+        #{updateByName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="version != null" >
+        #{version,jdbcType=DECIMAL},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null" >
+        #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="orderNo != null" >
+        #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="sellerCode != null" >
+        #{sellerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="linkUserName != null" >
+        #{linkUserName,jdbcType=VARCHAR},
+      </if>
+      <if test="linkPhone != null" >
+        #{linkPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="countryNameZh != null" >
+        #{countryNameZh,jdbcType=VARCHAR},
+      </if>
+      <if test="countryCode != null" >
+        #{countryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="countryNameEn != null" >
+        #{countryNameEn,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceNameZh != null" >
+        #{provinceNameZh,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceCode != null" >
+        #{provinceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceNameEn != null" >
+        #{provinceNameEn,jdbcType=VARCHAR},
+      </if>
+      <if test="cityNameZh != null" >
+        #{cityNameZh,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null" >
+        #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cityNameEn != null" >
+        #{cityNameEn,jdbcType=VARCHAR},
+      </if>
+      <if test="districtNameZh != null" >
+        #{districtNameZh,jdbcType=VARCHAR},
+      </if>
+      <if test="districtCode != null" >
+        #{districtCode,jdbcType=VARCHAR},
+      </if>
+      <if test="districtNameEn != null" >
+        #{districtNameEn,jdbcType=VARCHAR},
+      </if>
+      <if test="addressZh != null" >
+        #{addressZh,jdbcType=VARCHAR},
+      </if>
+      <if test="deliveryAddress != null" >
+        #{deliveryAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="addressEn != null" >
+        #{addressEn,jdbcType=VARCHAR},
+      </if>
+      <if test="submitTime != null" >
+        #{submitTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="exportType != null" >
+        #{exportType,jdbcType=INTEGER},
+      </if>
+      <if test="exportTime != null" >
+        #{exportTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="deliveryTime != null" >
+        #{deliveryTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="expectedDeliveryTime != null" >
+        #{expectedDeliveryTime,jdbcType=DATE},
+      </if>
+      <if test="receivePackageNum != null" >
+        #{receivePackageNum,jdbcType=INTEGER},
+      </if>
+      <if test="driverName != null" >
+        #{driverName,jdbcType=VARCHAR},
+      </if>
+      <if test="driverPhone != null" >
+        #{driverPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="packageNum != null" >
+        #{packageNum,jdbcType=INTEGER},
+      </if>
+      <if test="operationType != null" >
+        #{operationType,jdbcType=INTEGER},
+      </if>
+      <if test="pieceNumber != null" >
+        #{pieceNumber,jdbcType=INTEGER},
+      </if>
+      <if test="squareNumber != null" >
+        #{squareNumber,jdbcType=INTEGER},
+      </if>
+      <if test="bagNumber != null" >
+        #{bagNumber,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.szmsd.pack.domain.PackageManagementConfig" >
+    update package_management_config
+    <set >
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createByName != null" >
+        create_by_name = #{createByName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateByName != null" >
+        update_by_name = #{updateByName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="version != null" >
+        version = #{version,jdbcType=DECIMAL},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null" >
+        del_flag = #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="orderNo != null" >
+        order_no = #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="sellerCode != null" >
+        seller_code = #{sellerCode,jdbcType=VARCHAR},
+      </if>
+      <if test="linkUserName != null" >
+        link_user_name = #{linkUserName,jdbcType=VARCHAR},
+      </if>
+      <if test="linkPhone != null" >
+        link_phone = #{linkPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="countryNameZh != null" >
+        country_name_zh = #{countryNameZh,jdbcType=VARCHAR},
+      </if>
+      <if test="countryCode != null" >
+        country_code = #{countryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="countryNameEn != null" >
+        country_name_en = #{countryNameEn,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceNameZh != null" >
+        province_name_zh = #{provinceNameZh,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceCode != null" >
+        province_code = #{provinceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="provinceNameEn != null" >
+        province_name_en = #{provinceNameEn,jdbcType=VARCHAR},
+      </if>
+      <if test="cityNameZh != null" >
+        city_name_zh = #{cityNameZh,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null" >
+        city_code = #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cityNameEn != null" >
+        city_name_en = #{cityNameEn,jdbcType=VARCHAR},
+      </if>
+      <if test="districtNameZh != null" >
+        district_name_zh = #{districtNameZh,jdbcType=VARCHAR},
+      </if>
+      <if test="districtCode != null" >
+        district_code = #{districtCode,jdbcType=VARCHAR},
+      </if>
+      <if test="districtNameEn != null" >
+        district_name_en = #{districtNameEn,jdbcType=VARCHAR},
+      </if>
+      <if test="addressZh != null" >
+        address_zh = #{addressZh,jdbcType=VARCHAR},
+      </if>
+      <if test="deliveryAddress != null" >
+        delivery_address = #{deliveryAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="addressEn != null" >
+        address_en = #{addressEn,jdbcType=VARCHAR},
+      </if>
+      <if test="submitTime != null" >
+        submit_time = #{submitTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="exportType != null" >
+        export_type = #{exportType,jdbcType=INTEGER},
+      </if>
+      <if test="exportTime != null" >
+        export_time = #{exportTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="deliveryTime != null" >
+        delivery_time = #{deliveryTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="expectedDeliveryTime != null" >
+        expected_delivery_time = #{expectedDeliveryTime,jdbcType=DATE},
+      </if>
+      <if test="receivePackageNum != null" >
+        receive_package_num = #{receivePackageNum,jdbcType=INTEGER},
+      </if>
+      <if test="driverName != null" >
+        driver_name = #{driverName,jdbcType=VARCHAR},
+      </if>
+      <if test="driverPhone != null" >
+        driver_phone = #{driverPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="packageNum != null" >
+        package_num = #{packageNum,jdbcType=INTEGER},
+      </if>
+      <if test="operationType != null" >
+        operation_type = #{operationType,jdbcType=INTEGER},
+      </if>
+      <if test="pieceNumber != null" >
+        piece_number = #{pieceNumber,jdbcType=INTEGER},
+      </if>
+      <if test="squareNumber != null" >
+        square_number = #{squareNumber,jdbcType=INTEGER},
+      </if>
+      <if test="bagNumber != null" >
+        bag_number = #{bagNumber,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.szmsd.pack.domain.PackageManagementConfig" >
+    update package_management_config
+    set create_by = #{createBy,jdbcType=VARCHAR},
+      create_by_name = #{createByName,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_by = #{updateBy,jdbcType=VARCHAR},
+      update_by_name = #{updateByName,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      version = #{version,jdbcType=DECIMAL},
+      remark = #{remark,jdbcType=VARCHAR},
+      del_flag = #{delFlag,jdbcType=INTEGER},
+      order_no = #{orderNo,jdbcType=VARCHAR},
+      seller_code = #{sellerCode,jdbcType=VARCHAR},
+      link_user_name = #{linkUserName,jdbcType=VARCHAR},
+      link_phone = #{linkPhone,jdbcType=VARCHAR},
+      country_name_zh = #{countryNameZh,jdbcType=VARCHAR},
+      country_code = #{countryCode,jdbcType=VARCHAR},
+      country_name_en = #{countryNameEn,jdbcType=VARCHAR},
+      province_name_zh = #{provinceNameZh,jdbcType=VARCHAR},
+      province_code = #{provinceCode,jdbcType=VARCHAR},
+      province_name_en = #{provinceNameEn,jdbcType=VARCHAR},
+      city_name_zh = #{cityNameZh,jdbcType=VARCHAR},
+      city_code = #{cityCode,jdbcType=VARCHAR},
+      city_name_en = #{cityNameEn,jdbcType=VARCHAR},
+      district_name_zh = #{districtNameZh,jdbcType=VARCHAR},
+      district_code = #{districtCode,jdbcType=VARCHAR},
+      district_name_en = #{districtNameEn,jdbcType=VARCHAR},
+      address_zh = #{addressZh,jdbcType=VARCHAR},
+      delivery_address = #{deliveryAddress,jdbcType=VARCHAR},
+      address_en = #{addressEn,jdbcType=VARCHAR},
+      submit_time = #{submitTime,jdbcType=TIMESTAMP},
+      export_type = #{exportType,jdbcType=INTEGER},
+      export_time = #{exportTime,jdbcType=TIMESTAMP},
+      delivery_time = #{deliveryTime,jdbcType=TIMESTAMP},
+      expected_delivery_time = #{expectedDeliveryTime,jdbcType=DATE},
+      receive_package_num = #{receivePackageNum,jdbcType=INTEGER},
+      driver_name = #{driverName,jdbcType=VARCHAR},
+      driver_phone = #{driverPhone,jdbcType=VARCHAR},
+      package_num = #{packageNum,jdbcType=INTEGER},
+      operation_type = #{operationType,jdbcType=INTEGER},
+      piece_number = #{pieceNumber,jdbcType=INTEGER},
+      square_number = #{squareNumber,jdbcType=INTEGER},
+      bag_number = #{bagNumber,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
