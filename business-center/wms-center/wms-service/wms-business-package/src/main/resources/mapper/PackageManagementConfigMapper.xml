@@ -91,7 +91,7 @@
   </select>
     <select id="packageConfigBy" resultType="com.szmsd.pack.domain.PackageManagementConfig">
       SELECT
-        a.*, GROUP_CONCAT(b.week_name) as week_name
+        a.*, GROUP_CONCAT(b.week_name) as week_name,a.operation_type as operationTypes
       FROM
         package_management_config a
           LEFT JOIN package_management_config_week b ON a.id = b.package_management_config_id
