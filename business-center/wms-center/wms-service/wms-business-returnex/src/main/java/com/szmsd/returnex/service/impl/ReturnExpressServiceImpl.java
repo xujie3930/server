@@ -997,6 +997,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
 
         List<ReturnExpressDetail> returnExpressDetails = baseMapper.selectList(Wrappers.<ReturnExpressDetail>query().lambda()
                 .eq(ReturnExpressDetail::getReturnFeeStatus,0)
+                .eq(ReturnExpressDetail::getDealStatus,"waitCustomerDeal")
         );
 
         return returnExpressDetails;
@@ -1007,6 +1008,7 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
         List<ReturnExpressDetail> returnExpressDetails = baseMapper.selectList(Wrappers.<ReturnExpressDetail>query().lambda()
                 .eq(ReturnExpressDetail::getReturnFeeStatus,1)
                 .eq(ReturnExpressDetail::getDestoryFeeStatus,0)
+                .eq(ReturnExpressDetail::getDealStatus,"waitCustomerDeal")
         );
 
         return returnExpressDetails;

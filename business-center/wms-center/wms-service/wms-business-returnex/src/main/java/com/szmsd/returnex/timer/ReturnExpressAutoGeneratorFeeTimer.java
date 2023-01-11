@@ -30,10 +30,10 @@ public class ReturnExpressAutoGeneratorFeeTimer {
     private IReturnExpressService iReturnExpressService;
 
     /**
-     * 每5分钟执行一次,自动生成退件费
+     * 每1分钟执行一次,自动生成退件费
      */
     @Async
-    @Scheduled(cron = "0 */5 * * * ?")
+    @Scheduled(cron = "0 */1 * * * ?")
     public void autoGeneratorFee() {
         String key = applicationName + ":ReturnExpressTimer:autoGeneratorFee";
         this.doWorker(key, () -> {
@@ -44,10 +44,10 @@ public class ReturnExpressAutoGeneratorFeeTimer {
     }
 
     /**
-     * 每5分钟执行一次,自动生成销毁费
+     * 每2分钟执行一次,自动生成销毁费
      */
     @Async
-    @Scheduled(cron = "0 */5 * * * ?")
+    @Scheduled(cron = "0 */2 * * * ?")
     public void autoGeneratorDestoryFee() {
         String key = applicationName + ":ReturnExpressTimer:autoGeneratorDestoryFee";
         this.doWorker(key, () -> {

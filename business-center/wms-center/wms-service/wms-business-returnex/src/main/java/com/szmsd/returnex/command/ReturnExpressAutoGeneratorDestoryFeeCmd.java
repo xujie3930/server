@@ -250,6 +250,8 @@ public class ReturnExpressAutoGeneratorDestoryFeeCmd extends BasicCommand<List<R
             }else{
                 serialBill.setBusinessType("仓储服务");
             }
+            serialBill.setChargeCategory(FEE_TYPE);
+            serialBill.setChargeType(FEE_TYPE);
             serialBill.setChargeCategoryChange(FEE_TYPE);
 
             serialBillInfoList.add(serialBill);
