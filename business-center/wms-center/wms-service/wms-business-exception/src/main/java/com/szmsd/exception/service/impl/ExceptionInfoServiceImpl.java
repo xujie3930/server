@@ -284,6 +284,7 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
                     exportDto.setEmail(exportVO.getEmail());
                     exportDto.setIoss(exportVO.getIoss());
                     exportDto.setHouseNo(exportVO.getHouseNo());
+                    exportDto.setCodAmount(exportVO.getCodAmount());
                 }
             }
         }
@@ -593,6 +594,11 @@ public class ExceptionInfoServiceImpl extends ServiceImpl<ExceptionInfoMapper, E
     @Override
     public void updateDelOutboundHouseNo(ExceptionInfoExportDto dto) {
         baseMapper.updateDelOutboundHouseNo(dto);
+    }
+
+    @Override
+    public void updateCodAmount(ExceptionInfoExportDto dto) {
+        baseMapper.updateCodAmount(dto);
     }
 
     private Date dealUTZTime(String time) {
