@@ -109,11 +109,11 @@ public class ExceptionExcelUtil {
         //获取第一行数据
         Row row2 = sheet.getRow(0);
 
-        for (int i = 0; i < 20 - a; i++) {
+        for (int i = 0; i < 21 - a; i++) {
             Cell deliveryTimeCell = row2.getCell(i);
 
             CellStyle styleMain = workbook.createCellStyle();
-            if (i == 19 - a) {
+            if (i == 20 - a) {
                 styleMain.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
             } else {
                 styleMain.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
@@ -138,7 +138,7 @@ public class ExceptionExcelUtil {
 
         //获取第二行数据
         Row row3 = sheet.getRow(1);
-        for (int x = 19 - a; x < 24 - a; x++) {
+        for (int x = 20 - a; x < 25 - a; x++) {
 
             Cell deliveryTimeCell1 = row3.getCell(x);
             CellStyle styleMain1 = workbook.createCellStyle();
@@ -160,9 +160,9 @@ public class ExceptionExcelUtil {
         }
 
         if (exceptionInfoQueryDto.getType() == 1) {
-            sheet.setColumnHidden(19, true);
+            sheet.setColumnHidden(20, true);
         } else {
-            sheet.setColumnHidden(18, true);
+            sheet.setColumnHidden(19, true);
 
         }
 

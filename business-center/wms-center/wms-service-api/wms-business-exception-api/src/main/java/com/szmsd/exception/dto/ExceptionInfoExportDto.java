@@ -89,6 +89,10 @@ public class ExceptionInfoExportDto {
     @ApiModelProperty(value = "houseNo")
     private String houseNo;
 
+    @Excel(name="COD 金额",width = 15,needMerge=true)
+    @ApiModelProperty(value = "COD 金额")
+    private String codAmount;
+
     @Excel(name="增值税号",width = 30,needMerge = true)
     @ApiModelProperty(value = "增值税号")
     private String ioss;
