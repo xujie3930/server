@@ -5,6 +5,7 @@ import com.szmsd.pack.domain.PackageManagementConfig;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
 import com.szmsd.pack.vo.PackageManagementConfigVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface PackageManagementConfigMapper {
     int updateByPrimaryKey(PackageManagementConfig record);
 
     List<PackageManagementConfig>  selectPackageManagementConfigJob();
+
+    PackageManagementConfig  packageConfigBy(@Param("idu") Integer idu);
 }

@@ -89,5 +89,7 @@ public interface IPackageMangClientService extends IService<PackageAddress> {
     List<PackageManagementConfigVo>  selectpackageConfigList(PackageMangQueryDTO packageMangQueryDTO);
 
     int  deletePackageConfig(PackageMangQueryDTO packageMangQueryDTO);
+
+    PackageManagementConfig  packageConfigBy(PackageMangQueryDTO packageMangQueryDTO);
 }
 

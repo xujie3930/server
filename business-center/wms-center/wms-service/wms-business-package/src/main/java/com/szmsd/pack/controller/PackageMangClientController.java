@@ -193,6 +193,15 @@ public class PackageMangClientController extends BaseController {
         return getDataTable(list);
     }
 
+    @PreAuthorize("@ss.hasPermi('PackageManagement:PackageManagement:packageConfigList')")
+    @PostMapping("/packageConfigBy")
+    @ApiOperation(value = "揽件模板-列表", notes = "揽件模板列表查询")
+    public R<PackageManagementConfig> packageConfigBy(@RequestBody PackageMangQueryDTO packageMangQueryDTO) {
+
+        PackageManagementConfig packageManagementConfig = packageMangClientService.packageConfigBy(packageMangQueryDTO);
+        return R.ok(packageManagementConfig);
+    }
+
     /**
      * 查询package - 交货管理 - 揽件模板列表
      */
