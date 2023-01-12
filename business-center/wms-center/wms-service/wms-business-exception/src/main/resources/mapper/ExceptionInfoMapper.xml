@@ -109,5 +109,12 @@
         where
             order_no=#{orderNo}
     </update>
+    <update id="updateCodAmount" parameterType="com.szmsd.exception.dto.ExceptionInfoExportDto">
+        UPDATE del_outbound
+        set
+            cod_amount=#{codAmount}
+        where
+            order_no=#{orderNo}
+    </update>
 
 </mapper>

@@ -146,5 +146,7 @@ public interface IExceptionInfoService extends IService<ExceptionInfo> {
     R<Integer> updExceptionInfoState(ExceptionInfoStateDto stateDto);
 
     void updateDelOutboundHouseNo(ExceptionInfoExportDto dto);
+
+    void  updateCodAmount(ExceptionInfoExportDto dto);
 }
 

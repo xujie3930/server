@@ -38,4 +38,6 @@ public interface ExceptionInfoMapper extends BaseMapper<ExceptionInfo> {
     int updExceptionInfoState(@Param("state") String state, @Param("orderNos") List<String> orderNos);
 
     void  updateDelOutboundHouseNo(ExceptionInfoExportDto dto);
+
+    void  updateCodAmount(ExceptionInfoExportDto dto);
 }
