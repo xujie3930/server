@@ -925,6 +925,10 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
                     delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
                     delOutbound.setReferenceNumber(shipmentOrderResult.getReferenceNumber());
+                    IDelOutboundRetryLabelService iDelOutboundRetryLabelService = SpringUtils.getBean(IDelOutboundRetryLabelService.class);
+                    if(StringUtils.isNotEmpty(shipmentOrderResult.getOrderLabelUrl())){
+                        iDelOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), "",DelOutboundRetryLabelStateEnum.WAIT.name(),"");
+                    }
                 }
 
                 DelOutbound delOutboundUpd = new DelOutbound();

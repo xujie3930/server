@@ -7,4 +7,6 @@ public interface IDelOutboundRetryLabelService extends IService<DelOutboundRetry
 
     void saveAndPushLabel(String orderNo, String pushLabel, String createBy);
 
+    void saveAndPushLabel(String orderNo, String pushLabel,String state, String createBy);
+
 }
