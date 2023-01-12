@@ -106,7 +106,10 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
     @Override
     public int insertPackageManagement(PackageMangAddDTO packageManagement) {
         packageManagement.setOrderNo(genNo());
-        packageManagement.setSellerCode(getSellCode());
+        if (packageManagement.getSellerCode()==null||packageManagement.getSellerCode().equals("")){
+            packageManagement.setSellerCode(getSellCode());
+        }
+
         return baseMapper.insert(packageManagement.convertThis(PackageManagement.class));
     }
 
