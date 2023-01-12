@@ -24,4 +24,15 @@ public class DelOutboundRetryLabelServiceImpl extends ServiceImpl<DelOutboundRet
         this.save(retryLabel);
     }
 
+    @Override
+    public void saveAndPushLabel(String orderNo, String pushLabel, String state, String createBy) {
+        DelOutboundRetryLabel retryLabel = new DelOutboundRetryLabel();
+        retryLabel.setOrderNo(orderNo);
+        retryLabel.setNextRetryTime(new Date());
+        retryLabel.setRemark(pushLabel);
+        retryLabel.setCreateBy(createBy);
+        retryLabel.setState(state);
+        this.save(retryLabel);
+    }
+
 }
