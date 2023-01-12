@@ -75,6 +75,24 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
         return s;
     }
 
+    /**
+     * 单号生成2
+     *
+     * @return
+     */
+    public String genNos(String sellerCode) {
+        String code = PackageConstant.GENERATE_CODE;
+        String appId = PackageConstant.GENERATE_APP_ID;
+//        log.info("调用自动生成单号：code={}", code);
+        R<List<String>> r = basFeignService.create(new BasCodeDto().setAppId(appId).setCode(code));
+        AssertUtil.notNull(r, "单号生成失败");
+        AssertUtil.isTrue(r.getCode() == HttpStatus.SUCCESS, code + "单号生成失败：" + r.getMsg());
+        String s = r.getData().get(0);
+        s = PackageConstant.LS_PREFIX + sellerCode + s;
+//        log.info("调用自动生成单号：调用完成, {}-{}", code, s);
+        return s;
+    }
+
 
     /**
      * 查询package - 交货管理 - 地址信息表模块
@@ -105,14 +123,20 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
      */
     @Override
     public int insertPackageManagement(PackageMangAddDTO packageManagement) {
-        packageManagement.setOrderNo(genNo());
-        packageManagement.setSellerCode(getSellCode());
+
+        if (packageManagement.getSellerCode()==null||packageManagement.getSellerCode().equals("")){
+            packageManagement.setSellerCode(getSellCode());
+            packageManagement.setOrderNo(genNo());
+        }else {
+            packageManagement.setOrderNo(genNos(packageManagement.getSellerCode()));
+        }
+
         return baseMapper.insert(packageManagement.convertThis(PackageManagement.class));
     }
 
     @Override
     public int insertPackageManagementjob(PackageManagement packageManagement) {
-        packageManagement.setOrderNo(genNo());
+        packageManagement.setOrderNo(genNos(packageManagement.getSellerCode()));
         return baseMapper.insert(packageManagement);
     }
 

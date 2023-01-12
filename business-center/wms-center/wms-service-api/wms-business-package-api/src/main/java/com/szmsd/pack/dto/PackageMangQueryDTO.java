@@ -36,6 +36,9 @@ public class PackageMangQueryDTO extends QueryDto {
     @ApiModelProperty(value = "主键IDs")
     private List<Integer> ids;
 
+    @ApiModelProperty(value = "主键idu")
+    private Integer idu;
+
     @ApiModelProperty(value = "联系人")
     private String linkUserName;
 

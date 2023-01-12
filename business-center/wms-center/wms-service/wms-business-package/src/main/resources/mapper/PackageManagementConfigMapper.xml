@@ -61,7 +61,7 @@
       a.link_user_name,
       a.link_phone,
       a.delivery_address,
-      b.week_name
+    GROUP_CONCAT(b.week_name) as week_name
     FROM
       package_management_config a
         LEFT JOIN package_management_config_week b ON a.id = b.package_management_config_id
@@ -80,6 +80,7 @@
        </foreach>
      </if>
    </where>
+    GROUP BY a.id
   </select>
   <select id="selectPackageManagementConfigJob" resultType="com.szmsd.pack.domain.PackageManagementConfig">
     SELECT
@@ -88,7 +89,16 @@
       package_management_config a
         LEFT JOIN package_management_config_week b ON a.id = b.package_management_config_id
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    <select id="packageConfigBy" resultType="com.szmsd.pack.domain.PackageManagementConfig">
+      SELECT
+        a.*, GROUP_CONCAT(b.week_name) as week_name,a.operation_type as operationTypes
+      FROM
+        package_management_config a
+          LEFT JOIN package_management_config_week b ON a.id = b.package_management_config_id
+      where  a.id=#{idu}
+      GROUP BY a.id
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from package_management_config
     where id = #{id,jdbcType=INTEGER}
   </delete>

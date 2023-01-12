@@ -173,6 +173,9 @@ public class PackageManagementConfig extends BaseEntity {
     @TableField(exist = false)
     private String weekName;
 
+    @ApiModelProperty(value = "0：入库，1：转运 给前端显示用")
+    private String operationTypes;
+
     @ApiModelProperty(value = "周数集合")
     @TableField(exist = false)
     private List<PackageManagementConfigWeek> packageManagementConfigWeekList;
