@@ -2598,6 +2598,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         Document doc = new Document();
 
         try {
+            response.setContentType("application/pdf;charset=utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=labelBatch.pdf");
             ServletOutputStream outputStream = response.getOutputStream();
             PdfCopy pdfCopy = new PdfCopy(doc, outputStream);
             doc.open();
