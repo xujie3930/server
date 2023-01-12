@@ -37,7 +37,7 @@ public class QuartzPackageConfig {
 //        每天的0点、13点、18点、21点都执行一次：0 0 0,13,18,21 * * ?
         return TriggerBuilder.newTrigger().forJob(PackageMangJob())
                 .withIdentity("PackageMangJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 */1 * * ?"))
                 .build();
     }
 
