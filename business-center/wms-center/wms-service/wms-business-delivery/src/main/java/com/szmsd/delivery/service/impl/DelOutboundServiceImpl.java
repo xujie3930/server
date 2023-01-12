@@ -2637,6 +2637,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                         PdfImportedPage impage = pdfCopy.getImportedPage(new PdfReader(fb),1);
                         pdfCopy.addPage(impage);
+                    }else{
+
+                        byte[] fb = FileUtils.readFileToByteArray(labelFile);
+
+                        PdfImportedPage impage = pdfCopy.getImportedPage(new PdfReader(fb),1);
+                        pdfCopy.addPage(impage);
+
                     }
                 }
             }
