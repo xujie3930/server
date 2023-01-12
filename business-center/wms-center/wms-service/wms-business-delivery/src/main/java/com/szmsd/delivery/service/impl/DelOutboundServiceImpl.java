@@ -3286,6 +3286,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             byte[] fb = null;
             if(outbound.getEndTagState() != null && outbound.getEndTagState().equals(DelOutboundEndTagStateEnum.REVIEWED.getCode())){
                 pathname = outbound.getShipmentRetryLabel();
+
+                if(StringUtils.isEmpty(pathname)){
+                    response.setStatus(false);
+                    response.setMessage("单号："+outbound.getOrderNo()+",转运出库标签图片不存在");
+                    responseList.add(response);
+                    continue;
+                }
+
                 File labelFile = new File(pathname);
                 if (labelFile.exists()) {
                     FileInputStream fileInputStream = null;
