@@ -1351,6 +1351,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
 
+            logger.info("开始获取承运商标签：{}",delOutbound.getOrderNo());
+
             String productCode = delOutbound.getShipmentRule();
             String prcProductCode = delOutboundWrapperContext.getPrcProductCode();
             if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(prcProductCode)) {
@@ -1364,7 +1366,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 packageDeliveryConditions.setWarehouseCode(delOutbound.getWarehouseCode());
                 packageDeliveryConditions.setProductCode(productCode);
                 PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService = SpringUtils.getBean(PackageDeliveryConditionsFeignService.class);
+                logger.info("packageDeliveryConditionsFeignService.info 请求参数：{}",JSON.toJSONString(packageDeliveryConditions));
                 R<PackageDeliveryConditions> packageDeliveryConditionsR = packageDeliveryConditionsFeignService.info(packageDeliveryConditions);
+                logger.info("packageDeliveryConditionsFeignService.info 请求响应：{}",JSON.toJSONString(packageDeliveryConditionsR));
                 PackageDeliveryConditions packageDeliveryConditionsRData = null;
                 if (null != packageDeliveryConditionsR && Constants.SUCCESS == packageDeliveryConditionsR.getCode()) {
                     packageDeliveryConditionsRData = packageDeliveryConditionsR.getData();
