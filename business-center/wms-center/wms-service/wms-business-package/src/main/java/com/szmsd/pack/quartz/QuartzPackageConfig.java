@@ -17,7 +17,7 @@ public class QuartzPackageConfig {
 
     @Bean
     public JobDetail PackageMangJob() {
-        return JobBuilder.newJob(PackageMangJob.class).withIdentity("TjJob").storeDurably().build();
+        return JobBuilder.newJob(PackageMangJob.class).withIdentity("PackageMangJob").storeDurably().build();
     }
 
 
@@ -27,6 +27,7 @@ public class QuartzPackageConfig {
         //cron方式，每周一凌晨1点刷0 0 1 ? * MON
         //0/3 * * * * ? 3秒测试
         //0 */1 * * * ?  一分钟
+        //0 0 */1 * * ? 一小时一次
 //        每天23点执行一次：0 0 23 * * ?
 //        每天凌晨1点执行一次：0 0 1 * * ?
 //        每月1号凌晨1点执行一次：0 0 1 1 * ?
