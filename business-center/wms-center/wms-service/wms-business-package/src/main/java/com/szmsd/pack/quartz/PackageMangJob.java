@@ -38,8 +38,10 @@ public class PackageMangJob extends QuartzJobBean {
               SimpleDateFormat dateFm = new SimpleDateFormat("EEEE");
 
               String currSun = dateFm.format(date);
+              log.info("自动建揽收单数据周期：{}",currSun);
               //如果相同生成该周期的揽收单
              if (x.getWeekName().equals(currSun)){
+                 log.info("进来11111111111111111");
                  PackageManagement packageManagement=new PackageManagement();
                  BeanUtils.copyProperties(x,packageManagement);
                  packageManagement.setId(null);
