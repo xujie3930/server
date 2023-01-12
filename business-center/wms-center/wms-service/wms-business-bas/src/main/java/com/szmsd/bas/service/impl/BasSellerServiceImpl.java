@@ -28,6 +28,7 @@ import com.szmsd.bas.util.ObjectUtil;
 import com.szmsd.bas.vo.BasSellerCertificateVO;
 import com.szmsd.bas.vo.BasSellerInfoVO;
 import com.szmsd.bas.vo.BasSellerWrapVO;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.constant.UserConstants;
 import com.szmsd.common.core.domain.R;
@@ -549,8 +550,8 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         * @return 结果
         */
         @Override
-        @Transactional
-        public int updateBasSeller(BasSellerInfoDto basSellerInfoDto) throws IllegalAccessException {
+        @Transactional(rollbackFor = Exception.class)
+        public int updateBasSeller(BasSellerInfoDto basSellerInfoDto) {
             //查询表中信息
             QueryWrapper<BasSeller> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("id",basSellerInfoDto.getId());
@@ -558,7 +559,11 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             //注册到wms
             SellerRequest sellerRequest = BeanMapperUtil.map(basSellerInfoDto,SellerRequest.class);
             sellerRequest.setIsActive(true);
-            ObjectUtil.fillNull(sellerRequest,bas);
+            try {
+                ObjectUtil.fillNull(sellerRequest,bas);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
             R<ResponseVO> r = htpBasFeignService.createSeller(sellerRequest);
             //验证wms
             toWms(r);
@@ -577,8 +582,14 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
             userCreditDTO.setUserCreditDetailList(basSellerInfoDto.getUserCreditList());
             userCreditDTO.setCusCode(basSellerInfoDto.getSellerCode());
             R r1 = rechargesFeignService.updateUserCredit(userCreditDTO);
-            R.getDataAndException(r1);
-
+            if(r1 == null){
+                throw new RuntimeException("更新updateUserCredit 异常");
+            }
+            
+            if(r1.getCode() != Constants.SUCCESS){
+                throw new RuntimeException(r1.getMsg());
+            }
+            
             return baseMapper.updateById(basSeller);
         }
 
@@ -771,20 +782,20 @@ public class BasSellerServiceImpl extends ServiceImpl<BasSellerMapper, BasSeller
         }
     private void toWms(R<ResponseVO> r){
         if(r==null){
-            throw new BaseException("Wms service call failed");
+            throw new RuntimeException("Wms service call failed");
         }
         if(r.getData()==null){
-            throw new BaseException("Wms service call failed");
+            throw new RuntimeException("Wms service call failed");
         }else{
             if(r.getData().getSuccess()==null){
                 if(r.getData().getErrors()!=null)
                 {
-                    throw new BaseException("Failed to transmit wms" + r.getData().getErrors());
+                    throw new RuntimeException("Failed to transmit wms" + r.getData().getErrors());
                 }
             }else{
                 if(!r.getData().getSuccess())
                 {
-                    throw new BaseException("Failed to transmit wms" + r.getData().getMessage());
+                    throw new RuntimeException("Failed to transmit wms" + r.getData().getMessage());
                 }
             }
         }
