@@ -17,7 +17,7 @@ public class QuartzPackageConfig {
 
     @Bean
     public JobDetail PackageMangJob() {
-        return JobBuilder.newJob(PackageMangJob.class).withIdentity("TjJob").storeDurably().build();
+        return JobBuilder.newJob(PackageMangJob.class).withIdentity("PackageMangJob").storeDurably().build();
     }
 
 
