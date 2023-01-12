@@ -27,6 +27,7 @@ public class QuartzPackageConfig {
         //cron方式，每周一凌晨1点刷0 0 1 ? * MON
         //0/3 * * * * ? 3秒测试
         //0 */1 * * * ?  一分钟
+        //0 0 */1 * * ? 一小时一次
 //        每天23点执行一次：0 0 23 * * ?
 //        每天凌晨1点执行一次：0 0 1 * * ?
 //        每月1号凌晨1点执行一次：0 0 1 1 * ?
@@ -36,7 +37,7 @@ public class QuartzPackageConfig {
 //        每天的0点、13点、18点、21点都执行一次：0 0 0,13,18,21 * * ?
         return TriggerBuilder.newTrigger().forJob(PackageMangJob())
                 .withIdentity("PackageMangJob")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 */1 * * ?"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * * * ?"))
                 .build();
     }
 

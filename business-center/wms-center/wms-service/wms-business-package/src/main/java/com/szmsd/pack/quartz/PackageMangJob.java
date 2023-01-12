@@ -7,6 +7,7 @@ import com.szmsd.pack.mapper.PackageManagementConfigMapper;
 
 import com.szmsd.pack.service.IPackageMangServeService;
 import io.micrometer.core.instrument.binder.BaseUnits;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.BeanUtils;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 public class PackageMangJob extends QuartzJobBean {
 
     @Autowired
@@ -30,6 +32,7 @@ public class PackageMangJob extends QuartzJobBean {
       List<PackageManagementConfig> packageManagementConfigList=packageManagementConfigMapper.selectPackageManagementConfigJob();
       if (packageManagementConfigList.size()>0){
           packageManagementConfigList.forEach(x->{
+              log.info("自动建揽收单数据：{}",x);
               //当前日期求出周期
               Date date=new Date();
               SimpleDateFormat dateFm = new SimpleDateFormat("EEEE");
@@ -44,6 +47,7 @@ public class PackageMangJob extends QuartzJobBean {
                  packageManagement.setCreateTime(new Date());
                  packageManagement.setCreateByName("系统自动创建");
                  iPackageMangServeService.insertPackageManagementjob(packageManagement);
+                 log.info("自动建揽收单数据成功");
              }
           });
       }
