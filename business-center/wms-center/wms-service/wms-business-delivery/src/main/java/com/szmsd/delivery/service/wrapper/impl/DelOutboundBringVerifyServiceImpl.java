@@ -398,7 +398,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
         // 包裹信息
         List<PackageInfo> packageInfos = new ArrayList<>();
-        if (DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())) {
+
+        boolean orderTypeFlag = DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())
+                                || DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
+                                || DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType());
+
+        if (orderTypeFlag) {
             if (PricingEnum.SKU.equals(pricingEnum)) {
                 BigDecimal declaredValue = BigDecimal.ZERO;
                 Long totalQuantity = 0L;
@@ -413,12 +418,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                     totalQuantity += detail.getQty();
                 }
-                if(StringUtils.equals(delOutboundWrapperContext.getBringVerifyFlag(), "0")){
-                    totalQuantity = 1L;
-                }
+//                if(StringUtils.equals(delOutboundWrapperContext.getBringVerifyFlag(), "0")){
+//                    totalQuantity = 1L;
+//                }
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
                         new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm"),
-                        Math.toIntExact(1), delOutbound.getOrderNo(), declaredValue, ""));
+                        Math.toIntExact(totalQuantity), delOutbound.getOrderNo(), declaredValue, ""));
             } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
                 BigDecimal declareValue = BigDecimal.ZERO;
                 Long totalQuantity = 0L;
@@ -431,9 +436,9 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
                         declareValue = declareValue.add(resultValue);
                     }
-                    if(StringUtils.equals(delOutboundWrapperContext.getBringVerifyFlag(), "0")){
-                        totalQuantity = 1L;
-                    }
+//                    if(StringUtils.equals(delOutboundWrapperContext.getBringVerifyFlag(), "0")){
+//                        totalQuantity = 1L;
+//                    }
                     totalQuantity += detail.getQty();
                 }
                 packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
