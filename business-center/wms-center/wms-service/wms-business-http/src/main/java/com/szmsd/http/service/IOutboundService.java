@@ -56,4 +56,6 @@ public interface IOutboundService {
     R shipmentBoxtransfer(BulkOrderRequestDto dto);
 
     R<DirectExpressOrderApiDTO> getDirectExpressOrder(String orderNo);
+
+    R<Integer> updateDirectExpressOrderWeight(DirectExpressOrderWeightDto dto);
 }

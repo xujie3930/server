@@ -96,4 +96,11 @@ public class OutboundController extends BaseController {
         return outboundService.getDirectExpressOrder(orderNo);
     }
 
+    @PutMapping("/updateDirectExpressOrderWeight")
+    @ApiOperation(value = "获取中国直发订单状态")
+    public R<Integer> updateDirectExpressOrderWeight(@RequestBody DirectExpressOrderWeightDto dto) {
+
+        return outboundService.updateDirectExpressOrderWeight(dto);
+    }
+
 }

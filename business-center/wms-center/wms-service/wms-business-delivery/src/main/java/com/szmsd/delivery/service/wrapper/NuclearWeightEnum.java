@@ -12,10 +12,7 @@ import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.domain.DelOutboundThirdParty;
-import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
-import com.szmsd.delivery.enums.DelOutboundConstant;
-import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
-import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
+import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
 import com.szmsd.delivery.service.IDelOutboundService;
@@ -23,6 +20,7 @@ import com.szmsd.delivery.service.IDelOutboundThirdPartyService;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
+import com.szmsd.http.api.feign.HtpOutboundFeignService;
 import com.szmsd.http.dto.*;
 import org.springframework.util.StopWatch;
 
@@ -555,6 +553,24 @@ public enum NuclearWeightEnum implements ApplicationState, ApplicationRegister{
                 return;
             }
 
+            String prcterminalCarrier = delOutbound.getPrcTerminalCarrier();
+
+            if(PrcTerminalCarrierEnum.CK1.getCode().equals(prcterminalCarrier)){
+
+                logger.info("{}-创建承运商物流订单：{}", delOutbound.getOrderNo(),"CK1订单不创建承运商物流订单");
+
+                HtpOutboundFeignService htpOutboundFeignService = SpringUtils.getBean(HtpOutboundFeignService.class);
+                DirectExpressOrderWeightDto dto = new DirectExpressOrderWeightDto();
+                dto.setWeight(toBigDecimal(delOutbound.getWeight()));
+                dto.setLength(toBigDecimal(delOutbound.getLength()));
+                dto.setWidth(toBigDecimal(delOutbound.getWidth()));
+                dto.setHeight(toBigDecimal(delOutbound.getHeight()));
+                dto.setPackageId(delOutbound.getOrderNo());
+                htpOutboundFeignService.updateDirectExpressOrderWeight(dto);
+
+                return;
+            }
+
             IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
 
             logger.info("{}-创建承运商物流订单：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
@@ -628,6 +644,15 @@ public enum NuclearWeightEnum implements ApplicationState, ApplicationRegister{
         public ApplicationState nextState() {
             return END;
         }
+    }
+
+    private static BigDecimal toBigDecimal(Double d){
+
+        if(d == null){
+            return BigDecimal.ZERO;
+        }
+
+        return new BigDecimal(d);
     }
 
     static class EndHandle extends NuclearWeightEnum.CommonApplicationHandle {

@@ -6,7 +6,6 @@ import com.szmsd.http.api.feign.fallback.HtpOutboundFeignFallback;
 import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.CreateShipmentResponseVO;
 import com.szmsd.http.vo.ResponseVO;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -47,5 +46,7 @@ public interface HtpOutboundFeignService {
     @GetMapping("/api/outbound/http/getDirectExpressOrder")
     @ApiOperation(value = "获取中国直发订单状态")
     R<DirectExpressOrderApiDTO> getDirectExpressOrder(@RequestParam("orderNo") String orderNo);
+    @PostMapping("/api/outbound/http/updateDirectExpressOrderWeight")
+    R<Integer> updateDirectExpressOrderWeight(@RequestBody DirectExpressOrderWeightDto dto);
 
 }
