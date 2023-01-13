@@ -555,7 +555,10 @@ public enum NuclearWeightEnum implements ApplicationState, ApplicationRegister{
 
             String prcterminalCarrier = delOutbound.getPrcTerminalCarrier();
 
-            if(PrcTerminalCarrierEnum.CK1.getCode().equals(prcterminalCarrier)){
+            boolean flag = PrcTerminalCarrierEnum.CK1.getCode().equals(prcterminalCarrier)
+                    || PrcTerminalCarrierEnum.CHOUKOU1.getCode().equals(prcterminalCarrier);
+
+            if(flag){
 
                 logger.info("{}-创建承运商物流订单：{}", delOutbound.getOrderNo(),"CK1订单不创建承运商物流订单");
 

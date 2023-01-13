@@ -336,7 +336,7 @@
         where state = #{state}
         and thrid_part_status = 0
         and thrid_part_count <![CDATA[ <= ]]> 10
-        and prc_terminal_carrier = 'CK1'
+        and prc_terminal_carrier in ('CK1','CHOUKOU1')
         limit #{pageNumber},#{pageSize}
 
     </select>

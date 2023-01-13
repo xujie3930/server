@@ -2935,7 +2935,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         .eq(DelOutbound::getState,DelOutboundStateEnum.DELIVERED.getCode())
                 .eq(DelOutbound::getThridPartStatus,0)
                 .lt(DelOutbound::getThridPartCount,10)
-                .eq(DelOutbound::getPrcTerminalCarrier,"CK1")
+                .in(DelOutbound::getPrcTerminalCarrier,PrcTerminalCarrierEnum.CK1.getCode(),PrcTerminalCarrierEnum.CHOUKOU1.getCode())
         );
 
         if(totalRecord == 0){

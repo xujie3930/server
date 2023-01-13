@@ -2,7 +2,8 @@ package com.szmsd.delivery.enums;
 
 public enum PrcTerminalCarrierEnum {
 
-    CK1("CK1", "出口易订单")
+    CK1("CK1", "出口易订单"),
+    CHOUKOU1("CHOUKOU1","")
     ;
 
     private final String code;
