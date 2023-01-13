@@ -226,6 +226,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    private IDelOutboundThirdPartyService delOutboundThirdPartyService;
+
     /**
      * 查询出库单模块
      *
@@ -2320,37 +2323,55 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (CollectionUtils.isEmpty(orderNos)) {
             return reviewedList.size();
         }
-        // 通知WMS取消单据
-        ShipmentCancelRequestDto shipmentCancelRequestDto = new ShipmentCancelRequestDto();
-        shipmentCancelRequestDto.setOrderNoList(orderNos);
-        shipmentCancelRequestDto.setWarehouseCode(warehouseCode);
-        shipmentCancelRequestDto.setRemark("");
-        logger.info("通知WMS取消单据参数：{}",JSON.toJSONString(shipmentCancelRequestDto));
-        ResponseVO responseVO = this.htpOutboundClientService.shipmentDelete(shipmentCancelRequestDto);
-        logger.info("通知WMS取消单据返回：{}",JSON.toJSONString(responseVO));
-        if (null == responseVO || null == responseVO.getSuccess()) {
-            throw new CommonException("400", "取消出库单失败");
-        }
-        if (!responseVO.getSuccess()) {
 
-            String msg = responseVO.getMessage().trim();
+        int count = delOutboundThirdPartyService.count(Wrappers.<DelOutboundThirdParty>query().lambda()
+                .eq(DelOutboundThirdParty::getOperationType,"WMS")
+                .eq(DelOutboundThirdParty::getState,"SUCCESS")
+                .in(DelOutboundThirdParty::getOrderNo,orderNos)
+        );
 
-            if("有部分单号不存在".equals(msg)){
-                this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
-                // 修改单据状态为【仓库取消】
-                LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-                updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELLED.getCode());
-                updateWrapper.in(DelOutbound::getOrderNo, orderNos);
-                return this.baseMapper.update(null, updateWrapper);
-            }else{
-                throw new CommonException("400", Utils.defaultValue(msg, "取消出库单失败2"));
+        logger.info("通知WMS取消单据参数条数：{}",count);
+
+        if(count > 0) {
+
+            // 通知WMS取消单据
+            ShipmentCancelRequestDto shipmentCancelRequestDto = new ShipmentCancelRequestDto();
+            shipmentCancelRequestDto.setOrderNoList(orderNos);
+            shipmentCancelRequestDto.setWarehouseCode(warehouseCode);
+            shipmentCancelRequestDto.setRemark("");
+            logger.info("通知WMS取消单据参数：{}", JSON.toJSONString(shipmentCancelRequestDto));
+            ResponseVO responseVO = this.htpOutboundClientService.shipmentDelete(shipmentCancelRequestDto);
+            logger.info("通知WMS取消单据返回：{}", JSON.toJSONString(responseVO));
+            if (null == responseVO || null == responseVO.getSuccess()) {
+                throw new CommonException("400", "取消出库单失败");
             }
+            if (!responseVO.getSuccess()) {
+
+                String msg = responseVO.getMessage().trim();
+
+                if ("有部分单号不存在".equals(msg)) {
+                    this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
+                    // 修改单据状态为【仓库取消】
+                    LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+                    updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELLED.getCode());
+                    updateWrapper.in(DelOutbound::getOrderNo, orderNos);
+                    return this.baseMapper.update(null, updateWrapper);
+                } else {
+                    throw new CommonException("400", Utils.defaultValue(msg, "取消出库单失败2"));
+                }
+            }
+            // 修改单据状态为【仓库取消中】
+            LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELING.getCode());
+            updateWrapper.in(DelOutbound::getOrderNo, orderNos);
+            return this.baseMapper.update(null, updateWrapper);
+        }else {
+            // 修改单据状态为【取消】
+            LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELLED.getCode());
+            updateWrapper.in(DelOutbound::getOrderNo, orderNos);
+            return this.baseMapper.update(null, updateWrapper);
         }
-        // 修改单据状态为【仓库取消中】
-        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-        updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELING.getCode());
-        updateWrapper.in(DelOutbound::getOrderNo, orderNos);
-        return this.baseMapper.update(null, updateWrapper);
     }
 
     @Override
