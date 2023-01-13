@@ -864,7 +864,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
                     String trackingNo = delOutbound.getTrackingNo();
                     if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
-                        String referenceNumber = String.valueOf(delOutbound.getId());
+                        String referenceNumber = delOutbound.getReferenceNumber();
                         this.delOutboundBringVerifyService.cancellation(delOutbound.getWarehouseCode(), referenceNumber, shipmentOrderNumber, trackingNo);
                     }
                     cancelledState = "MODIFY";
