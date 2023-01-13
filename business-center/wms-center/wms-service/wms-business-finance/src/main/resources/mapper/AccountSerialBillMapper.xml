@@ -649,8 +649,8 @@
 
         SELECT
             a.nature,
-            DOB.shipment_rule_name as shipmentRuleName,
-            DOB.shipment_rule as shipmentRule,
+            a.shipment_rule_name as shipmentRuleName,
+            a.shipment_rule as shipmentRule,
             a.cus_code AS cusCode,
             a.warehouse_name AS warehouseName,
             a.`business_category` AS businessCategory,
@@ -667,7 +667,6 @@
             a.currency_name as currencyName
         FROM
         fss_account_serial_bill a
-        left join del_outbound as DOB on a.no = DOB.order_no
         <include refid="SelectSerialBillWhere"/>
         GROUP BY
         a.cus_code,
