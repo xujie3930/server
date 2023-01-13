@@ -61,6 +61,11 @@ public class HtpOutboundFeignFallback implements FallbackFactory<HtpOutboundFeig
             public R<DirectExpressOrderApiDTO> getDirectExpressOrder(String orderNo) {
                 return R.convertResultJson(throwable);
             }
+
+            @Override
+            public R<Integer> updateDirectExpressOrderWeight(DirectExpressOrderWeightDto dto) {
+                return R.convertResultJson(throwable);
+            }
         };
     }
 }
