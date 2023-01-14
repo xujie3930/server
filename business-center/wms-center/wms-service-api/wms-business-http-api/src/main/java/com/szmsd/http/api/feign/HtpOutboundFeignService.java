@@ -46,7 +46,7 @@ public interface HtpOutboundFeignService {
     @GetMapping("/api/outbound/http/getDirectExpressOrder")
     @ApiOperation(value = "获取中国直发订单状态")
     R<DirectExpressOrderApiDTO> getDirectExpressOrder(@RequestParam("orderNo") String orderNo);
-    @PutMapping("/api/outbound/http/updateDirectExpressOrderWeight")
+    @PostMapping("/api/outbound/http/updateDirectExpressOrderWeight")
     R<Integer> updateDirectExpressOrderWeight(@RequestBody DirectExpressOrderWeightDto dto);
 
 }

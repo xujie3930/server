@@ -1,6 +1,7 @@
 package com.szmsd.delivery.service.wrapper;
 
 import cn.hutool.core.util.ArrayUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
@@ -569,7 +570,17 @@ public enum NuclearWeightEnum implements ApplicationState, ApplicationRegister{
                 dto.setWidth(toBigDecimal(delOutbound.getWidth()));
                 dto.setHeight(toBigDecimal(delOutbound.getHeight()));
                 dto.setPackageId(delOutbound.getOrderNo());
-                htpOutboundFeignService.updateDirectExpressOrderWeight(dto);
+                R<Integer> r = htpOutboundFeignService.updateDirectExpressOrderWeight(dto);
+
+                logger.info("updateDirectExpressOrderWeight result:{}", JSON.toJSONString(r));
+
+                if(r == null){
+                    throw new RuntimeException("更新直发包裹信息异常");
+                }
+
+                if(r.getCode() != Constants.SUCCESS){
+                    throw new RuntimeException(r.getMsg());
+                }
 
                 return;
             }
