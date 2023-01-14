@@ -3,6 +3,7 @@ package com.szmsd.http.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.common.core.utils.HttpResponseBody;
@@ -127,14 +128,9 @@ public class OutboundServiceImpl extends WmsRequest implements IOutboundService 
         HttpResponseBody httpResponseBody = HttpClientHelper.httpPut(url, JSON.toJSONString(dto), headerMap);
 
         log.info("updateDirectExpressOrderWeight httpResponseBody : {}",JSON.toJSONString(httpResponseBody));
-
-        String body = httpResponseBody.getBody();
-
-        if(StringUtils.isNotEmpty(body)) {
-
+        if(httpResponseBody.getStatus() == Constants.SUCCESS) {
             return R.ok();
         }else{
-            log.error("异常:{}"+JSON.toJSONString(body));
             return R.failed("提交数据异常");
         }
     }
