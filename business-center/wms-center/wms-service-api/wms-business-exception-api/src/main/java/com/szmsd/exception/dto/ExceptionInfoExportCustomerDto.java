@@ -89,7 +89,9 @@ public class ExceptionInfoExportCustomerDto {
 
 
 
-
+    @Excel(name="COD 金额",width = 15,needMerge=true)
+    @ApiModelProperty(value = "COD 金额")
+    private String codAmount;
 
 
 

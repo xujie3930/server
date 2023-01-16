@@ -90,6 +90,9 @@
             <if test="cm.exportType != null ">
                 and export_type = #{cm.exportType}
             </if>
+            <if test="cm.sellerCode != null and cm.sellerCode!='' ">
+                and seller_code = #{cm.sellerCode}
+            </if>
             and del_flag = 0
         </where>
         order by id desc
