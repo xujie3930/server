@@ -2368,7 +2368,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }else {
             // 修改单据状态为【取消】
             LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELLED.getCode());
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
             updateWrapper.in(DelOutbound::getOrderNo, orderNos);
             return this.baseMapper.update(null, updateWrapper);
         }
