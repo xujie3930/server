@@ -3394,6 +3394,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         || DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(outbound.getState())
                         || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(outbound.getState())
                 )) {
+
+                    String exceptionMessage = outbound.getExceptionMessage();
+
+                    if(StringUtils.isNotEmpty(exceptionMessage)){
+                        throw new CommonException("400", exceptionMessage);
+                    }
                     throw new CommonException("400", "订单当前状态不允许获取");
                 }
 
