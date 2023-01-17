@@ -2226,7 +2226,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         this.updateById(modifyDelOutbound);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public int canceled(DelOutboundCanceledDto dto) {
         List<Long> ids = dto.getIds();
@@ -2351,14 +2351,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 String msg = responseVO.getMessage().trim();
 
+
                 if ("有部分单号不存在".equals(msg)) {
-
-                    boolean cacelFlag = this.cancellation(outboundList);
-
-                    if(!cacelFlag){
-                        logger.info("取消承运商订单异常:{}",JSON.toJSONString(outboundList));
-                        return 0;
-                    }
 
                     this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
                     // 修改单据状态为【仓库取消】
@@ -2369,12 +2363,24 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 } else {
                     throw new CommonException("400", Utils.defaultValue(msg, "取消出库单失败2"));
                 }
+            }else{
+
+                boolean cacelFlag = this.cancellation(outboundList);
+
+                if(!cacelFlag){
+                    logger.info("取消承运商订单异常:{}",JSON.toJSONString(outboundList));
+                    return 0;
+                }
+
+                this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
+
+                // 修改单据状态为【取消】
+                LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+                updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
+                updateWrapper.in(DelOutbound::getOrderNo, orderNos);
+                return this.baseMapper.update(null, updateWrapper);
             }
-            // 修改单据状态为【仓库取消中】
-            LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELING.getCode());
-            updateWrapper.in(DelOutbound::getOrderNo, orderNos);
-            return this.baseMapper.update(null, updateWrapper);
+
         }else {
 
             logger.info("WMS 不存在：{}",JSON.toJSONString(orderNos));
