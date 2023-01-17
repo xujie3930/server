@@ -136,7 +136,11 @@ public class ReturnExpressAutoGeneratorDestoryFeeCmd extends BasicCommand<List<R
                 }
 
                 if(feeRs.getCode() != Constants.SUCCESS){
-                    this.errorHandler(returnExpressDetail.getId(),feeRs.getMsg());
+
+                    logger.error("ReturnExpressAutoGeneratorDestoryFeeCmd 单号：{},扣费异常:{}",orderNo,feeRs.getMsg());
+
+                    String errorMsg = "单号："+orderNo+",扣费接口 异常";
+                    this.errorHandler(returnExpressDetail.getId(),errorMsg);
                     continue;
                 }
 
