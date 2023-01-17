@@ -2330,9 +2330,11 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 .in(DelOutboundThirdParty::getOrderNo,orderNos)
         );
 
-        logger.info("通知WMS取消单据参数条数：{}",count);
+        logger.info("通知WMS取消单据条数：{}",count);
 
         if(count > 0) {
+
+            logger.info("WMS 已存在：{}",JSON.toJSONString(orderNos));
 
             // 通知WMS取消单据
             ShipmentCancelRequestDto shipmentCancelRequestDto = new ShipmentCancelRequestDto();
@@ -2350,6 +2352,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 String msg = responseVO.getMessage().trim();
 
                 if ("有部分单号不存在".equals(msg)) {
+
+                    boolean cacelFlag = this.cancellation(outboundList);
+
+                    if(!cacelFlag){
+                        logger.info("取消承运商订单异常:{}",JSON.toJSONString(outboundList));
+                        return 0;
+                    }
+
                     this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
                     // 修改单据状态为【仓库取消】
                     LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
@@ -2366,11 +2376,48 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             updateWrapper.in(DelOutbound::getOrderNo, orderNos);
             return this.baseMapper.update(null, updateWrapper);
         }else {
-            // 修改单据状态为【取消】
+
+            logger.info("WMS 不存在：{}",JSON.toJSONString(orderNos));
+
+            boolean cacelFlag = this.cancellation(outboundList);
+
+            if(!cacelFlag){
+                logger.info("取消承运商订单异常:{}",JSON.toJSONString(outboundList));
+                return 0;
+            }
+
+            this.delOutboundCompletedService.add(orderNos, DelOutboundOperationTypeEnum.CANCELED.getCode());
+            // 修改单据状态为【仓库取消】
             LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELLED.getCode());
             updateWrapper.in(DelOutbound::getOrderNo, orderNos);
             return this.baseMapper.update(null, updateWrapper);
+        }
+    }
+
+    /**
+     * 取消承运商物流订单
+     * @param outboundList
+     * @return
+     */
+    private boolean cancellation(List<DelOutbound> outboundList){
+
+        try {
+
+            for(DelOutbound delOutbound : outboundList) {
+
+                String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
+                String trackingNo = delOutbound.getTrackingNo();
+                if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
+                    String referenceNumber = delOutbound.getReferenceNumber();
+                    this.delOutboundBringVerifyService.cancellation(delOutbound.getWarehouseCode(), referenceNumber, shipmentOrderNumber, trackingNo);
+                }
+            }
+
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
         }
     }
 

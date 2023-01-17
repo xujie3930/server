@@ -860,13 +860,13 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     cancelledState = "UN_CARRIER";
                 }
                 if ("UN_CARRIER".equals(cancelledState)) {
-                    // 取消承运商物流订单
-                    String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
-                    String trackingNo = delOutbound.getTrackingNo();
-                    if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
-                        String referenceNumber = delOutbound.getReferenceNumber();
-                        this.delOutboundBringVerifyService.cancellation(delOutbound.getWarehouseCode(), referenceNumber, shipmentOrderNumber, trackingNo);
-                    }
+//                    // 取消承运商物流订单
+//                    String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
+//                    String trackingNo = delOutbound.getTrackingNo();
+//                    if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
+//                        String referenceNumber = delOutbound.getReferenceNumber();
+//                        this.delOutboundBringVerifyService.cancellation(delOutbound.getWarehouseCode(), referenceNumber, shipmentOrderNumber, trackingNo);
+//                    }
                     cancelledState = "MODIFY";
                 }
                 if ("MODIFY".equals(cancelledState)) {
