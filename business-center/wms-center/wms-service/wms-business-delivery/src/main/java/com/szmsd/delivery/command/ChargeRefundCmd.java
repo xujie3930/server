@@ -12,6 +12,7 @@ import com.szmsd.finance.api.feign.RefundRequestFeignService;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.enums.PrcStateEnum;
+import com.szmsd.finance.enums.RefundStatusEnum;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
@@ -110,6 +111,8 @@ public class ChargeRefundCmd extends BasicCommand<List<AccountSerialBill>> {
             refundRequestAutoDTO.setFeeCategoryName(accountSerialBill.getChargeCategory());
             refundRequestAutoDTO.setPrcState(PrcStateEnum.SECOND.getCode());
             refundRequestAutoDTO.setAccountSerialBillId(accountSerialBill.getId());
+            //状态已完成
+            refundRequestAutoDTO.setAuditStatus(RefundStatusEnum.COMPLETE.getStatus());
 
             refundRequestList.add(refundRequestAutoDTO);
         }
