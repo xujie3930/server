@@ -2276,6 +2276,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 // continue;
                 throw new CommonException("400", "操作失败，已完成的订单不能取消");
             }
+
+            if (DelOutboundStateEnum.REVIEWED_DOING.getCode().equals(outbound.getState())) {
+                // continue;
+                throw new CommonException("400", "操作失败，提神中的订单不能取消");
+            }
+
             if (DelOutboundStateEnum.CANCELLED.getCode().equals(outbound.getState())) {
                 throw new CommonException("400", "操作失败，已取消的订单不能取消");
             }
