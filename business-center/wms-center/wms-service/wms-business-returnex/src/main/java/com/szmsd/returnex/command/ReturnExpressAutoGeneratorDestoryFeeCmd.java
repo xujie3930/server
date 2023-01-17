@@ -182,16 +182,18 @@ public class ReturnExpressAutoGeneratorDestoryFeeCmd extends BasicCommand<List<R
     @Override
     protected void rollback(String errorMsg) {
 
-        List<Integer> integers = expressDetails.stream().map(ReturnExpressDetail::getId).collect(Collectors.toList());
+//        List<Integer> integers = expressDetails.stream().map(ReturnExpressDetail::getId).collect(Collectors.toList());
+//
+//        ReturnExpressMapper expressMapper = SpringUtils.getBean(ReturnExpressMapper.class);
+//
+//        for(Integer id : integers){
+//            LambdaUpdateWrapper<ReturnExpressDetail> update = Wrappers.lambdaUpdate();
+//            update.set(ReturnExpressDetail::getErrorMsg, errorMsg)
+//                    .eq(ReturnExpressDetail::getId, id);
+//            expressMapper.update(null,update);
+//        }
 
-        ReturnExpressMapper expressMapper = SpringUtils.getBean(ReturnExpressMapper.class);
-
-        for(Integer id : integers){
-            LambdaUpdateWrapper<ReturnExpressDetail> update = Wrappers.lambdaUpdate();
-            update.set(ReturnExpressDetail::getErrorMsg, errorMsg)
-                    .eq(ReturnExpressDetail::getId, id);
-            expressMapper.update(null,update);
-        }
+        logger.error(errorMsg);
 
         super.rollback(errorMsg);
     }
