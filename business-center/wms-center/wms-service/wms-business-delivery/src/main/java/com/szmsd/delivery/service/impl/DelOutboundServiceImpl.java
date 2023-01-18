@@ -3363,7 +3363,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 continue;
             }
 
-            if(DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(outbound.getSellerCode())){
+            if(DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(outbound.getState())){
 
                 String exceptionMessage = outbound.getExceptionMessage();
 
