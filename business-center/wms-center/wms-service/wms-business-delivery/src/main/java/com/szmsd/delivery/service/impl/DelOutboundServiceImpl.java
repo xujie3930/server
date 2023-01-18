@@ -3362,6 +3362,17 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 responseList.add(response);
                 continue;
             }
+
+            if(DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(outbound.getSellerCode())){
+
+                String exceptionMessage = outbound.getExceptionMessage();
+
+                if(StringUtils.isNotEmpty(exceptionMessage)){
+                    throw new CommonException("400", exceptionMessage);
+                }
+                throw new CommonException("400", "订单当前状态不允许获取");
+            }
+
             String pathname = null;
             byte[] fb = null;
             if(outbound.getEndTagState() != null && outbound.getEndTagState().equals(DelOutboundEndTagStateEnum.REVIEWED.getCode())){
@@ -3399,6 +3410,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         || DelOutboundStateEnum.WHSE_PROCESSING.getCode().equals(outbound.getState())
                         || DelOutboundStateEnum.WHSE_COMPLETED.getCode().equals(outbound.getState())
                         || DelOutboundStateEnum.NOTIFY_WHSE_PROCESSING.getCode().equals(outbound.getState())
+                        || DelOutboundStateEnum.AUDIT_FAILED.getCode().equals(outbound.getState())
                 )) {
 
                     String exceptionMessage = outbound.getExceptionMessage();
