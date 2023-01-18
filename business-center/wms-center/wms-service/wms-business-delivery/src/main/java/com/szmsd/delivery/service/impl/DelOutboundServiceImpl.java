@@ -229,6 +229,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Autowired
     private IDelOutboundThirdPartyService delOutboundThirdPartyService;
 
+    @Autowired
+    private DelDirectTokenMapper delDirectTokenMapper;
+
     /**
      * 查询出库单模块
      *
@@ -3001,6 +3004,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             return ;
         }
 
+        List<DelDirectToken> delDirectTokens = delDirectTokenMapper.selectList(Wrappers.<DelDirectToken>query().lambda());
+
+        logger.info("配置信息token：{}",JSON.toJSONString(delDirectTokens));
+
         logger.info("返回条数:{}",totalRecord);
 
         Integer pageSize = 5000;
@@ -3014,13 +3021,27 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             for (DelOutbound delOutbound : delOutbounds) {
 
-                R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder(delOutbound.getOrderNo());
+                R<DirectExpressOrderApiDTO> directExpressOrderApiDTOR = null;
+
+                if(CollectionUtils.isEmpty(delDirectTokens)) {
+
+                    directExpressOrderApiDTOR = htpOutboundFeignService.getDirectExpressOrder(delOutbound.getOrderNo());
+
+                }else{
+                    for(DelDirectToken delDirectToken : delDirectTokens){
+                        directExpressOrderApiDTOR = htpOutboundFeignService.findDirectExpressOrder(delOutbound.getOrderNo(),delDirectToken.getToken());
+
+                        if(directExpressOrderApiDTOR != null && directExpressOrderApiDTOR.getCode() == 200 && directExpressOrderApiDTOR.getData() != null){
+                            break;
+                        }
+                    }
+                }
 
                 logger.info("订单号DirectExpressOrder1：{},返回数据：{}",delOutbound.getOrderNo(),JSON.toJSONString(directExpressOrderApiDTOR));
 
                 baseMapper.updateThridPartcount(delOutbound.getId());
 
-                if (directExpressOrderApiDTOR.getCode() != 200) {
+                if (directExpressOrderApiDTOR == null || directExpressOrderApiDTOR.getCode() != 200) {
                     continue;
                 }
                 DirectExpressOrderApiDTO directExpressOrderApiDTO = directExpressOrderApiDTOR.getData();

@@ -134,4 +134,30 @@ public class OutboundServiceImpl extends WmsRequest implements IOutboundService 
             return R.failed("提交数据异常");
         }
     }
+
+    @Override
+    public R<DirectExpressOrderApiDTO> findDirectExpressOrder(String orderNo, String token) {
+
+        String url = "https://openapi.chukou1.cn/v1/directExpressOrders/"+orderNo+"/status";
+
+        Map<String, String> headerMap = new HashMap<>();
+
+        headerMap.put("Authorization", "Bearer "+token);
+
+        log.info("directExpressOrders url ：{}",url);
+        log.info("directExpressOrders token : {}",token);
+
+        HttpResponseBody httpResponseBody = HttpClientHelper.httpGet(url, null, headerMap);
+
+        String body = httpResponseBody.getBody();
+
+        if(StringUtils.isNotEmpty(body)) {
+            DirectExpressOrderApiDTO directExpressOrderApiDTO = JSON.parseObject(body, new TypeReference<DirectExpressOrderApiDTO>() {
+            }.getType());
+            return R.ok(directExpressOrderApiDTO);
+        }else{
+            log.error("异常:{}"+JSON.toJSONString(body));
+            return R.failed("获取数据异常");
+        }
+    }
 }

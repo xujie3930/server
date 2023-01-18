@@ -96,6 +96,13 @@ public class OutboundController extends BaseController {
         return outboundService.getDirectExpressOrder(orderNo);
     }
 
+    @GetMapping("/findDirectExpressOrder")
+    @ApiOperation(value = "获取中国直发订单状态")
+    public R<DirectExpressOrderApiDTO> findDirectExpressOrder(@RequestParam("orderNo") String orderNo,@RequestParam("token")String token) {
+
+        return outboundService.findDirectExpressOrder(orderNo,token);
+    }
+
     @PostMapping("/updateDirectExpressOrderWeight")
     @ApiOperation(value = "获取中国直发订单状态")
     public R<Integer> updateDirectExpressOrderWeight(@RequestBody DirectExpressOrderWeightDto dto) {

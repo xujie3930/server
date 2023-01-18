@@ -58,4 +58,6 @@ public interface IOutboundService {
     R<DirectExpressOrderApiDTO> getDirectExpressOrder(String orderNo);
 
     R<Integer> updateDirectExpressOrderWeight(DirectExpressOrderWeightDto dto);
+
+    R<DirectExpressOrderApiDTO> findDirectExpressOrder(String orderNo, String token);
 }
