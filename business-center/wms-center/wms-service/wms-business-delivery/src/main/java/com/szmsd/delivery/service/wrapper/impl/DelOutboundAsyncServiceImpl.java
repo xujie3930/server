@@ -803,6 +803,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         this.delOutboundService.unFreeze(delOutbound);
                     }
                     cancelledState = "UN_FEE";
+                    logger.info("取消冻结库存--->,{}",orderNo);
                 }
                 // 销毁，自提，新SKU不扣物流费用
                 boolean fee = true;
@@ -850,6 +851,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         }
                     }
                     cancelledState = "UN_OP_FEE";
+                    logger.info("2.1取消冻结费用--->,{}",orderNo);
                 }
                 if ("UN_OP_FEE".equals(cancelledState)) {
                     DelOutboundOperationVO delOutboundOperationVO = new DelOutboundOperationVO();
@@ -858,6 +860,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     R<?> r = this.operationFeignService.delOutboundThaw(delOutboundOperationVO);
                     DelOutboundServiceImplUtil.thawOperationThrowCommonException(r);
                     cancelledState = "UN_CARRIER";
+                    logger.info("2.2取消冻结操作费用--->,{}",orderNo);
                 }
                 if ("UN_CARRIER".equals(cancelledState)) {
 //                    // 取消承运商物流订单
@@ -890,6 +893,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                     logger.info("更新状态为已取消,更新异常通知为已完成-结束：{}",delOutbound.getOrderNo());
 
                     cancelledState = "END";
+                    logger.info("更新状态为已取消--->,{}",orderNo);
                 }
                 // 重派订单不推CK1
                 if ("END".equals(cancelledState)
@@ -907,6 +911,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                 }
             }
         } catch (Exception e) {
+            logger.error("异常--->,{}",orderNo);
             this.logger.error(e.getMessage(), e);
             // 记录异常
             this.delOutboundService.exceptionMessage(delOutbound.getId(), e.getMessage());
