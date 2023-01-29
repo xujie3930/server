@@ -1,5 +1,6 @@
 package com.szmsd.bas.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.szmsd.bas.config.HMacSHA256;
 import com.szmsd.bas.config.ShopifyAppConfig;
@@ -191,7 +192,9 @@ public class BasShopifyHelperController extends BaseController {
         String shopifyUUID = map.get("shopifyUUID");
         String activateKey = "shopify:activate:" + shopifyUUID;
         Object object = this.redisTemplate.opsForValue().get(activateKey);
+
         JSONObject jsonObject = JSONObject.parseObject((String) object);
+        logger.info("shopify:activate:redis result:{}", JSON.toJSONString(jsonObject));
         if (null == jsonObject) {
             //jsonObject = new JSONObject();
             throw new RuntimeException("activate Login failure");
