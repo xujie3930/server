@@ -99,7 +99,7 @@ public class BasShopifyHelperController extends BaseController {
         variableMap.put("api_key", this.shopifyAppConfig.getClientId());
         variableMap.put("scopes", this.shopifyAppConfig.getScope());
         variableMap.put("redirect_uri", this.shopifyAppConfig.getRedirectUri());
-        String nonce = "" + (System.nanoTime());
+        String nonce = System.nanoTime()+"";
         variableMap.put("nonce", nonce);
         variableMap.put("access_mode", "value");
         for (String key : variableMap.keySet()) {
@@ -193,7 +193,8 @@ public class BasShopifyHelperController extends BaseController {
         Object object = this.redisTemplate.opsForValue().get(activateKey);
         JSONObject jsonObject = JSONObject.parseObject((String) object);
         if (null == jsonObject) {
-            jsonObject = new JSONObject();
+            //jsonObject = new JSONObject();
+            throw new RuntimeException("activate Login failure");
         }
         jsonObject.put("username", map.get("username"));
         LinkedHashMap<String, String[]> parameterMap = new LinkedHashMap<>();
@@ -209,6 +210,11 @@ public class BasShopifyHelperController extends BaseController {
         parameterMap.put("state", new String[]{state = jsonObject.getString("state")});
         parameterMap.put("timestamp", new String[]{timestamp = jsonObject.getString("timestamp")});
         parameterMap.put("username", new String[]{map.get("username")});
+
+        if(StringUtils.isEmpty(shop)){
+            throw new RuntimeException("shop error");
+        }
+
         // replace .myshopify.com
         String shopName = shop.replace(".myshopify.com", "");
         String key = "shopify:app:" + shopName;
@@ -217,7 +223,7 @@ public class BasShopifyHelperController extends BaseController {
             cacheState = "-";
         }
         if (!cacheState.equals(state)) {
-            throw new CommonException("500", "Verification failed，state error");
+            throw new RuntimeException("Verification failed，state error");
         }
         Object cacheScope = this.redisTemplate.opsForHash().get(key, "scope");
         String encryptHex = ShopifyUtil.encryptParameter(parameterMap, this.shopifyAppConfig.getClientSecret());
