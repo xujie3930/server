@@ -1417,7 +1417,7 @@ public class DelOutboundController extends BaseController {
             excelReaderSheetBuilder.doRead();
             List<DelOutboundBatchUpdateTrackingNoDto> list = analysisEventListener.getList();
             List<Map<String, Object>> list1=this.delOutboundService.batchUpdateTrackingNo(list);
-            logger.info("参数请求：{}",list1);
+//            logger.info("参数请求：{}",list1);
              //传list1做邮件发送功能 做发送功能
             delOutboundService.emailBatchUpdateTrackingNo(list1,filepath);
 

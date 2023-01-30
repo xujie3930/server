@@ -1607,12 +1607,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 resultList.add(result);
                 continue;
             }
-            if (StringUtils.isEmpty(updateTrackingNoDto.getTrackingNo())) {
-                Map<String, Object> result = new HashMap<>();
-                result.put("msg", "第 " + (i + 1) + " 行，挂号不能为空。");
-                resultList.add(result);
-                continue;
-            }
+//            if (StringUtils.isEmpty(updateTrackingNoDto.getTrackingNo())) {
+//                Map<String, Object> result = new HashMap<>();
+//                result.put("msg", "第 " + (i + 1) + " 行，挂号不能为空。");
+//                resultList.add(result);
+//                continue;
+//            }
             //更新业务明细对应出库单的挂号
             baseMapper.updateFssAccountSerial(list.get(i));
 
@@ -1631,12 +1631,14 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             DelOutbound delOutbound=baseMapper.selectTrackingNo(updateTrackingNoDto.getOrderNo());
             if (delOutbound!=null){
                 a=a+1;
-                DelOutboundTarckOn delOutboundTarckOn=new DelOutboundTarckOn();
-                delOutboundTarckOn.setOrderNo(delOutbound.getOrderNo());
-                delOutboundTarckOn.setTrackingNo(delOutbound.getTrackingNo());
-                delOutboundTarckOn.setUpdateTime(new Date());
-                delOutboundTarckOn.setTrackingNoNew(updateTrackingNoDto.getTrackingNo());
-                delOutboundTarckOnMapper.insertSelective(delOutboundTarckOn);
+                if (updateTrackingNoDto.getTrackingNo()!=null) {
+                    DelOutboundTarckOn delOutboundTarckOn = new DelOutboundTarckOn();
+                    delOutboundTarckOn.setOrderNo(delOutbound.getOrderNo());
+                    delOutboundTarckOn.setTrackingNo(delOutbound.getTrackingNo());
+                    delOutboundTarckOn.setUpdateTime(new Date());
+                    delOutboundTarckOn.setTrackingNoNew(updateTrackingNoDto.getTrackingNo());
+                    delOutboundTarckOnMapper.insertSelective(delOutboundTarckOn);
+
                 BasTrackingPush basTrackingPush=new BasTrackingPush();
                 basTrackingPush.setTrackingNo(updateTrackingNoDto.getTrackingNo());
                 basTrackingPush.setOrderNo(delOutbound.getOrderNo());
@@ -1644,6 +1646,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 basTrackingPushMapper.insertSelective(basTrackingPush);
                 updateTrackingNoDto.setRefNo(delOutbound.getRefNo());
                 list1.add(updateTrackingNoDto);
+                }
 //                ShipmentTrackingChangeRequestDto
 //                R<ResponseVO> r= htpOutboundFeignService.shipmentTracking(shipmentTrackingChangeRequestDto);
             }else if (delOutbound==null){
@@ -1767,8 +1770,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 if (a == false) {
                         DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto = new DelOutboundBatchUpdateTrackingNoEmailDto();
                         delOutboundBatchUpdateTrackingNoEmailDto.setOrderNo(dto.getOrderNo());
-                        delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
-                        int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
+                        if (StringUtils.isNotEmpty(dto.getTrackingNo())) {
+                            delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
+                            int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
+                        }
                     //manualTrackingYees(dto.getOrderNo());
 
 
@@ -1776,8 +1781,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 if (delOutboundBatchUpdateTrackingNoEmailDtoList.size()==0){
                     DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto = new DelOutboundBatchUpdateTrackingNoEmailDto();
                     delOutboundBatchUpdateTrackingNoEmailDto.setOrderNo(dto.getOrderNo());
-                    delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
-                    int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
+                    if (StringUtils.isNotEmpty(dto.getTrackingNo())) {
+                        delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
+                        int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
+                    }
                     //manualTrackingYees(dto.getOrderNo());
                 }
 
@@ -1817,16 +1824,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 if (a==false){
                     DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto=new DelOutboundBatchUpdateTrackingNoEmailDto();
                     delOutboundBatchUpdateTrackingNoEmailDto.setOrderNo(dto.getOrderNo());
-                    delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
-                    int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
+                    if (StringUtils.isNotEmpty(dto.getTrackingNo())) {
+                        delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
+                        int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
+                    }
 
                     //manualTrackingYees(dto.getOrderNo());
                 }
                 if (dto.getEmail()==null){
                     DelOutboundBatchUpdateTrackingNoEmailDto delOutboundBatchUpdateTrackingNoEmailDto=new DelOutboundBatchUpdateTrackingNoEmailDto();
                     delOutboundBatchUpdateTrackingNoEmailDto.setOrderNo(dto.getOrderNo());
-                    delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
-                    int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
+                    if (StringUtils.isNotEmpty(dto.getTrackingNo())) {
+                        delOutboundBatchUpdateTrackingNoEmailDto.setTrackingNo(dto.getTrackingNo());
+                        int u = super.baseMapper.updateTrackingNo(delOutboundBatchUpdateTrackingNoEmailDto);
+                    }
 
                     //manualTrackingYees(dto.getOrderNo());
                 }
@@ -1836,8 +1847,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
            Map<String,List<DelOutboundBatchUpdateTrackingNoEmailDto>> delOutboundBatchUpdateTrackingNoEmailDtoMap=delOutboundBatchUpdateTrackingNoEmailDtoList.stream().collect(Collectors.groupingBy(DelOutboundBatchUpdateTrackingNoEmailDto::getCustomCode));
             //循环map，得到每一组的数据 然后生成excel需要数据
             for (Map.Entry<String, List<DelOutboundBatchUpdateTrackingNoEmailDto>> entry : delOutboundBatchUpdateTrackingNoEmailDtoMap.entrySet()) {
-                System.out.println("key = " + entry.getKey() + ", value = " + entry.getValue());
-                logger.info("组合参数：{}",entry.getValue());
+//                System.out.println("key = " + entry.getKey() + ", value = " + entry.getValue());
+//                logger.info("组合参数：{}",entry.getValue());
                 ExcleDelOutboundBatchUpdateTracking(entry.getValue(),entry.getKey(), filepath);
             }
 
@@ -1845,8 +1856,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     }
 
+
+
     public void ExcleDelOutboundBatchUpdateTracking(List<DelOutboundBatchUpdateTrackingNoEmailDto> list,String customCode,String filepath){
-        logger.info("更新挂号参数1：{}",list);
+//        logger.info("更新挂号参数1：{}",list);
         EmailDto emailDto=new EmailDto();
         //功能模块
         emailDto.setModularType(0);
@@ -1856,15 +1869,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         //emailDto.setText("customer:"+list.get(0).getCustomCode()+"on"+"["+simpleDateFormat.format(new Date())+"]"+"Total number of updated tracking numbers"+"["+list.size()+"]"+"Please download the attachment for details");
         List<EmailObjectDto> emailObjectDtoList= BeanMapperUtil.mapList(list, EmailObjectDto.class);
         emailDto.setList(emailObjectDtoList);
-        if(customCode!=null&&!customCode.equals("")){
-            R r= emailFeingService.sendEmail(emailDto);
-            if (r.getCode()== HttpStatus.SUCCESS){
+        List<String> trackingNolist=emailObjectDtoList.stream().map(EmailObjectDto::getTrackingNo).filter(Objects::nonNull).collect(Collectors.toList());
+       if (trackingNolist.size()>0) {
+           if (customCode != null && !customCode.equals("")) {
+               R r = emailFeingService.sendEmail(emailDto);
+               if (r.getCode() == HttpStatus.SUCCESS) {
 
-            }
-        }
+               }
+           }
+       }
         logger.info("更新挂号参数2：{}",list);
         list.forEach(x->{
-            int u = super.baseMapper.updateTrackingNo(x);
+            if (x.getTrackingNo()!=null) {
+                int u = super.baseMapper.updateTrackingNo(x);
+            }
 
             //manualTrackingYees(x.getOrderNo());
 
