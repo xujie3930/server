@@ -1163,6 +1163,7 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
                     case QUOTA:
                         // 更新限额也直接更新 但是未归还的也会查询出来，但是金额是0 需要更新授信类型
                         accountBalanceMapper.update(new AccountBalance(), Wrappers.<AccountBalance>lambdaUpdate()
+                                        .eq(AccountBalance::getCusCode,cusCode)
                                 .set(AccountBalance::getCreditTimeFlag, true)
                                 .set(AccountBalance::getCreditType, CreditConstant.CreditTypeEnum.QUOTA.getValue()));
                         this.updateCreditBatch(userCreditDetailList, cusCode);
