@@ -11,6 +11,7 @@ import com.szmsd.chargerules.mapper.SpecialOperationMapper;
 import com.szmsd.chargerules.service.ISpecialOperationService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.http.api.feign.HtpBasFeignService;
 import com.szmsd.http.dto.SpecialOperationRequest;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Slf4j
@@ -38,6 +40,13 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
     public int save(SpecialOperationDTO dto) {
         SpecialOperation domain = new SpecialOperation();
         BeanUtils.copyProperties(dto, domain);
+
+        BigDecimal firstPrice = BigDecimalUtil.setScale(domain.getFirstPrice(),BigDecimalUtil.PRICE_SCALE);
+        BigDecimal nextPrice = BigDecimalUtil.setScale(domain.getNextPrice(),BigDecimalUtil.PRICE_SCALE);
+
+        domain.setFirstPrice(firstPrice);
+        domain.setNextPrice(nextPrice);
+
         int result = specialOperationMapper.insert(domain);
         specialOperationType(domain, result);
         return result;
@@ -46,6 +55,13 @@ public class SpecialOperationServiceImpl extends ServiceImpl<SpecialOperationMap
     @Transactional
     @Override
     public int update(SpecialOperation dto) {
+
+        BigDecimal firstPrice = BigDecimalUtil.setScale(dto.getFirstPrice(),BigDecimalUtil.PRICE_SCALE);
+        BigDecimal nextPrice = BigDecimalUtil.setScale(dto.getNextPrice(),BigDecimalUtil.PRICE_SCALE);
+
+        dto.setFirstPrice(firstPrice);
+        dto.setNextPrice(nextPrice);
+
         int result = specialOperationMapper.updateById(dto);
         specialOperationType(dto, result);
         return result;

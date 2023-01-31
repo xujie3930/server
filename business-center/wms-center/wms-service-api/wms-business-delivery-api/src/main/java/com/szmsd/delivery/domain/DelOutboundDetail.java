@@ -1,7 +1,6 @@
 package com.szmsd.delivery.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
@@ -9,7 +8,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
 
 /**
  * <p>
@@ -88,14 +86,11 @@ public class DelOutboundDetail extends BaseEntity {
     @ApiModelProperty(value = "箱标")
     private String boxMark;
 
-
-
     @ApiModelProperty(value = "是否品牌")
     private String brandFlag;
 
     @ApiModelProperty(value = "品牌链接")
     private String brandUrl;
-
 
     @ApiModelProperty(value = "箱长")
     private Double boxLength;
@@ -108,7 +103,6 @@ public class DelOutboundDetail extends BaseEntity {
 
     @ApiModelProperty(value = "箱重量")
     private Double boxWeight;
-
 
     @ApiModelProperty(value = "操作类型")
     private String operationType;

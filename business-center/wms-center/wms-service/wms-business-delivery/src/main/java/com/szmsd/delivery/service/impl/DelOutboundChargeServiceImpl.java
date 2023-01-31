@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.domain.DelOutboundCharge;
 import com.szmsd.delivery.dto.DelQueryServiceImport;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.Inet4Address;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
@@ -97,6 +99,10 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
     @Override
     public int insertDelOutboundCharge(DelOutboundCharge delOutboundCharge) {
         delOutboundCharge.setId(""+this.snowflake.nextId());
+
+        BigDecimal amount = BigDecimalUtil.setScale(delOutboundCharge.getAmount(),BigDecimalUtil.PRICE_SCALE);
+        delOutboundCharge.setAmount(amount);
+
         return baseMapper.insert(delOutboundCharge);
     }
 
@@ -108,6 +114,8 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
      */
     @Override
     public int updateDelOutboundCharge(DelOutboundCharge delOutboundCharge) {
+        BigDecimal amount = BigDecimalUtil.setScale(delOutboundCharge.getAmount(),BigDecimalUtil.PRICE_SCALE);
+        delOutboundCharge.setAmount(amount);
         return baseMapper.updateById(delOutboundCharge);
     }
 
@@ -144,6 +152,12 @@ public class DelOutboundChargeServiceImpl extends ServiceImpl<DelOutboundChargeM
         this.clearCharges(delOutboundCharge.getOrderNo());
         // 设置ID
         charges.forEach(value -> value.setId("" + this.snowflake.nextId()));
+
+        for(DelOutboundCharge delOutboundCharge1 : charges){
+            BigDecimal amount = BigDecimalUtil.setScale(delOutboundCharge1.getAmount(),BigDecimalUtil.PRICE_SCALE);
+            delOutboundCharge1.setAmount(amount);
+        }
+
         // 批量保存
         this.saveBatch(charges);
     }

@@ -17,6 +17,7 @@ import com.szmsd.chargerules.vo.WarehouseOperationVo;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -63,24 +64,38 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
             if (dto.getDetails()!=null){
                 AssertUtil.notEmpty(dto.getDetails(), "详情必填");
                 long count = dto.getDetails().stream().peek(value -> value.setWarehouseOperationId(domain.getId())).filter(value -> !Pattern.matches(REGEX, value.getChargeDays())).count();
-                if (count > 0) throw new CommonException("999", "计费天数格式错误");
+                if (count > 0) {
+                    throw new CommonException("999", "计费天数格式错误");
+                }
 
             }
             List<WarehouseOperationVo> warehouseOperationDb = this.listPage(dto);
             if ( dto.getDetails()!=null) {
 
-                if (isIntersection(dto.getDetails(), warehouseOperationDb.get(0).getDetails()))
+                if (isIntersection(dto.getDetails(), warehouseOperationDb.get(0).getDetails())) {
                     throw new CommonException("999", "仓库+区间存在重合");
+                }
             }
 
-            if (dto.getDetails()!=null) {
-                warehouseOperationDetailsService.saveBatch(dto.getDetails());
+            List<WarehouseOperationDetails> details = dto.getDetails();
+
+            if (CollectionUtils.isNotEmpty(details)) {
+
+                for(WarehouseOperationDetails details1 : details){
+                    BigDecimal price = BigDecimalUtil.setScale(details1.getPrice(),BigDecimalUtil.PRICE_SCALE);
+                    details1.setPrice(price);
+                }
+
+                warehouseOperationDetailsService.saveBatch(details);
             }
             if (dto.getLocationDetails()!=null) {
                 //dto.getLocationDetails().stream().peek(value -> value.setWarehouseOperationId(domain.getId()));
                 AssertUtil.notEmpty(dto.getLocationDetails(), "详情必填");
                 dto.getLocationDetails().forEach(x->{
                     x.setWarehouseOperationId(domain.getId());
+
+                    BigDecimal price = BigDecimalUtil.setScale(x.getPrice(),BigDecimalUtil.PRICE_SCALE);
+                    x.setPrice(price);
                 });
                 warehouseOperationDetailsService.saveBatch(dto.getLocationDetails());
             }
@@ -161,6 +176,8 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
         if (dto.getLocationDetails()!=null){
             dto.getLocationDetails().forEach(x->{
                 x.setWarehouseOperationId(dto.getId());
+                BigDecimal price = BigDecimalUtil.setScale(x.getPrice(),BigDecimalUtil.PRICE_SCALE);
+                x.setPrice(price);
             });
             query.eq(WarehouseOperationDetails::getComputeType,1);
             warehouseOperationDetailsService.remove(query);
@@ -168,11 +185,22 @@ public class WarehouseOperationServiceImpl extends ServiceImpl<WarehouseOperatio
 
         }
         query.eq(WarehouseOperationDetails::getWarehouseOperationId, dto.getId());
-        if (dto.getDetails()!=null){
+
+        List<WarehouseOperationDetails> detailsList = dto.getDetails();
+
+        if (detailsList!=null){
             query.eq(WarehouseOperationDetails::getComputeType,0);
             warehouseOperationDetailsService.remove(query);
-            if (isIntersection(dto.getDetails(), new ArrayList<>())) throw new CommonException("999", "仓库+区间存在重合");
-            warehouseOperationDetailsService.saveBatch(dto.getDetails());
+            if (isIntersection(dto.getDetails(), new ArrayList<>())){
+                throw new CommonException("999", "仓库+区间存在重合");
+            }
+
+            for(WarehouseOperationDetails details1 : detailsList){
+                BigDecimal price = BigDecimalUtil.setScale(details1.getPrice(),BigDecimalUtil.PRICE_SCALE);
+                details1.setPrice(price);
+            }
+
+            warehouseOperationDetailsService.saveBatch(detailsList);
 
         }
 
