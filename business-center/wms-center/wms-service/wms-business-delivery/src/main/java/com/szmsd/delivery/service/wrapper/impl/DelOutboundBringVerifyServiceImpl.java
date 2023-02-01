@@ -399,7 +399,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 包裹信息
         List<PackageInfo> packageInfos = new ArrayList<>();
 
-        boolean orderTypeFlag = DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())
+        boolean orderTypeFlag = DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType())
                                 || DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
                                 || DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType());
 
@@ -559,7 +559,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                     }
                 } else {
                     BigDecimal declareValue = BigDecimal.ZERO;
-                    Long totalQuantity = 0L;
                     Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
                     for (DelOutboundDetail detail : detailList) {
                         String sku = detail.getSku();
@@ -576,7 +575,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         }
 
                         BigDecimal resultV = BigDecimalUtil.setScale(productDeclaredValue.multiply(BigDecimal.valueOf(qty)));
-                        totalQuantity += qty;
 
                         declareValue = declareValue.add(resultV);
                     }
