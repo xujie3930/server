@@ -3,6 +3,7 @@ package com.szmsd.ec.common.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.StringToolkit;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.ec.common.mapper.CommonOrderItemMapper;
@@ -10,6 +11,7 @@ import com.szmsd.ec.common.service.ICommonOrderItemService;
 import com.szmsd.ec.domain.CommonOrderItem;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -55,6 +57,12 @@ public class CommonOrderItemServiceImpl extends ServiceImpl<CommonOrderItemMappe
      */
     @Override
     public int insertEcCommonOrderItem(CommonOrderItem commonOrderItem) {
+
+        BigDecimal price = BigDecimalUtil.setScale(commonOrderItem.getPrice(),BigDecimalUtil.PRICE_SCALE);
+        BigDecimal declareValue = BigDecimalUtil.setScale(commonOrderItem.getDeclareValue(),BigDecimalUtil.PRICE_SCALE);
+
+        commonOrderItem.setPrice(price);
+        commonOrderItem.setDeclareValue(declareValue);
         return baseMapper.insert(commonOrderItem);
     }
 
@@ -66,6 +74,17 @@ public class CommonOrderItemServiceImpl extends ServiceImpl<CommonOrderItemMappe
      */
     @Override
     public int updateEcCommonOrderItem(CommonOrderItem commonOrderItem) {
+
+        if(commonOrderItem.getPrice() != null) {
+            BigDecimal price = BigDecimalUtil.setScale(commonOrderItem.getPrice(), BigDecimalUtil.PRICE_SCALE);
+            commonOrderItem.setPrice(price);
+        }
+
+        if(commonOrderItem.getDeclareValue() != null) {
+            BigDecimal declareValue = BigDecimalUtil.setScale(commonOrderItem.getDeclareValue(), BigDecimalUtil.PRICE_SCALE);
+            commonOrderItem.setDeclareValue(declareValue);
+        }
+
         return baseMapper.updateById(commonOrderItem);
     }
 

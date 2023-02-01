@@ -1,7 +1,5 @@
 package com.szmsd.ec.common.service.impl;
 
-import cn.hutool.core.date.DateUnit;
-import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -10,16 +8,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.bas.api.feign.BasFeignService;
 import com.szmsd.bas.api.feign.BasSkuRuleMatchingFeignService;
-import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.domain.BasDeliveryServiceMatching;
 import com.szmsd.bas.domain.BasOtherRules;
 import com.szmsd.bas.domain.BasSkuRuleMatching;
 import com.szmsd.bas.dto.BasDeliveryServiceMatchingDto;
 import com.szmsd.bas.dto.BasSkuRuleMatchingDto;
-import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
@@ -40,15 +37,15 @@ import com.szmsd.ec.enums.OrderStatusEnum;
 import com.szmsd.ec.shopify.config.ShopifyConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -69,8 +66,6 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
     private BasSkuRuleMatchingFeignService basSkuRuleMatchingFeignService;
     @Autowired
     private DelOutboundFeignService delOutboundFeignService;
-//    @Autowired
-//    private OrdOrderFeignService orderFeignService;
 
     @Autowired
     private BasFeignService basFeignService;
@@ -305,6 +300,9 @@ public class CommonOrderServiceImpl extends ServiceImpl<CommonOrderMapper, Commo
             // 暂时关闭自动转单
 //            pushCenterOrder(false, commonOrder, bufferDto);
         } else {
+
+            BigDecimal amount = BigDecimalUtil.setScale(commonOrder.getAmount(),BigDecimalUtil.PRICE_SCALE);
+            commonOrder.setAmount(amount);
             this.baseMapper.insert(commonOrder);
             commonOrder.getCommonOrderItemList().forEach(item -> {
                 item.setOrderId(commonOrder.getId());

@@ -9,6 +9,7 @@ import com.helipay.app.trx.facade.response.pay.APPScanPayResponseForm;
 import com.helipay.component.facade.BaseDTO;
 import com.helipay.component.facade.HeliRequest;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.finance.domain.AccountPay;
 import com.szmsd.finance.dto.PreRechargeDTO;
@@ -139,6 +140,8 @@ public class HeliPayServiceImpl implements HeliPayService {
 
         AccountPay accountPay = new AccountPay();
 
+        BigDecimal amountDec = BigDecimalUtil.setScale(amount,BigDecimalUtil.PRICE_SCALE);
+
         Date current = appScanPayResponseForm.getCurrent();
         accountPay.setGeneratorTime(current);
         accountPay.setErrorCode(appScanPayResponseForm.getErrorCode());
@@ -151,11 +154,12 @@ public class HeliPayServiceImpl implements HeliPayService {
         accountPay.setOrderStatus(HeliOrderStatusEnum.INIT.name());
         accountPay.setCusCode(cusCode);
         accountPay.setGoodsName(gname);
-        accountPay.setAmount(amount);
+        accountPay.setAmount(amountDec);
         accountPay.setCallbackNumber(0L);
         accountPay.setCreateBy(cusCode);
         accountPay.setCreateTime(new Date());
         accountPay.setCreateByName(cusCode);
+
 
         return accountPay;
     }
@@ -355,6 +359,10 @@ public class HeliPayServiceImpl implements HeliPayService {
         accountPay.setCallbackNumber(cNumber+1);
 
         try {
+
+            if(accountPay.getActurlAmount() != null){
+                accountPay.setActurlAmount(BigDecimalUtil.setScale(accountPay.getActurlAmount(),BigDecimalUtil.PRICE_SCALE));
+            }
 
             int updAccountPay = accountPayMapper.updateById(accountPay);
 

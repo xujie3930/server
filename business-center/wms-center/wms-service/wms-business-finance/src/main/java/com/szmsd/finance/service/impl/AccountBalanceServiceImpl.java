@@ -13,6 +13,7 @@ import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.security.domain.LoginUser;
@@ -779,32 +780,39 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
     @Override
     public void setBalance(String cusCode, String currencyCode, BalanceDTO result, boolean needUpdateCredit) {
         log.info("更新余额：{}，{}，{}，{}", cusCode, currencyCode, JSONObject.toJSONString(result), needUpdateCredit);
-
-
-//        LambdaUpdateWrapper<AccountBalance> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-//        lambdaUpdateWrapper.eq(AccountBalance::getCusCode, cusCode);
-//        lambdaUpdateWrapper.eq(AccountBalance::getCurrencyCode, currencyCode);
-//        lambdaUpdateWrapper.set(AccountBalance::getCurrentBalance, result.getCurrentBalance());
-//        lambdaUpdateWrapper.set(AccountBalance::getFreezeBalance, result.getFreezeBalance());
-//        lambdaUpdateWrapper.set(AccountBalance::getTotalBalance, result.getTotalBalance());
-//        if (needUpdateCredit && null != result.getCreditInfoBO()) {
-//            lambdaUpdateWrapper.set(AccountBalance::getCreditUseAmount, result.getCreditInfoBO().getCreditUseAmount());
-//            lambdaUpdateWrapper.set(AccountBalance::getCreditStatus, result.getCreditInfoBO().getCreditStatus());
-//            lambdaUpdateWrapper.set(AccountBalance::getCreditBeginTime, result.getCreditInfoBO().getCreditBeginTime());
-//            lambdaUpdateWrapper.set(AccountBalance::getCreditEndTime, result.getCreditInfoBO().getCreditEndTime());
-//            lambdaUpdateWrapper.set(AccountBalance::getCreditBufferTime, result.getCreditInfoBO().getCreditBufferTime());
-//        }
-
-        //int updCount = accountBalanceMapper.update(null, lambdaUpdateWrapper);
         AccountBalanceUpdateDTO accountBalance = new AccountBalanceUpdateDTO();
+        BigDecimal currentBalance = result.getCurrentBalance();
+
+        if(currentBalance != null){
+            BigDecimal currentBa = BigDecimalUtil.setScale(currentBalance,BigDecimalUtil.PRICE_SCALE);
+            accountBalance.setCurrentBalance(currentBa);
+        }
+        BigDecimal freezebalance = result.getFreezeBalance();
+
+        if(freezebalance != null){
+            BigDecimal currentBa = BigDecimalUtil.setScale(freezebalance,BigDecimalUtil.PRICE_SCALE);
+            accountBalance.setFreezeBalance(currentBa);
+        }
+
+        BigDecimal totalBalance = result.getTotalBalance();
+        if(totalBalance != null){
+            BigDecimal currentBa = BigDecimalUtil.setScale(totalBalance,BigDecimalUtil.PRICE_SCALE);
+            accountBalance.setTotalBalance(currentBa);
+        }
+
         accountBalance.setCusCode(cusCode);
         accountBalance.setCurrencyCode(currencyCode);
-        accountBalance.setCurrentBalance(result.getCurrentBalance());
-        accountBalance.setFreezeBalance(result.getFreezeBalance());
-        accountBalance.setTotalBalance(result.getTotalBalance());
+
         accountBalance.setVersion(result.getVersion());
         if (needUpdateCredit && null != result.getCreditInfoBO()) {
-            accountBalance.setCreditUseAmount(result.getCreditInfoBO().getCreditUseAmount());
+
+            BigDecimal creditUseAmount = result.getCreditInfoBO().getCreditUseAmount();
+
+            if(creditUseAmount != null){
+                BigDecimal currentBa = BigDecimalUtil.setScale(creditUseAmount,BigDecimalUtil.PRICE_SCALE);
+                accountBalance.setCreditUseAmount(currentBa);
+            }
+
             accountBalance.setCreditStatus(result.getCreditInfoBO().getCreditStatus());
             accountBalance.setCreditBeginTime(result.getCreditInfoBO().getCreditBeginTime());
             accountBalance.setCreditEndTime(result.getCreditInfoBO().getCreditEndTime());

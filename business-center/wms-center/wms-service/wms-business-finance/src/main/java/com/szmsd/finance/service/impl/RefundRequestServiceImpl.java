@@ -13,6 +13,7 @@ import com.szmsd.bas.api.domain.BasSub;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.common.security.domain.LoginUser;
@@ -122,6 +123,16 @@ public class RefundRequestServiceImpl extends ServiceImpl<RefundRequestMapper, F
                 fssRefundRequest.setAuditStatus(RefundStatusEnum.BRING_INTO_COURT.getStatus())
                         .setProcessNo(strings.get(noLine.getAndIncrement()));
             }
+
+            BigDecimal amount = BigDecimalUtil.setScale(fssRefundRequest.getAmount(),BigDecimalUtil.PRICE_SCALE);
+            fssRefundRequest.setAmount(amount);
+
+            Double weight = BigDecimalUtil.setScale(fssRefundRequest.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
+            fssRefundRequest.setWeight(weight);
+
+            BigDecimal calcWeight = BigDecimalUtil.setScale(fssRefundRequest.getCalcWeight(),BigDecimalUtil.WEIGHT_SCALE);
+            fssRefundRequest.setCalcWeight(calcWeight);
+
             return fssRefundRequest;
         }).collect(Collectors.toList());
 

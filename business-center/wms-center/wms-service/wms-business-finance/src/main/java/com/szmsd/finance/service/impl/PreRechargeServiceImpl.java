@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -95,6 +97,16 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
         BeanUtils.copyProperties(dto,domain);
         String trimCode = domain.getCurrencyCode().trim();
         domain.setCurrencyCode(trimCode);
+
+        BigDecimal amount = BigDecimalUtil.setScale(domain.getAmount(),BigDecimalUtil.PRICE_SCALE);
+        domain.setAmount(amount);
+
+        BigDecimal proceAmount = BigDecimalUtil.setScale(domain.getProcedureAmount(),BigDecimalUtil.PRICE_SCALE);
+        domain.setProcedureAmount(proceAmount);
+
+        BigDecimal actur = BigDecimalUtil.setScale(domain.getActurlAmount(),BigDecimalUtil.PRICE_SCALE);
+        domain.setActurlAmount(actur);
+
         int insert = preRechargeMapper.insert(domain);
         if(insert>0){
             return R.ok();
@@ -146,6 +158,16 @@ public class PreRechargeServiceImpl implements IPreRechargeService {
 
         PreRecharge domain= new PreRecharge();
         BeanUtils.copyProperties(dto,domain);
+
+        BigDecimal amount = BigDecimalUtil.setScale(domain.getAmount(),BigDecimalUtil.PRICE_SCALE);
+        domain.setAmount(amount);
+
+        BigDecimal proceAmount = BigDecimalUtil.setScale(domain.getProcedureAmount(),BigDecimalUtil.PRICE_SCALE);
+        domain.setProcedureAmount(proceAmount);
+
+        BigDecimal actur = BigDecimalUtil.setScale(domain.getActurlAmount(),BigDecimalUtil.PRICE_SCALE);
+        domain.setActurlAmount(actur);
+
         int insert = preRechargeMapper.insert(domain);
 
         if(insert > 0) {
