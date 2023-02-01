@@ -46,6 +46,7 @@ import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -989,6 +990,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             delOutbound.setThridPartStatus(0);
             delOutbound.setThridPartCount(0);
+
+            Double weight = BigDecimalUtil.setScale(delOutbound.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
+            BigDecimal calcWeight = BigDecimalUtil.setScale(delOutbound.getCalcWeight(),BigDecimalUtil.WEIGHT_SCALE);
+            BigDecimal amount = BigDecimalUtil.setScale(delOutbound.getAmount(),BigDecimalUtil.PRICE_SCALE);
+            delOutbound.setAmount(amount);
+            delOutbound.setWeight(weight);
+            delOutbound.setCalcWeight(calcWeight);
             
             // 保存出库单
             int insert = baseMapper.insert(delOutbound);
@@ -1330,6 +1338,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         if (CollectionUtils.isNotEmpty(delOutboundDetailList)) {
             for (DelOutboundDetail delOutboundDetail : delOutboundDetailList) {
                 delOutboundDetail.setOrderNo(orderNo);
+
+                Double boxWeight = BigDecimalUtil.setScale(delOutboundDetail.getBoxWeight(),BigDecimalUtil.WEIGHT_SCALE);
+                delOutboundDetail.setBoxWeight(boxWeight);
             }
             this.delOutboundDetailService.saveBatch(delOutboundDetailList);
             for (int i = 0; i < delOutboundDetailList.size(); i++) {
@@ -1512,6 +1523,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             }
             //同步更新计泡拦截重量
             inputDelOutbound.setForecastWeight(inputDelOutbound.getWeight());
+
+            Double weight = BigDecimalUtil.setScale(inputDelOutbound.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
+            BigDecimal calcWeight = BigDecimalUtil.setScale(inputDelOutbound.getCalcWeight(),BigDecimalUtil.WEIGHT_SCALE);
+            BigDecimal amount = BigDecimalUtil.setScale(inputDelOutbound.getAmount(),BigDecimalUtil.PRICE_SCALE);
+            inputDelOutbound.setAmount(amount);
+            inputDelOutbound.setWeight(weight);
+            inputDelOutbound.setCalcWeight(calcWeight);
 
             // 更新
             int i = baseMapper.updateById(inputDelOutbound);
@@ -2209,6 +2227,20 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void updateByIdTransactional(DelOutbound delOutbound) {
+
+        if(delOutbound.getWeight() != null) {
+            Double weight = BigDecimalUtil.setScale(delOutbound.getWeight(), BigDecimalUtil.WEIGHT_SCALE);
+            delOutbound.setWeight(weight);
+        }
+        if(delOutbound.getCalcWeight() != null) {
+            BigDecimal calcWeight = BigDecimalUtil.setScale(delOutbound.getCalcWeight(), BigDecimalUtil.WEIGHT_SCALE);
+            delOutbound.setCalcWeight(calcWeight);
+        }
+        if(delOutbound.getAmount() != null) {
+            BigDecimal amount = BigDecimalUtil.setScale(delOutbound.getAmount(), BigDecimalUtil.PRICE_SCALE);
+            delOutbound.setAmount(amount);
+        }
+
         this.updateById(delOutbound);
     }
 
@@ -3092,6 +3124,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     Integer chargedWeight = directExpressOrderApiDTO.getChargedWeight();
                     BigDecimal calcWeight = new BigDecimal(chargedWeight);
 
+                    BigDecimal codecCalcWeight = BigDecimalUtil.setScale(calcWeight, BigDecimalUtil.WEIGHT_SCALE);
+
                     String specifications = length + "*" + width + "*" + height;
 
                     updatedata.setLength(length);
@@ -3100,7 +3134,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     updatedata.setWeight(weight);
                     updatedata.setSpecifications(specifications);
                     updatedata.setThridPartStatus(1);
-                    updatedata.setCalcWeight(calcWeight);
+                    updatedata.setCalcWeight(codecCalcWeight);
                     updatedata.setCalcWeightUnit("G");
 
                     updateData.add(updatedata);
@@ -3170,8 +3204,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Override
     public boolean updateWeightDelOutbound(UpdateWeightDelOutboundDto dto) {
 
-        //boolean upd = new OutboundUpdWeightCmd(dto).execute();
-
         String orderNo = dto.getOrderNo();
 
         LambdaQueryWrapper<DelOutbound> queryWrapper = new LambdaQueryWrapper<DelOutbound>();
@@ -3194,6 +3226,8 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             throw new CommonException("400", "单据不能修改");
         }
 
+        Double weight = BigDecimalUtil.setScale(dto.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
+        dto.setWeight(weight);
         //org.springframework.beans.BeanUtils.copyProperties(dto, data);
         //int upd = baseMapper.updateById(data);
 

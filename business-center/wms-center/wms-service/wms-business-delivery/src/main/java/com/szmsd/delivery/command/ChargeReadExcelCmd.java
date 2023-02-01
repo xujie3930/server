@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Lists;
 import com.szmsd.common.core.command.BasicCommand;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -89,6 +90,9 @@ public class ChargeReadExcelCmd extends BasicCommand<List<ChargeImport>> {
             chargeImport.setCreateTime(new Date());
             chargeImport.setState(ChargeImportStateEnum.INIT.getCode());
             chargeImport.setDelFlag(0);
+
+            BigDecimal weight = BigDecimalUtil.setScale(chargeImport.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
+            chargeImport.setWeight(weight);
         }
 
         List<String> orderNoList = chargeImportList.stream().map(ChargeImport::getOrderNo).distinct().collect(Collectors.toList());

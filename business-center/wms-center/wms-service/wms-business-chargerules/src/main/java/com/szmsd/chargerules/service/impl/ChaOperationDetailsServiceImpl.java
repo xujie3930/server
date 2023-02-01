@@ -1,21 +1,20 @@
 package com.szmsd.chargerules.service.impl;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.chargerules.domain.ChaOperationDetails;
 import com.szmsd.chargerules.dto.ChaOperationDetailsDTO;
 import com.szmsd.chargerules.dto.OperationDTO;
 import com.szmsd.chargerules.mapper.ChaOperationDetailsMapper;
 import com.szmsd.chargerules.service.IChaOperationDetailsService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.chargerules.vo.ChaOperationDetailsVO;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,6 +43,19 @@ public class ChaOperationDetailsServiceImpl extends ServiceImpl<ChaOperationDeta
                 ChaOperationDetails chaOperationDetails = new ChaOperationDetails();
                 BeanUtils.copyProperties(x, chaOperationDetails);
                 chaOperationDetails.setOperationId(operationId);
+
+                BigDecimal firstPrice = BigDecimalUtil.setScale(chaOperationDetails.getFirstPrice(),BigDecimalUtil.PRICE_SCALE);
+                BigDecimal nextPrice = BigDecimalUtil.setScale(chaOperationDetails.getNextPrice(),BigDecimalUtil.PRICE_SCALE);
+
+                BigDecimal minWeight = BigDecimalUtil.setScale(chaOperationDetails.getMinimumWeight(),BigDecimalUtil.WEIGHT_SCALE);
+                BigDecimal MaxWeight = BigDecimalUtil.setScale(chaOperationDetails.getMaximumWeight(),BigDecimalUtil.WEIGHT_SCALE);
+
+                chaOperationDetails.setFirstPrice(firstPrice);
+                chaOperationDetails.setNextPrice(nextPrice);
+                chaOperationDetails.setMinimumWeight(minWeight);
+                chaOperationDetails.setMaximumWeight(MaxWeight);
+
+
                 return chaOperationDetails;
             }).collect(Collectors.toList());
             this.saveOrUpdateBatch(detailsList);

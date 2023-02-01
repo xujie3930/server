@@ -1,19 +1,18 @@
 package com.szmsd.delivery.domain;
 
-import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.szmsd.common.core.web.domain.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.time.LocalDateTime;
-import java.util.Date;
-
+import com.szmsd.common.core.annotation.Excel;
+import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import com.szmsd.common.core.annotation.Excel;
+
+import java.math.BigDecimal;
+import java.util.Date;
 
 
 /**
