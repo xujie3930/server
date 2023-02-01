@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.delivery.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.delivery.domain.*;
@@ -337,13 +338,15 @@ public class DelSrmCostLogServiceImpl extends ServiceImpl<DelSrmCostLogMapper, D
                     delSrmCostDetail.setOrderTime(delOutbound.getCreateTime());
                     delSrmCostDetail.setCreateTime(new Date());
 
+                    BigDecimal amount = BigDecimalUtil.setScale(delSrmCostDetail.getAmount(),BigDecimalUtil.PRICE_SCALE);
 
+                    delSrmCostDetail.setAmount(amount);
                     //接口返回参数拼接
                     java.util.Map<String, Object> responseBodyMap = new HashMap();
                     responseBodyMap.put("productCode", delSrmCostDetail.getProductCode());
                     responseBodyMap.put("pdCode", delSrmCostDetail.getPdCode());
                     responseBodyMap.put("cuspriceCode", delSrmCostDetail.getCuspriceCode());
-                    responseBodyMap.put("amount", delSrmCostDetail.getAmount());
+                    responseBodyMap.put("amount", amount);
                     responseBodyMap.put("currencyCode", delSrmCostDetail.getCurrencyCode());
                     responseBody = (String) JSON.toJSONString(responseBody);
                     delSrmCostDetailService.insertDelSrmCostDetail(delSrmCostDetail);

@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.pack.domain.PackageCollectionDetail;
 import com.szmsd.pack.mapper.PackageCollectionDetailMapper;
 import com.szmsd.pack.service.IPackageCollectionDetailService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +60,10 @@ public class PackageCollectionDetailServiceImpl extends ServiceImpl<PackageColle
      */
     @Override
     public int insertPackageCollectionDetail(PackageCollectionDetail packageCollectionDetail) {
+
+        BigDecimal weight = BigDecimalUtil.setScale(packageCollectionDetail.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
+        packageCollectionDetail.setWeight(weight);
+
         return baseMapper.insert(packageCollectionDetail);
     }
 
@@ -69,6 +75,12 @@ public class PackageCollectionDetailServiceImpl extends ServiceImpl<PackageColle
      */
     @Override
     public int updatePackageCollectionDetail(PackageCollectionDetail packageCollectionDetail) {
+
+        if(packageCollectionDetail.getWeight() != null) {
+            BigDecimal weight = BigDecimalUtil.setScale(packageCollectionDetail.getWeight(), BigDecimalUtil.WEIGHT_SCALE);
+            packageCollectionDetail.setWeight(weight);
+        }
+
         return baseMapper.updateById(packageCollectionDetail);
     }
 

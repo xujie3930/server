@@ -14,6 +14,7 @@ import com.szmsd.bas.constant.SerialNumberConstant;
 import com.szmsd.bas.domain.BasFile;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -246,6 +247,15 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             }
         }
 
+        BigDecimal amount = BigDecimalUtil.setScale(accountSerialBill.getAmount(),BigDecimalUtil.PRICE_SCALE);
+        accountSerialBill.setAmount(amount);
+
+        Double weight = BigDecimalUtil.setScale(accountSerialBill.getWeight(),BigDecimalUtil.PRICE_SCALE);
+        accountSerialBill.setWeight(weight);
+
+        BigDecimal calcWeight = BigDecimalUtil.setScale(accountSerialBill.getCalcWeight(),BigDecimalUtil.PRICE_SCALE);
+        accountSerialBill.setCalcWeight(calcWeight);
+
         return accountSerialBillMapper.insert(accountSerialBill);
     }
 
@@ -302,6 +312,15 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                     value.setPrcState(1);
                 }
             }
+
+            BigDecimal amount = BigDecimalUtil.setScale(value.getAmount(),BigDecimalUtil.PRICE_SCALE);
+            value.setAmount(amount);
+
+            Double weight = BigDecimalUtil.setScale(value.getWeight(),BigDecimalUtil.PRICE_SCALE);
+            value.setWeight(weight);
+
+            BigDecimal calcWeight = BigDecimalUtil.setScale(value.getCalcWeight(),BigDecimalUtil.PRICE_SCALE);
+            value.setCalcWeight(calcWeight);
 
             return value;
         }).collect(Collectors.toList());

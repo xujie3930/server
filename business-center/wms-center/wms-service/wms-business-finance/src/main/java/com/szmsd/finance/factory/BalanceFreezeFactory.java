@@ -2,14 +2,10 @@ package com.szmsd.finance.factory;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.chargerules.enums.DelOutboundOrderEnum;
-import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.common.plugin.HandlerContext;
-import com.szmsd.finance.domain.AccountBalance;
 import com.szmsd.finance.domain.AccountBalanceChange;
 import com.szmsd.finance.dto.BalanceDTO;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -21,8 +17,6 @@ import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.util.LogUtil;
 import com.szmsd.finance.util.SnowflakeId;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,7 +26,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 冻结
@@ -40,9 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 public class BalanceFreezeFactory extends AbstractPayFactory {
-
-    @Resource
-    private RedissonClient redissonClient;
 
     @Resource
     private AccountBalanceChangeMapper accountBalanceChangeMapper;
@@ -53,85 +43,43 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
     @Autowired
     AccountBalanceMapper accountBalanceMapper;
 
-    private ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap<>();
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean updateBalance(final CustPayDTO dto) {
 
         log.info("BalanceFreezeFactory {}", JSONObject.toJSONString(dto));
         log.info(LogUtil.format(dto, "冻结/解冻"));
-        final String key = "cky-fss-freeze-balance-all:" + dto.getCusCode();
-//        RLock lock = redissonClient.getLock(key);
-
         try {
-//            if (lock.tryLock(time,leaseTime, unit)) {
+            final String currencyCode = dto.getCurrencyCode();
 
-                final String currencyCode = dto.getCurrencyCode();
+            log.info("【updateBalance】 1 开始查询该用户对应币别的{}余额,客户ID：{}",currencyCode,dto.getCusCode());
+            BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
 
-                log.info("【updateBalance】 1 开始查询该用户对应币别的{}余额,客户ID：{}",currencyCode,dto.getCusCode());
-                BalanceDTO balance = getBalance(dto.getCusCode(), dto.getCurrencyCode());
+            log.info("【updateBalance】 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
+            //蒋俊看财务
+            Boolean checkFlag = checkAndSetBalance(balance, dto);
+            log.info("【updateBalance】 2.1 {} 校验后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
+            log.info("【updateBalance】 3 checkFlag {}",checkFlag);
+            if (checkFlag == null){
+                return null;
+            }
+            if (!checkFlag) {
+                return false;
+            }
+            log.info("【updateBalance】 4");
+            balance.setOrderNo(dto.getNo());
 
-                String mKey = key + balance.getVersion();
+            setBalance(dto.getCusCode(), currencyCode, balance);
 
-                log.info("balance mKey version {}",mKey);
+            log.info("balance update version {}",balance.getVersion());
 
-//                if(concurrentHashMap.get(mKey) != null){
-//                    concurrentHashMap.remove(mKey);
-//
-//                    if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-//                        log.info("释放redis锁 {}",dto.getNo());
-//                        lock.unlock();
-//                    }
-//
-//                    Thread.sleep(100);
-//
-//                    log.info("balance 重新执行 {}",mKey);
-//                    return updateBalance(dto);
-//                }
+            log.info("【updateBalance】 5");
+            recordOpLogAsync(dto, balance.getCurrentBalance());
+            recordDetailLogAsync(dto, balance);
+            log.info("【updateBalance】 5.1 {} recordOpLogAsync,recordDetailLogAsync后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
+            log.info("【updateBalance】 6");
 
-                log.info("【updateBalance】 2 {} 可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
-                //蒋俊看财务
-                Boolean checkFlag = checkAndSetBalance(balance, dto);
-                log.info("【updateBalance】 2.1 {} 校验后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
-                log.info("【updateBalance】 3 checkFlag {}",checkFlag);
-                if (checkFlag == null){
-                    return null;
-                }
-                if (!checkFlag) {
-                    return false;
-                }
-                log.info("【updateBalance】 4");
-                balance.setOrderNo(dto.getNo());
-
-                setBalance(dto.getCusCode(), currencyCode, balance);
-
-                log.info("balance update version {}",balance.getVersion());
-
-                log.info("【updateBalance】 5");
-                recordOpLogAsync(dto, balance.getCurrentBalance());
-                recordDetailLogAsync(dto, balance);
-                log.info("【updateBalance】 5.1 {} recordOpLogAsync,recordDetailLogAsync后可用余额：{}，冻结余额：{}，总余额：{},余额剩余：{} ",currencyCode,balance.getCurrentBalance(),balance.getFreezeBalance(),balance.getTotalBalance(),JSONObject.toJSONString(balance));
-                log.info("【updateBalance】 6");
-
-                concurrentHashMap.put(mKey,balance.getVersion());
-
-                return true;
-//            } else {
-//                log.error("冻结/解冻操作超时,请稍候重试{}", JSONObject.toJSONString(dto));
-//                throw new RuntimeException("冻结/解冻操作超时,请稍候重试");
-//            }
-//        } catch (InterruptedException e) {
-//            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
-//            e.printStackTrace();
-//            log.error("获取余额异常，加锁失败 BalanceFreezeFactory异常：", e);
-//            throw new RuntimeException("冻结/解冻操作超时,请稍候重试!");
-//        } finally {
-
-//            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
-//                log.info("释放redis锁 {}",dto.getNo());
-//                lock.unlock();
-//            }
+            return true;
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); //手动回滚事务
             e.printStackTrace();
@@ -154,6 +102,13 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
         accountBalanceChange.setSerialNum(SnowflakeId.getNextId12());
         setOpLogAmount(accountBalanceChange, dto.getAmount());
         accountBalanceChange.setCurrentBalance(result);
+
+        BigDecimal amountCharge = BigDecimalUtil.setScale(accountBalanceChange.getAmountChange(),BigDecimalUtil.PRICE_SCALE);
+        accountBalanceChange.setAmountChange(amountCharge);
+
+        BigDecimal currentBalance = BigDecimalUtil.setScale(accountBalanceChange.getCurrentBalance(),BigDecimalUtil.PRICE_SCALE);
+        accountBalanceChange.setCurrentBalance(currentBalance);
+
         accountBalanceChangeMapper.insert(accountBalanceChange);
         log.info("recordOpLog= {}   === {}", JSONObject.toJSONString(dto), JSONObject.toJSONString(accountBalanceChange));
         return accountBalanceChange;

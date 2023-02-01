@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -77,6 +79,10 @@ public class PreWithdrawServiceImpl implements IPreWithdrawService {
         PreWithdraw domain= new PreWithdraw();
         BeanUtils.copyProperties(dto,domain);
         domain.setWithdrawTime(new Date());
+
+        BigDecimal amount = BigDecimalUtil.setScale(domain.getAmount(),BigDecimalUtil.PRICE_SCALE);
+        domain.setAmount(amount);
+
         int insert = preWithdrawMapper.insert(domain);
         if(insert>0){
             return R.ok();

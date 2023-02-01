@@ -3,6 +3,7 @@ package com.szmsd.finance.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.finance.domain.ThirdRechargeRecord;
 import com.szmsd.finance.dto.CustPayDTO;
@@ -14,6 +15,8 @@ import com.szmsd.http.vo.RechargesResponseVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 
 /**
  * @author liulei
@@ -49,6 +52,13 @@ public class ThirdRechargeRecordServiceImpl implements IThirdRechargeRecordServi
                 thirdRechargeRecord.setErrorMessage(vo.getMessage());
             }
         }
+
+        BigDecimal amount = BigDecimalUtil.setScale(thirdRechargeRecord.getActualAmount(),BigDecimalUtil.PRICE_SCALE);
+        thirdRechargeRecord.setActualAmount(amount);
+
+        BigDecimal re = BigDecimalUtil.setScale(thirdRechargeRecord.getRechargeAmount(),BigDecimalUtil.PRICE_SCALE);
+        thirdRechargeRecord.setRechargeAmount(re);
+
         thirdRechargeRecordMapper.insert(thirdRechargeRecord);
     }
 

@@ -1,12 +1,12 @@
 package com.szmsd.delivery.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Lists;
 import com.szmsd.bas.api.domain.dto.BasRegionSelectListQueryDto;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.security.utils.SecurityUtils;
@@ -97,7 +97,8 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
             for(OfflineCostImport excelDto1 : trackingList){
                 amount = amount.add(excelDto1.getAmount());
             }
-            deliveryImport.setAmount(amount);
+            BigDecimal amountDec = BigDecimalUtil.setScale(amount,BigDecimalUtil.PRICE_SCALE);
+            deliveryImport.setAmount(amountDec);
 
             deliveryImport.setVersion(1L);
             deliveryImport.setCreateBy(loginUser);
@@ -105,6 +106,12 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
             deliveryImport.setCreateByName(loginUser);
             deliveryImport.setDealStatus(OfflineDeliveryStateEnum.INIT.getCode());
 
+
+            BigDecimal weight = BigDecimalUtil.setScale(deliveryImport.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
+            deliveryImport.setWeight(weight);
+
+            BigDecimal calcWeight = BigDecimalUtil.setScale(deliveryImport.getCalcWeight(),BigDecimalUtil.WEIGHT_SCALE);
+            deliveryImport.setCalcWeight(calcWeight);
 
             String specifications = deliveryImport.getSpecifications();
             if(StringUtils.isNotEmpty(specifications)){
@@ -124,6 +131,8 @@ public class OfflineDeliveryServiceImpl  implements OfflineDeliveryService {
             costImport.setCreateBy(loginUser);
             costImport.setCreateTime(date);
             costImport.setCreateByName(loginUser);
+            BigDecimal amount = BigDecimalUtil.setScale(costImport.getAmount(),BigDecimalUtil.PRICE_SCALE);
+            costImport.setAmount(amount);
         }
 
         //step 3. 保存解析记录

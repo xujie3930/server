@@ -18,6 +18,7 @@ import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.FileStream;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.security.domain.LoginUser;
@@ -382,6 +383,12 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             packageCollectionContextCancel.addUndoType(PackageCollectionOperationRecordConstants.Type.CARRIER);
             // 保存揽收单
             this.logger.info(">>>insertPackageCollection: 开始-新增揽收单，耗时：{}", timer.intervalRestart());
+            BigDecimal amount = BigDecimalUtil.setScale(packageCollection.getAmount(),BigDecimalUtil.PRICE_SCALE);
+            packageCollection.setAmount(amount);
+
+            BigDecimal calcWeight = BigDecimalUtil.setScale(packageCollection.getCalcWeight(),BigDecimalUtil.WEIGHT_SCALE);
+            packageCollection.setCalcWeight(calcWeight);
+
             boolean save = super.save(packageCollection);
             this.logger.info(">>>insertPackageCollection: 结束-新增揽收单，耗时：{}", timer.intervalRestart());
             if (save) {
@@ -543,6 +550,17 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
     @Override
     public int updatePackageCollection(PackageCollection packageCollection) {
         packageCollection.setTotalQty(this.countTotalQty(packageCollection.getDetailList()));
+
+        if(packageCollection.getAmount() != null) {
+            BigDecimal amount = BigDecimalUtil.setScale(packageCollection.getAmount(), BigDecimalUtil.PRICE_SCALE);
+            packageCollection.setAmount(amount);
+        }
+
+        if(packageCollection.getCalcWeight() != null) {
+            BigDecimal calcWeight = BigDecimalUtil.setScale(packageCollection.getCalcWeight(), BigDecimalUtil.WEIGHT_SCALE);
+            packageCollection.setCalcWeight(calcWeight);
+        }
+
         int update = baseMapper.updateById(packageCollection);
         if (update > 0) {
             LambdaQueryWrapper<PackageCollectionDetail> packageCollectionDetailLambdaQueryWrapper = Wrappers.lambdaQuery();
@@ -833,6 +851,9 @@ public class PackageCollectionServiceImpl extends ServiceImpl<PackageCollectionM
             for (PackageCollectionDetail detail : detailList) {
                 detail.setCollectionId(collectionId);
                 detail.setSort(sort++);
+
+                BigDecimal calcWeight = BigDecimalUtil.setScale(detail.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
+                detail.setWeight(calcWeight);
             }
             this.packageCollectionDetailService.saveBatch(detailList);
         }

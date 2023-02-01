@@ -1,6 +1,7 @@
 package com.szmsd.finance.factory.abstractFactory;
 
 import com.alibaba.fastjson.JSONObject;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.finance.domain.AccountBalanceChange;
@@ -79,6 +80,13 @@ public abstract class AbstractPayFactory {
         accountBalanceChange.setSerialNum(SnowflakeId.getNextId12());
         setOpLogAmount(accountBalanceChange, dto.getAmount());
         accountBalanceChange.setCurrentBalance(result);
+
+        BigDecimal amountChange = BigDecimalUtil.setScale(accountBalanceChange.getAmountChange(),BigDecimalUtil.PRICE_SCALE);
+        accountBalanceChange.setAmountChange(amountChange);
+
+        BigDecimal currentBalance = BigDecimalUtil.setScale(accountBalanceChange.getCurrentBalance(),BigDecimalUtil.PRICE_SCALE);
+        accountBalanceChange.setCurrentBalance(currentBalance);
+
         accountBalanceChangeMapper.insert(accountBalanceChange);
         return accountBalanceChange;
     }
@@ -95,15 +103,19 @@ public abstract class AbstractPayFactory {
             FssDeductionRecord fssDeductionRecord = new FssDeductionRecord();
             CreditInfoBO creditInfoBO = balanceDTO.getCreditInfoBO();
             int creditType = Integer.parseInt(creditInfoBO.getCreditType());
+            BigDecimal amount = BigDecimalUtil.setScale(custPayDTO.getAmount(),BigDecimalUtil.PRICE_SCALE);
+
+            BigDecimal creditUseAmount = BigDecimalUtil.setScale(balanceDTO.getCreditUseAmount(),BigDecimalUtil.PRICE_SCALE);
+
             fssDeductionRecord.setPayMethod(custPayDTO.getPayMethod().name())
-                    .setAmount(custPayDTO.getAmount())
+                    .setAmount(amount)
                     .setCreditType(creditType)
                     .setStatus(creditType == CreditConstant.CreditTypeEnum.QUOTA.getValue() ?
                             CreditConstant.CreditBillStatusEnum.CHECKED.getValue() : CreditConstant.CreditBillStatusEnum.DEFAULT.getValue())
                     .setOrderNo(custPayDTO.getNo())
                     .setCusCode(custPayDTO.getCusCode()).setCurrencyCode(custPayDTO.getCurrencyCode())
-                    .setActualDeduction(balanceDTO.getActualDeduction()).setCreditUseAmount(balanceDTO.getCreditUseAmount())
-                    .setRemainingRepaymentAmount(balanceDTO.getCreditUseAmount()).setRepaymentAmount(BigDecimal.ZERO)
+                    .setActualDeduction(balanceDTO.getActualDeduction()).setCreditUseAmount(creditUseAmount)
+                    .setRemainingRepaymentAmount(creditUseAmount).setRepaymentAmount(BigDecimal.ZERO)
                     .setCreditBeginTime(creditInfoBO.getCreditBeginTime()).setCreditEndTime(creditInfoBO.getCreditEndTime())
             ;
             iDeductionRecordService.save(fssDeductionRecord);
@@ -196,7 +208,10 @@ public abstract class AbstractPayFactory {
         if (addMoney.compareTo(BigDecimal.ZERO) <= 0){
             return;
         }
-        financeThreadTaskPool.submit(() -> iDeductionRecordService.addForCreditBill(addMoney, cusCode, currencyCode));
+
+        BigDecimal addMoneys = BigDecimalUtil.setScale(addMoney,BigDecimalUtil.PRICE_SCALE);
+
+        financeThreadTaskPool.submit(() -> iDeductionRecordService.addForCreditBill(addMoneys, cusCode, currencyCode));
 
     }
 

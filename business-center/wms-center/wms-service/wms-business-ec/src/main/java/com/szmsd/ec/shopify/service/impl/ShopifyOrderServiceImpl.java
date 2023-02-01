@@ -14,6 +14,7 @@ import com.szmsd.bas.api.feign.BasSellerShopifyPermissionFeignService;
 import com.szmsd.bas.domain.BasSellerShopifyPermission;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.web.BaseException;
+import com.szmsd.common.core.utils.BigDecimalUtil;
 import com.szmsd.common.core.utils.HttpClientHelper;
 import com.szmsd.common.core.utils.HttpResponseBody;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
@@ -86,6 +87,12 @@ public class ShopifyOrderServiceImpl extends ServiceImpl<ShopifyOrderMapper, Sho
             shopifyOrderDTO.getShopifyOrderItemDTOList().forEach(shopifyOrderItemDTO -> {
                 ShopifyOrderItem shopifyOrderItem = BeanMapperUtil.map(shopifyOrderItemDTO, ShopifyOrderItem.class);
                 shopifyOrderItem.setShopifyOrderId(shopifyOrder.getId());
+
+                Double price = BigDecimalUtil.setScale(shopifyOrderItem.getPrice(),BigDecimalUtil.PRICE_SCALE);
+                Double totalDiscount = BigDecimalUtil.setScale(shopifyOrderItem.getTotalDiscount(),BigDecimalUtil.PRICE_SCALE);
+                shopifyOrderItem.setPrice(price);
+                shopifyOrderItem.setTotalDiscount(totalDiscount);
+
                 shopifyOrderItemMapper.insert(shopifyOrderItem);
             });
         } else {
@@ -93,6 +100,12 @@ public class ShopifyOrderServiceImpl extends ServiceImpl<ShopifyOrderMapper, Sho
             shopifyOrderDTO.getShopifyOrderItemDTOList().forEach(shopifyOrderItemDTO -> {
                 ShopifyOrderItem shopifyOrderItem = BeanMapperUtil.map(shopifyOrderItemDTO, ShopifyOrderItem.class);
                 shopifyOrderItem.setShopifyOrderId(shopifyOrder.getId());
+
+                Double price = BigDecimalUtil.setScale(shopifyOrderItem.getPrice(),BigDecimalUtil.PRICE_SCALE);
+                Double totalDiscount = BigDecimalUtil.setScale(shopifyOrderItem.getTotalDiscount(),BigDecimalUtil.PRICE_SCALE);
+                shopifyOrderItem.setPrice(price);
+                shopifyOrderItem.setTotalDiscount(totalDiscount);
+
                 shopifyOrderItemMapper.insert(shopifyOrderItem);
             });
         }
