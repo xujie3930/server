@@ -1,6 +1,8 @@
 package com.szmsd.common.core.utils;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 public class BigDecimalUtil {
 
@@ -52,6 +54,27 @@ public class BigDecimalUtil {
         }
 
         return amount.setScale(2,BigDecimal.ROUND_HALF_UP);
+    }
+
+    /**
+     * 千分位
+     * @param value
+     * @return
+     */
+    public static String micrometer(BigDecimal value) {
+
+        NumberFormat numberFormat1 = NumberFormat.getNumberInstance();
+        String price = numberFormat1.format(value);
+        return price;
+    }
+
+
+    public static void main(String[] args) {
+
+        String s = micrometer(new BigDecimal("12421321321.123543254325435"));
+
+        System.out.println(s);
+
     }
 
 }
