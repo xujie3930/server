@@ -21,9 +21,9 @@ public class TaskConfigInfoAdapter {
         if (DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(orderType)) {
             return buildTaskConfigInfo("NotReceive", false, false, "PrintOnWave");
         } else if (DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(orderType)) {
-            return buildTaskConfigInfo("NotReceive", true, false, "NotPrint");
+            return buildTaskConfigInfo("NotReceive", false, false, "NotPrint");
         } else if (DelOutboundOrderTypeEnum.SPLIT_SKU.getCode().equals(orderType)) {
-            return buildTaskConfigInfo("NotReceive", true, false, "NotPrint");
+            return buildTaskConfigInfo("NotReceive", false, false, "NotPrint");
         } else if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(orderType)) {
             return buildTaskConfigInfo("NotReceive", false, false, "NotPrint");
         } else if(DelOutboundOrderTypeEnum.BATCH.getCode().equals(orderType)){
