@@ -52,8 +52,29 @@
                 update_time,
                 remark,
             id, create_by, update_by, version, del_flag, order_no, seller_code, link_user_name, link_phone, country_name_zh, country_code, country_name_en, province_name_zh, province_code, province_name_en, city_name_zh, city_code, city_name_en, district_name_zh, district_code, district_name_en, address_zh, delivery_address, address_en, submit_time, export_type, export_time, delivery_time, expected_delivery_time, receive_package_num, driver_name, driver_phone, package_num, operation_type,
-            piece_number,square_number,bag_number
+            piece_number,square_number,bag_number,driver_license_plate,dm_remark
     </sql>
+    <update id="updateImportData" parameterType="com.szmsd.pack.dto.PackageMangQueryExcle">
+        update package_management
+        <set >
+            <if test="exportType != null" >
+                export_type = #{exportType,jdbcType=INTEGER},
+            </if>
+            <if test="driverName != null" >
+                driver_name = #{driverName,jdbcType=VARCHAR},
+            </if>
+            <if test="driverPhone != null" >
+                driver_phone = #{driverPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="driverLicensePlate != null" >
+                driver_license_plate = #{driverLicensePlate,jdbcType=VARCHAR},
+            </if>
+            <if test="dmRemark != null" >
+                dm_remark = #{dmRemark,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where order_no = #{orderNo,jdbcType=VARCHAR}
+    </update>
 
     <select id="selectPackageManagementList" resultType="com.szmsd.pack.vo.PackageMangVO">
         select
