@@ -72,6 +72,9 @@ public class AccountSerialBill extends FssBaseEntity {
 //    @TableField(exist = false)
     private BigDecimal calcWeight;
 
+    @ApiModelProperty(value = "计费重单位")
+    private String calcWeightUnit;
+
     @AutoFieldI18n
     @ApiModelProperty(value = "规格")
     @Excel(name = "规格")

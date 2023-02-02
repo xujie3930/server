@@ -27,9 +27,11 @@ import com.szmsd.delivery.vo.DelOutboundListVO;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.AccountSerialBillTotalVO;
 import com.szmsd.finance.domain.ChargeRelation;
+import com.szmsd.finance.domain.FssConvertUnit;
 import com.szmsd.finance.dto.*;
 import com.szmsd.finance.mapper.AccountSerialBillMapper;
 import com.szmsd.finance.mapper.ChargeRelationMapper;
+import com.szmsd.finance.service.FssConvertUnitService;
 import com.szmsd.finance.service.IAccountSerialBillService;
 import com.szmsd.finance.service.ISysDictDataService;
 import com.szmsd.finance.task.EasyPoiExportTask;
@@ -99,6 +101,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
     private InboundReceiptFeignService inboundReceiptFeignService;
     @Resource
     private DelOutboundFeignService delOutboundFeignService;
+
+    @Resource
+    private FssConvertUnitService fssConvertUnitService;
 
     @Data
     @AllArgsConstructor
@@ -212,7 +217,10 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         isPrcStateList.add("仓租");
         isPrcStateList.add("增值消费");
         isPrcStateList.add("物料费");
-        
+
+        List<FssConvertUnit> convertUnits = fssConvertUnitService.list(Wrappers.<FssConvertUnit>query().lambda());
+        Map<String,FssConvertUnit> convertUnitMap = convertUnits.stream().collect(Collectors.toMap(FssConvertUnit::getCalcUnit, v->v));
+
         AccountSerialBill accountSerialBill = BeanMapperUtil.map(dto, AccountSerialBill.class);
         if (StringUtils.isBlank(accountSerialBill.getWarehouseName())) {
             accountSerialBill.setWarehouseName(sysDictDataService.getWarehouseNameByCode(accountSerialBill.getWarehouseCode()));
@@ -247,14 +255,26 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             }
         }
 
+        String calcWeightUnit = accountSerialBill.getCalcWeightUnit();
+        //转换成KG
+        if(StringUtils.isNotEmpty(calcWeightUnit)){
+            FssConvertUnit fssConvertUnit = convertUnitMap.get(calcWeightUnit);
+
+            if(fssConvertUnit != null && accountSerialBill.getCalcWeight() != null){
+                BigDecimal convertValue = fssConvertUnit.getConvertValue();
+                BigDecimal g = accountSerialBill.getCalcWeight().multiply(convertValue);
+
+                BigDecimal calcWeight = g.divide(new BigDecimal(1000),3,BigDecimal.ROUND_UP);
+                accountSerialBill.setCalcWeight(calcWeight);
+                accountSerialBill.setCalcWeightUnit("KG");
+            }
+        }
+
         BigDecimal amount = BigDecimalUtil.setScale(accountSerialBill.getAmount(),BigDecimalUtil.PRICE_SCALE);
         accountSerialBill.setAmount(amount);
 
-        Double weight = BigDecimalUtil.setScale(accountSerialBill.getWeight(),BigDecimalUtil.PRICE_SCALE);
+        Double weight = BigDecimalUtil.setScale(accountSerialBill.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
         accountSerialBill.setWeight(weight);
-
-        BigDecimal calcWeight = BigDecimalUtil.setScale(accountSerialBill.getCalcWeight(),BigDecimalUtil.PRICE_SCALE);
-        accountSerialBill.setCalcWeight(calcWeight);
 
         return accountSerialBillMapper.insert(accountSerialBill);
     }
@@ -272,6 +292,9 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         isPrcStateList.add("仓租");
         isPrcStateList.add("增值消费");
         isPrcStateList.add("物料费");
+
+        List<FssConvertUnit> convertUnits = fssConvertUnitService.list(Wrappers.<FssConvertUnit>query().lambda());
+        Map<String,FssConvertUnit> convertUnitMap = convertUnits.stream().collect(Collectors.toMap(FssConvertUnit::getCalcUnit, v->v));
 
         List<AccountSerialBill> accountSerialBill = BeanMapperUtil.mapList(dto, AccountSerialBill.class);
         List<AccountSerialBill> collect = accountSerialBill.stream().map(value -> {
@@ -313,14 +336,26 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
                 }
             }
 
+            String calcWeightUnit = value.getCalcWeightUnit();
+            //转换成KG
+            if(com.szmsd.common.core.utils.StringUtils.isNotEmpty(calcWeightUnit)){
+                FssConvertUnit fssConvertUnit = convertUnitMap.get(calcWeightUnit);
+
+                if(fssConvertUnit != null && value.getCalcWeight() != null){
+                    BigDecimal convertValue = fssConvertUnit.getConvertValue();
+                    BigDecimal g = value.getCalcWeight().multiply(convertValue);
+
+                    BigDecimal calcWeight = g.divide(new BigDecimal(1000),3,BigDecimal.ROUND_UP);
+                    value.setCalcWeight(calcWeight);
+                    value.setCalcWeightUnit("KG");
+                }
+            }
+
             BigDecimal amount = BigDecimalUtil.setScale(value.getAmount(),BigDecimalUtil.PRICE_SCALE);
             value.setAmount(amount);
 
-            Double weight = BigDecimalUtil.setScale(value.getWeight(),BigDecimalUtil.PRICE_SCALE);
+            Double weight = BigDecimalUtil.setScale(value.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
             value.setWeight(weight);
-
-            BigDecimal calcWeight = BigDecimalUtil.setScale(value.getCalcWeight(),BigDecimalUtil.PRICE_SCALE);
-            value.setCalcWeight(calcWeight);
 
             return value;
         }).collect(Collectors.toList());

@@ -159,10 +159,11 @@ public class AccountSerialBillDTO implements Serializable {
     @ApiModelProperty(value = "实重")
     private Double weight;
 
-
     @ApiModelProperty(value = "计费重")
     private BigDecimal calcWeight;
 
+    @ApiModelProperty(value = "计费重单位")
+    private String calcWeightUnit;
 
     @ApiModelProperty(value = "规格")
     private String specifications;
