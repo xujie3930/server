@@ -445,6 +445,45 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
                         , Math.toIntExact(1), delOutbound.getOrderNo(), declareValue, ""));
             }
+        }else if(DelOutboundOrderTypeEnum.PACKAGE_TRANSFER.getCode().equals(delOutbound.getOrderType())){
+
+            if (PricingEnum.SKU.equals(pricingEnum)) {
+                BigDecimal declaredValue = BigDecimal.ZERO;
+                for (DelOutboundDetail detail : detailList) {
+                    if (null != detail.getDeclaredValue()) {
+
+                        BigDecimal dvalue = BigDecimal.valueOf(detail.getDeclaredValue());
+                        BigDecimal bqty = BigDecimal.valueOf(detail.getQty());
+                        BigDecimal resultValue = BigDecimalUtil.setScale(dvalue.multiply(bqty));
+
+                        declaredValue = declaredValue.add(resultValue);
+                    }
+                }
+                packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
+                        new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm"),
+                        Math.toIntExact(1), delOutbound.getOrderNo(), declaredValue, ""));
+            } else if (PricingEnum.PACKAGE.equals(pricingEnum)) {
+                BigDecimal declareValue = BigDecimal.ZERO;
+                Long totalQuantity = 0L;
+                for (DelOutboundDetail detail : detailList) {
+                    if (null != detail.getDeclaredValue()) {
+
+                        BigDecimal dvalue = BigDecimal.valueOf(detail.getDeclaredValue());
+                        BigDecimal bqty = BigDecimal.valueOf(detail.getQty());
+                        BigDecimal resultValue = BigDecimalUtil.setScale(dvalue.multiply(bqty));
+
+                        declareValue = declareValue.add(resultValue);
+                    }
+//                    if(StringUtils.equals(delOutboundWrapperContext.getBringVerifyFlag(), "0")){
+//                        totalQuantity = 1L;
+//                    }
+                    totalQuantity += detail.getQty();
+                }
+                packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
+                        new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
+                        , Math.toIntExact(1), delOutbound.getOrderNo(), declareValue, ""));
+            }
+
         }else if(DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())){
 
             BigDecimal declareValue = BigDecimal.ZERO;
