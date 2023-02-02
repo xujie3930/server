@@ -64,9 +64,9 @@ public class PackageMangVO {
         this.exportType = exportType;
         if (null != exportType) {
             if (exportType == 0) {
-                exportTypeStr = "未导出";
+                exportTypeStr = "未安排预约揽收";
             } else {
-                exportTypeStr = "已导出";
+                exportTypeStr = "已安排预约揽收";
             }
         }
     }
@@ -167,6 +167,9 @@ public class PackageMangVO {
 
     @ApiModelProperty(value = "袋数")
     private Integer bagNumber;
+
+    @ApiModelProperty(value = "司机车牌")
+    private Integer driverLicensePlate;
 
     public void setShowChoose() {
         this.showChoose = String.join(" ", provinceNameZh, cityNameZh, districtNameZh);

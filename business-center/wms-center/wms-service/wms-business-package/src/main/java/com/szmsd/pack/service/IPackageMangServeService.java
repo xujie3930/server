@@ -1,9 +1,11 @@
 package com.szmsd.pack.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.pack.domain.PackageManagement;
 import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
+import com.szmsd.pack.dto.PackageMangQueryExcle;
 import com.szmsd.pack.vo.PackageMangVO;
 
 import java.util.List;
@@ -67,5 +69,7 @@ public interface IPackageMangServeService extends IService<PackageManagement> {
      * @param ids
      */
     void setExportStatus(List<Integer> ids);
+
+    R  updateImportData(List<PackageMangQueryExcle> list1);
 }
 
