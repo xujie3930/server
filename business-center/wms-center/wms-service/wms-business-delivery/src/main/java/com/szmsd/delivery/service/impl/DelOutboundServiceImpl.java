@@ -1212,13 +1212,6 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             delOutbound.setWeight(weight);
             // 规格，长*宽*高
             delOutbound.setSpecifications(length + "*" + width + "*" + height);
-        } else if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
-            delOutbound.setLength(0D);
-            delOutbound.setWidth(0D);
-            delOutbound.setHeight(0D);
-            delOutbound.setWeight(0D);
-            // 规格，长*宽*高
-            delOutbound.setSpecifications(0 + "*" + 0 + "*" + 0);
         } else if(DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())){
             BigDecimal length = BigDecimal.ZERO;
             BigDecimal width = BigDecimal.ZERO;

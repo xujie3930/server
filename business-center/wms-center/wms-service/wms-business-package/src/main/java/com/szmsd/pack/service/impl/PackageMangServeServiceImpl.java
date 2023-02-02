@@ -15,6 +15,7 @@ import com.szmsd.pack.constant.PackageConstant;
 import com.szmsd.pack.domain.PackageManagement;
 import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
+import com.szmsd.pack.dto.PackageMangQueryExcle;
 import com.szmsd.pack.mapper.PackageManagementMapper;
 import com.szmsd.pack.service.IPackageMangServeService;
 import com.szmsd.pack.vo.PackageMangVO;
@@ -188,6 +189,21 @@ public class PackageMangServeServiceImpl extends ServiceImpl<PackageManagementMa
                 .set(PackageManagement::getExportTime, LocalDateTime.now())
         );
         log.info("导出条数【{}】,修改状态条数【{}】", ids.size(), update);
+    }
+
+    @Override
+    public R updateImportData(List<PackageMangQueryExcle> list1) {
+        try {
+            list1.forEach(x->{
+                x.setExportType("1");
+                packageManagementMapper.updateImportData(x);
+            });
+            return R.ok();
+        }catch (Exception e){
+            e.printStackTrace();
+            return  R.failed();
+        }
+
     }
 }
 

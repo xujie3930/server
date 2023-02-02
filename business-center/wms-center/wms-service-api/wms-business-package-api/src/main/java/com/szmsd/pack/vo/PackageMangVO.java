@@ -1,5 +1,6 @@
 package com.szmsd.pack.vo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -53,6 +54,8 @@ public class PackageMangVO {
     @ApiModelProperty(value = "客户代码")
     private String sellerCode;
 
+
+
     @ApiModelProperty(value = "是否导出【 0：未导出，1：已导出】", example = "0")
     private Integer exportType;
 
@@ -64,12 +67,24 @@ public class PackageMangVO {
         this.exportType = exportType;
         if (null != exportType) {
             if (exportType == 0) {
-                exportTypeStr = "未导出";
+                exportTypeStr = "未安排预约揽收";
             } else {
-                exportTypeStr = "已导出";
+                exportTypeStr = "已安排预约揽收";
             }
         }
     }
+
+    @Excel(name = "省", width = 15)
+    @ApiModelProperty(value = "省 - 名称")
+    private String provinceNameZh;
+
+    @Excel(name = "市", width = 15)
+    @ApiModelProperty(value = "市 - 名称")
+    private String cityNameZh;
+
+    @Excel(name = "区", width = 15)
+    @ApiModelProperty(value = "区 - 名称")
+    private String districtNameZh;
 
     @Excel(name = "地址", width = 32)
     @ApiModelProperty(value = "详细地址", required = true)
@@ -104,6 +119,10 @@ public class PackageMangVO {
     @Excel(name = "司机号码")
     private String driverPhone;
 
+    @Excel(name = "司机车牌")
+    @ApiModelProperty(value = "司机车牌")
+    private Integer driverLicensePlate;
+
     @ApiModelProperty(value = "货物类型【 0：入库，1：转运】")
     private Integer operationType;
 
@@ -121,13 +140,25 @@ public class PackageMangVO {
     @ApiModelProperty(value = "货物类型【 0：入库，1：转运】")
     private String operationTypeStr;
 
+    @Excel(name = "货物件数")
+    @ApiModelProperty(value = "件数")
+    private Integer pieceNumber;
+
+    @Excel(name = "货物方数")
+    @ApiModelProperty(value = "货物方数")
+    private Integer squareNumber;
+
+    @Excel(name = "货物袋数")
+    @ApiModelProperty(value = "袋数")
+    private Integer bagNumber;
+
+
     @Excel(name = "备注")
     @ApiModelProperty(value = "备注")
     private String remark;
 
 
-    @ApiModelProperty(value = "省 - 名称")
-    private String provinceNameZh;
+
 
     @ApiModelProperty(value = "省 - 简码", hidden = true)
     private String provinceCode;
@@ -135,8 +166,7 @@ public class PackageMangVO {
     @ApiModelProperty(value = "省 - 英文名", hidden = true)
     private String provinceNameEn;
 
-    @ApiModelProperty(value = "市 - 名称")
-    private String cityNameZh;
+
 
     @ApiModelProperty(value = "市 - 简码", hidden = true)
     private String cityCode;
@@ -144,8 +174,7 @@ public class PackageMangVO {
     @ApiModelProperty(value = "市 - 英文名", hidden = true)
     private String cityNameEn;
 
-    @ApiModelProperty(value = "区 - 名称")
-    private String districtNameZh;
+
 
     @ApiModelProperty(value = "区 - 简码", hidden = true)
     private String districtCode;
@@ -159,14 +188,12 @@ public class PackageMangVO {
     @ApiModelProperty(value = "选中的地址")
     private String showChoose;
 
-    @ApiModelProperty(value = "件数")
-    private Integer pieceNumber;
 
-    @ApiModelProperty(value = "方数")
-    private Integer squareNumber;
 
-    @ApiModelProperty(value = "袋数")
-    private Integer bagNumber;
+    @Excel(name = "DM反馈原因")
+    private String dmRemark;
+
+
 
     public void setShowChoose() {
         this.showChoose = String.join(" ", provinceNameZh, cityNameZh, districtNameZh);

@@ -1,16 +1,22 @@
 package com.szmsd.pack.controller;
 
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.event.SyncReadListener;
 import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
+import com.szmsd.delivery.dto.DelQueryServiceImport;
+import com.szmsd.delivery.dto.DelQueryServiceImportExcle;
 import com.szmsd.pack.dto.PackageMangAddDTO;
 import com.szmsd.pack.dto.PackageMangQueryDTO;
+import com.szmsd.pack.dto.PackageMangQueryExcle;
 import com.szmsd.pack.service.IPackageMangServeService;
 import com.szmsd.pack.vo.PackageMangVO;
 import io.swagger.annotations.Api;
@@ -18,8 +24,10 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -63,13 +71,30 @@ public class PackageManagementController extends BaseController {
     @GetMapping("/export")
     @ApiOperation(value = "交货管理-揽收列表导出", notes = "导出package - 交货管理 - 地址信息表模块列表")
     public void export(HttpServletResponse response, @Validated PackageMangQueryDTO packageManagement) throws IOException {
-        AssertUtil.isTrue(CollectionUtils.isNotEmpty(packageManagement.getIds()), "请选择导出的数据列");
-        packageManagement.setExportType(0);
+        //AssertUtil.isTrue(CollectionUtils.isNotEmpty(packageManagement.getIds()), "请选择导出的数据列");
+        //packageManagement.setExportType(0);
         List<PackageMangVO> list = packageManagementService.selectPackageManagementList(packageManagement);
-        packageManagementService.setExportStatus(packageManagement.getIds());
+        //packageManagementService.setExportStatus(packageManagement.getIds());
         ExcelUtil<PackageMangVO> util = new ExcelUtil<PackageMangVO>(PackageMangVO.class);
         util.exportExcel(response, list, "揽收列表-" + LocalDate.now());
 
+    }
+
+    @PostMapping("/importData")
+    @ApiOperation(httpMethod = "POST", value = "导入交货管理数据")
+    public R importData(MultipartFile file, HttpServletRequest httpServletRequest) throws Exception {
+
+        List<PackageMangQueryExcle> list1 = EasyExcel.read(file.getInputStream(), PackageMangQueryExcle.class, new SyncReadListener()).sheet().doReadSync();
+
+       R r = packageManagementService.updateImportData(list1);
+
+        //集合之间的拷贝
+//        List<DelQueryServiceImport> list = BeanMapperUtil.mapList(list1, DelQueryServiceImport.class);
+
+
+
+        //return delQueryServiceService.importData(list);
+        return  r;
     }
 
     /**
