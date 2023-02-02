@@ -69,12 +69,12 @@ public class BigDecimalUtil {
     }
 
 
-    public static void main(String[] args) {
-
-        String s = micrometer(new BigDecimal("12421321321.123543254325435"));
-
-        System.out.println(s);
-
-    }
+//    public static void main(String[] args) {
+//
+//        String s = micrometer(new BigDecimal("12421321321.123543254325435"));
+//
+//        System.out.println(s);
+//
+//    }
 
 }
