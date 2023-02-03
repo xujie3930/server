@@ -484,7 +484,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         , Math.toIntExact(1), delOutbound.getOrderNo(), declareValue, ""));
             }
 
-        }else if(DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())){
+        }else if(DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType())){
 
             BigDecimal declareValue = BigDecimal.ZERO;
             Long totalQuantity = 0L;
