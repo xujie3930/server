@@ -148,7 +148,7 @@ public class BalanceFreezeFactory extends AbstractPayFactory {
                 log.info("入库冻结没钱也可以扣--扣除{}", changeAmount);
                 balance.freeze(changeAmount);
             } else {
-                if (!balance.checkAndSetAmountAndCreditAnd(changeAmount, false, BalanceDTO::freeze)) {
+                if (!balance.checkAndSetAmountAndCreditAnd(changeAmount, true, BalanceDTO::freeze)) {
 
                     String message = "Sorry, your "+currencyCode+" balance is low ,"+changeAmount;
                     throw new RuntimeException(message);
