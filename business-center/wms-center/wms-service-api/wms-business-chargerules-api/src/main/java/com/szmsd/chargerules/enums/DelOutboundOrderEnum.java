@@ -19,7 +19,7 @@ public enum DelOutboundOrderEnum {
     BATCH_LABEL("Batch-label", "批量出库单-贴标费"),
     FREEZE_IN_STORAGE("FreezeInStorage", "入库冻结"),
     PackageCollection("PackageCollection","揽收单"),
-    MULTIPLE_PIECES("MultiplePieces","一票多件出库单"),
+    MULTIBOX("MultiBox","一票多件出库单"),
     BULK_ORDER("BulkOrder","大货订单"),
 
     ;
