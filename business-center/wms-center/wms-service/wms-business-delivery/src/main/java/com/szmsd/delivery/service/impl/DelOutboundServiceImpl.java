@@ -488,7 +488,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
         }
 
-        if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
+        if (DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType())) {
             //一票多件
             BasAttachmentQueryDTO dto = new BasAttachmentQueryDTO();
             dto.setBusinessNo(delOutbound.getOrderNo());
@@ -1009,7 +1009,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             this.saveAddress(dto, delOutbound.getOrderNo());
             logger.info(">>>>>[创建出库单{}]3.5 保存地址信息，{}", delOutbound.getOrderNo(), timer.intervalRestart());
 
-            if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
+            if (DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType())) {
                 //如果明细中商标为空，系统自动生成
                 stopWatch.start();
 
@@ -1049,7 +1049,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 }
             }
             // 附件信息
-            if (!DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())
+            if (!DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType())
             && !DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())
             ) {
                 AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(orderNo).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
@@ -1080,7 +1080,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 logger.info(">>>>>[创建出库单]3.9 保存NEW_SKU/SPLIT_SKU相关信息，{}", timer.intervalRestart());
             }
 
-            if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
+            if (DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType())) {
                 //一票多件出库
                 //箱标
                 List<AttachmentDataDTO> batchLabels = new ArrayList();
@@ -1419,7 +1419,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 计算发货类型
             inputDelOutbound.setShipmentType(this.buildShipmentType(dto));
             // 附件信息
-            if (!DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType()) && !DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())) {
+            if (!DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType()) && !DelOutboundOrderTypeEnum.BULK_ORDER.getCode().equals(delOutbound.getOrderType())) {
                 AttachmentDTO attachmentDTO = AttachmentDTO.builder().businessNo(delOutbound.getOrderNo()).businessItemNo(null).fileList(dto.getDocumentsFiles()).attachmentTypeEnum(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT).build();
                 this.remoteAttachmentService.saveAndUpdate(attachmentDTO);
             }
@@ -1462,7 +1462,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 this.delOutboundCombinationService.update(orderNo, dto.getCombinations());
             }
 
-            if (DelOutboundOrderTypeEnum.MULTIPLE_PIECES.getCode().equals(delOutbound.getOrderType())) {
+            if (DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType())) {
                 //一票多件出库
                 //箱标
                 List<AttachmentDataDTO> batchLabels = new ArrayList();
