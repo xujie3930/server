@@ -2376,6 +2376,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             return reviewedList.size();
         }
 
+        LambdaUpdateWrapper<DelOutboundCompleted> updateWrappers = Wrappers.lambdaUpdate();
+        updateWrappers.set(DelOutboundCompleted::getHandleSize, 11);
+        updateWrappers.set(DelOutboundCompleted::getRemark,"取消订单修改handleSize");
+        updateWrappers.in(DelOutboundCompleted::getOrderNo, orderNos);
+        updateWrappers.eq(DelOutboundCompleted::getState,DelOutboundCompletedStateEnum.FAIL.getCode());
+        delOutboundCompletedService.update(null,updateWrappers);
+
         int count = delOutboundThirdPartyService.count(Wrappers.<DelOutboundThirdParty>query().lambda()
                 .eq(DelOutboundThirdParty::getOperationType,"WMS")
                 .eq(DelOutboundThirdParty::getState,"SUCCESS")
@@ -2451,6 +2458,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             updateWrapper.in(DelOutbound::getOrderNo, orderNos);
             return this.baseMapper.update(null, updateWrapper);
         }
+
     }
 
     /**
