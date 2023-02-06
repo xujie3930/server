@@ -221,13 +221,13 @@ public class BasShopifyHelperController extends BaseController {
         // replace .myshopify.com
         String shopName = shop.replace(".myshopify.com", "");
         String key = "shopify:app:" + shopName;
-        Object cacheState = this.redisTemplate.opsForHash().get(key, "state");
-        if (null == cacheState) {
-            cacheState = "-";
-        }
-        if (!cacheState.equals(state)) {
-            throw new RuntimeException("Verification failed，state error");
-        }
+//        Object cacheState = this.redisTemplate.opsForHash().get(key, "state");
+//        if (null == cacheState) {
+//            cacheState = "-";
+//        }
+//        if (!cacheState.equals(state)) {
+//            throw new RuntimeException("Verification failed，state error");
+//        }
         Object cacheScope = this.redisTemplate.opsForHash().get(key, "scope");
         String encryptHex = ShopifyUtil.encryptParameter(parameterMap, this.shopifyAppConfig.getClientSecret());
         jsonObject.put("scope", String.valueOf(cacheScope));
