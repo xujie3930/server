@@ -140,6 +140,13 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
         return e1.ordinal() < e2.ordinal();
     }
 
+    public static boolean eq(BringVerifyEnum e1,BringVerifyEnum e2){
+        if (null == e1 || null == e2) {
+            throw new CommonException("400", "枚举类型不能为空");
+        }
+        return e1.ordinal() == e2.ordinal();
+    }
+
     @Override
     public Map<String, ApplicationHandle> register() {
         Map<String, ApplicationHandle> map = new HashMap<>();

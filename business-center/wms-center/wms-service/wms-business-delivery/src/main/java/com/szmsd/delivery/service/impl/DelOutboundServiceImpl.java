@@ -67,6 +67,8 @@ import com.szmsd.delivery.util.PackageInfo;
 import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.*;
+import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.api.feign.HtpOutboundFeignService;
@@ -232,6 +234,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
     @Autowired
     private DelDirectTokenMapper delDirectTokenMapper;
+
+    @Autowired
+    private RechargesFeignService rechargesFeignService;
 
     /**
      * 查询出库单模块
@@ -2365,15 +2370,58 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 String bringVerifyState = delOutbound.getBringVerifyState();
                 if (StringUtils.isNotEmpty(bringVerifyState)) {
                     // 判断要不要取消冻结库存
-                    //if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_INVENTORY, BringVerifyEnum.get(bringVerifyState))) {
+                    if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_INVENTORY, BringVerifyEnum.get(bringVerifyState))) {
                         // 取消冻结库存
                         this.unFreeze(delOutbound);
-                    //}
+                    }
                     // 判断要不要取消冻结操作费用
-                    //if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.get(bringVerifyState))) {
+                    if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.get(bringVerifyState))) {
                         // 取消冻结操作费用
                         this.unfreezeOperation(orderNo, delOutbound.getOrderType());
-                   // }
+                    }
+
+                    if(BringVerifyEnum.eq(BringVerifyEnum.FREEZE_BALANCE,BringVerifyEnum.get(bringVerifyState))){
+
+                        boolean fee = true;
+                        if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
+                                || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())
+                                || DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
+                            fee = false;
+                        }
+
+                        if (fee) {
+
+                            // 存在费用
+                            if (null != delOutbound.getAmount() && delOutbound.getAmount().doubleValue() > 0.0D) {
+
+                                List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
+                                Map<String, List<DelOutboundCharge>> groupByCharge =
+                                        delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+                                for (String currencyCode: groupByCharge.keySet()) {
+                                    BigDecimal bigDecimal = new BigDecimal(0);
+                                    for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
+                                        if (c.getAmount() != null) {
+                                            bigDecimal = bigDecimal.add(c.getAmount());
+                                        }
+                                    }
+                                    CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                                    cusFreezeBalanceDTO.setAmount(bigDecimal);
+                                    cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
+                                    cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                                    cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                                    cusFreezeBalanceDTO.setOrderType("Freight");
+                                    R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+                                    if (null == thawBalanceR) {
+                                        throw new CommonException("400", "取消冻结费用失败");
+                                    }
+                                    if (com.szmsd.common.core.constant.Constants.SUCCESS != thawBalanceR.getCode()) {
+                                        throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 }
                 DelOutboundOperationLogEnum.CANCEL.listener(delOutbound);
             }
