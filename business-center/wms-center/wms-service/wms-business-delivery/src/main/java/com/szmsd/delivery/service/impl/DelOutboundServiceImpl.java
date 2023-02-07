@@ -2352,7 +2352,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         LambdaUpdateWrapper<DelOutboundCompleted> updateWrappers = Wrappers.lambdaUpdate();
         updateWrappers.set(DelOutboundCompleted::getHandleSize, 11);
         updateWrappers.set(DelOutboundCompleted::getRemark,"取消订单修改handleSize");
-        updateWrappers.in(DelOutboundCompleted::getOrderNo, orderNos);
+        if(CollectionUtils.isNotEmpty(orderNos)) {
+            updateWrappers.in(DelOutboundCompleted::getOrderNo, orderNos);
+        }
+        if(CollectionUtils.isNotEmpty(reviewedList)){
+            updateWrappers.in(DelOutboundCompleted::getOrderNo, reviewedList);
+        }
         updateWrappers.eq(DelOutboundCompleted::getState,DelOutboundCompletedStateEnum.FAIL.getCode());
         delOutboundCompletedService.update(null,updateWrappers);
 
