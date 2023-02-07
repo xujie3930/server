@@ -837,7 +837,43 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), weightInGram = Utils.valueOfDouble(product.getWeight()),
                     new Size(product.getLength(), product.getWidth(), product.getHeight()),
                     Utils.valueOfLong(delOutbound.getBoxNumber()), product.getHsCode(), String.valueOf(delOutbound.getId()), delOutbound.getNewSku()));
-        } else {
+        } else if(DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType())) {
+
+            // 查询sku信息
+            List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
+            Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
+            for (DelOutboundDetail detail : detailList) {
+                String sku = detail.getSku();
+                BaseProduct product = productMap.get(sku);
+                if (null == product) {
+                    throw new CommonException("400",  MessageUtil.to("查询SKU[" + sku + "]信息失败",
+                            "Failed to query SKU ["+sku+"] information"));
+                }
+                int productWeight = Utils.valueOfDouble(product.getWeight());
+                weightInGram += productWeight;
+                packageItems.add(new PackageItem(product.getProductName(), product.getProductNameChinese(), product.getDeclaredValue(), productWeight,
+                        new Size(product.getLength(), product.getWidth(), product.getHeight()),
+                        Utils.valueOfLong(detail.getQty()), product.getHsCode(), String.valueOf(detail.getId()), sku));
+
+
+                if (null != delOutbound.getWeight() && delOutbound.getWeight() > 0) {
+                    weightInGram = Utils.valueOfDouble(delOutbound.getWeight());
+                }
+                String packageNumber;
+                if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
+                    packageNumber = delOutbound.getRefNo();
+                } else {
+                    packageNumber = orderNo;
+                }
+                packages.add(new Package(packageNumber, delOutbound.getRemark() + "|" + orderNo,
+                        new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
+                        weightInGram, packageItems));
+
+            }
+
+            createShipmentOrderCommand.setPackages(packages);
+
+        }else{
             // 查询sku信息
             List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
             Map<String, BaseProduct> productMap = productList.stream().collect(Collectors.toMap(BaseProduct::getCode, (v) -> v, (v1, v2) -> v1));
@@ -858,20 +894,21 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         if (null != delOutbound.getWeight() && delOutbound.getWeight() > 0) {
             weightInGram = Utils.valueOfDouble(delOutbound.getWeight());
         }
-//        if (weightInGram <= 0) {
-//            throw new CommonException("400", MessageUtil.to("包裹重量为0或者小于0，不能创建承运商物流订单",
-//                    "If the package weight is 0 or less than 0, the carrier logistics order cannot be created"));
-//        }
         String packageNumber;
         if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
             packageNumber = delOutbound.getRefNo();
         } else {
             packageNumber = orderNo;
         }
-        packages.add(new Package(packageNumber, delOutbound.getRemark() + "|" + orderNo,
-                new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
-                weightInGram, packageItems));
-        createShipmentOrderCommand.setPackages(packages);
+
+        if(!DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType())) {
+
+            packages.add(new Package(packageNumber, delOutbound.getRemark() + "|" + orderNo,
+                    new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
+                    weightInGram, packageItems));
+            createShipmentOrderCommand.setPackages(packages);
+        }
+
         createShipmentOrderCommand.setCarrier(new Carrier(shipmentService));
         Long s = System.currentTimeMillis();
         ResponseObject<ShipmentOrderResult, ProblemDetails> responseObjectWrapper = this.htpCarrierClientService.shipmentOrder(createShipmentOrderCommand);
