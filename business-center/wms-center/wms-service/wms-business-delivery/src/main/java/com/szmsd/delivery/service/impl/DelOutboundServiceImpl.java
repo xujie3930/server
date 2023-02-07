@@ -2365,15 +2365,15 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 String bringVerifyState = delOutbound.getBringVerifyState();
                 if (StringUtils.isNotEmpty(bringVerifyState)) {
                     // 判断要不要取消冻结库存
-                    if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_INVENTORY, BringVerifyEnum.get(bringVerifyState))) {
+                    //if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_INVENTORY, BringVerifyEnum.get(bringVerifyState))) {
                         // 取消冻结库存
                         this.unFreeze(delOutbound);
-                    }
+                    //}
                     // 判断要不要取消冻结操作费用
-                    if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.get(bringVerifyState))) {
+                    //if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.get(bringVerifyState))) {
                         // 取消冻结操作费用
                         this.unfreezeOperation(orderNo, delOutbound.getOrderType());
-                    }
+                   // }
                 }
                 DelOutboundOperationLogEnum.CANCEL.listener(delOutbound);
             }
