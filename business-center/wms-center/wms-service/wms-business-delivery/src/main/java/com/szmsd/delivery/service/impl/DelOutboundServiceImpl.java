@@ -2275,6 +2275,9 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int canceled(DelOutboundCanceledDto dto) {
+
+        logger.info("取消订单参数:{}",JSON.toJSONString(dto));
+
         List<Long> ids = dto.getIds();
         List<String> orderNos1 = dto.getOrderNos();
         if (CollectionUtils.isEmpty(ids) && CollectionUtils.isEmpty(orderNos1)) {
@@ -2341,6 +2344,10 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
             // 通知WMS处理的
             orderNos.add(orderNo);
         }
+
+        logger.info("取消订单orderNos:{}",JSON.toJSONString(orderNos));
+        logger.info("取消订单reviewedList:{}",JSON.toJSONString(reviewedList));
+
         // 判断有没有处理未提审，提审失败的
         if (CollectionUtils.isNotEmpty(reviewedList)) {
             // 修改状态未已取消
