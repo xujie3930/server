@@ -6,9 +6,9 @@ public class Ts {
 
 //    public static void main(String[] args) {
 //
-//        String s = "FREEZE_BALANCE";
+//        String s = "BEGIN";
 //
-//        boolean a = BringVerifyEnum.gt(BringVerifyEnum.FREEZE_INVENTORY,BringVerifyEnum.get(s));
+//        boolean a = BringVerifyEnum.gt(BringVerifyEnum.FREEZE_BALANCE,BringVerifyEnum.get(s));
 //
 //        System.out.println(a);
 //

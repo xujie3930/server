@@ -2380,43 +2380,40 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         this.unfreezeOperation(orderNo, delOutbound.getOrderType());
                     }
 
-                    if(BringVerifyEnum.gt(BringVerifyEnum.FREEZE_BALANCE,BringVerifyEnum.get(bringVerifyState))){
+                    boolean fee = true;
+                    if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
+                            || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())
+                            || DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
+                        fee = false;
+                    }
 
-                        boolean fee = true;
-                        if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
-                                || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())
-                                || DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
-                            fee = false;
-                        }
+                    if (fee) {
 
-                        if (fee) {
+                        // 存在费用
+                        if (null != delOutbound.getAmount() && delOutbound.getAmount().doubleValue() > 0.0D) {
 
-                            // 存在费用
-                            if (null != delOutbound.getAmount() && delOutbound.getAmount().doubleValue() > 0.0D) {
-
-                                List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
-                                Map<String, List<DelOutboundCharge>> groupByCharge =
-                                        delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
-                                for (String currencyCode: groupByCharge.keySet()) {
-                                    BigDecimal bigDecimal = new BigDecimal(0);
-                                    for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
-                                        if (c.getAmount() != null) {
-                                            bigDecimal = bigDecimal.add(c.getAmount());
-                                        }
+                            List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
+                            Map<String, List<DelOutboundCharge>> groupByCharge =
+                                    delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+                            for (String currencyCode: groupByCharge.keySet()) {
+                                BigDecimal bigDecimal = new BigDecimal(0);
+                                for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
+                                    if (c.getAmount() != null) {
+                                        bigDecimal = bigDecimal.add(c.getAmount());
                                     }
-                                    CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
-                                    cusFreezeBalanceDTO.setAmount(bigDecimal);
-                                    cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
-                                    cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
-                                    cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
-                                    cusFreezeBalanceDTO.setOrderType("Freight");
-                                    R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
-                                    if (null == thawBalanceR) {
-                                        throw new CommonException("400", "取消冻结费用失败");
-                                    }
-                                    if (com.szmsd.common.core.constant.Constants.SUCCESS != thawBalanceR.getCode()) {
-                                        throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
-                                    }
+                                }
+                                CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                                cusFreezeBalanceDTO.setAmount(bigDecimal);
+                                cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
+                                cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                                cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                                cusFreezeBalanceDTO.setOrderType("Freight");
+                                R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+                                if (null == thawBalanceR) {
+                                    throw new CommonException("400", "取消冻结费用失败");
+                                }
+                                if (com.szmsd.common.core.constant.Constants.SUCCESS != thawBalanceR.getCode()) {
+                                    throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
                                 }
                             }
                         }
