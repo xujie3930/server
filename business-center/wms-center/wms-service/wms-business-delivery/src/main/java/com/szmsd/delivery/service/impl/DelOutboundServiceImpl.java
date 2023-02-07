@@ -68,6 +68,7 @@ import com.szmsd.delivery.util.PackageUtil;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.delivery.vo.*;
 import com.szmsd.finance.api.feign.RechargesFeignService;
+import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.finance.dto.QueryChargeDto;
 import com.szmsd.finance.vo.QueryChargeVO;
 import com.szmsd.http.api.feign.HtpOutboundFeignService;
@@ -2365,13 +2366,72 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         logger.info("取消订单reviewedList:{}",JSON.toJSONString(reviewedList));
 
         if (CollectionUtils.isNotEmpty(reviewedList)) {
-            // 修改状态未已取消
-            this.delOutboundCompletedService.add(reviewedList, DelOutboundOperationTypeEnum.CANCELED.getCode());
-            // 修改单据状态为【仓库取消】
             LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
-            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.WHSE_CANCELLED.getCode());
+            updateWrapper.set(DelOutbound::getState, DelOutboundStateEnum.CANCELLED.getCode());
+            // 把异常信息也清空
+            updateWrapper.set(DelOutbound::getExceptionState, DelOutboundExceptionStateEnum.NORMAL.getCode());
+            updateWrapper.set(DelOutbound::getExceptionMessage, "");
             updateWrapper.in(DelOutbound::getOrderNo, reviewedList);
-            return this.baseMapper.update(null, updateWrapper);
+            this.update(updateWrapper);
+            // 取消冻结的数据
+            for (String orderNo : reviewedList) {
+                DelOutbound delOutbound = delOutboundMap.get(orderNo);
+                // 提审状态
+                String bringVerifyState = delOutbound.getBringVerifyState();
+                if (StringUtils.isNotEmpty(bringVerifyState)) {
+                    // 判断要不要取消冻结库存
+                    if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_INVENTORY, BringVerifyEnum.get(bringVerifyState))) {
+                        // 取消冻结库存
+                        this.unFreeze(delOutbound);
+                    }
+                    // 判断要不要取消冻结操作费用
+                    if (BringVerifyEnum.gt(BringVerifyEnum.FREEZE_OPERATION, BringVerifyEnum.get(bringVerifyState))) {
+                        // 取消冻结操作费用
+                        this.unfreezeOperation(orderNo, delOutbound.getOrderType());
+                    }
+
+                    boolean fee = true;
+                    if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
+                            || DelOutboundOrderTypeEnum.SELF_PICK.getCode().equals(delOutbound.getOrderType())
+                            || DelOutboundOrderTypeEnum.NEW_SKU.getCode().equals(delOutbound.getOrderType())) {
+                        fee = false;
+                    }
+
+                    if (fee) {
+
+                        // 存在费用
+                        if (null != delOutbound.getAmount() && delOutbound.getAmount().doubleValue() > 0.0D) {
+
+                            List<DelOutboundCharge> delOutboundChargeList = delOutboundChargeService.listCharges(delOutbound.getOrderNo());
+                            Map<String, List<DelOutboundCharge>> groupByCharge =
+                                    delOutboundChargeList.stream().collect(Collectors.groupingBy(DelOutboundCharge::getCurrencyCode));
+                            for (String currencyCode: groupByCharge.keySet()) {
+                                BigDecimal bigDecimal = new BigDecimal(0);
+                                for (DelOutboundCharge c : groupByCharge.get(currencyCode)) {
+                                    if (c.getAmount() != null) {
+                                        bigDecimal = bigDecimal.add(c.getAmount());
+                                    }
+                                }
+                                CusFreezeBalanceDTO cusFreezeBalanceDTO = new CusFreezeBalanceDTO();
+                                cusFreezeBalanceDTO.setAmount(bigDecimal);
+                                cusFreezeBalanceDTO.setCurrencyCode(currencyCode);
+                                cusFreezeBalanceDTO.setCusCode(delOutbound.getSellerCode());
+                                cusFreezeBalanceDTO.setNo(delOutbound.getOrderNo());
+                                cusFreezeBalanceDTO.setOrderType("Freight");
+                                R<?> thawBalanceR = rechargesFeignService.thawBalance(cusFreezeBalanceDTO);
+                                if (null == thawBalanceR) {
+                                    throw new CommonException("400", "取消冻结费用失败");
+                                }
+                                if (com.szmsd.common.core.constant.Constants.SUCCESS != thawBalanceR.getCode()) {
+                                    throw new CommonException("400", Utils.defaultValue(thawBalanceR.getMsg(), "取消冻结费用失败2"));
+                                }
+                            }
+                        }
+                    }
+
+                }
+                DelOutboundOperationLogEnum.CANCEL.listener(delOutbound);
+            }
         }
         // 判断是否需要WMS处理
         if (CollectionUtils.isEmpty(orderNos)) {
