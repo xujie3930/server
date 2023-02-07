@@ -2380,7 +2380,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                         this.unfreezeOperation(orderNo, delOutbound.getOrderType());
                     }
 
-                    if(BringVerifyEnum.eq(BringVerifyEnum.FREEZE_BALANCE,BringVerifyEnum.get(bringVerifyState))){
+                    if(BringVerifyEnum.gt(BringVerifyEnum.FREEZE_BALANCE,BringVerifyEnum.get(bringVerifyState))){
 
                         boolean fee = true;
                         if (DelOutboundOrderTypeEnum.DESTROY.getCode().equals(delOutbound.getOrderType())
