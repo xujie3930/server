@@ -865,12 +865,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                 if (null != delOutbound.getWeight() && delOutbound.getWeight() > 0) {
                     weightInGram = Utils.valueOfDouble(delOutbound.getWeight());
                 }
-                String packageNumber;
-                if (DelOutboundConstant.REASSIGN_TYPE_Y.equals(delOutbound.getReassignType())) {
-                    packageNumber = delOutbound.getRefNo();
-                } else {
-                    packageNumber = orderNo;
-                }
+                String packageNumber = sku;
                 packages.add(new Package(packageNumber, delOutbound.getRemark() + "|" + orderNo,
                         new Size(delOutbound.getLength(), delOutbound.getWidth(), delOutbound.getHeight()),
                         weightInGram, packageItems));
