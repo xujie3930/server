@@ -3,6 +3,8 @@ package com.szmsd.delivery.service.wrapper;
 import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
@@ -12,10 +14,12 @@ import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.delivery.domain.DelOutboundCharge;
+import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.domain.DelOutboundThirdParty;
 import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
+import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.IDelOutboundThirdPartyService;
 import com.szmsd.delivery.util.Utils;
@@ -610,6 +614,18 @@ public enum NuclearWeightEnum implements ApplicationState, ApplicationRegister{
                     delOutboundUpd.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
                     delOutboundUpd.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
                     iDelOutboundService.updateById(delOutboundUpd);
+
+                    IDelOutboundDetailService iDelOutboundDetailService = SpringUtils.getBean(IDelOutboundDetailService.class);
+
+                    List<PackageResult> packageResults = shipmentOrderResult.getPackages();
+
+                    for(PackageResult packageResult : packageResults){
+                        LambdaUpdateWrapper<DelOutboundDetail> update = Wrappers.lambdaUpdate();
+                        update.set(DelOutboundDetail::getBindCode, packageResult.getTrackingNumber())
+                                .eq(DelOutboundDetail::getOrderNo, delOutbound.getOrderNo())
+                                .eq(DelOutboundDetail::getSku,packageResult.getPackageNumber());
+                        iDelOutboundDetailService.update(null,update);
+                    }
                 }
 
                 logger.info(">>>>>[创建出库单{}]创建承运商 耗时{}", delOutbound.getOrderNo(), stopWatch.getLastTaskInfo().getTimeMillis());

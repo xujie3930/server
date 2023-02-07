@@ -4,6 +4,8 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.feign.BasMeteringConfigFeignService;
 import com.szmsd.bas.dto.BasMeteringConfigDto;
 import com.szmsd.common.core.constant.Constants;
@@ -22,6 +24,7 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.enums.DelOutboundTrackingAcquireTypeEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundChargeService;
+import com.szmsd.delivery.service.IDelOutboundDetailService;
 import com.szmsd.delivery.service.IDelOutboundRetryLabelService;
 import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
@@ -308,6 +311,19 @@ public enum ShipmentEnum implements ApplicationState, ApplicationRegister {
                 delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
                 delOutbound.setShipmentOrderLabelUrl(shipmentOrderResult.getOrderLabelUrl());
                 delOutbound.setReferenceNumber(shipmentOrderResult.getReferenceNumber());
+
+                IDelOutboundDetailService iDelOutboundDetailService = SpringUtils.getBean(IDelOutboundDetailService.class);
+
+                List<PackageResult> packageResults = shipmentOrderResult.getPackages();
+
+                for(PackageResult packageResult : packageResults){
+                    LambdaUpdateWrapper<DelOutboundDetail> update = Wrappers.lambdaUpdate();
+                    update.set(DelOutboundDetail::getBindCode, packageResult.getTrackingNumber())
+                            .eq(DelOutboundDetail::getOrderNo, delOutbound.getOrderNo())
+                            .eq(DelOutboundDetail::getSku,packageResult.getPackageNumber());
+                    iDelOutboundDetailService.update(null,update);
+                }
+
             }
 
             DelOutbound delOutboundUpd = new DelOutbound();

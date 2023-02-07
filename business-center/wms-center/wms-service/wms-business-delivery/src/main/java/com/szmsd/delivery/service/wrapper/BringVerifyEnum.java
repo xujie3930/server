@@ -4,6 +4,8 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.domain.BasAttachment;
 import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
@@ -14,6 +16,7 @@ import com.szmsd.bas.dto.BaseProductConditionQueryDto;
 import com.szmsd.chargerules.api.feign.ChargeFeignService;
 import com.szmsd.chargerules.api.feign.OperationFeignService;
 import com.szmsd.chargerules.domain.BasProductService;
+import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.chargerules.dto.BasProductServiceDao;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
@@ -37,19 +40,7 @@ import com.szmsd.finance.api.feign.RechargesFeignService;
 import com.szmsd.finance.dto.CusFreezeBalanceDTO;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
-import com.szmsd.http.dto.ChargeCategory;
-import com.szmsd.http.dto.ChargeItem;
-import com.szmsd.http.dto.ChargeWrapper;
-import com.szmsd.http.dto.Money;
-import com.szmsd.http.dto.Packing;
-import com.szmsd.http.dto.PricingPackageInfo;
-import com.szmsd.http.dto.ProblemDetails;
-import com.szmsd.http.dto.ResponseObject;
-import com.szmsd.http.dto.ShipmentChargeInfo;
-import com.szmsd.http.dto.ShipmentLabelChangeRequestDto;
-import com.szmsd.http.dto.ShipmentOrderResult;
-import com.szmsd.http.dto.TaskConfigInfo;
-import com.szmsd.http.dto.Weight;
+import com.szmsd.http.dto.*;
 import com.szmsd.http.vo.PricedProductInfo;
 import com.szmsd.http.vo.ResponseVO;
 import com.szmsd.inventory.api.service.InventoryFeignClientService;
@@ -935,6 +926,18 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                     IDelOutboundRetryLabelService iDelOutboundRetryLabelService = SpringUtils.getBean(IDelOutboundRetryLabelService.class);
                     if(StringUtils.isNotEmpty(shipmentOrderResult.getOrderLabelUrl())){
                         iDelOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), "",DelOutboundRetryLabelStateEnum.WAIT.name(),"");
+                    }
+
+                    IDelOutboundDetailService iDelOutboundDetailService = SpringUtils.getBean(IDelOutboundDetailService.class);
+
+                    List<PackageResult> packageResults = shipmentOrderResult.getPackages();
+
+                    for(PackageResult packageResult : packageResults){
+                        LambdaUpdateWrapper<DelOutboundDetail> update = Wrappers.lambdaUpdate();
+                        update.set(DelOutboundDetail::getBindCode, packageResult.getTrackingNumber())
+                                .eq(DelOutboundDetail::getOrderNo, delOutbound.getOrderNo())
+                                .eq(DelOutboundDetail::getSku,packageResult.getPackageNumber());
+                        iDelOutboundDetailService.update(null,update);
                     }
                 }
 
