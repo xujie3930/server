@@ -1362,6 +1362,8 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             DelOutboundWrapperContext delOutboundWrapperContext = (DelOutboundWrapperContext) context;
             DelOutbound delOutbound = delOutboundWrapperContext.getDelOutbound();
 
+            RemoteAttachmentService remoteAttachmentService = SpringUtils.getBean(RemoteAttachmentService.class);
+
             logger.info("开始获取承运商标签：{}",delOutbound.getOrderNo());
 
             String productCode = delOutbound.getShipmentRule();
@@ -1394,7 +1396,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             R<List<BasAttachment>> listR = null;
             // 查询上传文件信息
             try{
-                RemoteAttachmentService remoteAttachmentService = SpringUtils.getBean(RemoteAttachmentService.class);
+
                 BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
                 basAttachmentQueryDTO.setBusinessCode(AttachmentTypeEnum.DEL_OUTBOUND_DOCUMENT.getBusinessCode());
                 basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
@@ -1475,12 +1477,31 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
                 }
 
                 try {
+
+                    String labelType = "ShipmentLabel";
+
+                    if(DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType())){
+                        BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                        basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                        R<List<BasAttachment>> lsr = remoteAttachmentService.list(basAttachmentQueryDTO);
+
+                        if (null != lsr && null != lsr.getData()) {
+                            List<BasAttachment> attachmentList = lsr.getData();
+                            if (CollectionUtils.isNotEmpty(attachmentList)) {
+                                BasAttachment attachment = attachmentList.get(0);
+                                if(AttachmentTypeEnum.MULTIPLE_PIECES_INVOICE.getBusinessCode().equals(attachment.getBusinessCode())){
+                                    labelType = "ShipmentInvoice";
+                                }
+                            }
+                        }
+                    }
+
                     byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
                     String encode = Base64.encode(byteArray);
                     ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
                     shipmentLabelChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
                     shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
-                    shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
+                    shipmentLabelChangeRequestDto.setLabelType(labelType);
                     shipmentLabelChangeRequestDto.setLabel(encode);
                     IHtpOutboundClientService htpOutboundClientService = SpringUtils.getBean(IHtpOutboundClientService.class);
                     ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);

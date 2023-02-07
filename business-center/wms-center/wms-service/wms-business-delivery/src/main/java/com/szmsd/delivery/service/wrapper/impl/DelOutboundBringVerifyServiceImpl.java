@@ -1479,12 +1479,32 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 判断标签文件是否存在
         if (labelFile.exists()) {
             try {
+                
+                String labelType = "ShipmentLabel";
+
+                if(DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType())){
+                    BasAttachmentQueryDTO basAttachmentQueryDTO = new BasAttachmentQueryDTO();
+                    basAttachmentQueryDTO.setBusinessNo(delOutbound.getOrderNo());
+                    R<List<BasAttachment>> listR = remoteAttachmentService.list(basAttachmentQueryDTO);
+
+                    if (null != listR && null != listR.getData()) {
+                        List<BasAttachment> attachmentList = listR.getData();
+                        if (CollectionUtils.isNotEmpty(attachmentList)) {
+                            BasAttachment attachment = attachmentList.get(0);
+                            if(AttachmentTypeEnum.MULTIPLE_PIECES_INVOICE.getBusinessCode().equals(attachment.getBusinessCode())){
+                                labelType = "ShipmentInvoice";
+                            }
+
+                        }
+                    }
+                }
+
                 byte[] byteArray = FileUtils.readFileToByteArray(labelFile);
                 String encode = cn.hutool.core.codec.Base64.encode(byteArray);
                 ShipmentLabelChangeRequestDto shipmentLabelChangeRequestDto = new ShipmentLabelChangeRequestDto();
                 shipmentLabelChangeRequestDto.setWarehouseCode(delOutbound.getWarehouseCode());
                 shipmentLabelChangeRequestDto.setOrderNo(delOutbound.getOrderNo());
-                shipmentLabelChangeRequestDto.setLabelType("ShipmentLabel");
+                shipmentLabelChangeRequestDto.setLabelType(labelType);
                 shipmentLabelChangeRequestDto.setLabel(encode);
                 ResponseVO responseVO = htpOutboundClientService.shipmentLabel(shipmentLabelChangeRequestDto);
                 if (null == responseVO || null == responseVO.getSuccess()) {
