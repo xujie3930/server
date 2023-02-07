@@ -394,7 +394,13 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
         // 查询sku信息
         List<BaseProduct> productList = delOutboundWrapperContext.getProductList();
 
+        Integer  thridPartStatus = delOutbound.getThridPartStatus();
 
+        if("1".equals(thridPartStatus)){
+            delOutbound.setLength(1D);
+            delOutbound.setWeight(1D);
+            delOutbound.setWidth(1D);
+        }
 
         // 包裹信息
         List<PackageInfo> packageInfos = new ArrayList<>();
