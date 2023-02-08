@@ -381,12 +381,12 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         }
         List<DelOutboundDetail> delOutboundDetailList = delOutboundDetailService.listByOrderNo(orderNo);
         if (CollectionUtils.isNotEmpty(delOutboundDetailList)) {
-            logger.info("出库明细转换前:{}",JSON.toJSONString(delOutboundDetailList));
+            //logger.info("出库明细转换前:{}",JSON.toJSONString(delOutboundDetailList));
             List<DelOutboundDetailVO> detailDtos = new ArrayList<>(delOutboundDetailList.size());
             List<String> skus = new ArrayList<>(delOutboundDetailList.size());
             for (DelOutboundDetail detail : delOutboundDetailList) {
                 detailDtos.add(BeanMapperUtil.map(detail, DelOutboundDetailVO.class));
-                logger.info("出库明细转换后:{}",JSON.toJSONString(detailDtos));
+                //logger.info("出库明细转换后:{}",JSON.toJSONString(detailDtos));
                 skus.add(detail.getSku());
             }
 
@@ -429,12 +429,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 }
                 for (DelOutboundDetailVO vo : detailDtos) {
                     InventoryAvailableListVO available = availableMap.get(vo.getSku());
+                    available.setBindCode(vo.getBindCode());
                     if (null != available) {
                         BeanMapperUtil.map(available, vo);
                     }
                 }
 
-                logger.info("出库明细转换后1add:{}",JSON.toJSONString(detailDtos));
+                //logger.info("出库明细转换后1add:{}",JSON.toJSONString(detailDtos));
             }
 
 
