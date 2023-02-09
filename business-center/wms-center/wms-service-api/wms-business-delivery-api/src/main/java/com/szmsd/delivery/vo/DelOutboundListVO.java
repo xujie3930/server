@@ -197,4 +197,7 @@ public class DelOutboundListVO implements Serializable {
 
     @ApiModelProperty(value = "houseNo")
     private String houseNo;
+
+    @ApiModelProperty(value = "报价单号")
+    private String sheetCode;
 }

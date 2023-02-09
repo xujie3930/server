@@ -187,4 +187,7 @@ public class DelOutboundVO implements Serializable {
 
     @ApiModelProperty(value = "允查轨迹停留天数")
     private Long querysetrackStayDays;
+
+    @ApiModelProperty(value = "报价单号")
+    private String sheetCode;
 }

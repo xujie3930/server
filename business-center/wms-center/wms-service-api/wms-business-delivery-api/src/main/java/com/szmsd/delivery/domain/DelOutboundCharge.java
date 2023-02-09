@@ -71,6 +71,11 @@ public class DelOutboundCharge extends BaseEntity {
     @TableField(exist = false)
     private String trackingNo;
 
+    @ApiModelProperty(value = "报价单号")
+    @Excel(name = "报价单号")
+    @TableField(exist = false)
+    private String sheetCode;
+
     @ApiModelProperty(value = "费用编号")
     @Excel(name = "费用编号")
     private String billingNo;

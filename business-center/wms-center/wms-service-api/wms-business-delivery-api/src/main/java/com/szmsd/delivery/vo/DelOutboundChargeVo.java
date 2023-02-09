@@ -1,21 +1,13 @@
 package com.szmsd.delivery.vo;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.szmsd.common.core.annotation.Excel;
-import com.szmsd.common.core.web.domain.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
 
 
 /**
@@ -37,19 +29,15 @@ public class DelOutboundChargeVo  {
     @Excel(name = "订单号")
     private String orderNo;
 
-
-
     @ApiModelProperty(value = "跟踪号")
     @Excel(name = "跟踪号")
     @TableField(exist = false)
     private String trackingNo;
 
-
     @ApiModelProperty(value = "refNo")
     @Excel(name = "refNo")
     @TableField(exist = false)
     private String refNo;
-
 
     @ApiModelProperty("客户代码")
     @Excel(name = "客户代码")
@@ -60,10 +48,7 @@ public class DelOutboundChargeVo  {
     @Excel(name = "币种")
     private String currencyCode;
 
-
-
     @ApiModelProperty(value = "总金额")
-
     @Excel(name = "总金额")
     private BigDecimal amount;
 
@@ -74,6 +59,10 @@ public class DelOutboundChargeVo  {
     @Excel(name = "结算时间")
     @ApiModelProperty(value = "结算时间")
     private String createTime;
+
+    @ApiModelProperty(value = "报价单号")
+    @Excel(name = "报价单号")
+    private String sheetCode;
 
 
 }

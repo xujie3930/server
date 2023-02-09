@@ -73,7 +73,8 @@
             a.id_number,
             o.prc_interface_product_code,
             o.prc_terminal_carrier,
-            o.house_no
+            o.house_no,
+            o.sheet_code
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
         ${ew.customSqlSegment}
