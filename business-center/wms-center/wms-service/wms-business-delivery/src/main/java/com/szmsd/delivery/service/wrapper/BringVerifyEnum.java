@@ -893,21 +893,9 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             String shipmentService = delOutbound.getShipmentService();
             String trackingAcquireType = delOutbound.getTrackingAcquireType();
 
-            //BasShipmenRulesService basShipmenRulesService = SpringUtils.getBean(BasShipmenRulesService.class);
-
-            //8431 提审订单时，如果返回的物流服务是空的，跳过调用供应商
             if(StringUtils.isEmpty(shipmentService) || trackingAcquireType.equals(DelOutboundTrackingAcquireTypeEnum.NONE.getCode())){
                 return;
             }
-
-//            BasShipmentRulesDto paramBasShipmentRulesDto = new BasShipmentRulesDto();
-//            paramBasShipmentRulesDto.setCustomCode(delOutbound.getSellerCode());
-//            paramBasShipmentRulesDto.setServiceChannelName(shipmentService);
-//            List<BasShipmentRules> list = basShipmenRulesService.selectBasShipmentRules(paramBasShipmentRulesDto);
-//            if(CollectionUtils.isNotEmpty(list)){
-//                return;
-//            }
-
             IDelOutboundService iDelOutboundService = SpringUtils.getBean(IDelOutboundService.class);
 
             logger.info("{}-创建承运商物流订单：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(delOutbound));
@@ -915,9 +903,16 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             if (DelOutboundTrackingAcquireTypeEnum.ORDER_SUPPLIER.getCode().equals(delOutbound.getTrackingAcquireType())) {
                 // 创建承运商物流订单
                 IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
+                ShipmentOrderResult shipmentOrderResult = null;
+                try{
                 stopWatch.start();
-                ShipmentOrderResult shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
+                shipmentOrderResult = delOutboundBringVerifyService.shipmentOrder(delOutboundWrapperContext);
                 stopWatch.stop();
+                }catch (Exception e){
+
+                    throw new RuntimeException(e.getMessage());
+                }
+                logger.info("{}-创建承运商物流订单返回：{}", delOutbound.getOrderNo(), JSONObject.toJSONString(shipmentOrderResult));
                 if(shipmentOrderResult != null){
                     delOutbound.setTrackingNo(shipmentOrderResult.getMainTrackingNumber());
                     delOutbound.setShipmentOrderNumber(shipmentOrderResult.getOrderNumber());
