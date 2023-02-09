@@ -2,6 +2,7 @@ package com.szmsd.delivery.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.domain.vo.BasRegionSelectListVO;
 import com.szmsd.bas.api.feign.BasRegionFeignService;
 import com.szmsd.bas.api.service.BasWarehouseClientService;
@@ -182,6 +183,45 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
 
                 if(syncTrackingNoState == 1){
 
+                    //判断是否存在
+                    List<String> refNoList = list.stream().map(DelOutboundDto::getRefNo).collect(Collectors.toList());
+
+                    list.get(0).getCustomCode();
+
+                    String sellerCode;
+                    if (StringUtils.isNotEmpty(list.get(0).getCustomCode())) {
+                        sellerCode = list.get(0).getCustomCode();
+                    } else {
+                        sellerCode = list.get(0).getSellerCode();
+                    }
+
+                    if(StringUtils.isEmpty(sellerCode)){
+                        throw new RuntimeException("客户代码不允许为空");
+                    }
+
+                    List<DelOutbound>  deloutbounds = delOutboundService.list(Wrappers.<DelOutbound>query().lambda()
+                            .eq(DelOutbound::getCustomCode,sellerCode)
+                            .in(DelOutbound::getRefNo,refNoList)
+                            .notIn(DelOutbound::getState,DelOutboundStateEnum.CANCELLED.getCode())
+                    );
+
+                    if(CollectionUtils.isNotEmpty(deloutbounds)){
+
+                        Map<String,DelOutbound> outboundMap = deloutbounds.stream().collect(Collectors.toMap(DelOutbound::getOrderNo,v->v));
+
+                        for(DelOutboundAddResponse response : responses){
+
+                            String orderNo = response.getOrderNo();
+                            DelOutbound delOutbound = outboundMap.get(orderNo);
+
+                            if(delOutbound != null){
+                                response.setTrackingNo(delOutbound.getTrackingNo());
+                            }
+                        }
+                        return responses;
+                    }
+
+                    //不存在
                     try {
 
                         for(DelOutbound delOutbound : delOutboundList) {
