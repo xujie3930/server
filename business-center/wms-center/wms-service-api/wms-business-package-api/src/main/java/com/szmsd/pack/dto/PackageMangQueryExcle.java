@@ -90,4 +90,7 @@ public class PackageMangQueryExcle {
     @ExcelProperty(index = 17)
     @Excel(name = "DM反馈原因",width = 30, type = Excel.Type.ALL)
     private String dmRemark;
+
+    private String exportType;
+
 }
