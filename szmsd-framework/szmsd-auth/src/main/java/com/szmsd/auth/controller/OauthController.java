@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.LinkedMultiValueMap;
@@ -41,7 +42,6 @@ import java.util.concurrent.TimeUnit;
 public class OauthController {
     private static final Logger logger = LoggerFactory.getLogger(IdUtils.class);
 
-
     @Autowired
     private TokenEndpoint tokenEndpoint;
 
@@ -49,9 +49,6 @@ public class OauthController {
     private RedisTemplate redisTemplate;
     @Autowired
     private  Producer producer;
-
-
-
 
     private Set<HttpMethod> allowedRequestMethods = new HashSet<HttpMethod>(Arrays.asList(HttpMethod.GET));
 
@@ -127,7 +124,13 @@ public class OauthController {
     @PostMapping(value = "/token")
     public R<AuthResult> newpostAccessToken(Principal principal, @RequestParam
     Map<String, String> parameters) throws HttpRequestMethodNotSupportedException {
-        OAuth2AccessToken accessToken = tokenEndpoint.postAccessToken(principal, parameters).getBody();
+        OAuth2AccessToken accessToken = null;
+        try {
+            accessToken = tokenEndpoint.postAccessToken(principal, parameters).getBody();
+        }catch (InvalidGrantException e){
+            e.printStackTrace();
+            return R.failed("授权异常，请检查账号密码是否正确");
+        }
 
         String matcher = parameters.get("matcher");
 
