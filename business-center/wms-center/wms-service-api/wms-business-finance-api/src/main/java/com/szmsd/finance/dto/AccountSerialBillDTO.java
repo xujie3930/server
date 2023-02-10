@@ -225,6 +225,7 @@ public class AccountSerialBillDTO implements Serializable {
         this.shipmentService = details.getShipmentService();
         this.calcWeight = details.getCalcWeight();
         this.weight = details.getWeight();
+        this.calcWeightUnit = details.getCalcWeightUnit();
         this.chargeCategoryChange = details.getChargeCategoryChange();
         this.nature = details.getNature();
         this.businessType = details.getBusinessType();

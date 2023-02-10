@@ -395,6 +395,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                                     serialBill.setGrade(delOutbound.getGrade());
                                     serialBill.setWeight(delOutbound.getWeight());
                                     serialBill.setCalcWeight(delOutbound.getCalcWeight());
+                                    serialBill.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
                                     serialBill.setRefNo(delOutbound.getRefNo());
                                     serialBill.setShipmentService(delOutbound.getShipmentService());
 
@@ -478,6 +479,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                             dto.setGrade(delOutbound.getGrade());
                             dto.setWeight(delOutbound.getWeight());
                             dto.setCalcWeight(delOutbound.getCalcWeight());
+                            dto.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
                             dto.setRefNo(delOutbound.getRefNo());
                             dto.setShipmentService(delOutbound.getShipmentService());
 

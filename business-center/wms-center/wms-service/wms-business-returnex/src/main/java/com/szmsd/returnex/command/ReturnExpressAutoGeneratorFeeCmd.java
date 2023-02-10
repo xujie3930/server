@@ -241,6 +241,7 @@ public class ReturnExpressAutoGeneratorFeeCmd extends BasicCommand<List<ReturnEx
             serialBill.setGrade(delOutbound.getGrade());
             serialBill.setWeight(delOutbound.getWeight());
             serialBill.setCalcWeight(delOutbound.getCalcWeight());
+            serialBill.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
             serialBill.setRefNo(delOutbound.getRefNo());
             serialBill.setShipmentService(delOutbound.getShipmentService());
             serialBill.setNature("物流消费");
