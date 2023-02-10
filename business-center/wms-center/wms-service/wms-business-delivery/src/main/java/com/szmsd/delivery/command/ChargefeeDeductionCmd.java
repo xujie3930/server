@@ -112,6 +112,7 @@ public class ChargefeeDeductionCmd extends BasicCommand<List<String>> {
                     serialBill.setCountryCode(address.getCountryCode());
                     serialBill.setWeight(delOutbound.getWeight());
                     serialBill.setCalcWeight(delOutbound.getCalcWeight());
+                    serialBill.setCalcWeightUnit(delOutbound.getCalcWeightUnit());
 
                     serialBillInfoList.add(serialBill);
                     custPayDTO.setSerialBillInfoList(serialBillInfoList);

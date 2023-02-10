@@ -273,8 +273,14 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         BigDecimal amount = BigDecimalUtil.setScale(accountSerialBill.getAmount(),BigDecimalUtil.PRICE_SCALE);
         accountSerialBill.setAmount(amount);
 
-        Double weight = BigDecimalUtil.setScale(accountSerialBill.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
-        accountSerialBill.setWeight(weight);
+        Double weight = accountSerialBill.getWeight();
+
+        if(weight != null){
+
+            BigDecimal cs = new BigDecimal(weight);
+            BigDecimal ds = cs.divide(new BigDecimal(1000),3,BigDecimal.ROUND_UP);
+            accountSerialBill.setWeight(ds.doubleValue());
+        }
 
         return accountSerialBillMapper.insert(accountSerialBill);
     }
@@ -338,7 +344,7 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
 
             String calcWeightUnit = value.getCalcWeightUnit();
             //转换成KG
-            if(com.szmsd.common.core.utils.StringUtils.isNotEmpty(calcWeightUnit)){
+            if(StringUtils.isNotEmpty(calcWeightUnit)){
                 FssConvertUnit fssConvertUnit = convertUnitMap.get(calcWeightUnit);
 
                 if(fssConvertUnit != null && value.getCalcWeight() != null){
@@ -354,8 +360,13 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
             BigDecimal amount = BigDecimalUtil.setScale(value.getAmount(),BigDecimalUtil.PRICE_SCALE);
             value.setAmount(amount);
 
-            Double weight = BigDecimalUtil.setScale(value.getWeight(),BigDecimalUtil.WEIGHT_SCALE);
-            value.setWeight(weight);
+            Double weight = value.getWeight();
+
+            if(weight != null){
+                BigDecimal cs = new BigDecimal(weight);
+                BigDecimal ds = cs.divide(new BigDecimal(1000),3,BigDecimal.ROUND_UP);
+                value.setWeight(ds.doubleValue());
+            }
 
             return value;
         }).collect(Collectors.toList());

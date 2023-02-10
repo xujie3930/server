@@ -980,7 +980,7 @@ public enum BringVerifyEnum implements ApplicationState, ApplicationRegister {
             String shipmentOrderNumber = delOutbound.getShipmentOrderNumber();
             String trackingNo = delOutbound.getTrackingNo();
             if (StringUtils.isNotEmpty(shipmentOrderNumber) && StringUtils.isNotEmpty(trackingNo)) {
-                String referenceNumber = String.valueOf(delOutbound.getId());
+                String referenceNumber = delOutbound.getReferenceNumber();
                 IDelOutboundBringVerifyService delOutboundBringVerifyService = SpringUtils.getBean(IDelOutboundBringVerifyService.class);
                 delOutboundBringVerifyService.cancellation(delOutbound.getWarehouseCode(), referenceNumber, shipmentOrderNumber, trackingNo);
                 delOutbound.setTrackingNo("");
