@@ -407,7 +407,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
         boolean orderTypeFlag = DelOutboundOrderTypeEnum.COLLECTION.getCode().equals(delOutbound.getOrderType())
                                 || DelOutboundOrderTypeEnum.NORMAL.getCode().equals(delOutbound.getOrderType())
-                                || DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType());
+                                || DelOutboundOrderTypeEnum.BATCH.getCode().equals(delOutbound.getOrderType())
+                                || DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType());
 
         if (orderTypeFlag) {
             if (PricingEnum.SKU.equals(pricingEnum)) {
@@ -489,26 +490,6 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
                         new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
                         , Math.toIntExact(1), delOutbound.getOrderNo(), declareValue, ""));
             }
-
-        }else if(DelOutboundOrderTypeEnum.MULTIBOX.getCode().equals(delOutbound.getOrderType())){
-
-            BigDecimal declareValue = BigDecimal.ZERO;
-            Long totalQuantity = 0L;
-            for (DelOutboundDetail detail : detailList) {
-                if (null != detail.getDeclaredValue()) {
-
-                    BigDecimal dvalue = BigDecimal.valueOf(detail.getDeclaredValue());
-                    declareValue = declareValue.add(dvalue);
-                }
-                //一票多件以sku数量计算
-                totalQuantity += 1;
-            }
-
-            BigDecimal resultDeclareValue = BigDecimalUtil.setScale(declareValue.multiply(new BigDecimal(totalQuantity)));
-
-            packageInfos.add(new PackageInfo(new Weight(Utils.valueOf(delOutbound.getWeight()), "g"),
-                    new Packing(Utils.valueOf(delOutbound.getLength()), Utils.valueOf(delOutbound.getWidth()), Utils.valueOf(delOutbound.getHeight()), "cm")
-                    , Math.toIntExact(totalQuantity), delOutbound.getOrderNo(), resultDeclareValue, ""));
 
         } else {
             if (PricingEnum.SKU.equals(pricingEnum)) {
