@@ -32,6 +32,7 @@
         <module>wms-business-package</module>
         <module>wms-business-report</module>
         <module>wms-business-ec</module>
+        <module>wms-business-track</module>
     </modules>
 
     <properties>

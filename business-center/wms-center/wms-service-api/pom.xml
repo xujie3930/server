@@ -35,6 +35,7 @@
         <module>wms-business-package-api</module>
         <module>wms-business-report-api</module>
         <module>wms-business-ec-api</module>
+        <module>wms-business-track-api</module>
     </modules>
 
     <dependencyManagement>

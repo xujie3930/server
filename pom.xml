@@ -22,8 +22,6 @@
     <modules>
         <module>business-center</module>
         <module>szmsd-framework</module>
-        <module>business-center/wms-center/wms-service-api/wms-business-track-api</module>
-        <module>business-center/wms-center/wms-service/wms-business-track</module>
     </modules>
 
     <properties>
