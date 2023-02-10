@@ -121,7 +121,7 @@ public class PackageMangVO {
 
     @Excel(name = "司机车牌")
     @ApiModelProperty(value = "司机车牌")
-    private Integer driverLicensePlate;
+    private String driverLicensePlate;
 
     @ApiModelProperty(value = "货物类型【 0：入库，1：转运】")
     private Integer operationType;
