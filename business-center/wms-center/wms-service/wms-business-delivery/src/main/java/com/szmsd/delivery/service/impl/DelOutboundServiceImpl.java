@@ -1343,6 +1343,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
                 Double boxWeight = BigDecimalUtil.setScale(delOutboundDetail.getBoxWeight(),BigDecimalUtil.WEIGHT_SCALE);
                 delOutboundDetail.setBoxWeight(boxWeight);
+
+                String productAttribute = delOutboundDetail.getProductAttribute();
+                if("electrified".equals(productAttribute)){
+                    delOutboundDetail.setElectrifiedMode("");
+                    delOutboundDetail.setBatteryPackaging("");
+                }
+
             }
             this.delOutboundDetailService.saveBatch(delOutboundDetailList);
             for (int i = 0; i < delOutboundDetailList.size(); i++) {
