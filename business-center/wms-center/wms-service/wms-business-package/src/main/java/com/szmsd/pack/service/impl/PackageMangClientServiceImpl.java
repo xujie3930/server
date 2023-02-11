@@ -4,6 +4,7 @@ package com.szmsd.pack.service.impl;
 import com.alibaba.nacos.common.utils.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.datascope.service.AwaitUserService;
@@ -248,7 +249,12 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
 
     @Override
     public int addPackageConfig(PackageManagementConfig packageManagementConfig) {
-       int a= packageManagementConfigMapper.insertSelective(packageManagementConfig);
+        int a=0;
+        List<PackageManagementConfig> packageManagementConfig1=packageManagementConfigMapper.selectPckageManagementConfigus(packageManagementConfig);
+        if (packageManagementConfig1.size()==0){
+
+
+        a= packageManagementConfigMapper.insertSelective(packageManagementConfig);
         List<PackageManagementConfigWeek> list=packageManagementConfig.getPackageManagementConfigWeekList();
         if (list.size()>0) {
             list.forEach(x -> {
@@ -256,19 +262,27 @@ public class PackageMangClientServiceImpl extends ServiceImpl<PackageAddressMapp
                 packageManagementConfigWeekMapper.insertSelective(x);
             });
         }
+
+        }
         return a;
+
     }
+
+
 
     @Override
     public int editPackageConfig(PackageManagementConfig packageManagementConfig) {
-
-        int a= packageManagementConfigMapper.updateByPrimaryKeySelective(packageManagementConfig);
-        List<PackageManagementConfigWeek> list=packageManagementConfig.getPackageManagementConfigWeekList();
-        packageManagementConfigWeekMapper.deleteByPrimaryKey(packageManagementConfig.getId());
-        list.forEach(x->{
-            x.setPackageManagementConfigId(packageManagementConfig.getId());
-            packageManagementConfigWeekMapper.insertSelective(x);
-        });
+        int a=0;
+        List<PackageManagementConfig> packageManagementConfig1=packageManagementConfigMapper.selectPckageManagementConfigus(packageManagementConfig);
+        if (packageManagementConfig1.size()==0) {
+            a = packageManagementConfigMapper.updateByPrimaryKeySelective(packageManagementConfig);
+            List<PackageManagementConfigWeek> list = packageManagementConfig.getPackageManagementConfigWeekList();
+            packageManagementConfigWeekMapper.deleteByPrimaryKey(packageManagementConfig.getId());
+            list.forEach(x -> {
+                x.setPackageManagementConfigId(packageManagementConfig.getId());
+                packageManagementConfigWeekMapper.insertSelective(x);
+            });
+        }
         return a;
     }
 
