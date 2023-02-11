@@ -98,7 +98,16 @@
       where  a.id=#{idu}
       GROUP BY a.id
     </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+  <select id="selectPckageManagementConfigus" resultType="com.szmsd.pack.domain.PackageManagementConfig">
+    SELECT * from package_management_config
+    <where>
+    seller_code =#{sellerCode} AND delivery_address=#{deliveryAddress} and del_flag='0'
+    <if test="id!=null and id!=''">
+      id!=#{id}
+    </if>
+  </where>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from package_management_config
     where id = #{id,jdbcType=INTEGER}
   </delete>
