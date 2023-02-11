@@ -26,4 +26,6 @@ public interface PackageManagementConfigMapper {
     List<PackageManagementConfig>  selectPackageManagementConfigJob();
 
     PackageManagementConfig  packageConfigBy(@Param("idu") Integer idu);
+
+    List<PackageManagementConfig>  selectPckageManagementConfigus(PackageManagementConfig packageManagementConfig);
 }
