@@ -180,14 +180,6 @@ public interface DelOutboundClientService {
     DelOutboundAddResponse addShopify(DelOutboundDto dto);
 
 
-    /**
-     * 轨迹查询
-     *
-     * @param queryDto queryDto
-     * @return List<DelOutboundReportListVO>
-     */
-    DelTrackMainDocCommonDto commonTrackList(List<String> orderNos) ;
-
     int updateWeightDelOutbound(UpdateWeightDelOutboundDto dto);
 
     int receiveLabel(DelOutboundReceiveLabelDto dto);
