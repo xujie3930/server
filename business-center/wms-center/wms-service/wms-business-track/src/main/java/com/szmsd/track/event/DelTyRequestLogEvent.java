@@ -1,4 +1,4 @@
-package com.szmsd.delivery.event;
+package com.szmsd.track.event;
 
 import org.springframework.context.ApplicationEvent;
 
