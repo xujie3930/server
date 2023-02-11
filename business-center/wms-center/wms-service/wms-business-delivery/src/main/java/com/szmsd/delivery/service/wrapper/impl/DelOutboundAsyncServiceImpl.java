@@ -56,6 +56,8 @@ import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import com.szmsd.putinstorage.domain.dto.ReceiptRequest;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
+import com.szmsd.track.api.feign.TrackFeignService;
+import com.szmsd.track.domain.DelTrack;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
@@ -131,6 +133,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
 
     @Autowired
     private HtpCarrierFeignService htpCarrierFeignService;
+
+    @Autowired
+    private TrackFeignService delTrackService;
+
     @Override
     public int shipmentPacking(Long id) {
         return this.shipmentPacking(id, true);
@@ -614,12 +620,11 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         e.printStackTrace();
                     }
 
-                     //TODO 推送TY
-//                    delTrackService.addData(new DelTrack()
-//                            .setOrderNo(delOutbound.getOrderNo())
-//                            .setTrackingNo(delOutbound.getTrackingNo())
-//                            .setTrackingStatus("WarehouseShipped")
-//                            .setDescription("DMF, Departure Scan"));
+                    delTrackService.addData(new DelTrack()
+                            .setOrderNo(delOutbound.getOrderNo())
+                            .setTrackingNo(delOutbound.getTrackingNo())
+                            .setTrackingStatus("WarehouseShipped")
+                            .setDescription("DMF, Departure Scan"));
 
                     if(StringUtils.equals(type, "pushDate")){
                         //不调用wms的订单

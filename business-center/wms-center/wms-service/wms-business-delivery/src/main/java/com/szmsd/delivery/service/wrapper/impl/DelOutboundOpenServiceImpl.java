@@ -23,6 +23,8 @@ import com.szmsd.delivery.service.wrapper.ShipmentEnum;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.ShipmentUpdateRequestDto;
+import com.szmsd.track.api.feign.TrackFeignService;
+import com.szmsd.track.domain.DelTrack;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -52,8 +54,8 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
     private RemoteAttachmentService attachmentService;
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
-//    @Autowired
-//    private IDelTrackService delTrackService;
+    @Autowired
+    private TrackFeignService delTrackService;
 
     @Resource
     private BasSellerFeignService basSellerFeignService;
@@ -306,12 +308,11 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                 // 增加出库单已取消记录，异步处理，定时任务
                 this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
             }
-             //TODO TY addData
-//            delTrackService.addData(new DelTrack()
-//                    .setOrderNo(delOutbound.getOrderNo())
-//                    .setTrackingNo(delOutbound.getTrackingNo())
-//                    .setTrackingStatus("Hub")
-//                    .setDescription("DMF, Parcel is being processed at the "+delOutbound.getWarehouseCode()));
+            delTrackService.addData(new DelTrack()
+                    .setOrderNo(delOutbound.getOrderNo())
+                    .setTrackingNo(delOutbound.getTrackingNo())
+                    .setTrackingStatus("Hub")
+                    .setDescription("DMF, Parcel is being processed at the "+delOutbound.getWarehouseCode()));
             return 1;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

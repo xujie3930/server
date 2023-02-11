@@ -83,7 +83,6 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
     private RedisTemplate redisTemplate;
 
 
-
     @Override
     public void addData(DelTrack track) {
         track.setSource("2");

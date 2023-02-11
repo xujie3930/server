@@ -45,6 +45,8 @@ import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.pack.api.feign.PackageDeliveryConditionsFeignService;
 import com.szmsd.pack.domain.PackageDeliveryConditions;
+import com.szmsd.track.api.feign.TrackFeignService;
+import com.szmsd.track.domain.DelTrack;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -87,8 +89,8 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
     private IDelOutboundCompletedService delOutboundCompletedService;
     @Autowired
     private IDelOutboundRetryLabelService delOutboundRetryLabelService;
-//    @Autowired
-//    private IDelTrackService delTrackService;
+    @Autowired
+    private TrackFeignService delTrackService;
     @SuppressWarnings({"all"})
     @Autowired
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
@@ -337,12 +339,11 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
                                 // 提交一个获取标签的任务
                                 delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), "pushLabel", "bringVerify");
                             }
-                            //TODO TY
-//                            delTrackService.addData(new DelTrack()
-//                                    .setOrderNo(delOutbound.getOrderNo())
-//                                    .setTrackingNo(delOutbound.getTrackingNo())
-//                                    .setTrackingStatus("Todo")
-//                                    .setDescription("DMF, Parcel Infomation Received"));
+                            delTrackService.addData(new DelTrack()
+                                    .setOrderNo(delOutbound.getOrderNo())
+                                    .setTrackingNo(delOutbound.getTrackingNo())
+                                    .setTrackingStatus("Todo")
+                                    .setDescription("DMF, Parcel Infomation Received"));
 //                            logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
 
                             stopWatch.stop();

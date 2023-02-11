@@ -27,6 +27,8 @@ import com.szmsd.http.util.Ck1DomainPluginUtil;
 import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.pack.api.feign.PackageDeliveryConditionsFeignService;
 import com.szmsd.pack.domain.PackageDeliveryConditions;
+import com.szmsd.track.api.feign.TrackFeignService;
+import com.szmsd.track.domain.DelTrack;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
@@ -63,8 +65,9 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
     private IDelOutboundCompletedService delOutboundCompletedService;
     @Autowired
     private IDelOutboundRetryLabelService delOutboundRetryLabelService;
-//    @Autowired
-//    private IDelTrackService delTrackService;
+
+    @Autowired
+    private TrackFeignService delTrackService;
     @SuppressWarnings({"all"})
     @Autowired
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
@@ -223,12 +226,13 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 // 提交一个获取标签的任务
                 delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), "pushLabel", "bringVerify");
             }
-            //TODO TY delTrackService.addData
-//            delTrackService.addData(new DelTrack()
-//                    .setOrderNo(delOutbound.getOrderNo())
-//                    .setTrackingNo(delOutbound.getTrackingNo())
-//                    .setTrackingStatus("Todo")
-//                    .setDescription("DMF, Parcel Infomation Received"));
+
+            DelTrack delTrack = new DelTrack();
+            delTrack.setOrderNo(delOutbound.getOrderNo());
+            delTrack.setTrackingNo(delOutbound.getTrackingNo());
+            delTrack.setTrackingStatus("Todo");
+            delTrack.setDescription("DMF, Parcel Infomation Received");
+            delTrackService.addData(delTrack);
             logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
         } catch (CommonException e) {
             // 回滚操作
