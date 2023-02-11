@@ -37,45 +37,51 @@ public class PackageMangQueryExcle {
     private String deliveryAddress;
 
     @ExcelProperty(index = 6)
-    @Excel(name = "电话",width = 30, type = Excel.Type.ALL)
-    private String linkPhone;
-
-    @ExcelProperty(index = 7)
     @Excel(name = "联系人",width = 30, type = Excel.Type.ALL)
     private String linkUserName;
 
+    @ExcelProperty(index = 7)
+    @Excel(name = "电话",width = 30, type = Excel.Type.ALL)
+    private String linkPhone;
+
+
+
     @ExcelProperty(index = 8)
+    @Excel(name = "请求收货时间",width = 30, type = Excel.Type.ALL)
+    private String expectedDeliveryTime;
+
+    @ExcelProperty(index = 9)
+    @Excel(name = "收货数量",width = 30, type = Excel.Type.ALL)
+    private String packageNum;
+
+    @ExcelProperty(index = 10)
     @Excel(name = "司机姓名",width = 30, type = Excel.Type.ALL)
     private String driverName;
 
-    @ExcelProperty(index = 9)
+    @ExcelProperty(index = 11)
     @Excel(name = "司机电话",width = 30, type = Excel.Type.ALL)
     private String driverPhone;
 
-    @ExcelProperty(index = 10)
+    @ExcelProperty(index = 12)
     @Excel(name = "司机车牌",width = 30, type = Excel.Type.ALL)
     private String driverLicensePlate;
 
 
-    @ExcelProperty(index = 11)
-    @Excel(name = "状态",width = 30, type = Excel.Type.ALL)
-    private String exportType;
 
-    @ExcelProperty(index = 12)
+
+    @ExcelProperty(index = 13)
     @Excel(name = "货物件数",width = 30, type = Excel.Type.ALL)
     private String pieceNumber;
 
-    @ExcelProperty(index = 13)
+    @ExcelProperty(index = 14)
     @Excel(name = "货物方数",width = 30, type = Excel.Type.ALL)
     private String squareNumber;
 
-    @ExcelProperty(index = 14)
+    @ExcelProperty(index = 15)
     @Excel(name = "货物袋数",width = 30, type = Excel.Type.ALL)
     private String bagNumber;
 
-    @ExcelProperty(index = 15)
-    @Excel(name = "请求收货时间",width = 30, type = Excel.Type.ALL)
-    private String expectedDeliveryTime;
+
 
     @ExcelProperty(index = 16)
     @Excel(name = "客户备注",width = 30, type = Excel.Type.ALL)
@@ -84,4 +90,7 @@ public class PackageMangQueryExcle {
     @ExcelProperty(index = 17)
     @Excel(name = "DM反馈原因",width = 30, type = Excel.Type.ALL)
     private String dmRemark;
+
+    private String exportType;
+
 }
