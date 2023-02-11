@@ -7,15 +7,10 @@ import com.szmsd.bas.api.domain.dto.BasAttachmentQueryDTO;
 import com.szmsd.bas.api.enums.AttachmentTypeEnum;
 import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.api.feign.RemoteAttachmentService;
-import com.szmsd.bas.plugin.BasSubCommonPlugin;
-import com.szmsd.bas.plugin.BasSubValueCommonParameter;
 import com.szmsd.bas.vo.BasSellerInfoVO;
-import com.szmsd.common.core.annotation.Excel;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.common.plugin.annotation.AutoFieldValue;
 import com.szmsd.delivery.domain.DelOutbound;
-import com.szmsd.delivery.domain.DelTrack;
 import com.szmsd.delivery.dto.ShipmentContainersRequestDto;
 import com.szmsd.delivery.dto.ShipmentPackingMaterialRequestDto;
 import com.szmsd.delivery.enums.DelOutboundOperationTypeEnum;
@@ -23,13 +18,11 @@ import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
 import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
 import com.szmsd.delivery.service.IDelOutboundCompletedService;
 import com.szmsd.delivery.service.IDelOutboundService;
-import com.szmsd.delivery.service.IDelTrackService;
 import com.szmsd.delivery.service.wrapper.IDelOutboundOpenService;
 import com.szmsd.delivery.service.wrapper.ShipmentEnum;
 import com.szmsd.delivery.util.Utils;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.ShipmentUpdateRequestDto;
-import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,8 +52,8 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
     private RemoteAttachmentService attachmentService;
     @Autowired
     private IDelOutboundCompletedService delOutboundCompletedService;
-    @Autowired
-    private IDelTrackService delTrackService;
+//    @Autowired
+//    private IDelTrackService delTrackService;
 
     @Resource
     private BasSellerFeignService basSellerFeignService;
@@ -313,12 +306,12 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                 // 增加出库单已取消记录，异步处理，定时任务
                 this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
             }
-
-            delTrackService.addData(new DelTrack()
-                    .setOrderNo(delOutbound.getOrderNo())
-                    .setTrackingNo(delOutbound.getTrackingNo())
-                    .setTrackingStatus("Hub")
-                    .setDescription("DMF, Parcel is being processed at the "+delOutbound.getWarehouseCode()));
+             //TODO TY addData
+//            delTrackService.addData(new DelTrack()
+//                    .setOrderNo(delOutbound.getOrderNo())
+//                    .setTrackingNo(delOutbound.getTrackingNo())
+//                    .setTrackingStatus("Hub")
+//                    .setDescription("DMF, Parcel is being processed at the "+delOutbound.getWarehouseCode()));
             return 1;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

@@ -23,7 +23,10 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
 import com.szmsd.delivery.enums.*;
-import com.szmsd.delivery.event.*;
+import com.szmsd.delivery.event.DelCk1RequestLogEvent;
+import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
+import com.szmsd.delivery.event.DelSrmCostLogEvent;
+import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
@@ -122,8 +125,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     @SuppressWarnings({"all"})
     @Autowired
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
-    @Autowired
-    private IDelTrackService delTrackService;
+
     @Autowired
     private ExceptionInfoFeignService exceptionInfoFeignService;
 
@@ -612,12 +614,12 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         e.printStackTrace();
                     }
 
-
-                    delTrackService.addData(new DelTrack()
-                            .setOrderNo(delOutbound.getOrderNo())
-                            .setTrackingNo(delOutbound.getTrackingNo())
-                            .setTrackingStatus("WarehouseShipped")
-                            .setDescription("DMF, Departure Scan"));
+                     //TODO 推送TY
+//                    delTrackService.addData(new DelTrack()
+//                            .setOrderNo(delOutbound.getOrderNo())
+//                            .setTrackingNo(delOutbound.getTrackingNo())
+//                            .setTrackingStatus("WarehouseShipped")
+//                            .setDescription("DMF, Departure Scan"));
 
                     if(StringUtils.equals(type, "pushDate")){
                         //不调用wms的订单
@@ -688,10 +690,11 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             return;
         }
         // 请求体的内容异步填充
-        DelTyRequestLog tyRequestLog = new DelTyRequestLog();
-        tyRequestLog.setOrderNo(delOutbound.getOrderNo());
-        tyRequestLog.setType(DelTyRequestLogConstant.Type.shipments.name());
-        EventUtil.publishEvent(new DelTyRequestLogEvent(tyRequestLog));
+        //TODO 推送TY
+//        DelTyRequestLog tyRequestLog = new DelTyRequestLog();
+//        tyRequestLog.setOrderNo(delOutbound.getOrderNo());
+//        tyRequestLog.setType(DelTyRequestLogConstant.Type.shipments.name());
+//        EventUtil.publishEvent(new DelTyRequestLogEvent(tyRequestLog));
     }
 
     private String getSkuName(BaseProduct baseProduct) {

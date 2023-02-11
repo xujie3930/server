@@ -65,8 +65,8 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
     private IDelOutboundService delOutboundService;
     @Resource
     private BasSellerFeignService basSellerFeignService;
-    @Resource
-    private IDelTrackService delTrackService;
+//    @Resource
+//    private IDelTrackService delTrackService;
     @Autowired
     private IDelOutboundService iDelOutboundService;
     @Autowired
@@ -583,14 +583,15 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 } else if (delOutbound.getShipmentsTime() != null && (DateUtil.betweenDay(delOutbound.getShipmentsTime(), new Date(), true) >= delQuerySettings.getShipmentDays() || DateUtil.betweenDay(delOutbound.getTrackingTime(), new Date(), true) >= delQuerySettings.getTrackStayDays())) {
                     bool = true;
                 } else {
-                    LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
-                    delTrackLambdaQueryWrapper.eq(DelTrack::getOrderNo, delQueryService.getOrderNo());
-                    delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
-                    delTrackLambdaQueryWrapper.last("LIMIT 1");
-                    DelTrack dataDelTrack = delTrackService.getOne(delTrackLambdaQueryWrapper);
-                    if (dataDelTrack != null && dataDelTrack.getTrackingTime() != null && DateUtil.betweenDay(dataDelTrack.getTrackingTime(), new Date(), true) <= delQuerySettings.getTrackStayDays()) {
-                        bool = true;
-                    }
+                    //TODO TY
+//                    LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
+//                    delTrackLambdaQueryWrapper.eq(DelTrack::getOrderNo, delQueryService.getOrderNo());
+//                    delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
+//                    delTrackLambdaQueryWrapper.last("LIMIT 1");
+//                    DelTrack dataDelTrack = delTrackService.getOne(delTrackLambdaQueryWrapper);
+//                    if (dataDelTrack != null && dataDelTrack.getTrackingTime() != null && DateUtil.betweenDay(dataDelTrack.getTrackingTime(), new Date(), true) <= delQuerySettings.getTrackStayDays()) {
+//                        bool = true;
+//                    }
                 }
                 if (!bool) {
                     throw new CommonException("400", "This document search application does not meet the document search conditions");

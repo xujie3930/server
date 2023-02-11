@@ -1,47 +1,24 @@
 package com.szmsd.delivery.timer;
 
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.bas.api.service.SerialNumberClientService;
 import com.szmsd.bas.constant.SerialNumberConstant;
-import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import com.szmsd.delivery.domain.*;
-import com.szmsd.delivery.dto.DelOutboundDto;
-import com.szmsd.delivery.enums.DelOutboundCompletedStateEnum;
-import com.szmsd.delivery.enums.DelOutboundConstant;
-import com.szmsd.delivery.enums.DelOutboundOrderTypeEnum;
-import com.szmsd.delivery.enums.DelOutboundStateEnum;
-import com.szmsd.delivery.service.*;
+import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundAddress;
+import com.szmsd.delivery.domain.DelOutboundDetail;
+import com.szmsd.delivery.service.IDelOutboundAddressService;
+import com.szmsd.delivery.service.IDelOutboundDetailService;
+import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.util.LockerUtil;
-import com.szmsd.delivery.vo.DelOutboundAddResponse;
-import com.szmsd.inventory.api.feign.PurchaseFeignService;
-import com.szmsd.inventory.domain.dto.TransportWarehousingAddDTO;
-import org.apache.commons.collections4.CollectionUtils;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StopWatch;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 /**
  * 转运入库特定客户，每天定时生成一条数据
@@ -64,9 +41,9 @@ public class DelOutboundTransferTimer {
 
     @Autowired
     private IDelOutboundDetailService delOutboundDetailService;
-    @SuppressWarnings({"all"})
-    @Autowired
-    private IDelTrackService delTrackService;
+//    @SuppressWarnings({"all"})
+//    @Autowired
+//    private IDelTrackService delTrackService;
     @Autowired
     private SerialNumberClientService serialNumberClientService;
 
@@ -132,32 +109,33 @@ public class DelOutboundTransferTimer {
 
     private void processing2(Date date, String trackingStatus, String description){
 
-        QueryWrapper<DelOutbound> queryWrapper = new QueryWrapper();
-        queryWrapper.eq("seller_code", "CNW759");
-        queryWrapper.eq("source_type", "time");
-
-        queryWrapper.eq("date_format(create_time,'%Y-%m-%d')", DateUtil.format(date, "yyyy-MM-dd"));
-        List<DelOutbound> list = delOutboundService.list(queryWrapper);
-        if(list.isEmpty()){
-            return;
-        }
-        List<DelTrack> delTrackList = new ArrayList<DelTrack>();
-
-        for (DelOutbound delOutbound: list){
-            DelTrack delTrack = new DelTrack();
-            delTrack.setSource("1");
-            delTrack.setTrackingNo(delOutbound.getOrderNo());
-            delTrack.setTrackingStatus(trackingStatus);
-            delTrack.setDescription(description);
-            delTrack.setTrackingTime(new Date());
-            delTrack.setOrderNo(delOutbound.getOrderNo());
-            delTrack.setCreateTime(new Date());
-            delTrackList.add(delTrack);
-
-            delOutbound.setTrackingStatus(trackingStatus);
-        }
-        delTrackService.saveBatch(delTrackList);
-        delOutboundService.updateBatchById(list);
+        //TODO TY process
+//        QueryWrapper<DelOutbound> queryWrapper = new QueryWrapper();
+//        queryWrapper.eq("seller_code", "CNW759");
+//        queryWrapper.eq("source_type", "time");
+//
+//        queryWrapper.eq("date_format(create_time,'%Y-%m-%d')", DateUtil.format(date, "yyyy-MM-dd"));
+//        List<DelOutbound> list = delOutboundService.list(queryWrapper);
+//        if(list.isEmpty()){
+//            return;
+//        }
+//        List<DelTrack> delTrackList = new ArrayList<DelTrack>();
+//
+//        for (DelOutbound delOutbound: list){
+//            DelTrack delTrack = new DelTrack();
+//            delTrack.setSource("1");
+//            delTrack.setTrackingNo(delOutbound.getOrderNo());
+//            delTrack.setTrackingStatus(trackingStatus);
+//            delTrack.setDescription(description);
+//            delTrack.setTrackingTime(new Date());
+//            delTrack.setOrderNo(delOutbound.getOrderNo());
+//            delTrack.setCreateTime(new Date());
+//            delTrackList.add(delTrack);
+//
+//            delOutbound.setTrackingStatus(trackingStatus);
+//        }
+//        delTrackService.saveBatch(delTrackList);
+//        delOutboundService.updateBatchById(list);
 
     }
 
