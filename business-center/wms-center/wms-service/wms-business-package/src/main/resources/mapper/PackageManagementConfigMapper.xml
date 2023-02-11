@@ -103,7 +103,7 @@
     <where>
     seller_code =#{sellerCode} AND delivery_address=#{deliveryAddress} and del_flag='0'
     <if test="id!=null and id!=''">
-      id!=#{id}
+     and id!=#{id}
     </if>
   </where>
   </select>
