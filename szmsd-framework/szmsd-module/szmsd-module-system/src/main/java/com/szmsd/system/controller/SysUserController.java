@@ -220,7 +220,6 @@ public class SysUserController extends BaseController {
         Set<String> permissions = permissionService.getMenuPermission(userId, type);
 
         Map map = new HashMap<>();
-        // todo 此处修改ajax.put返回  R.ok(map)
 
         SysUser sysUser = userService.selectUserById(userId);
         String sellerCode = sysUser.getSellerCode();
@@ -266,7 +265,6 @@ public class SysUserController extends BaseController {
     public R getInfo(@PathVariable(value = "userId", required = false) Long userId) {
 //        R ajax = R.ok();
         Map map = new HashMap<>();
-        // todo 此处修改ajax.put返回  R.ok(map)
         map.put("roles", roleService.selectRoleAll());
 //        map.put("posts", postService.selectPostAll());
         if (StringUtils.isNotNull(userId)) {

@@ -22,7 +22,6 @@ import java.io.IOException;
  *
  * @author szmsd
  */
-// TODO  new throw
 @Component
 public class CustomWebResponseExceptionTranslator implements WebResponseExceptionTranslator {
     private ThrowableAnalyzer throwableAnalyzer = new DefaultThrowableAnalyzer();

@@ -339,7 +339,7 @@ public class SysUserServiceImpl implements ISysUserService {
 
 
         // 删除用户与角色关联
-        userRoleMapper.deleteUserRoleOtherByUserId(userId, roleType);// todo 只删除角色为E3/相关的
+        userRoleMapper.deleteUserRoleOtherByUserId(userId, roleType);//
         // 新增用户与角色管理
         insertUserRole(user);
 //        // 删除用户与岗位关联
@@ -372,7 +372,7 @@ public class SysUserServiceImpl implements ISysUserService {
     public int updateUserApp(SysUser user) {
         Long userId = user.getUserId();
         // 删除用户与角色关联
-        userRoleMapper.deleteUserRoleOtherByUserId(userId, UserConstants.ROLE_TYPE_APP);// todo 只删除角色为app相关的
+        userRoleMapper.deleteUserRoleOtherByUserId(userId, UserConstants.ROLE_TYPE_APP);//
         // 新增用户与角色管理
         insertUserRole(user);
 //        // 删除用户与岗位关联
@@ -480,7 +480,7 @@ public class SysUserServiceImpl implements ISysUserService {
             }
         }
     }
-// TODO 用户岗位移到基础资料
+//  用户岗位移到基础资料
 //    /**
 //     * 新增用户岗位信息
 //     *

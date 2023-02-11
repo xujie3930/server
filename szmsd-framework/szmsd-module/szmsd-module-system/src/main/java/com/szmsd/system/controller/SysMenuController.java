@@ -60,7 +60,6 @@ public class SysMenuController extends BaseController {
         BeanUtils.copyBeanProp(menu, sysMenuDto);
 //        Long userId = 1L;
         List<SysMenu> menus = menuService.selectMenuList(menu, userId);
-//todo 存储了数据字典键值对，不调用基础数据feign
      /*   R r = basFeignService.list(BaseConstants.SUB_CODE, BaseConstants.SUB_NAME);
         //封装数据字典 机构级别名称 到菜单列表展示
         if (menus.size() > 0 && r != null && r.getData() != null) {

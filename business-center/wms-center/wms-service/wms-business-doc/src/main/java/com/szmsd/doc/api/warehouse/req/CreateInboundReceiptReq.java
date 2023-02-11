@@ -83,7 +83,7 @@ public class CreateInboundReceiptReq extends InboundReceiptReq {
         if (StringUtils.isNotBlank(goodsSourceCode)){
             AssertUtil400.isTrue("0".equals(goodsSourceCode) || "1".equals(goodsSourceCode), "The product origin does not exist");
         }
-        // 裸货上架 过滤图片 TODO
+        // 裸货上架 过滤图片
         if ("055003".equals(super.getOrderType())){
             this.getInboundReceiptDetails().stream().map(InboundReceiptDetailReq::getEditionImage);
         }

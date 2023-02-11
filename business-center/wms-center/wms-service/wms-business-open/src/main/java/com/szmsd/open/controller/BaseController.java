@@ -96,7 +96,7 @@ public class BaseController {
     /**
      * @return com.szmsd.inner.common.handler.ResponseEntity
      * @Author Mars
-     * @Description //TODO 请求前异常
+     * @Description
      * @Date 2020/6/16
      * @Param [e]
      **/
@@ -115,7 +115,7 @@ public class BaseController {
     /**
      * @return com.szmsd.inner.common.handler.ResponseEntity
      * @Author Mars
-     * @Description //TODO 运行时异常
+     * @Description
      * @Date 2020/6/16
      * @Param [ex]
      **/
