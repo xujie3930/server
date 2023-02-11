@@ -11,6 +11,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -190,4 +191,9 @@ public class DelOutboundVO implements Serializable {
 
     @ApiModelProperty(value = "报价单号")
     private String sheetCode;
+
+    @ApiModelProperty(value = "物流商code")
+    private String logisticsProviderCode;
+
+    private Date shipmentsTime;
 }

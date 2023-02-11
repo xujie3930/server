@@ -110,6 +110,11 @@
                 <artifactId>wms-business-ec-api</artifactId>
                 <version>1.0.0</version>
             </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-track-api</artifactId>
+                <version>${business.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

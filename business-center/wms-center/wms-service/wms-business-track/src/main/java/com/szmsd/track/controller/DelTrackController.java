@@ -1,20 +1,14 @@
 package com.szmsd.track.controller;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.szmsd.bas.api.client.BasSubClientService;
-import com.szmsd.bas.api.feign.BasCarrierKeywordFeignService;
-import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.SpringUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
-import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.utils.poi.ExcelUtil;
 import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
@@ -35,7 +29,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
@@ -48,9 +41,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -77,17 +70,6 @@ public class DelTrackController extends BaseController {
     @Resource
     private ApplicationContext applicationContext;
 
-    @Autowired
-    private BasSubClientService basSubClientService;
-
-    @Autowired
-    private IDelOutboundAddressService delOutboundAddressService;
-
-    @Autowired
-    private BasCarrierKeywordFeignService basCarrierKeywordFeignService;
-
-    @Autowired
-    private IDelOutboundService delOutboundService;
     /**
      * 查询模块列表
      */
@@ -105,113 +87,10 @@ public class DelTrackController extends BaseController {
     @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
     @AutoValue
     public R<DelTrackMainCommonDto> commonTrackList(@RequestBody List<String> orderNos) {
-        Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("099");
-        List<BasSubWrapperVO> delTrackStateTypeList = listMap.get("099");
-        Map<String, BasSubWrapperVO> delTrackStateTypeMap
-                = delTrackStateTypeList.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue, Function.identity()));
-        List<DelTrack> list = delTrackService.commonTrackList(orderNos);
-        Map<String, Boolean> cacheMap = new HashMap<String, Boolean>();
-        for (int i = 0; i < list.size(); i++) {
-            DelTrack track = list.get(i);
-            if(StringUtils.isEmpty(track.getCarrierCode())){
-                continue;
-            }
-            boolean ignore = true;
-            String key = track.getCarrierCode()+":"+track.getDescription();
-            if(!cacheMap.containsKey(key)){
-                R<Boolean> booleanR = this.basCarrierKeywordFeignService.checkExistKeyword(track.getCarrierCode(), track.getDisplay());
-                if(null != booleanR && booleanR.getData() != null){
-                    ignore = booleanR.getData();
-                }
-                cacheMap.put(key, ignore);
-            }else{
-                ignore = cacheMap.get(key);
-            }
-            if (ignore) {
-                list.remove(i);
-                i--;
-            }
-        }
-        List<DelTrackCommonDto> newList = BeanMapperUtil.mapList(list, DelTrackCommonDto.class);
-        for (DelTrackCommonDto dto: newList){
-            BasSubWrapperVO vo  = delTrackStateTypeMap.get(dto.getTrackingStatus());
-            if (vo != null) {
-                dto.setTrackingStatusName(vo.getSubName());
-            }
-        }
 
+        R<DelTrackMainCommonDto> commonTrackListRs = delTrackService.commonTrackList(orderNos);
 
-
-        Set<String> threeSet = new TreeSet<String>();
-        for(DelTrack delTrack: list){
-            threeSet.add(delTrack.getOrderNo());
-        }
-        orderNos.clear();
-        orderNos.addAll(threeSet);
-
-
-        //处理轨迹状态数量
-        Map<String, List<DelTrackCommonDto>> groupBy = newList.stream().collect(Collectors.groupingBy(DelTrackCommonDto::getOrderNo));
-        Map<String, Integer> delTrackStateDto = new HashMap();
-        for (String ordersNo: orderNos){
-            List<DelTrackCommonDto> detailList = groupBy.get(ordersNo);
-            if(detailList != null){
-                String trackingStatus = detailList.get(0).getTrackingStatus();
-                if(delTrackStateDto.containsKey(trackingStatus)){
-                    delTrackStateDto.put(trackingStatus, delTrackStateDto.get(trackingStatus) + 1);
-                }else{
-                    delTrackStateDto.put(trackingStatus, 1);
-                }
-            }
-        }
-
-        //封装主表
-        List<DelTrackDetailDto> mainDetailDataList = new ArrayList();
-        for (String ordersNo: orderNos){
-            List<DelTrackCommonDto> detailList = groupBy.get(ordersNo);
-            if(detailList != null){
-                DelTrackDetailDto detailDto = new DelTrackDetailDto();
-                mainDetailDataList.add(detailDto);
-                BeanUtils.copyProperties(detailList.get(0), detailDto);
-                detailDto.setTrackingList(detailList);
-
-                //计算每一条数据轨迹天数
-                long day = 0;
-                if(detailDto.getTrackingTime() != null && detailList.get(detailList.size() - 1).getTrackingTime() != null){
-                    day = DateUtil.betweenDay(detailDto.getTrackingTime(), detailList.get(detailList.size() - 1).getTrackingTime(),  true);
-                    if(day < 0){
-                        day = 0;
-                    }
-                }
-
-                detailDto.setTrackDays(day);
-
-            }
-        }
-
-        //地址信息处理
-        List<String> orders = mainDetailDataList.stream().map(e -> e.getOrderNo()).collect(Collectors.toList());
-        if(orders.size() > 0){
-            LambdaQueryWrapper<DelOutboundAddress> queryWrapper = Wrappers.lambdaQuery();
-            queryWrapper.in(DelOutboundAddress::getOrderNo, orders);
-            List<DelOutboundAddress> addressList = delOutboundAddressService.list(queryWrapper);
-            Map<String, DelOutboundAddress> addressMap =
-                    addressList.stream().collect(Collectors.toMap(DelOutboundAddress::getOrderNo, account -> account));
-            for (DelTrackDetailDto dto: mainDetailDataList){
-                DelOutboundAddress address = addressMap.get(dto.getOrderNo());
-                if(address != null){
-                    BeanUtils.copyProperties(address, dto);
-                }
-            }
-
-        }
-
-
-        DelTrackMainCommonDto mainDto = new DelTrackMainCommonDto();
-        mainDto.setDelTrackStateDto(delTrackStateDto);
-        mainDto.setTrackingList(mainDetailDataList);
-        mainDto.setDelTrackStateTypeList(delTrackStateTypeList);
-        return R.ok(mainDto);
+        return commonTrackListRs;
     }
 
     /**
@@ -289,22 +168,8 @@ public class DelTrackController extends BaseController {
     @PostMapping("addOrUpdate")
     public R addOrUpdate(@RequestBody DelTrack delTrack){
 
-        if(StringUtils.isEmpty(delTrack.getOrderNo()) || StringUtils.isEmpty(delTrack.getTrackingNo())){
-            throw new CommonException("400", "订单号和跟踪号不能为空");
-        }
+        delTrackService.saveOrUpdateTrack(delTrack);
 
-        DelOutbound dataDelOutbound = delOutboundService.getByOrderNo(delTrack.getOrderNo());
-        if(dataDelOutbound == null){
-            throw new CommonException("400", "订单号不存在系统");
-        }else if(!StringUtils.equals(dataDelOutbound.getTrackingNo(), delTrack.getTrackingNo())){
-            throw new CommonException("400", "订单所对应的跟踪号与系统不符");
-
-        }
-
-        delTrack.setSource("2"); // 手动新增
-        delTrack.setTrackingTime(new Date());
-        delTrackService.saveOrUpdate(delTrack);
-        applicationContext.publishEvent(new ChangeDelOutboundLatestTrackEvent(delTrack));
         return R.ok();
     }
 

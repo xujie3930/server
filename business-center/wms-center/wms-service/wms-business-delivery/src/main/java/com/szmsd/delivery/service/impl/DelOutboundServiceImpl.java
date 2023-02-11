@@ -2854,6 +2854,59 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
         return null;
     }
 
+    @Override
+    public List<DelOutboundAddress> findDelboundAddress(List<String> orderNoList) {
+
+        if(CollectionUtils.isEmpty(orderNoList)){
+            throw new RuntimeException("订单不允许为空");
+        }
+        List<DelOutboundAddress> delOutboundAddresses = delOutboundAddressService.list(Wrappers.<DelOutboundAddress>query().lambda().in(DelOutboundAddress::getOrderNo,orderNoList));
+        return delOutboundAddresses;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R updateDeloutboundTrackMsg(DelOutboundTrackRequestVO updateDeloutboundTrackMsg) {
+
+        if(updateDeloutboundTrackMsg == null){
+            return R.failed("参数异常");
+        }
+
+        if(StringUtils.isEmpty(updateDeloutboundTrackMsg.getOrderNo())){
+            return R.failed("订单号不允许为空");
+        }
+
+        LambdaUpdateWrapper<DelOutbound> updateWrapper = Wrappers.lambdaUpdate();
+        if(updateDeloutboundTrackMsg.getTrackingStatus() != null) {
+            updateWrapper.set(DelOutbound::getTrackingStatus, updateDeloutboundTrackMsg.getTrackingStatus());
+        }
+        if(updateDeloutboundTrackMsg.getTrackingDescription() != null) {
+            updateWrapper.set(DelOutbound::getTrackingDescription, updateDeloutboundTrackMsg.getTrackingDescription());
+        }
+        if(updateDeloutboundTrackMsg.getTrackingTime() != null) {
+            updateWrapper.set(DelOutbound::getTrackingTime, updateDeloutboundTrackMsg.getTrackingTime());
+        }
+        if(updateDeloutboundTrackMsg.getDeliveredDime() != null) {
+            updateWrapper.set(DelOutbound::getDeliveredDime, updateDeloutboundTrackMsg.getDeliveredDime());
+        }
+        if(updateDeloutboundTrackMsg.getTimeDifference() != null){
+            updateWrapper.set(DelOutbound::getTimeDifference, updateDeloutboundTrackMsg.getTimeDifference());
+        }
+
+        if(updateDeloutboundTrackMsg.getTyShipmentId() != null){
+            updateWrapper.set(DelOutbound::getTyShipmentId, updateDeloutboundTrackMsg.getTyShipmentId());
+        }
+
+        updateWrapper.eq(DelOutbound::getOrderNo, updateDeloutboundTrackMsg.getOrderNo());
+
+        boolean upd = this.update(null,updateWrapper);
+
+        if(upd){
+            return R.ok();
+        }
+        return R.failed("更新异常");
+    }
+
 
     @Override
     public void labelSelfPick(HttpServletResponse response, DelOutboundLabelDto dto) {

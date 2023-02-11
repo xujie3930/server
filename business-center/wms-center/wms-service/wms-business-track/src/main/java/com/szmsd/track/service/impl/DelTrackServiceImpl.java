@@ -8,11 +8,21 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.bas.api.client.BasSubClientService;
 import com.szmsd.bas.api.feign.BasCarrierKeywordFeignService;
+import com.szmsd.bas.plugin.vo.BasSubWrapperVO;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
+import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.DateUtils;
+import com.szmsd.common.core.utils.StringToolkit;
+import com.szmsd.common.core.utils.bean.BeanMapperUtil;
+import com.szmsd.common.core.utils.bean.BeanUtils;
 import com.szmsd.common.core.web.domain.BaseEntity;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.domain.DelOutboundAddress;
+import com.szmsd.delivery.vo.DelOutboundTrackRequestVO;
+import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.http.api.service.IHtpPricedProductClientService;
 import com.szmsd.http.dto.PricedProductInServiceCriteria;
 import com.szmsd.http.vo.PricedProduct;
@@ -20,13 +30,9 @@ import com.szmsd.pack.api.feign.PackageCollectionFeignService;
 import com.szmsd.pack.constant.PackageConstant;
 import com.szmsd.pack.domain.PackageCollection;
 import com.szmsd.track.domain.DelTrack;
-import com.szmsd.track.dto.TrackAnalysisDto;
-import com.szmsd.track.dto.TrackAnalysisExportDto;
-import com.szmsd.track.dto.TrackAnalysisRequestDto;
-import com.szmsd.track.dto.TrackingYeeTraceDto;
+import com.szmsd.track.dto.*;
 import com.szmsd.track.event.ChangeDelOutboundLatestTrackEvent;
 import com.szmsd.track.mapper.DelTrackMapper;
-import com.szmsd.track.service.IDelTrackRemarkService;
 import com.szmsd.track.service.IDelTrackService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -41,6 +47,7 @@ import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -56,7 +63,7 @@ import java.util.stream.Collectors;
 public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> implements IDelTrackService {
 
     @Autowired
-    private DelOutboundMapper delOutboundMapper;
+    private DelOutboundFeignService delOutboundFeignService;
 
     @Autowired
     private BasCarrierKeywordFeignService basCarrierKeywordFeignService;
@@ -104,14 +111,160 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
      * @return 模块
      */
     @Override
-    public List<DelTrack> commonTrackList(List<String> orderNos) {
+    public R<DelTrackMainCommonDto> commonTrackList(List<String> orderNos) {
         LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
         delTrackLambdaQueryWrapper.in(DelTrack::getOrderNo, orderNos);
         delTrackLambdaQueryWrapper.or();
         delTrackLambdaQueryWrapper.in(DelTrack::getTrackingNo, orderNos);
         delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
-        List<DelTrack> selectList = baseMapper.selectList(delTrackLambdaQueryWrapper);
-        return selectList;
+        List<DelTrack> list = baseMapper.selectList(delTrackLambdaQueryWrapper);
+
+        if(CollectionUtils.isEmpty(list)){
+            return R.failed("无数据");
+        }
+
+        Map<String, List<BasSubWrapperVO>> listMap = this.basSubClientService.getSub("099");
+        List<BasSubWrapperVO> delTrackStateTypeList = listMap.get("099");
+        Map<String, BasSubWrapperVO> delTrackStateTypeMap
+                = delTrackStateTypeList.stream().collect(Collectors.toMap(BasSubWrapperVO::getSubValue, Function.identity()));
+
+        Map<String, Boolean> cacheMap = new HashMap<String, Boolean>();
+        for (int i = 0; i < list.size(); i++) {
+            DelTrack track = list.get(i);
+            if(com.szmsd.common.core.utils.StringUtils.isEmpty(track.getCarrierCode())){
+                continue;
+            }
+            boolean ignore = true;
+            String key = track.getCarrierCode()+":"+track.getDescription();
+            if(!cacheMap.containsKey(key)){
+                R<Boolean> booleanR = this.basCarrierKeywordFeignService.checkExistKeyword(track.getCarrierCode(), track.getDisplay());
+                if(null != booleanR && booleanR.getData() != null){
+                    ignore = booleanR.getData();
+                }
+                cacheMap.put(key, ignore);
+            }else{
+                ignore = cacheMap.get(key);
+            }
+            if (ignore) {
+                list.remove(i);
+                i--;
+            }
+        }
+        List<DelTrackCommonDto> newList = BeanMapperUtil.mapList(list, DelTrackCommonDto.class);
+        for (DelTrackCommonDto dto: newList){
+            BasSubWrapperVO vo  = delTrackStateTypeMap.get(dto.getTrackingStatus());
+            if (vo != null) {
+                dto.setTrackingStatusName(vo.getSubName());
+            }
+        }
+
+
+        Set<String> threeSet = new TreeSet<String>();
+        for(DelTrack delTrack: list){
+            threeSet.add(delTrack.getOrderNo());
+        }
+        orderNos.clear();
+        orderNos.addAll(threeSet);
+
+
+        //处理轨迹状态数量
+        Map<String, List<DelTrackCommonDto>> groupBy = newList.stream().collect(Collectors.groupingBy(DelTrackCommonDto::getOrderNo));
+        Map<String, Integer> delTrackStateDto = new HashMap();
+        for (String ordersNo: orderNos){
+            List<DelTrackCommonDto> detailList = groupBy.get(ordersNo);
+            if(detailList != null){
+                String trackingStatus = detailList.get(0).getTrackingStatus();
+                if(delTrackStateDto.containsKey(trackingStatus)){
+                    delTrackStateDto.put(trackingStatus, delTrackStateDto.get(trackingStatus) + 1);
+                }else{
+                    delTrackStateDto.put(trackingStatus, 1);
+                }
+            }
+        }
+
+        //封装主表
+        List<DelTrackDetailDto> mainDetailDataList = new ArrayList();
+        for (String ordersNo: orderNos){
+            List<DelTrackCommonDto> detailList = groupBy.get(ordersNo);
+            if(detailList != null){
+                DelTrackDetailDto detailDto = new DelTrackDetailDto();
+                mainDetailDataList.add(detailDto);
+                BeanUtils.copyProperties(detailList.get(0), detailDto);
+                detailDto.setTrackingList(detailList);
+
+                //计算每一条数据轨迹天数
+                long day = 0;
+                if(detailDto.getTrackingTime() != null && detailList.get(detailList.size() - 1).getTrackingTime() != null){
+                    day = DateUtil.betweenDay(detailDto.getTrackingTime(), detailList.get(detailList.size() - 1).getTrackingTime(),  true);
+                    if(day < 0){
+                        day = 0;
+                    }
+                }
+
+                detailDto.setTrackDays(day);
+
+            }
+        }
+
+        //地址信息处理
+        List<String> orders = mainDetailDataList.stream().map(e -> e.getOrderNo()).collect(Collectors.toList());
+        if(orders.size() > 0){
+            R<List<DelOutboundAddress>> addressRs = delOutboundFeignService.findDelboundAddress(orderNos);
+
+            if(addressRs == null){
+                return R.failed("订单地址异常");
+            }
+
+            if(addressRs.getCode() != Constants.SUCCESS){
+                return R.failed(addressRs.getMsg());
+            }
+
+            List<DelOutboundAddress> addressList = addressRs.getData();
+
+            Map<String, DelOutboundAddress> addressMap =
+                    addressList.stream().collect(Collectors.toMap(DelOutboundAddress::getOrderNo, account -> account));
+            for (DelTrackDetailDto dto: mainDetailDataList){
+                DelOutboundAddress address = addressMap.get(dto.getOrderNo());
+                if(address != null){
+                    BeanUtils.copyProperties(address, dto);
+                }
+            }
+        }
+
+        DelTrackMainCommonDto mainDto = new DelTrackMainCommonDto();
+        mainDto.setDelTrackStateDto(delTrackStateDto);
+        mainDto.setTrackingList(mainDetailDataList);
+        mainDto.setDelTrackStateTypeList(delTrackStateTypeList);
+
+        return R.ok(mainDto);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveOrUpdateTrack(DelTrack delTrack) {
+
+        if(StringUtils.isEmpty(delTrack.getOrderNo()) || StringUtils.isEmpty(delTrack.getTrackingNo())){
+            throw new CommonException("400", "订单号和跟踪号不能为空");
+        }
+
+        R<DelOutboundVO> delOutboundVOR = delOutboundFeignService.getInfoByOrderNo(delTrack.getOrderNo());
+
+        if(delOutboundVOR == null){
+            throw new CommonException("400", "获取出库单异常");
+        }
+
+        DelOutboundVO delOutboundVO = delOutboundVOR.getData();
+        if(!StringUtils.equals(delOutboundVO.getTrackingNo(), delTrack.getTrackingNo())){
+            throw new CommonException("400", "订单所对应的跟踪号与系统不符");
+        }
+
+        delTrack.setSource("2"); // 手动新增
+        delTrack.setTrackingTime(new Date());
+
+        this.saveOrUpdate(delTrack);
+
+        applicationContext.publishEvent(new ChangeDelOutboundLatestTrackEvent(delTrack));
+
     }
 
     /**
@@ -125,13 +278,13 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
         String queryNo = delTrack.getQueryNoOne();
 
-        if (com.szmsd.common.core.utils.StringUtils.isNotEmpty(queryNo)) {
+        if (StringUtils.isNotEmpty(queryNo)) {
             try {
                 queryNo = URLDecoder.decode(delTrack.getQueryNoOne(),"UTF-8");
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
-            List<String> queryNoList = DelOutboundServiceImplUtil.splitToArray(queryNo, "[\n,]");
+            List<String> queryNoList = StringToolkit.splitToArray(queryNo, "[\n,]");
             delTrackLambdaQueryWrapper.in(DelTrack::getOrderNo, queryNoList)
                     .or().in(DelTrack::getTrackingNo, queryNoList);
         }
@@ -150,11 +303,16 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         if (CollectionUtils.isNotEmpty(selectList) && orderNoNotEmpty) {
             String carrierCode = "";
             if ("DEL".equals(delTrack.getSourceType())) {
-                LambdaQueryWrapper<DelOutbound> delOutboundLambdaQueryWrapper = Wrappers.lambdaQuery();
-                delOutboundLambdaQueryWrapper.eq(DelOutbound::getOrderNo, delTrack.getOrderNo());
-                DelOutbound delOutbound = delOutboundMapper.selectOne(delOutboundLambdaQueryWrapper);
-                if (null != delOutbound) {
-                    carrierCode = delOutbound.getLogisticsProviderCode();
+
+                R<DelOutboundVO> delOutboundVOR = delOutboundFeignService.getInfoByOrderNo(delTrack.getOrderNo());
+
+                if(delOutboundVOR == null || delOutboundVOR.getCode() != Constants.SUCCESS){
+                    throw new RuntimeException("获取出库单异常");
+                }
+
+                DelOutboundVO delOutboundVO = delOutboundVOR.getData();
+                if (null != delOutboundVO) {
+                    carrierCode = delOutboundVO.getLogisticsProviderCode();
                 }
             } else if ("PCK".equals(delTrack.getSourceType())) {
                 PackageCollection queryPackageCollection = new PackageCollection();
@@ -381,30 +539,38 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                     packageCollectionFeignService.updateCollecting(trackingYeeTraceDto.getOrderNo());
                 }
             } else {
-                DelOutbound delOutbound = delOutboundMapper.selectOne(new LambdaQueryWrapper<DelOutbound>().eq(DelOutbound::getOrderNo, trackingYeeTraceDto.getOrderNo()).last("limit 1"));
-                if (delOutbound != null) {
+                R<DelOutboundVO> delOutboundVOR = delOutboundFeignService.getInfoByOrderNo(trackingYeeTraceDto.getOrderNo());
+
+                if(delOutboundVOR == null || delOutboundVOR.getCode() != Constants.SUCCESS){
+                    throw new RuntimeException("获取出库单异常");
+                }
+
+                DelOutboundVO delOutboundVO = delOutboundVOR.getData();
+
+                if (delOutboundVO != null) {
+
                     List<DelTrack> delTrackList = trackList.stream().sorted(Comparator.comparing(DelTrack::getTrackingTime).reversed()).collect(Collectors.toList());
                     DelTrack delTrack = delTrackList.get(0);
-                    DelOutbound updateDelOutbound = new DelOutbound();
-                    updateDelOutbound.setId(delOutbound.getId());
-                    updateDelOutbound.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
+                    DelOutboundTrackRequestVO delOutboundTrackRequestVO = new DelOutboundTrackRequestVO();
+                    delOutboundTrackRequestVO.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
+                    delOutboundTrackRequestVO.setOrderNo(delOutboundVO.getOrderNo());
                     // 最新时间
                     Date latestDate = trackList.stream().map(DelTrack::getTrackingTime).max((d1, d2) -> d1.compareTo(d2)).orElse(null);
-                    updateDelOutbound.setTrackingTime(latestDate);
-                    updateDelOutbound.setTrackingDescription(delTrack.getDescription() + " (" + DateUtil.format(delTrack.getTrackingTime(), DateUtils.YYYY_MM_DD_HH_MM_SS) + ")");
+                    delOutboundTrackRequestVO.setTrackingTime(latestDate);
+                    delOutboundTrackRequestVO.setTrackingDescription(delTrack.getDescription() + " (" + DateUtil.format(delTrack.getTrackingTime(), DateUtils.YYYY_MM_DD_HH_MM_SS) + ")");
 
 
                    if (delTrack.getTrackingStatus().equals("Delivered")){
                        Date deliveredDime = trackList.stream().map(DelTrack::getTrackingTime).max((d1, d2) -> d1.compareTo(d2)).orElse(null);
-                      Date shipmentsTime =delOutbound.getShipmentsTime();
+                      Date shipmentsTime =delOutboundVO.getShipmentsTime();
                       if (deliveredDime!=null&&shipmentsTime!=null){
                           long timeDifference=(deliveredDime.getTime()-shipmentsTime.getTime())/(24*60*60*1000);
-                          updateDelOutbound.setDeliveredDime(deliveredDime);
-                          updateDelOutbound.setTimeDifference(Integer.parseInt(String.valueOf(timeDifference)));
+                          delOutboundTrackRequestVO.setDeliveredDime(deliveredDime);
+                          delOutboundTrackRequestVO.setTimeDifference(Integer.parseInt(String.valueOf(timeDifference)));
                       }
                    }
-                    delOutboundMapper.updateById(updateDelOutbound);
 
+                    delOutboundFeignService.updateDeloutboundTrackMsg(delOutboundTrackRequestVO);
 
                 }
             }

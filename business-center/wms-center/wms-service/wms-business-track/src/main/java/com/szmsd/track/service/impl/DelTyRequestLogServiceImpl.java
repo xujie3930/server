@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szmsd.delivery.api.feign.DelOutboundFeignService;
+import com.szmsd.delivery.vo.DelOutboundTrackRequestVO;
 import com.szmsd.http.api.service.IHtpRmiClientService;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.vo.HttpResponseVO;
@@ -39,8 +41,9 @@ public class DelTyRequestLogServiceImpl extends ServiceImpl<DelTyRequestLogMappe
     private RedissonClient redissonClient;
     @Autowired
     private IHtpRmiClientService htpRmiClientService;
+
     @Autowired
-    private IDelOutboundService delOutboundService;
+    private DelOutboundFeignService delOutboundFeignService;
     //                                            0   1   2   3   4   5   6   7   8    9    10   11
     private final int[] retryTimeConfiguration = {30, 30, 60, 60, 60, 60, 60, 60, 180, 180, 180, 180};
     public static final int retryCount = 10;
@@ -103,10 +106,10 @@ public class DelTyRequestLogServiceImpl extends ServiceImpl<DelTyRequestLogMappe
                                 String tyShipmentId = successImportRowResult.getString("id");
                                 if (StringUtils.isNotEmpty(tyShipmentId)) {
                                     // 回写到出库表上
-                                    LambdaUpdateWrapper<DelOutbound> delOutboundLambdaUpdateWrapper = Wrappers.lambdaUpdate();
-                                    delOutboundLambdaUpdateWrapper.set(DelOutbound::getTyShipmentId, tyShipmentId);
-                                    delOutboundLambdaUpdateWrapper.eq(DelOutbound::getOrderNo, tyRequestLog.getOrderNo());
-                                    this.delOutboundService.update(delOutboundLambdaUpdateWrapper);
+                                    DelOutboundTrackRequestVO delOutboundTrackRequestVO = new DelOutboundTrackRequestVO();
+                                    delOutboundTrackRequestVO.setTyShipmentId(tyShipmentId);
+                                    delOutboundTrackRequestVO.setOrderNo(tyRequestLog.getOrderNo());
+                                    delOutboundFeignService.updateDeloutboundTrackMsg(delOutboundTrackRequestVO);
                                 }
                             } else {
                                 // 返回的成功数量不是1，判定为异常

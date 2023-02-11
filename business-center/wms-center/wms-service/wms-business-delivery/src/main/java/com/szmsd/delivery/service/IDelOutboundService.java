@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.datascope.annotation.DataScope;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundTarckError;
 import com.szmsd.delivery.domain.DelOutboundTarckOn;
 import com.szmsd.delivery.dto.*;
@@ -492,5 +493,19 @@ void emailBatchUpdateTrackingNo(List<Map<String, Object>> list,String filepath);
      * @return
      */
     R labelBatch(HttpServletResponse response, DelOutboundLabelDto dto);
+
+    /**
+     * 根据出库单号获取订单地址信息
+     * @param orderNoList
+     * @return
+     */
+    List<DelOutboundAddress> findDelboundAddress(List<String> orderNoList);
+
+    /**
+     * 更新出库单物流信息
+     * @param updateDeloutboundTrackMsg
+     * @return
+     */
+    R updateDeloutboundTrackMsg(DelOutboundTrackRequestVO updateDeloutboundTrackMsg);
 }
 

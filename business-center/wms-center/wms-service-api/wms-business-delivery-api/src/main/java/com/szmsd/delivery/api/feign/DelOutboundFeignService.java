@@ -5,6 +5,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.BusinessDeliveryInterface;
 import com.szmsd.delivery.api.feign.factory.DelOutboundFeignFallback;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.*;
@@ -282,4 +283,12 @@ public interface DelOutboundFeignService {
     @PostMapping("/api/outbound/findDelboundCharges")
     @ApiOperation(value = "出库管理 - 出库单和费用明细")
     R<List<DelOutboundChargeData>> findDelboundCharges(@RequestBody List<String> orders);
+
+    @PostMapping("/api/outbound/findDelboundAddress")
+    @ApiOperation(value = "出库管理 - 地址信息")
+    R<List<DelOutboundAddress>> findDelboundAddress(@RequestBody List<String> orderNos);
+
+    @PostMapping("/api/outbound/updateDeloutboundTrackMsg")
+    @ApiOperation(value = "出库管理 - 更新出库单物流信息")
+    R<Integer> updateDeloutboundTrackMsg(@RequestBody DelOutboundTrackRequestVO delOutboundTrackRequestVO);
 }

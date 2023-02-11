@@ -2,11 +2,9 @@ package com.szmsd.track.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szmsd.common.core.domain.R;
 import com.szmsd.track.domain.DelTrack;
-import com.szmsd.track.dto.TrackAnalysisDto;
-import com.szmsd.track.dto.TrackAnalysisExportDto;
-import com.szmsd.track.dto.TrackAnalysisRequestDto;
-import com.szmsd.track.dto.TrackingYeeTraceDto;
+import com.szmsd.track.dto.*;
 
 import java.util.List;
 
@@ -98,6 +96,8 @@ public interface IDelTrackService extends IService<DelTrack> {
     List<TrackAnalysisExportDto> getAnalysisExportData(TrackAnalysisRequestDto requestDto);
 
 
-    List<DelTrack> commonTrackList(List<String> orderNos);
+    R<DelTrackMainCommonDto> commonTrackList(List<String> orderNos);
+
+    void saveOrUpdateTrack(DelTrack delTrack);
 }
 
