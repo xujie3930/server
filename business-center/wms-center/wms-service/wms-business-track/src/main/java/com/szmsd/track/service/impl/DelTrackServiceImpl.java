@@ -581,6 +581,11 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
     @Override
     public List<TrackAnalysisDto> getTrackAnalysis(TrackAnalysisRequestDto requestDto) {
         List<TrackAnalysisDto> trackAnalysis = baseMapper.getTrackAnalysis(queryWrapper(requestDto).eq(StringUtils.isNotBlank(requestDto.getCountryCode()), "b.country_code", requestDto.getCountryCode()));
+
+        if(CollectionUtils.isEmpty(trackAnalysis)){
+            return new ArrayList<>();
+        }
+
         List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
         Map<String, String> subList = basSubClientService.getSubListByLang("099", requestDto.getLang()); // 099为轨迹状态
         subList.forEach((k, v) -> {
