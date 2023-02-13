@@ -599,7 +599,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             TrackAnalysisDto analysisDto = new TrackAnalysisDto();
             analysisDto.setKeyName(k);
             analysisDto.setKeyCode(v);
-            TrackAnalysisDto trackAnalysisDto = trackAnalysis.stream().filter(a -> a.getKeyCode().equalsIgnoreCase(v)).findFirst().orElse(null);
+            TrackAnalysisDto trackAnalysisDto = trackAnalysis.stream().filter(a -> v.equalsIgnoreCase(a.getKeyCode())).findFirst().orElse(null);
             if (trackAnalysisDto != null) {
                 analysisDto.setNum(trackAnalysisDto.getNum());
             } else {
