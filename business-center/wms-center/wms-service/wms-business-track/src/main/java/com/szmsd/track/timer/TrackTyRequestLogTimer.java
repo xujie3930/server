@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.szmsd.track.domain.TrackTyRequestLog;
 import com.szmsd.track.enums.TrackTyRequestLogConstant;
-import com.szmsd.track.service.IDelTyRequestLogService;
-import com.szmsd.track.service.impl.DelTyRequestLogServiceImpl;
+import com.szmsd.track.service.ITrackTyRequestLogService;
+import com.szmsd.track.service.impl.TrackTyRequestLogServiceImpl;
 import com.szmsd.track.util.LockerUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RedissonClient;
@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 @Component
-public class DelTyRequestLogTimer {
+public class TrackTyRequestLogTimer {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Value("${spring.application.name}")
@@ -29,7 +29,7 @@ public class DelTyRequestLogTimer {
     @Autowired
     private RedissonClient redissonClient;
     @Autowired
-    private IDelTyRequestLogService delTyRequestLogService;
+    private ITrackTyRequestLogService delTyRequestLogService;
     /**
      * ty接口请求
      * <p/>
@@ -53,7 +53,7 @@ public class DelTyRequestLogTimer {
                         .eq(TrackTyRequestLog::getState, TrackTyRequestLogConstant.State.FAIL_CONTINUE.name());
             });
             // 小于10次
-            queryWrapper.lt(TrackTyRequestLog::getFailCount, DelTyRequestLogServiceImpl.retryCount);
+            queryWrapper.lt(TrackTyRequestLog::getFailCount, TrackTyRequestLogServiceImpl.retryCount);
             // 处理时间小于等于当前时间的
             queryWrapper.le(TrackTyRequestLog::getNextRetryTime, new Date());
             queryWrapper.last("limit 200");

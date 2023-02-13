@@ -21,7 +21,7 @@ import com.szmsd.track.event.ChangeDelOutboundLatestTrackEvent;
 import com.szmsd.track.imported.DefaultAnalysisEventListener;
 import com.szmsd.track.imported.ImportMessage;
 import com.szmsd.track.imported.ImportResult;
-import com.szmsd.track.service.IDelTrackService;
+import com.szmsd.track.service.ITrackService;
 import com.szmsd.track.util.EasyExcelFactoryUtil;
 import com.szmsd.track.util.SHA256Util;
 import io.swagger.annotations.Api;
@@ -59,10 +59,10 @@ import java.util.List;
 @Api(tags = {""})
 @RestController
 @RequestMapping("/del-track")
-public class DelTrackController extends BaseController {
+public class TrackController extends BaseController {
 
     @Resource
-    private IDelTrackService delTrackService;
+    private ITrackService delTrackService;
 
     @Value("${webhook.secret}")
     private String webhookSecret;

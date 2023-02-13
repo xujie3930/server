@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.track.domain.TrackRemark;
-import com.szmsd.track.mapper.DelTrackRemarkMapper;
-import com.szmsd.track.service.IDelTrackRemarkService;
+import com.szmsd.track.mapper.TrackRemarkMapper;
+import com.szmsd.track.service.ITrackRemarkService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,7 +22,7 @@ import java.util.List;
  * @since 2022-05-06
  */
 @Service
-public class DelTrackRemarkServiceImpl extends ServiceImpl<DelTrackRemarkMapper, TrackRemark> implements IDelTrackRemarkService {
+public class TrackRemarkServiceImpl extends ServiceImpl<TrackRemarkMapper, TrackRemark> implements ITrackRemarkService {
 
     @Autowired
     private RedisTemplate redisTemplate;

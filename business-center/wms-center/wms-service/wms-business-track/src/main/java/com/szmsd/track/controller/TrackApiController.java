@@ -4,7 +4,7 @@ import com.szmsd.common.core.domain.R;
 import com.szmsd.track.domain.Track;
 import com.szmsd.track.dto.TrackMainCommonDto;
 import com.szmsd.track.dto.TrackTyRequestLogDto;
-import com.szmsd.track.service.IDelTrackService;
+import com.szmsd.track.service.ITrackService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +18,10 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/track")
-public class DelTrackApiController {
+public class TrackApiController {
 
     @Resource
-    private IDelTrackService delTrackService;
+    private ITrackService delTrackService;
 
     @PostMapping("/addData")
     public void addData(@RequestBody Track delTrack) {

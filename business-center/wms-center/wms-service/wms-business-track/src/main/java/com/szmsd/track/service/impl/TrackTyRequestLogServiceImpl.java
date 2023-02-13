@@ -14,8 +14,8 @@ import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.track.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.track.domain.TrackTyRequestLog;
 import com.szmsd.track.enums.TrackTyRequestLogConstant;
-import com.szmsd.track.mapper.DelTyRequestLogMapper;
-import com.szmsd.track.service.IDelTyRequestLogService;
+import com.szmsd.track.mapper.TrackTyRequestLogMapper;
+import com.szmsd.track.service.ITrackTyRequestLogService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.redisson.api.RLock;
@@ -32,8 +32,8 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class DelTyRequestLogServiceImpl extends ServiceImpl<DelTyRequestLogMapper, TrackTyRequestLog> implements IDelTyRequestLogService {
-    private final Logger logger = LoggerFactory.getLogger(DelTyRequestLogServiceImpl.class);
+public class TrackTyRequestLogServiceImpl extends ServiceImpl<TrackTyRequestLogMapper, TrackTyRequestLog> implements ITrackTyRequestLogService {
+    private final Logger logger = LoggerFactory.getLogger(TrackTyRequestLogServiceImpl.class);
 
     @Value("${spring.application.name}")
     private String applicationName;
