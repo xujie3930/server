@@ -15,8 +15,8 @@ import com.szmsd.track.config.ThreadPoolExecutorConfiguration;
 import com.szmsd.track.config.TyRequestConfig;
 import com.szmsd.track.domain.TrackTyRequestLog;
 import com.szmsd.track.enums.TrackTyRequestLogConstant;
-import com.szmsd.track.event.DelTyRequestLogEvent;
-import com.szmsd.track.service.IDelTyRequestLogService;
+import com.szmsd.track.event.TrackTyRequestLogEvent;
+import com.szmsd.track.service.ITrackTyRequestLogService;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -26,12 +26,12 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class DelTyRequestLogListener {
+public class TrackTyRequestLogListener {
 
     @Autowired
     private TyRequestConfig tyRequestConfig;
     @Autowired
-    private IDelTyRequestLogService delTyRequestLogService;
+    private ITrackTyRequestLogService delTyRequestLogService;
     @Autowired
     private DelOutboundFeignService delOutboundService;
     @Autowired
@@ -39,7 +39,7 @@ public class DelTyRequestLogListener {
 
     @Async(value = ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_TY_SAVE)
     @EventListener
-    public void onApplicationEvent(DelTyRequestLogEvent event) {
+    public void onApplicationEvent(TrackTyRequestLogEvent event) {
         TrackTyRequestLog tyRequestLog = (TrackTyRequestLog) event.getSource();
         tyRequestLog.setState(DelCk1RequestLogConstant.State.WAIT.name());
         tyRequestLog.setNextRetryTime(new Date());

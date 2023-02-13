@@ -13,7 +13,7 @@ import java.util.List;
  * @author YM
  * @since 2022-05-06
  */
-public interface IDelTrackRemarkService extends IService<TrackRemark> {
+public interface ITrackRemarkService extends IService<TrackRemark> {
 
     /**
      * 查询轨迹备注表模块

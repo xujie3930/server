@@ -11,6 +11,6 @@ import com.szmsd.track.domain.TrackRemark;
  * @author YM
  * @since 2022-05-06
  */
-public interface DelTrackRemarkMapper extends BaseMapper<TrackRemark> {
+public interface TrackRemarkMapper extends BaseMapper<TrackRemark> {
 
 }

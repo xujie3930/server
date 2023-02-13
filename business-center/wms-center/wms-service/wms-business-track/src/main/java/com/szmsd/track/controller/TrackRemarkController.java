@@ -7,7 +7,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.track.domain.TrackRemark;
-import com.szmsd.track.service.IDelTrackRemarkService;
+import com.szmsd.track.service.ITrackRemarkService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,10 +33,10 @@ import java.util.List;
 @Api(tags = {"轨迹备注表"})
 @RestController
 @RequestMapping("/del-track-remark")
-public class DelTrackRemarkController extends BaseController {
+public class TrackRemarkController extends BaseController {
 
     @Resource
-    private IDelTrackRemarkService delTrackRemarkService;
+    private ITrackRemarkService delTrackRemarkService;
 
     /**
      * 查询轨迹备注表模块列表

@@ -32,10 +32,10 @@ import com.szmsd.pack.domain.PackageCollection;
 import com.szmsd.track.domain.Track;
 import com.szmsd.track.dto.*;
 import com.szmsd.track.event.ChangeDelOutboundLatestTrackEvent;
-import com.szmsd.track.event.DelTyRequestLogEvent;
+import com.szmsd.track.event.TrackTyRequestLogEvent;
 import com.szmsd.track.event.EventUtil;
-import com.szmsd.track.mapper.DelTrackMapper;
-import com.szmsd.track.service.IDelTrackService;
+import com.szmsd.track.mapper.TrackMapper;
+import com.szmsd.track.service.ITrackService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, Track> implements IDelTrackService {
+public class TrackServiceImpl extends ServiceImpl<TrackMapper, Track> implements ITrackService {
 
     @Autowired
     private DelOutboundFeignService delOutboundFeignService;
@@ -269,7 +269,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, Track> impl
     @Override
     public void pushTY(TrackTyRequestLogDto requestLogDto) {
 
-        EventUtil.publishEvent(new DelTyRequestLogEvent(requestLogDto));
+        EventUtil.publishEvent(new TrackTyRequestLogEvent(requestLogDto));
     }
 
     @Override
@@ -689,7 +689,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, Track> impl
             }
 
             // 设置轨迹备注  直接读取redis缓存
-            Object remarkObj = redisTemplate.opsForHash().get(DelTrackRemarkServiceImpl.TRACK_REMARK_KEY, data.getLatestTrackInfo());
+            Object remarkObj = redisTemplate.opsForHash().get(TrackRemarkServiceImpl.TRACK_REMARK_KEY, data.getLatestTrackInfo());
             if (remarkObj != null) {
                 data.setTrackRemark((String)remarkObj);
             }

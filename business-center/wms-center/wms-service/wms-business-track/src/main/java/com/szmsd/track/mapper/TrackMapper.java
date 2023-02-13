@@ -20,7 +20,7 @@ import java.util.Map;
  * @author YM
  * @since 2022-02-10
  */
-public interface DelTrackMapper extends BaseMapper<Track> {
+public interface TrackMapper extends BaseMapper<Track> {
 
     List<TrackAnalysisDto> getTrackAnalysis(@Param(Constants.WRAPPER) QueryWrapper<TrackAnalysisRequestDto> queryWrapper);
 

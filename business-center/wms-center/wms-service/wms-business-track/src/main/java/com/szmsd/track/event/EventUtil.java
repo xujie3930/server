@@ -15,7 +15,7 @@ public final class EventUtil implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
 
-    public static void publishEvent(DelTyRequestLogEvent event) {
+    public static void publishEvent(TrackTyRequestLogEvent event) {
         EventUtil.applicationContext.publishEvent(event);
     }
 

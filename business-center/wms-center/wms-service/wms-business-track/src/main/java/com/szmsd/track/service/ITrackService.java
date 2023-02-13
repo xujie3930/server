@@ -16,7 +16,7 @@ import java.util.List;
  * @author YM
  * @since 2022-02-10
  */
-public interface IDelTrackService extends IService<Track> {
+public interface ITrackService extends IService<Track> {
 
     void addData(Track delTrack);
 
