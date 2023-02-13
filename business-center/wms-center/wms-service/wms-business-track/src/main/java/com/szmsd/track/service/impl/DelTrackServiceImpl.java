@@ -589,6 +589,8 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
         Map<String, String> subList = basSubClientService.getSubListByLang("099", requestDto.getLang()); // 099为轨迹状态
 
+        log.info("099轨迹状态数据:{}",JSON.toJSONString(subList));
+
         if(subList == null){
             throw new RuntimeException("099轨迹状态数据异常");
         }
