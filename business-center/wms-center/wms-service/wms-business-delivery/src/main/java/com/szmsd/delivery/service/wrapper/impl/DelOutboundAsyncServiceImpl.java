@@ -57,7 +57,8 @@ import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import com.szmsd.putinstorage.domain.dto.ReceiptRequest;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
 import com.szmsd.track.api.feign.TrackFeignService;
-import com.szmsd.track.domain.DelTrack;
+import com.szmsd.track.domain.Track;
+import com.szmsd.track.dto.TrackTyRequestLogDto;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
@@ -620,7 +621,7 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         e.printStackTrace();
                     }
 
-                    delTrackService.addData(new DelTrack()
+                    delTrackService.addData(new Track()
                             .setOrderNo(delOutbound.getOrderNo())
                             .setTrackingNo(delOutbound.getTrackingNo())
                             .setTrackingStatus("WarehouseShipped")
@@ -695,11 +696,10 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             return;
         }
         // 请求体的内容异步填充
-        //TODO 推送TY
-//        DelTyRequestLog tyRequestLog = new DelTyRequestLog();
-//        tyRequestLog.setOrderNo(delOutbound.getOrderNo());
-//        tyRequestLog.setType(DelTyRequestLogConstant.Type.shipments.name());
-//        EventUtil.publishEvent(new DelTyRequestLogEvent(tyRequestLog));
+        TrackTyRequestLogDto tyRequestLog = new TrackTyRequestLogDto();
+        tyRequestLog.setOrderNo(delOutbound.getOrderNo());
+        tyRequestLog.setType(DelTyRequestLogConstant.Type.shipments.name());
+        delTrackService.pushTY(tyRequestLog);
     }
 
     private String getSkuName(BaseProduct baseProduct) {

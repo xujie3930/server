@@ -28,7 +28,7 @@ import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.pack.api.feign.PackageDeliveryConditionsFeignService;
 import com.szmsd.pack.domain.PackageDeliveryConditions;
 import com.szmsd.track.api.feign.TrackFeignService;
-import com.szmsd.track.domain.DelTrack;
+import com.szmsd.track.domain.Track;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
@@ -227,7 +227,7 @@ public class DelOutboundBringVerifyAsyncServiceImpl implements IDelOutboundBring
                 delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), "pushLabel", "bringVerify");
             }
 
-            DelTrack delTrack = new DelTrack();
+            Track delTrack = new Track();
             delTrack.setOrderNo(delOutbound.getOrderNo());
             delTrack.setTrackingNo(delOutbound.getTrackingNo());
             delTrack.setTrackingStatus("Todo");

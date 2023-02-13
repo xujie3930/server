@@ -6,7 +6,7 @@ import com.szmsd.common.core.web.controller.BaseController;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
-import com.szmsd.track.domain.DelTrackRemark;
+import com.szmsd.track.domain.TrackRemark;
 import com.szmsd.track.service.IDelTrackRemarkService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,9 +44,9 @@ public class DelTrackRemarkController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelTrackRemark:DelTrackRemark:list')")
     @GetMapping("/list")
     @ApiOperation(value = "查询轨迹备注表模块列表", notes = "查询轨迹备注表模块列表")
-    public TableDataInfo list(DelTrackRemark delTrackRemark) {
+    public TableDataInfo list(TrackRemark delTrackRemark) {
         startPage();
-        List<DelTrackRemark> list = delTrackRemarkService.selectDelTrackRemarkList(delTrackRemark);
+        List<TrackRemark> list = delTrackRemarkService.selectDelTrackRemarkList(delTrackRemark);
         return getDataTable(list);
     }
 
@@ -57,9 +57,9 @@ public class DelTrackRemarkController extends BaseController {
     @Log(title = "轨迹备注表模块", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     @ApiOperation(value = "导出轨迹备注表模块列表", notes = "导出轨迹备注表模块列表")
-    public void export(HttpServletResponse response, DelTrackRemark delTrackRemark) throws IOException {
-        List<DelTrackRemark> list = delTrackRemarkService.selectDelTrackRemarkList(delTrackRemark);
-        ExcelUtil<DelTrackRemark> util = new ExcelUtil<DelTrackRemark>(DelTrackRemark.class);
+    public void export(HttpServletResponse response, TrackRemark delTrackRemark) throws IOException {
+        List<TrackRemark> list = delTrackRemarkService.selectDelTrackRemarkList(delTrackRemark);
+        ExcelUtil<TrackRemark> util = new ExcelUtil<TrackRemark>(TrackRemark.class);
         util.exportExcel(response, list, "DelTrackRemark");
 
     }
@@ -81,7 +81,7 @@ public class DelTrackRemarkController extends BaseController {
     @Log(title = "轨迹备注表模块", businessType = BusinessType.INSERT)
     @PostMapping("add")
     @ApiOperation(value = "新增轨迹备注表模块", notes = "新增轨迹备注表模块")
-    public R add(@RequestBody @Valid DelTrackRemark delTrackRemark) {
+    public R add(@RequestBody @Valid TrackRemark delTrackRemark) {
         return toOk(delTrackRemarkService.insertDelTrackRemark(delTrackRemark));
     }
 
@@ -92,7 +92,7 @@ public class DelTrackRemarkController extends BaseController {
     @Log(title = "轨迹备注表模块", businessType = BusinessType.UPDATE)
     @PutMapping("edit")
     @ApiOperation(value = " 修改轨迹备注表模块", notes = "修改轨迹备注表模块")
-    public R edit(@RequestBody @Valid DelTrackRemark delTrackRemark) {
+    public R edit(@RequestBody @Valid TrackRemark delTrackRemark) {
         return toOk(delTrackRemarkService.updateDelTrackRemark(delTrackRemark));
     }
 

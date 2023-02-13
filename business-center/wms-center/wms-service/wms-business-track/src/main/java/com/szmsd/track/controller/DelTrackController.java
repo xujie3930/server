@@ -15,7 +15,7 @@ import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.common.log.annotation.Log;
 import com.szmsd.common.log.enums.BusinessType;
 import com.szmsd.common.plugin.annotation.AutoValue;
-import com.szmsd.track.domain.DelTrack;
+import com.szmsd.track.domain.Track;
 import com.szmsd.track.dto.*;
 import com.szmsd.track.event.ChangeDelOutboundLatestTrackEvent;
 import com.szmsd.track.imported.DefaultAnalysisEventListener;
@@ -77,18 +77,18 @@ public class DelTrackController extends BaseController {
     @GetMapping("/list")
     @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
     @AutoValue
-    public TableDataInfo list(DelTrack delTrack) {
+    public TableDataInfo list(Track delTrack) {
         startPage();
-        List<DelTrack> list = delTrackService.selectDelTrackList(delTrack);
+        List<Track> list = delTrackService.selectDelTrackList(delTrack);
         return getDataTable(list);
     }
 
     @PostMapping("/commonTrackList")
     @ApiOperation(value = "查询模块列表", notes = "查询模块列表")
     @AutoValue
-    public R<DelTrackMainCommonDto> commonTrackList(@RequestBody List<String> orderNos) {
+    public R<TrackMainCommonDto> commonTrackList(@RequestBody List<String> orderNos) {
 
-        R<DelTrackMainCommonDto> commonTrackListRs = delTrackService.commonTrackList(orderNos);
+        R<TrackMainCommonDto> commonTrackListRs = delTrackService.commonTrackList(orderNos);
 
         return commonTrackListRs;
     }
@@ -100,9 +100,9 @@ public class DelTrackController extends BaseController {
     @Log(title = "模块", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     @ApiOperation(value = "导出模块列表", notes = "导出模块列表")
-    public void export(HttpServletResponse response, DelTrack delTrack) throws IOException {
-        List<DelTrack> list = delTrackService.selectDelTrackList(delTrack);
-        ExcelUtil<DelTrack> util = new ExcelUtil<DelTrack>(DelTrack.class);
+    public void export(HttpServletResponse response, Track delTrack) throws IOException {
+        List<Track> list = delTrackService.selectDelTrackList(delTrack);
+        ExcelUtil<Track> util = new ExcelUtil<Track>(Track.class);
         util.exportExcel(response, list, "DelTrack");
 
     }
@@ -132,7 +132,7 @@ public class DelTrackController extends BaseController {
                 return R.ok(ImportResult.buildFail(ImportMessage.build("导入数据不能为空")));
             }
             List<ImportMessage> messageList = new ArrayList<>();
-            List<DelTrack> tracks = BeanMapperUtil.mapList(dataList, DelTrack.class);
+            List<Track> tracks = BeanMapperUtil.mapList(dataList, Track.class);
             int i = 1;
             for(ImportTrackDto track : dataList){
                 if (StringUtils.isBlank(track.getOrderNo())){
@@ -166,7 +166,7 @@ public class DelTrackController extends BaseController {
     @PreAuthorize("@ss.hasPermi('DelTrack:DelTrack:addOrUpdate')")
     @Log(title = "模块", businessType = BusinessType.INSERT)
     @PostMapping("addOrUpdate")
-    public R addOrUpdate(@RequestBody DelTrack delTrack){
+    public R addOrUpdate(@RequestBody Track delTrack){
 
         delTrackService.saveOrUpdateTrack(delTrack);
 

@@ -35,6 +35,8 @@ import com.szmsd.http.dto.PricedProductSearchCriteria;
 import com.szmsd.http.dto.ShipmentLabelChangeRequestDto;
 import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.http.vo.ResponseVO;
+import com.szmsd.track.api.feign.TrackFeignService;
+import com.szmsd.track.dto.TrackMainDocCommonDto;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -76,6 +78,9 @@ public class DeliveryController {
     private RemoteAttachmentService remoteAttachmentService;
     @Autowired
     private IHtpPricedProductClientService htpPricedProductClientService;
+
+    @Autowired
+    private TrackFeignService trackFeignService;
 
     @PreAuthorize("hasAuthority('client')")
     @PostMapping("/priced-product")
@@ -713,12 +718,11 @@ public class DeliveryController {
         return delOutboundClientService.getInfoForThirdParty(vo);
     }
 
-     //TODO TY 接口
-//    @PostMapping(value = "/commonTrackList")
-//    @ApiOperation(value = "#21 轨迹管理 - 第三方轨迹查看专用接口", position = 902)
-//    public R<DelTrackMainDocCommonDto> commonTrackList(@RequestBody @Validated DelTrackRequest request) {
-//        return R.ok(delOutboundClientService.commonTrackList(request.getOrderNos()));
-//    }
+    @PostMapping(value = "/commonTrackList")
+    @ApiOperation(value = "#21 轨迹管理 - 第三方轨迹查看专用接口", position = 902)
+    public R<TrackMainDocCommonDto> commonTrackList(@RequestBody @Validated DelTrackRequest request) {
+        return trackFeignService.commonTrackList(request.getOrderNos());
+    }
 
 
     @PreAuthorize("hasAuthority('client')")

@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.track.mapper.DelTrackMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.szmsd.track.domain.DelTrack">
+    <resultMap id="BaseResultMap" type="com.szmsd.track.domain.Track">
         <id column="id" property="id"/>
         <result column="create_by_name" property="createByName"/>
         <result column="create_time" property="createTime"/>
@@ -44,7 +44,7 @@
             id, create_by, update_by, version, tracking_no, carrier_code, shipment_id, order_no, tracking_status, no, description, tracking_time, action_code, display, country_code, country_name_en, country_name_cn, province, city, postcode, street1, street2, street3
         </sql>
     <delete id="deletetrack" parameterType="java.util.Map">
-        DELETE   from del_track where order_no=#{map.orderNo} AND tracking_no=#{map.trackingNo} AND no=#{map.no}
+        DELETE   from track where order_no=#{map.orderNo} AND tracking_no=#{map.trackingNo} AND no=#{map.no}
     </delete>
 
     <select id="getTrackAnalysis" resultType="com.szmsd.track.dto.TrackAnalysisDto">
@@ -83,7 +83,7 @@
           c.country,
           b.tracking_time as latestTrackTimeStr,
           a.shipments_time as shipmentsTimeStr
-        from  (select t2.tracking_time, t2.country_code, t2.description, t2.order_no from (select MAX(id) id from del_track  where order_no &lt;&gt; '' GROUP BY order_no) t1 left join del_track t2 on t1.id = t2.id) b
+        from  (select t2.tracking_time, t2.country_code, t2.description, t2.order_no from (select MAX(id) id from track  where order_no &lt;&gt; '' GROUP BY order_no) t1 left join track t2 on t1.id = t2.id) b
         left join del_outbound a on a.order_no = b.order_no
         left join del_outbound_address c on a.order_no = c.order_no
         ${ew.customSqlSegment}

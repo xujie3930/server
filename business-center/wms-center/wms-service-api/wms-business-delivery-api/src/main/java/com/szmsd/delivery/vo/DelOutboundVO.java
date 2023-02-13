@@ -196,4 +196,7 @@ public class DelOutboundVO implements Serializable {
     private String logisticsProviderCode;
 
     private Date shipmentsTime;
+
+    @ApiModelProperty(value = "创建时间")
+    private Date createTime;
 }

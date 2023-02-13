@@ -3,7 +3,7 @@ package com.szmsd.track.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.common.core.utils.StringUtils;
-import com.szmsd.track.domain.DelTrackRemark;
+import com.szmsd.track.domain.TrackRemark;
 import com.szmsd.track.mapper.DelTrackRemarkMapper;
 import com.szmsd.track.service.IDelTrackRemarkService;
 import org.apache.commons.collections4.CollectionUtils;
@@ -22,7 +22,7 @@ import java.util.List;
  * @since 2022-05-06
  */
 @Service
-public class DelTrackRemarkServiceImpl extends ServiceImpl<DelTrackRemarkMapper, DelTrackRemark> implements IDelTrackRemarkService {
+public class DelTrackRemarkServiceImpl extends ServiceImpl<DelTrackRemarkMapper, TrackRemark> implements IDelTrackRemarkService {
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -36,7 +36,7 @@ public class DelTrackRemarkServiceImpl extends ServiceImpl<DelTrackRemarkMapper,
      * @return 轨迹备注表模块
      */
     @Override
-    public DelTrackRemark selectDelTrackRemarkById(String id) {
+    public TrackRemark selectDelTrackRemarkById(String id) {
         return baseMapper.selectById(id);
     }
 
@@ -47,11 +47,11 @@ public class DelTrackRemarkServiceImpl extends ServiceImpl<DelTrackRemarkMapper,
      * @return 轨迹备注表模块
      */
     @Override
-    public List<DelTrackRemark> selectDelTrackRemarkList(DelTrackRemark delTrackRemark) {
-        LambdaQueryWrapper<DelTrackRemark> where = new LambdaQueryWrapper<DelTrackRemark>();
-        where.like(StringUtils.isNotBlank(delTrackRemark.getTrackDescription()), DelTrackRemark::getTrackDescription, delTrackRemark.getTrackDescription());
-        where.like(StringUtils.isNotBlank(delTrackRemark.getTrackRemark()), DelTrackRemark::getTrackRemark, delTrackRemark.getTrackRemark());
-        where.orderByDesc(DelTrackRemark::getId);
+    public List<TrackRemark> selectDelTrackRemarkList(TrackRemark delTrackRemark) {
+        LambdaQueryWrapper<TrackRemark> where = new LambdaQueryWrapper<TrackRemark>();
+        where.like(StringUtils.isNotBlank(delTrackRemark.getTrackDescription()), TrackRemark::getTrackDescription, delTrackRemark.getTrackDescription());
+        where.like(StringUtils.isNotBlank(delTrackRemark.getTrackRemark()), TrackRemark::getTrackRemark, delTrackRemark.getTrackRemark());
+        where.orderByDesc(TrackRemark::getId);
         return baseMapper.selectList(where);
     }
 
@@ -62,7 +62,7 @@ public class DelTrackRemarkServiceImpl extends ServiceImpl<DelTrackRemarkMapper,
      * @return 结果
      */
     @Override
-    public int insertDelTrackRemark(DelTrackRemark delTrackRemark) {
+    public int insertDelTrackRemark(TrackRemark delTrackRemark) {
         redisTemplate.opsForHash().put(TRACK_REMARK_KEY, delTrackRemark.getTrackDescription(), delTrackRemark.getTrackRemark());
         return baseMapper.insert(delTrackRemark);
     }
@@ -74,9 +74,9 @@ public class DelTrackRemarkServiceImpl extends ServiceImpl<DelTrackRemarkMapper,
      * @return 结果
      */
     @Override
-    public int updateDelTrackRemark(DelTrackRemark delTrackRemark) {
+    public int updateDelTrackRemark(TrackRemark delTrackRemark) {
         // 更新时需要删除原始数据缓存 再添加新缓存
-        DelTrackRemark trackRemark = baseMapper.selectById(delTrackRemark.getId());
+        TrackRemark trackRemark = baseMapper.selectById(delTrackRemark.getId());
         if (trackRemark != null) {
             redisTemplate.opsForHash().delete(TRACK_REMARK_KEY, trackRemark.getTrackDescription());
         }
@@ -92,7 +92,7 @@ public class DelTrackRemarkServiceImpl extends ServiceImpl<DelTrackRemarkMapper,
      */
     @Override
     public int deleteDelTrackRemarkByIds(List<String> ids) {
-        List<DelTrackRemark> remarks = this.listByIds(ids);
+        List<TrackRemark> remarks = this.listByIds(ids);
         if (CollectionUtils.isNotEmpty(remarks)) {
             remarks.forEach(item -> {
                 redisTemplate.opsForHash().delete(TRACK_REMARK_KEY, item.getTrackDescription());
@@ -109,7 +109,7 @@ public class DelTrackRemarkServiceImpl extends ServiceImpl<DelTrackRemarkMapper,
      */
     @Override
     public int deleteDelTrackRemarkById(String id) {
-        DelTrackRemark remark = this.getById(id);
+        TrackRemark remark = this.getById(id);
         if (remark != null) {
             redisTemplate.opsForHash().delete(TRACK_REMARK_KEY, remark.getTrackDescription());
         }

@@ -6,7 +6,7 @@ import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.vo.DelOutboundTrackRequestVO;
 import com.szmsd.pack.api.feign.PackageCollectionFeignService;
 import com.szmsd.pack.constant.PackageConstant;
-import com.szmsd.track.domain.DelTrack;
+import com.szmsd.track.domain.Track;
 import com.szmsd.track.event.ChangeDelOutboundLatestTrackEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class ChangeDelOutboundLatestTrackListener {
     @EventListener
     public void onApplicationEvent(ChangeDelOutboundLatestTrackEvent event){
         log.info("进入同步出库单轨迹监听器");
-        DelTrack track = (DelTrack) event.getSource();
+        Track track = (Track) event.getSource();
         if (track == null) {
             return;
         }

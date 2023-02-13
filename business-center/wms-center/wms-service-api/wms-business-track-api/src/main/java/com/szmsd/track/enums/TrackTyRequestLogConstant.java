@@ -1,6 +1,6 @@
 package com.szmsd.track.enums;
 
-public final class DelTyRequestLogConstant {
+public final class TrackTyRequestLogConstant {
 
     /**
      * 状态

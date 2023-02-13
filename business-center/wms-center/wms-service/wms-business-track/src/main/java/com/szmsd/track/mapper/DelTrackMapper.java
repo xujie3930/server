@@ -3,7 +3,7 @@ package com.szmsd.track.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
-import com.szmsd.track.domain.DelTrack;
+import com.szmsd.track.domain.Track;
 import com.szmsd.track.dto.TrackAnalysisDto;
 import com.szmsd.track.dto.TrackAnalysisExportDto;
 import com.szmsd.track.dto.TrackAnalysisRequestDto;
@@ -20,7 +20,7 @@ import java.util.Map;
  * @author YM
  * @since 2022-02-10
  */
-public interface DelTrackMapper extends BaseMapper<DelTrack> {
+public interface DelTrackMapper extends BaseMapper<Track> {
 
     List<TrackAnalysisDto> getTrackAnalysis(@Param(Constants.WRAPPER) QueryWrapper<TrackAnalysisRequestDto> queryWrapper);
 

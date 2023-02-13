@@ -10,6 +10,7 @@ import com.szmsd.bas.api.feign.BasSellerFeignService;
 import com.szmsd.bas.api.feign.BasSubFeignService;
 import com.szmsd.bas.api.feign.BasTranslateFeignService;
 import com.szmsd.bas.vo.BasSellerInfoVO;
+import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.constant.HttpStatus;
 import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.common.core.utils.StringToolkit;
@@ -30,6 +31,7 @@ import com.szmsd.delivery.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szmsd.delivery.vo.DelOutboundVO;
 import com.szmsd.finance.domain.AccountBalance;
+import com.szmsd.track.api.feign.TrackFeignService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,8 +67,8 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
     private IDelOutboundService delOutboundService;
     @Resource
     private BasSellerFeignService basSellerFeignService;
-//    @Resource
-//    private IDelTrackService delTrackService;
+    @Resource
+    private TrackFeignService delTrackService;
     @Autowired
     private IDelOutboundService iDelOutboundService;
     @Autowired
@@ -583,15 +585,12 @@ public class DelQueryServiceServiceImpl extends ServiceImpl<DelQueryServiceMappe
                 } else if (delOutbound.getShipmentsTime() != null && (DateUtil.betweenDay(delOutbound.getShipmentsTime(), new Date(), true) >= delQuerySettings.getShipmentDays() || DateUtil.betweenDay(delOutbound.getTrackingTime(), new Date(), true) >= delQuerySettings.getTrackStayDays())) {
                     bool = true;
                 } else {
-                    //TODO TY
-//                    LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
-//                    delTrackLambdaQueryWrapper.eq(DelTrack::getOrderNo, delQueryService.getOrderNo());
-//                    delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
-//                    delTrackLambdaQueryWrapper.last("LIMIT 1");
-//                    DelTrack dataDelTrack = delTrackService.getOne(delTrackLambdaQueryWrapper);
-//                    if (dataDelTrack != null && dataDelTrack.getTrackingTime() != null && DateUtil.betweenDay(dataDelTrack.getTrackingTime(), new Date(), true) <= delQuerySettings.getTrackStayDays()) {
-//                        bool = true;
-//                    }
+
+                    R<Integer> getTrackingTime = delTrackService.checkTrackDoc(delQueryService.getOrderNo(),delQuerySettings.getTrackStayDays());
+
+                    if(getTrackingTime != null && getTrackingTime.getCode() == Constants.SUCCESS && "1".equals(getTrackingTime.getData())){
+                        bool = true;
+                    }
                 }
                 if (!bool) {
                     throw new CommonException("400", "This document search application does not meet the document search conditions");

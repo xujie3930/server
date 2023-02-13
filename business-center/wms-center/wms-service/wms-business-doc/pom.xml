@@ -143,6 +143,10 @@
             <artifactId>szmsd-module-system-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-track-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
         </dependency>

@@ -18,7 +18,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ApiModel(value = "推送TY日志表", description = "DelTyRequestLog对象")
-public class DelTyRequestLog extends BaseEntity {
+public class TrackTyRequestLog extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 

@@ -29,9 +29,11 @@ import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.pack.api.feign.PackageCollectionFeignService;
 import com.szmsd.pack.constant.PackageConstant;
 import com.szmsd.pack.domain.PackageCollection;
-import com.szmsd.track.domain.DelTrack;
+import com.szmsd.track.domain.Track;
 import com.szmsd.track.dto.*;
 import com.szmsd.track.event.ChangeDelOutboundLatestTrackEvent;
+import com.szmsd.track.event.DelTyRequestLogEvent;
+import com.szmsd.track.event.EventUtil;
 import com.szmsd.track.mapper.DelTrackMapper;
 import com.szmsd.track.service.IDelTrackService;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +62,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> implements IDelTrackService {
+public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, Track> implements IDelTrackService {
 
     @Autowired
     private DelOutboundFeignService delOutboundFeignService;
@@ -84,7 +86,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
 
     @Override
-    public void addData(DelTrack track) {
+    public void addData(Track track) {
         track.setSource("2");
         track.setTrackingTime(new Date());
         applicationContext.publishEvent(new ChangeDelOutboundLatestTrackEvent(track));
@@ -98,25 +100,23 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
      * @return 模块
      */
     @Override
-    public DelTrack selectDelTrackById(String id) {
+    public Track selectDelTrackById(String id) {
         return baseMapper.selectById(id);
     }
 
 
     /**
      * 查询模块列表
-     *
-     * @param delTrack 模块
      * @return 模块
      */
     @Override
-    public R<DelTrackMainCommonDto> commonTrackList(List<String> orderNos) {
-        LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
-        delTrackLambdaQueryWrapper.in(DelTrack::getOrderNo, orderNos);
+    public R<TrackMainCommonDto> commonTrackList(List<String> orderNos) {
+        LambdaQueryWrapper<Track> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
+        delTrackLambdaQueryWrapper.in(Track::getOrderNo, orderNos);
         delTrackLambdaQueryWrapper.or();
-        delTrackLambdaQueryWrapper.in(DelTrack::getTrackingNo, orderNos);
-        delTrackLambdaQueryWrapper.orderByDesc(DelTrack::getTrackingTime);
-        List<DelTrack> list = baseMapper.selectList(delTrackLambdaQueryWrapper);
+        delTrackLambdaQueryWrapper.in(Track::getTrackingNo, orderNos);
+        delTrackLambdaQueryWrapper.orderByDesc(Track::getTrackingTime);
+        List<Track> list = baseMapper.selectList(delTrackLambdaQueryWrapper);
 
         if(CollectionUtils.isEmpty(list)){
             return R.failed("无数据");
@@ -129,7 +129,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
         Map<String, Boolean> cacheMap = new HashMap<String, Boolean>();
         for (int i = 0; i < list.size(); i++) {
-            DelTrack track = list.get(i);
+            Track track = list.get(i);
             if(com.szmsd.common.core.utils.StringUtils.isEmpty(track.getCarrierCode())){
                 continue;
             }
@@ -149,8 +149,8 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                 i--;
             }
         }
-        List<DelTrackCommonDto> newList = BeanMapperUtil.mapList(list, DelTrackCommonDto.class);
-        for (DelTrackCommonDto dto: newList){
+        List<TrackCommonDto> newList = BeanMapperUtil.mapList(list, TrackCommonDto.class);
+        for (TrackCommonDto dto: newList){
             BasSubWrapperVO vo  = delTrackStateTypeMap.get(dto.getTrackingStatus());
             if (vo != null) {
                 dto.setTrackingStatusName(vo.getSubName());
@@ -159,7 +159,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
 
         Set<String> threeSet = new TreeSet<String>();
-        for(DelTrack delTrack: list){
+        for(Track delTrack: list){
             threeSet.add(delTrack.getOrderNo());
         }
         orderNos.clear();
@@ -167,10 +167,10 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
 
         //处理轨迹状态数量
-        Map<String, List<DelTrackCommonDto>> groupBy = newList.stream().collect(Collectors.groupingBy(DelTrackCommonDto::getOrderNo));
+        Map<String, List<TrackCommonDto>> groupBy = newList.stream().collect(Collectors.groupingBy(TrackCommonDto::getOrderNo));
         Map<String, Integer> delTrackStateDto = new HashMap();
         for (String ordersNo: orderNos){
-            List<DelTrackCommonDto> detailList = groupBy.get(ordersNo);
+            List<TrackCommonDto> detailList = groupBy.get(ordersNo);
             if(detailList != null){
                 String trackingStatus = detailList.get(0).getTrackingStatus();
                 if(delTrackStateDto.containsKey(trackingStatus)){
@@ -182,11 +182,11 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         }
 
         //封装主表
-        List<DelTrackDetailDto> mainDetailDataList = new ArrayList();
+        List<TrackDetailDto> mainDetailDataList = new ArrayList();
         for (String ordersNo: orderNos){
-            List<DelTrackCommonDto> detailList = groupBy.get(ordersNo);
+            List<TrackCommonDto> detailList = groupBy.get(ordersNo);
             if(detailList != null){
-                DelTrackDetailDto detailDto = new DelTrackDetailDto();
+                TrackDetailDto detailDto = new TrackDetailDto();
                 mainDetailDataList.add(detailDto);
                 BeanUtils.copyProperties(detailList.get(0), detailDto);
                 detailDto.setTrackingList(detailList);
@@ -222,7 +222,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
             Map<String, DelOutboundAddress> addressMap =
                     addressList.stream().collect(Collectors.toMap(DelOutboundAddress::getOrderNo, account -> account));
-            for (DelTrackDetailDto dto: mainDetailDataList){
+            for (TrackDetailDto dto: mainDetailDataList){
                 DelOutboundAddress address = addressMap.get(dto.getOrderNo());
                 if(address != null){
                     BeanUtils.copyProperties(address, dto);
@@ -230,7 +230,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             }
         }
 
-        DelTrackMainCommonDto mainDto = new DelTrackMainCommonDto();
+        TrackMainCommonDto mainDto = new TrackMainCommonDto();
         mainDto.setDelTrackStateDto(delTrackStateDto);
         mainDto.setTrackingList(mainDetailDataList);
         mainDto.setDelTrackStateTypeList(delTrackStateTypeList);
@@ -240,7 +240,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void saveOrUpdateTrack(DelTrack delTrack) {
+    public void saveOrUpdateTrack(Track delTrack) {
 
         if(StringUtils.isEmpty(delTrack.getOrderNo()) || StringUtils.isEmpty(delTrack.getTrackingNo())){
             throw new CommonException("400", "订单号和跟踪号不能为空");
@@ -266,6 +266,29 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
     }
 
+    @Override
+    public void pushTY(TrackTyRequestLogDto requestLogDto) {
+
+        EventUtil.publishEvent(new DelTyRequestLogEvent(requestLogDto));
+    }
+
+    @Override
+    public R<Integer> checkTrackDoc(String orderNo,Integer trackStayDays) {
+
+        Integer res = 0;
+
+        LambdaQueryWrapper<Track> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
+        delTrackLambdaQueryWrapper.eq(Track::getOrderNo, orderNo);
+        delTrackLambdaQueryWrapper.orderByDesc(Track::getTrackingTime);
+        delTrackLambdaQueryWrapper.last("LIMIT 1");
+        Track dataDelTrack = baseMapper.selectOne(delTrackLambdaQueryWrapper);
+        if (dataDelTrack != null && dataDelTrack.getTrackingTime() != null && DateUtil.betweenDay(dataDelTrack.getTrackingTime(), new Date(), true) <= trackStayDays) {
+            res = 1;
+        }
+        
+        return R.ok(res);
+    }
+
     /**
      * 查询模块列表
      *
@@ -273,8 +296,8 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
      * @return 模块
      */
     @Override
-    public List<DelTrack> selectDelTrackList(DelTrack delTrack) {
-        LambdaQueryWrapper<DelTrack> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
+    public List<Track> selectDelTrackList(Track delTrack) {
+        LambdaQueryWrapper<Track> delTrackLambdaQueryWrapper = Wrappers.lambdaQuery();
         String queryNo = delTrack.getQueryNoOne();
 
         if (StringUtils.isNotEmpty(queryNo)) {
@@ -284,21 +307,21 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                 throw new RuntimeException(e);
             }
             List<String> queryNoList = StringToolkit.splitToArray(queryNo, "[\n,]");
-            delTrackLambdaQueryWrapper.in(DelTrack::getOrderNo, queryNoList)
-                    .or().in(DelTrack::getTrackingNo, queryNoList);
+            delTrackLambdaQueryWrapper.in(Track::getOrderNo, queryNoList)
+                    .or().in(Track::getTrackingNo, queryNoList);
         }
 
         boolean orderNoNotEmpty = StringUtils.isNotEmpty(delTrack.getOrderNo());
-        delTrackLambdaQueryWrapper.eq(orderNoNotEmpty, DelTrack::getOrderNo, delTrack.getOrderNo());
-        delTrackLambdaQueryWrapper.eq(StringUtils.isNotBlank(delTrack.getSource()), DelTrack::getSource, delTrack.getSource());
+        delTrackLambdaQueryWrapper.eq(orderNoNotEmpty, Track::getOrderNo, delTrack.getOrderNo());
+        delTrackLambdaQueryWrapper.eq(StringUtils.isNotBlank(delTrack.getSource()), Track::getSource, delTrack.getSource());
         delTrackLambdaQueryWrapper
                 .ge(StringUtils.isNotBlank(delTrack.getBeginTime()), BaseEntity::getCreateTime, delTrack.getBeginTime())
                 .le(StringUtils.isNotBlank(delTrack.getEndTime()), BaseEntity::getCreateTime, delTrack.getEndTime())
-                .eq(StringUtils.isNotBlank(delTrack.getTrackingNo()), DelTrack::getTrackingNo, delTrack.getTrackingNo())
-                .eq(StringUtils.isNotBlank(delTrack.getCreateByName()), DelTrack::getCreateByName, delTrack.getCreateByName())
-                .orderByDesc(DelTrack::getTrackingTime)
+                .eq(StringUtils.isNotBlank(delTrack.getTrackingNo()), Track::getTrackingNo, delTrack.getTrackingNo())
+                .eq(StringUtils.isNotBlank(delTrack.getCreateByName()), Track::getCreateByName, delTrack.getCreateByName())
+                .orderByDesc(Track::getTrackingTime)
         ;
-        List<DelTrack> selectList = baseMapper.selectList(delTrackLambdaQueryWrapper);
+        List<Track> selectList = baseMapper.selectList(delTrackLambdaQueryWrapper);
         if (CollectionUtils.isNotEmpty(selectList) && orderNoNotEmpty) {
             String carrierCode = "";
             if ("DEL".equals(delTrack.getSourceType())) {
@@ -331,7 +354,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
             // filter keyword value is 'Y' and carrier code is not empty
             if ("Y".equals(filterKeyword) && StringUtils.isNotEmpty(carrierCode)) {
                 for (int i = 0; i < selectList.size(); i++) {
-                    DelTrack track = selectList.get(i);
+                    Track track = selectList.get(i);
                     // check
                     R<Boolean> booleanR = this.basCarrierKeywordFeignService.checkExistKeyword(carrierCode, track.getDisplay());
                     boolean ignore;
@@ -366,7 +389,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
      * @return 结果
      */
     @Override
-    public int insertDelTrack(DelTrack delTrack) {
+    public int insertDelTrack(Track delTrack) {
         return baseMapper.insert(delTrack);
     }
 
@@ -377,7 +400,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
      * @return 结果
      */
     @Override
-    public int updateDelTrack(DelTrack delTrack) {
+    public int updateDelTrack(Track delTrack) {
         return baseMapper.updateById(delTrack);
     }
 
@@ -420,7 +443,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
         }
 
 
-        List<DelTrack> trackList = new ArrayList<>();
+        List<Track> trackList = new ArrayList<>();
         logisticsTrackingSections.forEach(trackingSection -> {
             TrackingYeeTraceDto.LogisticsTrackingDto logisticsTracking = trackingSection.getLogisticsTracking();
             // 只获取主运单号的轨迹  关联运单号的暂不获取
@@ -447,10 +470,10 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
                     }
 
                     // 校验路由信息存不存在
-                    Integer trackCount = this.count(new LambdaQueryWrapper<DelTrack>().eq(DelTrack::getOrderNo, trackingYeeTraceDto.getOrderNo())
-                            .eq(DelTrack::getTrackingNo, trackingYeeTraceDto.getTrackingNo())
+                    Integer trackCount = this.count(new LambdaQueryWrapper<Track>().eq(Track::getOrderNo, trackingYeeTraceDto.getOrderNo())
+                            .eq(Track::getTrackingNo, trackingYeeTraceDto.getTrackingNo())
 //                            .eq(DelTrack::getTrackingTime, trackingTime)
-                                    .eq(DelTrack::getNo, trackingItems.get(item).getNo())
+                                    .eq(Track::getNo, trackingItems.get(item).getNo())
                     );
                     if (trackCount != 0) {
                         Map map=new HashMap();
@@ -462,7 +485,7 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
                         Map maps=new HashMap();
                         maps.put("carrierCode",trackingYeeTraceDto.getCarrierCode());
-                        DelTrack delTrack = new DelTrack();
+                        Track delTrack = new Track();
                         delTrack.setTrackingNo(trackingYeeTraceDto.getTrackingNo());
                         delTrack.setCarrierCode(trackingYeeTraceDto.getCarrierCode());
                         delTrack.setShipmentId(trackingYeeTraceDto.getShipmentId());
@@ -548,19 +571,19 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
                 if (delOutboundVO != null) {
 
-                    List<DelTrack> delTrackList = trackList.stream().sorted(Comparator.comparing(DelTrack::getTrackingTime).reversed()).collect(Collectors.toList());
-                    DelTrack delTrack = delTrackList.get(0);
+                    List<Track> delTrackList = trackList.stream().sorted(Comparator.comparing(Track::getTrackingTime).reversed()).collect(Collectors.toList());
+                    Track delTrack = delTrackList.get(0);
                     DelOutboundTrackRequestVO delOutboundTrackRequestVO = new DelOutboundTrackRequestVO();
                     delOutboundTrackRequestVO.setTrackingStatus(trackingYeeTraceDto.getTrackingStatus());
                     delOutboundTrackRequestVO.setOrderNo(delOutboundVO.getOrderNo());
                     // 最新时间
-                    Date latestDate = trackList.stream().map(DelTrack::getTrackingTime).max((d1, d2) -> d1.compareTo(d2)).orElse(null);
+                    Date latestDate = trackList.stream().map(Track::getTrackingTime).max((d1, d2) -> d1.compareTo(d2)).orElse(null);
                     delOutboundTrackRequestVO.setTrackingTime(latestDate);
                     delOutboundTrackRequestVO.setTrackingDescription(delTrack.getDescription() + " (" + DateUtil.format(delTrack.getTrackingTime(), DateUtils.YYYY_MM_DD_HH_MM_SS) + ")");
 
 
                    if (delTrack.getTrackingStatus().equals("Delivered")){
-                       Date deliveredDime = trackList.stream().map(DelTrack::getTrackingTime).max((d1, d2) -> d1.compareTo(d2)).orElse(null);
+                       Date deliveredDime = trackList.stream().map(Track::getTrackingTime).max((d1, d2) -> d1.compareTo(d2)).orElse(null);
                       Date shipmentsTime =delOutboundVO.getShipmentsTime();
                       if (deliveredDime!=null&&shipmentsTime!=null){
                           long timeDifference=(deliveredDime.getTime()-shipmentsTime.getTime())/(24*60*60*1000);
