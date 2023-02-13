@@ -27,7 +27,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ApiModel(value = "", description = "DelTrackCommonDto对象")
-public class DelTrackDocCommonDto extends BaseEntity {
+public class TrackCommonDto extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -35,9 +35,9 @@ public class DelTrackDocCommonDto extends BaseEntity {
     @Excel(name = "运输包裹的物流跟踪号")
     private String trackingNo;
 
-    /*@ApiModelProperty(value = "运输包裹的运输商编码")
+    @ApiModelProperty(value = "运输包裹的运输商编码")
     @Excel(name = "运输包裹的运输商编码")
-    private String carrierCode;*/
+    private String carrierCode;
 
     @ApiModelProperty(value = "运输包裹 Id，代表唯一的一个运输包裹信息")
     @Excel(name = "运输包裹 Id，代表唯一的一个运输包裹信息")

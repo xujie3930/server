@@ -2,8 +2,8 @@ package com.szmsd.track.timer;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.szmsd.track.domain.DelTyRequestLog;
-import com.szmsd.track.enums.DelTyRequestLogConstant;
+import com.szmsd.track.domain.TrackTyRequestLog;
+import com.szmsd.track.enums.TrackTyRequestLogConstant;
 import com.szmsd.track.service.IDelTyRequestLogService;
 import com.szmsd.track.service.impl.DelTyRequestLogServiceImpl;
 import com.szmsd.track.util.LockerUtil;
@@ -43,23 +43,23 @@ public class DelTyRequestLogTimer {
         String key = applicationName + ":DelTyRequestLogTimer:tyRequest";
         this.doWorker(key, () -> {
             // 查询初始化的任务执行
-            LambdaQueryWrapper<DelTyRequestLog> queryWrapper = Wrappers.lambdaQuery();
-            queryWrapper.select(DelTyRequestLog::getId, DelTyRequestLog::getOrderNo, DelTyRequestLog::getRequestBody,
-                    DelTyRequestLog::getFailCount, DelTyRequestLog::getNextRetryTime, DelTyRequestLog::getType,
-                    DelTyRequestLog::getUrl, DelTyRequestLog::getMethod);
+            LambdaQueryWrapper<TrackTyRequestLog> queryWrapper = Wrappers.lambdaQuery();
+            queryWrapper.select(TrackTyRequestLog::getId, TrackTyRequestLog::getOrderNo, TrackTyRequestLog::getRequestBody,
+                    TrackTyRequestLog::getFailCount, TrackTyRequestLog::getNextRetryTime, TrackTyRequestLog::getType,
+                    TrackTyRequestLog::getUrl, TrackTyRequestLog::getMethod);
             queryWrapper.and(qw -> {
-                qw.eq(DelTyRequestLog::getState, DelTyRequestLogConstant.State.WAIT.name())
+                qw.eq(TrackTyRequestLog::getState, TrackTyRequestLogConstant.State.WAIT.name())
                         .or()
-                        .eq(DelTyRequestLog::getState, DelTyRequestLogConstant.State.FAIL_CONTINUE.name());
+                        .eq(TrackTyRequestLog::getState, TrackTyRequestLogConstant.State.FAIL_CONTINUE.name());
             });
             // 小于10次
-            queryWrapper.lt(DelTyRequestLog::getFailCount, DelTyRequestLogServiceImpl.retryCount);
+            queryWrapper.lt(TrackTyRequestLog::getFailCount, DelTyRequestLogServiceImpl.retryCount);
             // 处理时间小于等于当前时间的
-            queryWrapper.le(DelTyRequestLog::getNextRetryTime, new Date());
+            queryWrapper.le(TrackTyRequestLog::getNextRetryTime, new Date());
             queryWrapper.last("limit 200");
-            List<DelTyRequestLog> list = this.delTyRequestLogService.list(queryWrapper);
+            List<TrackTyRequestLog> list = this.delTyRequestLogService.list(queryWrapper);
             if (CollectionUtils.isNotEmpty(list)) {
-                for (DelTyRequestLog tyRequestLog : list) {
+                for (TrackTyRequestLog tyRequestLog : list) {
                     this.delTyRequestLogService.handler(tyRequestLog);
                 }
             }

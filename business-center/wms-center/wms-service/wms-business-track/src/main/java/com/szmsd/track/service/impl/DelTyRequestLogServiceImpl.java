@@ -12,8 +12,8 @@ import com.szmsd.http.api.service.IHtpRmiClientService;
 import com.szmsd.http.dto.HttpRequestDto;
 import com.szmsd.http.vo.HttpResponseVO;
 import com.szmsd.track.config.ThreadPoolExecutorConfiguration;
-import com.szmsd.track.domain.DelTyRequestLog;
-import com.szmsd.track.enums.DelTyRequestLogConstant;
+import com.szmsd.track.domain.TrackTyRequestLog;
+import com.szmsd.track.enums.TrackTyRequestLogConstant;
 import com.szmsd.track.mapper.DelTyRequestLogMapper;
 import com.szmsd.track.service.IDelTyRequestLogService;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +32,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class DelTyRequestLogServiceImpl extends ServiceImpl<DelTyRequestLogMapper, DelTyRequestLog> implements IDelTyRequestLogService {
+public class DelTyRequestLogServiceImpl extends ServiceImpl<DelTyRequestLogMapper, TrackTyRequestLog> implements IDelTyRequestLogService {
     private final Logger logger = LoggerFactory.getLogger(DelTyRequestLogServiceImpl.class);
 
     @Value("${spring.application.name}")
@@ -50,7 +50,7 @@ public class DelTyRequestLogServiceImpl extends ServiceImpl<DelTyRequestLogMappe
 
     @Async(value = ThreadPoolExecutorConfiguration.THREADPOOLEXECUTOR_TY_REQUEST)
     @Override
-    public void handler(DelTyRequestLog tyRequestLog) {
+    public void handler(TrackTyRequestLog tyRequestLog) {
         Long id = tyRequestLog.getId();
         String lockName = applicationName + ":DelTyRequestLogServiceImpl:" + id;
         RLock lock = redissonClient.getLock(lockName);
@@ -123,25 +123,25 @@ public class DelTyRequestLogServiceImpl extends ServiceImpl<DelTyRequestLogMappe
                     }
                 }
                 if (success) {
-                    state = DelTyRequestLogConstant.State.SUCCESS.name();
+                    state = TrackTyRequestLogConstant.State.SUCCESS.name();
                 } else {
                     failCount++;
                     if (failCount >= retryCount) {
-                        state = DelTyRequestLogConstant.State.FAIL.name();
+                        state = TrackTyRequestLogConstant.State.FAIL.name();
                     } else {
-                        state = DelTyRequestLogConstant.State.FAIL_CONTINUE.name();
+                        state = TrackTyRequestLogConstant.State.FAIL_CONTINUE.name();
                         int t = retryTimeConfiguration[failCount];
                         nextRetryTime = DateUtils.addSeconds(tyRequestLog.getNextRetryTime(), t);
                     }
                 }
                 int lastRequestConsumeTime = (int) (System.currentTimeMillis() - st);
-                LambdaUpdateWrapper<DelTyRequestLog> updateWrapper = Wrappers.lambdaUpdate();
-                updateWrapper.set(DelTyRequestLog::getState, state);
-                updateWrapper.set(DelTyRequestLog::getFailCount, failCount);
-                updateWrapper.set(DelTyRequestLog::getResponseBody, responseBody);
-                updateWrapper.set(DelTyRequestLog::getLastRequestConsumeTime, lastRequestConsumeTime);
-                updateWrapper.set(DelTyRequestLog::getNextRetryTime, nextRetryTime);
-                updateWrapper.eq(DelTyRequestLog::getId, tyRequestLog.getId());
+                LambdaUpdateWrapper<TrackTyRequestLog> updateWrapper = Wrappers.lambdaUpdate();
+                updateWrapper.set(TrackTyRequestLog::getState, state);
+                updateWrapper.set(TrackTyRequestLog::getFailCount, failCount);
+                updateWrapper.set(TrackTyRequestLog::getResponseBody, responseBody);
+                updateWrapper.set(TrackTyRequestLog::getLastRequestConsumeTime, lastRequestConsumeTime);
+                updateWrapper.set(TrackTyRequestLog::getNextRetryTime, nextRetryTime);
+                updateWrapper.eq(TrackTyRequestLog::getId, tyRequestLog.getId());
                 super.update(updateWrapper);
             }
         } catch (Exception e) {

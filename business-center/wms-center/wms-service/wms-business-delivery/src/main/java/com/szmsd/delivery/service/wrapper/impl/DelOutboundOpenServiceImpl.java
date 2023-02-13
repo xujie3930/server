@@ -24,7 +24,7 @@ import com.szmsd.delivery.util.Utils;
 import com.szmsd.http.api.service.IHtpOutboundClientService;
 import com.szmsd.http.dto.ShipmentUpdateRequestDto;
 import com.szmsd.track.api.feign.TrackFeignService;
-import com.szmsd.track.domain.DelTrack;
+import com.szmsd.track.domain.Track;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -308,7 +308,7 @@ public class DelOutboundOpenServiceImpl implements IDelOutboundOpenService {
                 // 增加出库单已取消记录，异步处理，定时任务
                 this.delOutboundCompletedService.add(delOutbound.getOrderNo(), DelOutboundOperationTypeEnum.SHIPMENT_PACKING.getCode());
             }
-            delTrackService.addData(new DelTrack()
+            delTrackService.addData(new Track()
                     .setOrderNo(delOutbound.getOrderNo())
                     .setTrackingNo(delOutbound.getTrackingNo())
                     .setTrackingStatus("Hub")

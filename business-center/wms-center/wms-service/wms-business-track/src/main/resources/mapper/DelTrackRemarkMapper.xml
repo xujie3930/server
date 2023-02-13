@@ -3,7 +3,7 @@
 <mapper namespace="com.szmsd.track.mapper.DelTrackRemarkMapper">
 
         <!-- 通用查询映射结果 -->
-        <resultMap id="BaseResultMap" type="com.szmsd.track.domain.DelTrackRemark">
+        <resultMap id="BaseResultMap" type="com.szmsd.track.domain.TrackRemark">
                     <id column="id" property="id"/>
                     <result column="create_by_name" property="createByName"/>
                     <result column="create_time" property="createTime"/>

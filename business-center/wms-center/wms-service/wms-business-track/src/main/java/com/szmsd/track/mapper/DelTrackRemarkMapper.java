@@ -1,7 +1,7 @@
 package com.szmsd.track.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.szmsd.track.domain.DelTrackRemark;
+import com.szmsd.track.domain.TrackRemark;
 
 /**
  * <p>
@@ -11,6 +11,6 @@ import com.szmsd.track.domain.DelTrackRemark;
  * @author YM
  * @since 2022-05-06
  */
-public interface DelTrackRemarkMapper extends BaseMapper<DelTrackRemark> {
+public interface DelTrackRemarkMapper extends BaseMapper<TrackRemark> {
 
 }

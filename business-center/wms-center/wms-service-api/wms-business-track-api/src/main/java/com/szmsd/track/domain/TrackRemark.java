@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ApiModel(value = "轨迹备注表", description = "DelTrackRemark对象")
-public class DelTrackRemark extends BaseEntity {
+public class TrackRemark extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 

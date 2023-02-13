@@ -1,8 +1,6 @@
-package com.szmsd.track.domain;
+package com.szmsd.track.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.szmsd.bas.plugin.BasSubCommonPlugin;
 import com.szmsd.bas.plugin.BasSubValueCommonParameter;
 import com.szmsd.common.core.annotation.Excel;
@@ -14,7 +12,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 
@@ -29,35 +26,18 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-@ApiModel(value = "", description = "DelTrack对象")
-public class DelTrack extends BaseEntity {
+@ApiModel(value = "", description = "DelTrackCommonDto对象")
+public class TrackDocCommonDto extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
-
-    @ApiModelProperty(value = "主键ID")
-    @TableId(value = "id", type = IdType.AUTO)
-    @Excel(name = "主键ID")
-    private Integer id;
-
-    @ApiModelProperty(value = "创建人")
-    @Excel(name = "创建人")
-    private String createBy;
-
-    @ApiModelProperty(value = "修改人")
-    @Excel(name = "修改人")
-    private String updateBy;
-
-    @ApiModelProperty(value = "版本号")
-    @Excel(name = "版本号")
-    private BigDecimal version;
 
     @ApiModelProperty(value = "运输包裹的物流跟踪号")
     @Excel(name = "运输包裹的物流跟踪号")
     private String trackingNo;
 
-    @ApiModelProperty(value = "运输包裹的运输商编码")
+    /*@ApiModelProperty(value = "运输包裹的运输商编码")
     @Excel(name = "运输包裹的运输商编码")
-    private String carrierCode;
+    private String carrierCode;*/
 
     @ApiModelProperty(value = "运输包裹 Id，代表唯一的一个运输包裹信息")
     @Excel(name = "运输包裹 Id，代表唯一的一个运输包裹信息")
@@ -99,15 +79,6 @@ public class DelTrack extends BaseEntity {
     @Excel(name = "物流轨迹发生的位置显示描述")
     private String display;
 
-    @ApiModelProperty(value = "物流轨迹发生的位置显示描述(原始)")
-    @Excel(name = "物流轨迹发生的位置显示描述(原始)")
-    private String dmDisplay;
-
-    @ApiModelProperty(value = "轨迹信息描述(原始)")
-    @Excel(name = "轨迹信息描述(原始)")
-    private String dmDescription;
-
-
     @ApiModelProperty(value = "包裹所处的国家编码")
     @Excel(name = "包裹所处的国家编码")
     private String countryCode;
@@ -148,14 +119,4 @@ public class DelTrack extends BaseEntity {
     @Excel(name = "来源 1 自动拉取 2 手动添加")
     private String source;
 
-    @ApiModelProperty(value = "过滤关键词，Y过滤，N不过滤，默认Y")
-    @TableField(exist = false)
-    private String filterKeyword;
-
-    @ApiModelProperty(value = "来源类型，DEL出库，PCK揽收")
-    @TableField(exist = false)
-    private String sourceType;
-
-    @TableField(exist = false)
-    private String queryNoOne;
 }

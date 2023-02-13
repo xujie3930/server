@@ -24,7 +24,7 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ApiModel(value = "", description = "DelTrackCommonDto对象")
-public class DelTrackMainCommonDto extends BaseEntity {
+public class TrackMainCommonDto extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,7 +32,7 @@ public class DelTrackMainCommonDto extends BaseEntity {
     private Map<String, Integer> delTrackStateDto;
 
     @ApiModelProperty(value = "物流数据集合")
-    private List<DelTrackDetailDto> trackingList;
+    private List<TrackDetailDto> trackingList;
 
     @ApiModelProperty(value = "状态类型")
     private List<BasSubWrapperVO> delTrackStateTypeList;

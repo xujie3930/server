@@ -3,7 +3,7 @@ package com.szmsd.track.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.common.core.domain.R;
-import com.szmsd.track.domain.DelTrack;
+import com.szmsd.track.domain.Track;
 import com.szmsd.track.dto.*;
 
 import java.util.List;
@@ -16,9 +16,9 @@ import java.util.List;
  * @author YM
  * @since 2022-02-10
  */
-public interface IDelTrackService extends IService<DelTrack> {
+public interface IDelTrackService extends IService<Track> {
 
-    void addData(DelTrack delTrack);
+    void addData(Track delTrack);
 
     /**
      * 查询模块
@@ -26,7 +26,7 @@ public interface IDelTrackService extends IService<DelTrack> {
      * @param id 模块ID
      * @return 模块
      */
-    DelTrack selectDelTrackById(String id);
+    Track selectDelTrackById(String id);
 
     /**
      * 查询模块列表
@@ -34,7 +34,7 @@ public interface IDelTrackService extends IService<DelTrack> {
      * @param delTrack 模块
      * @return 模块集合
      */
-    List<DelTrack> selectDelTrackList(DelTrack delTrack);
+    List<Track> selectDelTrackList(Track delTrack);
 
     /**
      * 新增模块
@@ -42,7 +42,7 @@ public interface IDelTrackService extends IService<DelTrack> {
      * @param delTrack 模块
      * @return 结果
      */
-    int insertDelTrack(DelTrack delTrack);
+    int insertDelTrack(Track delTrack);
 
     /**
      * 修改模块
@@ -50,7 +50,7 @@ public interface IDelTrackService extends IService<DelTrack> {
      * @param delTrack 模块
      * @return 结果
      */
-    int updateDelTrack(DelTrack delTrack);
+    int updateDelTrack(Track delTrack);
 
     /**
      * 批量删除模块
@@ -96,8 +96,13 @@ public interface IDelTrackService extends IService<DelTrack> {
     List<TrackAnalysisExportDto> getAnalysisExportData(TrackAnalysisRequestDto requestDto);
 
 
-    R<DelTrackMainCommonDto> commonTrackList(List<String> orderNos);
+    R<TrackMainCommonDto> commonTrackList(List<String> orderNos);
 
-    void saveOrUpdateTrack(DelTrack delTrack);
+    void saveOrUpdateTrack(Track delTrack);
+
+    void pushTY(TrackTyRequestLogDto requestLogDto);
+
+    R<Integer> checkTrackDoc(String orderNo,Integer trackStayDays);
+
 }
 

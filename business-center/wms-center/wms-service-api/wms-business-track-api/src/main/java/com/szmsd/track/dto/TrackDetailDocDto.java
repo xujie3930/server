@@ -28,7 +28,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ApiModel(value = "", description = "DelTrackCommonDto对象")
-public class DelTrackDetailDto extends BaseEntity {
+public class TrackDetailDocDto extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,11 +36,6 @@ public class DelTrackDetailDto extends BaseEntity {
     @Excel(name = "运输包裹的物流跟踪号")
     private String trackingNo;
 
-    @ApiModelProperty(value = "运输包裹的运输商编码")
-    @Excel(name = "运输包裹的运输商编码")
-    private String carrierCode;
-
-    @ApiModelProperty(value = "运输包裹的订单号，可以是电商平台的订单号，也可以是用 于自己做唯一标示的号。")
     @Excel(name = "运输包裹的订单号，可以是电商平台的订单号，也可以是用 于自己做唯一标示的号。")
     private String orderNo;
 
@@ -113,7 +108,7 @@ public class DelTrackDetailDto extends BaseEntity {
     private String street3;
 
     @ApiModelProperty(value = "轨迹数据集合")
-    private List<DelTrackCommonDto> trackingList;
+    private List<TrackDocCommonDto> trackingList;
 
 
     @ApiModelProperty(value = "轨迹天数")
