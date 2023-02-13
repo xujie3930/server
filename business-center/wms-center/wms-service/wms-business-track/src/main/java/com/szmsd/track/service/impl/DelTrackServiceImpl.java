@@ -588,6 +588,11 @@ public class DelTrackServiceImpl extends ServiceImpl<DelTrackMapper, DelTrack> i
 
         List<TrackAnalysisDto> trackAnalysisResult = new ArrayList<>();
         Map<String, String> subList = basSubClientService.getSubListByLang("099", requestDto.getLang()); // 099为轨迹状态
+
+        if(subList == null){
+            throw new RuntimeException("099轨迹状态数据异常");
+        }
+
         subList.forEach((k, v) -> {
             TrackAnalysisDto analysisDto = new TrackAnalysisDto();
             analysisDto.setKeyName(k);
