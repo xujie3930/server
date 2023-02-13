@@ -3,7 +3,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        # 服务注册地址
+        # 服务注册地址 1
         server-addr: 192.168.1.122:8848
         namespace: f91c996a-0b5a-49b3-9d02-4d43205319c7
       config:
