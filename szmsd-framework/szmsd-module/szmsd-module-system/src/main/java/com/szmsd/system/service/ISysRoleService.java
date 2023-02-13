@@ -121,7 +121,6 @@ public interface ISysRoleService
     public int updateRoleStatus(SysRole role);
 
     /**
-     * TODO 沙特不需要
      * 修改数据权限信息
      * 
      * @param role 角色信息

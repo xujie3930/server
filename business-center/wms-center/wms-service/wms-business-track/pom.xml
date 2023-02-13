@@ -109,6 +109,10 @@
             <groupId>com.szmsd</groupId>
             <artifactId>business-basic-plugin</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-track-api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

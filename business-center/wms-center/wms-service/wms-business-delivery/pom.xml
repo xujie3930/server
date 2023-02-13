@@ -182,6 +182,11 @@
             <artifactId>wms-business-ec-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.szmsd.wms</groupId>
+            <artifactId>wms-business-track-api</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

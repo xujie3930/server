@@ -109,7 +109,6 @@ public class SysDeptControllerCopy extends BaseController
     {
         List<SysDept> depts = deptService.selectDeptList(new SysDept());
         Map map=new HashMap<>();
-        // todo 此处修改ajax.put返回  R.ok(map)
         map.put("checkedKeys", deptService.selectDeptListByRoleId(roleId));
         map.put("depts", deptService.buildDeptTreeSelect(depts));
         return R.ok(map);

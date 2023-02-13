@@ -1,4 +1,5 @@
-
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.szmsd.track.api.feign.factory.TrackFeignFallback
 
   
   

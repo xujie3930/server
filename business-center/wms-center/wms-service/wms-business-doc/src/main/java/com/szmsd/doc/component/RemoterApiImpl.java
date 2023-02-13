@@ -98,7 +98,6 @@ public class RemoterApiImpl implements IRemoterApi {
     public void getUserInfo() {
         R info = remoteUserService.getInfo(1);
         Map data = (Map) info.getData();
-        // todo 此处修改ajax.put返回  R.ok(map)
         Object userObj = data.get("user");
         String jsonString = JSONObject.toJSONString(userObj);
         SysUser user = JSONObject.parseObject(jsonString, SysUser.class);

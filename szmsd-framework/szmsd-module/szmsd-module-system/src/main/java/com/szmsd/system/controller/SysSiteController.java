@@ -165,7 +165,7 @@ public class SysSiteController extends BaseController {
 
         List<SysSite> sysSites = sysSiteService.selectSysSiteList(new SysSite());
         Map map = new HashMap<>();
-        // todo 此处修改ajax.put返回  R.ok(map)
+        //
         map.put("checkedKeys", sysSiteService.selectSiteListByRoleId(roleId));
         map.put("sysSites", sysSiteService.buildSiteTreeSelect(sysSites));
         return R.ok(map);

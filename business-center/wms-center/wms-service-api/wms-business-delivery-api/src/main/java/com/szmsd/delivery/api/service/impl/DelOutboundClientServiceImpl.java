@@ -141,12 +141,6 @@ public class DelOutboundClientServiceImpl implements DelOutboundClientService {
     }
 
 
-
-    @Override
-    public DelTrackMainDocCommonDto commonTrackList(List<String> orderNos) {
-        return R.getDataAndException(this.delOutboundFeignService.commonTrackList(orderNos));
-    }
-
     @Override
     public int updateWeightDelOutbound(UpdateWeightDelOutboundDto dto) {
         return R.getDataAndException(this.delOutboundFeignService.updateWeightDelOutbound(dto));

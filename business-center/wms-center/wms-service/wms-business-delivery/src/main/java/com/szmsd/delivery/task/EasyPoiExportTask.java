@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * todo say somthing here!
  *
  * @author jun
  */

@@ -5,6 +5,7 @@ import com.szmsd.common.core.exception.web.BaseException;
 import com.szmsd.common.core.web.page.TableDataInfo;
 import com.szmsd.delivery.api.feign.DelOutboundFeignService;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundPacking;
 import com.szmsd.delivery.dto.*;
 import com.szmsd.delivery.vo.*;
@@ -192,10 +193,6 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
                 return R.convertResultJson(throwable);
             }
 
-            @Override
-            public R<DelTrackMainDocCommonDto> commonTrackList(List<String> orders) {
-                return R.convertResultJson(throwable);
-            }
 
             @Override
             public R<Boolean> updateInStockList(List<Long> idList) {
@@ -254,6 +251,16 @@ public class DelOutboundFeignFallback implements FallbackFactory<DelOutboundFeig
 
             @Override
             public R<List<DelOutboundChargeData>> findDelboundCharges(List<String> orders) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<List<DelOutboundAddress>> findDelboundAddress(List<String> orderNos) {
+                return R.convertResultJson(throwable);
+            }
+
+            @Override
+            public R<Integer> updateDeloutboundTrackMsg(DelOutboundTrackRequestVO delOutboundTrackRequestVO) {
                 return R.convertResultJson(throwable);
             }
         };

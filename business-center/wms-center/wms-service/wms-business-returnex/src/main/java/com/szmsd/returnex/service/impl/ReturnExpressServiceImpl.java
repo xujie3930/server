@@ -327,7 +327,6 @@ public class ReturnExpressServiceImpl extends ServiceImpl<ReturnExpressMapper, R
      * @param returnExpressAddDTO
      */
     public void makeNewOutboundOrder(ReturnExpressServiceAddDTO returnExpressAddDTO) {
-        //TODO
         boolean reassign = returnExpressAddDTO.getReturnType().equals(configStatus.getReassign());
         if (reassign) {
             log.info("【重新派件】：{}", returnExpressAddDTO);

@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModel;
 /**
  *
  * @ClassName:SysLangDTO
- * @Description:TODO
+ * @Description:
  * @author GaoJunWen
  * @date 2020-04-22
  * @version V1.0

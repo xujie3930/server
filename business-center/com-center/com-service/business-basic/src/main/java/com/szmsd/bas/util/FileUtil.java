@@ -62,7 +62,6 @@ public class FileUtil {
         String prefix = lineToHump(type.getBusinessCode()) + "/" + type.getFileDirectory();
         try {
             // 这里使用Apache的FileUtils方法来进行保存
-            //todo 按类型，时间戳 分类
             String yearMonth = DateUtils.dateTimeNow("yyyyMMdd");
             String lastFileStr = "/" + prefix + "/" + yearMonth + "/";
             uploadFolder = uploadFolder.trim().endsWith("/") ? uploadFolder.substring(0, uploadFolder.trim().length() - 1) : uploadFolder;

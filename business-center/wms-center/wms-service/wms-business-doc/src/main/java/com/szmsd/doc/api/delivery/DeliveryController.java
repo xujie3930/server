@@ -713,12 +713,12 @@ public class DeliveryController {
         return delOutboundClientService.getInfoForThirdParty(vo);
     }
 
-
-    @PostMapping(value = "/commonTrackList")
-    @ApiOperation(value = "#21 轨迹管理 - 第三方轨迹查看专用接口", position = 902)
-    public R<DelTrackMainDocCommonDto> commonTrackList(@RequestBody @Validated DelTrackRequest request) {
-        return R.ok(delOutboundClientService.commonTrackList(request.getOrderNos()));
-    }
+     //TODO TY 接口
+//    @PostMapping(value = "/commonTrackList")
+//    @ApiOperation(value = "#21 轨迹管理 - 第三方轨迹查看专用接口", position = 902)
+//    public R<DelTrackMainDocCommonDto> commonTrackList(@RequestBody @Validated DelTrackRequest request) {
+//        return R.ok(delOutboundClientService.commonTrackList(request.getOrderNos()));
+//    }
 
 
     @PreAuthorize("hasAuthority('client')")

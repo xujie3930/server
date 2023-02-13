@@ -35,6 +35,7 @@
         <module>wms-business-package-api</module>
         <module>wms-business-report-api</module>
         <module>wms-business-ec-api</module>
+        <module>wms-business-track-api</module>
     </modules>
 
     <dependencyManagement>
@@ -108,6 +109,11 @@
                 <groupId>com.szmsd.wms</groupId>
                 <artifactId>wms-business-ec-api</artifactId>
                 <version>1.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.szmsd.wms</groupId>
+                <artifactId>wms-business-track-api</artifactId>
+                <version>${business.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

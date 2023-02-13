@@ -262,7 +262,7 @@ public class InboundApiController {
 //        boolean b = iRemoterApi.checkSkuBelong(cusCode, warehouseCode, skuList);
         boolean b = iRemoterApi.checkSkuBelong(cusCode, skuList, addDTO);
         AssertUtil400.isTrue(b, String.format("请检查SKU：%s是否存在", skuList));
-        //校验vat TODo
+        //校验vat
         this.checkVAT(iRemoterApi, addDTO);
         List<String> collect = addDTO.stream().filter(x -> "055003".equals(x.getWarehouseMethodCode())).flatMap(z -> z.getInboundReceiptDetails().stream().map(InboundReceiptDetailDTO::getSku)).collect(Collectors.toList());
         iRemoterApi.checkSkuPic(collect, AttachmentTypeEnum.SKU_IMAGE);

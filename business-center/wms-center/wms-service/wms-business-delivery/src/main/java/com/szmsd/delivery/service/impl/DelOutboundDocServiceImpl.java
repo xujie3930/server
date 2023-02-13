@@ -15,7 +15,10 @@ import com.szmsd.chargerules.domain.BasProductService;
 import com.szmsd.common.core.constant.Constants;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.CommonException;
-import com.szmsd.delivery.domain.*;
+import com.szmsd.delivery.domain.DelCk1RequestLog;
+import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundAddress;
+import com.szmsd.delivery.domain.DelOutboundDetail;
 import com.szmsd.delivery.dto.DelCk1OutboundDto;
 import com.szmsd.delivery.dto.DelOutboundBringVerifyDto;
 import com.szmsd.delivery.dto.DelOutboundDto;
@@ -23,7 +26,10 @@ import com.szmsd.delivery.dto.DelOutboundOtherInServiceDto;
 import com.szmsd.delivery.enums.*;
 import com.szmsd.delivery.event.DelCk1RequestLogEvent;
 import com.szmsd.delivery.event.EventUtil;
-import com.szmsd.delivery.service.*;
+import com.szmsd.delivery.service.IDelOutboundCompletedService;
+import com.szmsd.delivery.service.IDelOutboundDocService;
+import com.szmsd.delivery.service.IDelOutboundRetryLabelService;
+import com.szmsd.delivery.service.IDelOutboundService;
 import com.szmsd.delivery.service.wrapper.ApplicationContainer;
 import com.szmsd.delivery.service.wrapper.BringVerifyEnum;
 import com.szmsd.delivery.service.wrapper.DelOutboundWrapperContext;
@@ -39,6 +45,8 @@ import com.szmsd.http.util.DomainInterceptorUtil;
 import com.szmsd.http.vo.PricedProduct;
 import com.szmsd.pack.api.feign.PackageDeliveryConditionsFeignService;
 import com.szmsd.pack.domain.PackageDeliveryConditions;
+import com.szmsd.track.api.feign.TrackFeignService;
+import com.szmsd.track.domain.DelTrack;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -82,7 +90,7 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
     @Autowired
     private IDelOutboundRetryLabelService delOutboundRetryLabelService;
     @Autowired
-    private IDelTrackService delTrackService;
+    private TrackFeignService delTrackService;
     @SuppressWarnings({"all"})
     @Autowired
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
@@ -331,13 +339,12 @@ public class DelOutboundDocServiceImpl implements IDelOutboundDocService {
                                 // 提交一个获取标签的任务
                                 delOutboundRetryLabelService.saveAndPushLabel(delOutbound.getOrderNo(), "pushLabel", "bringVerify");
                             }
-
                             delTrackService.addData(new DelTrack()
                                     .setOrderNo(delOutbound.getOrderNo())
                                     .setTrackingNo(delOutbound.getTrackingNo())
                                     .setTrackingStatus("Todo")
                                     .setDescription("DMF, Parcel Infomation Received"));
-                            logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
+//                            logger.info("(3)提审异步操作成功，出库单号：{}", delOutbound.getOrderNo());
 
                             stopWatch.stop();
                             logger.info(">>>>>[创建出库单{}]this.BringVerifyEnum(bringVerifyDto)耗时{}" + delOutbound.getOrderNo(), stopWatch.getLastTaskTimeMillis());

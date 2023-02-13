@@ -23,7 +23,10 @@ import com.szmsd.common.core.exception.com.CommonException;
 import com.szmsd.delivery.domain.*;
 import com.szmsd.delivery.dto.DelOutboundFurtherHandlerDto;
 import com.szmsd.delivery.enums.*;
-import com.szmsd.delivery.event.*;
+import com.szmsd.delivery.event.DelCk1RequestLogEvent;
+import com.szmsd.delivery.event.DelOutboundOperationLogEnum;
+import com.szmsd.delivery.event.DelSrmCostLogEvent;
+import com.szmsd.delivery.event.EventUtil;
 import com.szmsd.delivery.service.*;
 import com.szmsd.delivery.service.impl.DelOutboundServiceImplUtil;
 import com.szmsd.delivery.service.wrapper.*;
@@ -53,6 +56,8 @@ import com.szmsd.putinstorage.domain.dto.CreateInboundReceiptDTO;
 import com.szmsd.putinstorage.domain.dto.InboundReceiptDetailDTO;
 import com.szmsd.putinstorage.domain.dto.ReceiptRequest;
 import com.szmsd.putinstorage.enums.InboundReceiptEnum;
+import com.szmsd.track.api.feign.TrackFeignService;
+import com.szmsd.track.domain.DelTrack;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
@@ -122,13 +127,16 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
     @SuppressWarnings({"all"})
     @Autowired
     private PackageDeliveryConditionsFeignService packageDeliveryConditionsFeignService;
-    @Autowired
-    private IDelTrackService delTrackService;
+
     @Autowired
     private ExceptionInfoFeignService exceptionInfoFeignService;
 
     @Autowired
     private HtpCarrierFeignService htpCarrierFeignService;
+
+    @Autowired
+    private TrackFeignService delTrackService;
+
     @Override
     public int shipmentPacking(Long id) {
         return this.shipmentPacking(id, true);
@@ -612,7 +620,6 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
                         e.printStackTrace();
                     }
 
-
                     delTrackService.addData(new DelTrack()
                             .setOrderNo(delOutbound.getOrderNo())
                             .setTrackingNo(delOutbound.getTrackingNo())
@@ -688,10 +695,11 @@ public class DelOutboundAsyncServiceImpl implements IDelOutboundAsyncService {
             return;
         }
         // 请求体的内容异步填充
-        DelTyRequestLog tyRequestLog = new DelTyRequestLog();
-        tyRequestLog.setOrderNo(delOutbound.getOrderNo());
-        tyRequestLog.setType(DelTyRequestLogConstant.Type.shipments.name());
-        EventUtil.publishEvent(new DelTyRequestLogEvent(tyRequestLog));
+        //TODO 推送TY
+//        DelTyRequestLog tyRequestLog = new DelTyRequestLog();
+//        tyRequestLog.setOrderNo(delOutbound.getOrderNo());
+//        tyRequestLog.setType(DelTyRequestLogConstant.Type.shipments.name());
+//        EventUtil.publishEvent(new DelTyRequestLogEvent(tyRequestLog));
     }
 
     private String getSkuName(BaseProduct baseProduct) {

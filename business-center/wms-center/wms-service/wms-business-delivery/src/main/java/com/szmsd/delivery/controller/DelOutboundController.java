@@ -42,6 +42,7 @@ import com.szmsd.common.plugin.annotation.AutoValue;
 import com.szmsd.common.security.domain.LoginUser;
 import com.szmsd.common.security.utils.SecurityUtils;
 import com.szmsd.delivery.domain.DelOutbound;
+import com.szmsd.delivery.domain.DelOutboundAddress;
 import com.szmsd.delivery.domain.DelOutboundTarckError;
 import com.szmsd.delivery.domain.DelOutboundTarckOn;
 import com.szmsd.delivery.dto.*;
@@ -1606,6 +1607,19 @@ public class DelOutboundController extends BaseController {
     public R findDelboundCharges(@RequestBody List<String> orderNoList) {
         List<DelOutboundChargeData> delOutboundChargeData = delOutboundService.findDelboundCharges(orderNoList);
         return R.ok(delOutboundChargeData);
+    }
+
+    @PostMapping("/findDelboundAddress")
+    @ApiOperation(value = "出库管理-查询出库单地址", position = 501)
+    public R findDelboundAddress(@RequestBody List<String> orderNoList) {
+        List<DelOutboundAddress> delOutboundAddresses = delOutboundService.findDelboundAddress(orderNoList);
+        return R.ok(delOutboundAddresses);
+    }
+
+    @PostMapping("/updateDeloutboundTrackMsg")
+    @ApiOperation(value = "出库管理-查询出库单地址", position = 502)
+    public R updateDeloutboundTrackMsg(@RequestBody DelOutboundTrackRequestVO updateDeloutboundTrackMsg) {
+        return delOutboundService.updateDeloutboundTrackMsg(updateDeloutboundTrackMsg);
     }
 
 }

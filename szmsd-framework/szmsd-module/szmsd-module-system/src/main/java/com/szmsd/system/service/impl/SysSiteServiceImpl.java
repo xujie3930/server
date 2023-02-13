@@ -125,7 +125,7 @@ public class SysSiteServiceImpl extends ServiceImpl<SysSiteMapper, SysSite> impl
         }
         if(ObjectUtils.isNotEmpty(sysSite.getParentId())){
             where.eq("parent_id",sysSite.getParentId());
-            //todo 临时加的判断 是否需要包含父级id的数据
+            // 临时加的判断 是否需要包含父级id的数据
             if("include".equals(sysSite.getRemark())) {
                 where.or().eq("id", sysSite.getParentId());
             }

@@ -35,7 +35,7 @@ public class I18nHandler {
 
     public static  Map<String, String> I18N_TEMP_MAP = new ConcurrentHashMap();
 
-    //todo 启用停用标识,后期可以做动态开关
+    // 启用停用标识,后期可以做动态开关
     public  static Integer MULTIPLE_LANGUAGE_SHOW_OPTION = 1;
 
     public  String TAB_SYS_LANRES_LAST_UPDATE_DATA = "";

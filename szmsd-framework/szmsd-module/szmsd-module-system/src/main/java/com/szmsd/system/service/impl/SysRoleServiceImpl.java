@@ -233,7 +233,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
     }
 
     /**
-     * TODO 沙特不需要
+     *
      * 修改数据权限信息
      *
      * @param role 角色信息
@@ -274,7 +274,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
     }
 
     /**
-     * TODO 沙特不需要
+     *
      * 新增角色部门信息(数据权限)
      *
      * @param role 角色对象
