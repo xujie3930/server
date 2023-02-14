@@ -33,7 +33,8 @@ public class DirectExpressOrdersTimer {
      * <p/>
      * 每天12点执行
      */
-    @Scheduled(cron = "40 59 11 * * ?")
+    //@Scheduled(cron = "40 59 11 * * ?")
+    @Scheduled(cron = "0 */5 * * * ?")
     @Async
     public void doDirectExpressOrders() {
 
