@@ -159,6 +159,10 @@ public class OutboundServiceImpl extends WmsRequest implements IOutboundService 
 
             log.info("directExpressOrderApiDTO:{}",JSON.toJSONString(directExpressOrderApiDTO));
 
+            if(directExpressOrderApiDTO == null){
+                return R.failed(body);
+            }
+
             return R.ok(directExpressOrderApiDTO);
         }else{
             log.error("异常:{}"+JSON.toJSONString(body));
