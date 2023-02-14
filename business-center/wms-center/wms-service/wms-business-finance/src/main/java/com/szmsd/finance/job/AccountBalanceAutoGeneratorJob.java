@@ -1,5 +1,6 @@
 package com.szmsd.finance.job;
 
+import com.szmsd.finance.service.FssAccountBalanceLogNewService;
 import com.szmsd.finance.service.IAccountBalanceLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -18,6 +19,9 @@ public class AccountBalanceAutoGeneratorJob {
 
     @Autowired
     private IAccountBalanceLogService iAccountBalanceLogService;
+
+    @Autowired
+    private FssAccountBalanceLogNewService fssAccountBalanceLogNewService;
 
     @Resource
     private RedissonClient redissonClient;
@@ -45,6 +49,22 @@ public class AccountBalanceAutoGeneratorJob {
         log.info("autoGeneratorBalance() end...");
     }
 
+
+    /**
+     * 定时任务：每天0点定时备份账户余额表
+     */
+    @Scheduled(cron = "0 0 0 * * ?")
+//    @Scheduled(cron = "* */1 * * * ?")
+    public void autoSyncBalance() {
+        log.info("autoSyncBalance() start...");
+
+        try {
+            fssAccountBalanceLogNewService.autoSyncBalance();
+        } catch (Exception e) {
+            log.error("autoSyncBalance() execute error: ", e);
+        }
+        log.info("autoSyncBalance() end...");
+    }
 
 
 }

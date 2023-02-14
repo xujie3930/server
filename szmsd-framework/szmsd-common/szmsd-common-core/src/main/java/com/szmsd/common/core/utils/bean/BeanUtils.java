@@ -1,5 +1,7 @@
 package com.szmsd.common.core.utils.bean;
 
+import com.alibaba.fastjson.JSON;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,4 +109,10 @@ public class BeanUtils extends org.springframework.beans.BeanUtils
     {
         return m1.substring(BEAN_METHOD_PROP_INDEX).equals(m2.substring(BEAN_METHOD_PROP_INDEX));
     }
+
+    public static <T> List<T> copyList(List<?> list, Class<T> clazz) {
+        String oldOb = JSON.toJSONString(list);
+        return JSON.parseArray(oldOb, clazz);
+    }
+
 }

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.Strings;
@@ -14,6 +15,7 @@ import com.szmsd.chargerules.domain.ChargeLog;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.common.core.exception.com.AssertUtil;
 import com.szmsd.common.core.utils.BigDecimalUtil;
+import com.szmsd.common.core.utils.DateUtils;
 import com.szmsd.common.core.utils.StringUtils;
 import com.szmsd.common.core.utils.bean.BeanMapperUtil;
 import com.szmsd.common.security.domain.LoginUser;
@@ -1335,5 +1337,13 @@ public class AccountBalanceServiceImpl implements IAccountBalanceService {
             this.reloadCreditTime(cusCodeList, currency);
         });
 
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AccountBalance> selectByDaily() {
+        Date date = new Date();
+        LambdaQueryWrapper<AccountBalance> queryWrapper = Wrappers.lambdaQuery();
+        return accountBalanceMapper.listPage(queryWrapper);
     }
 }

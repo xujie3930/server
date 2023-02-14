@@ -326,4 +326,43 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         date = cal.getTime();
         return dateTimeStr(date);
     }
+
+    public static String dateToString(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS);
+        return sdf.format(date);
+    }
+
+    public static Date lastdayBegin(Date date){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//格式化时间格式
+        //Date date = sdf.parse("2022-01-22 08:00:22");  //测试数据
+        Calendar calendar = Calendar.getInstance(); //得到日历
+        calendar.setTime(date);//把当前时间赋给日历
+        calendar.add(Calendar.DAY_OF_MONTH, -1); //设置为前一天
+        String beforeOneDay = sdf.format(calendar.getTime()); //得到前一天的时间
+        String lastdayBegin = beforeOneDay.substring(0, 10) + " 00:00:00";
+        Date parse = null;
+        try {
+            parse = sdf.parse(lastdayBegin);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        return parse;
+    }
+
+    public static Date lastdayEnd(Date date){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//格式化时间格式
+        //Date date = sdf.parse("2022-01-22 08:00:22");  //测试数据
+        Calendar calendar = Calendar.getInstance(); //得到日历
+        calendar.setTime(date);//把当前时间赋给日历
+        calendar.add(Calendar.DAY_OF_MONTH, -1); //设置为前一天
+        String beforeOneDay = sdf.format(calendar.getTime()); //得到前一天的时间
+        String lastdayEnd = beforeOneDay.substring(0, 10) + " 23:59:59";
+        Date parse = null;
+        try {
+            parse = sdf.parse(lastdayEnd);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        return parse;
+    }
 }
