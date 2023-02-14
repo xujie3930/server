@@ -179,7 +179,7 @@
                 credit_buffer_time = #{creditBufferTime},
             </if>
 
-            version = version + 1,
+            version = version + 1,update_time = now()
 
         </set>
         where cus_code = #{cusCode} and currency_code = #{currencyCode} and version = #{version}

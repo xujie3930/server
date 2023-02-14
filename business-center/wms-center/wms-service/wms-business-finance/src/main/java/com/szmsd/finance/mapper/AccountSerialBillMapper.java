@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.szmsd.delivery.domain.DelOutbound;
 import com.szmsd.finance.domain.AccountSerialBill;
 import com.szmsd.finance.domain.AccountSerialBillTotalVO;
-import com.szmsd.finance.dto.AccountBalanceBillCurrencyVO;
-import com.szmsd.finance.dto.AccountBalanceBillResultDTO;
-import com.szmsd.finance.dto.AccountSerialBillDTO;
-import com.szmsd.finance.dto.AccountSerialBillNatureDTO;
+import com.szmsd.finance.dto.*;
 import com.szmsd.finance.vo.AccountSerialBillExcelVO;
 import com.szmsd.finance.vo.BillBusinessTotalVO;
 import com.szmsd.finance.vo.BillDirectDeliveryTotalVO;
@@ -50,6 +47,8 @@ public interface AccountSerialBillMapper extends BaseMapper<AccountSerialBill> {
     Integer selectBillOutbountCount();
 
     List<AccountBalanceBillCurrencyVO> findBillCurrencyData(AccountSerialBillDTO dto);
+
+    List<AccountBalanceBillCusCurrencyVO> findBillCusCurrencyData(AccountSerialBillDTO query);
 
     List<AccountSerialBillTotalVO> selectBillTotal(AccountSerialBillDTO dto);
 

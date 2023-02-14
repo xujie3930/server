@@ -645,6 +645,22 @@
         group by a.currency_code
     </select>
 
+    <select id="findBillCusCurrencyData"  resultType="com.szmsd.finance.dto.AccountBalanceBillCusCurrencyVO" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
+        select  a.cus_code as cusCode,
+        a.currency_code as currencyCode,
+        sum(
+        CASE
+        WHEN
+        a.pay_method in ('EXCHANGE_INCOME','OFFLINE_INCOME','ONLINE_INCOME') or a.business_category in('退费','赔偿','充值','优惠')
+        THEN
+        abs(a.amount) ELSE 0-abs(a.amount)
+        END
+        ) AS amount
+        from fss_account_serial_bill as a
+        <include refid="SelectSerialBillWhere"/>
+        group by a.cus_code,a.currency_code
+    </select>
+
     <select id="selectBillTotal" resultType="com.szmsd.finance.domain.AccountSerialBillTotalVO" parameterType="com.szmsd.finance.dto.AccountSerialBillDTO">
 
         SELECT

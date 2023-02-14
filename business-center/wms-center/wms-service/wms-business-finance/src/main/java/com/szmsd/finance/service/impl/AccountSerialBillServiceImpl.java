@@ -46,6 +46,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -463,6 +464,12 @@ public class AccountSerialBillServiceImpl extends ServiceImpl<AccountSerialBillM
         this.generatorTime(dto);
 
         return accountSerialBillMapper.findBillCurrencyData(dto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AccountBalanceBillCusCurrencyVO> findBillCusCurrencyData(AccountSerialBillDTO dto) {
+        return accountSerialBillMapper.findBillCusCurrencyData(dto);
     }
 
     @Override

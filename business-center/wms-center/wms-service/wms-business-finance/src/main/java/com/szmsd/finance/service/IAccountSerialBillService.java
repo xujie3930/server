@@ -3,10 +3,7 @@ package com.szmsd.finance.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szmsd.common.core.domain.R;
 import com.szmsd.finance.domain.AccountSerialBill;
-import com.szmsd.finance.dto.AccountBalanceBillCurrencyVO;
-import com.szmsd.finance.dto.AccountOrderQueryDTO;
-import com.szmsd.finance.dto.AccountSerialBillDTO;
-import com.szmsd.finance.dto.CustPayDTO;
+import com.szmsd.finance.dto.*;
 import com.szmsd.finance.vo.AccountSerialBillExcelVO;
 
 import javax.servlet.http.HttpServletResponse;
@@ -36,6 +33,8 @@ public interface IAccountSerialBillService extends IService<AccountSerialBill> {
      * @return
      */
     List<AccountBalanceBillCurrencyVO> findBillCurrencyData(AccountSerialBillDTO dto);
+
+    List<AccountBalanceBillCusCurrencyVO> findBillCusCurrencyData(AccountSerialBillDTO dto);
 
     void exportBillTotal(HttpServletResponse response, AccountSerialBillDTO dto);
 

@@ -103,4 +103,5 @@ public interface IAccountBalanceService {
      */
     void updateUserCreditTime();
 
+    List<AccountBalance> selectByDaily();
 }
