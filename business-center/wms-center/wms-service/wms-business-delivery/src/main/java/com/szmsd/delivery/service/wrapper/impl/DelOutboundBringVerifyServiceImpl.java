@@ -398,7 +398,7 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
         logger.info("{},pricing,thridPartStatus:{}",delOutbound.getOrderNo(),thridPartStatus);
 
-        if("1".equals(thridPartStatus)){
+        if(thridPartStatus.equals(1)){
             delOutbound.setLength(1D);
             delOutbound.setWidth(1D);
             delOutbound.setHeight(1D);
