@@ -149,11 +149,16 @@ public class OutboundServiceImpl extends WmsRequest implements IOutboundService 
 
         HttpResponseBody httpResponseBody = HttpClientHelper.httpGet(url, null, headerMap);
 
+        log.info("httpResponseBody:{}",JSON.toJSONString(httpResponseBody));
+
         String body = httpResponseBody.getBody();
 
         if(StringUtils.isNotEmpty(body)) {
             DirectExpressOrderApiDTO directExpressOrderApiDTO = JSON.parseObject(body, new TypeReference<DirectExpressOrderApiDTO>() {
             }.getType());
+
+            log.info("directExpressOrderApiDTO:{}",JSON.toJSONString(directExpressOrderApiDTO));
+
             return R.ok(directExpressOrderApiDTO);
         }else{
             log.error("异常:{}"+JSON.toJSONString(body));
