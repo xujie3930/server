@@ -1345,7 +1345,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                 delOutboundDetail.setBoxWeight(boxWeight);
 
                 String productAttribute = delOutboundDetail.getProductAttribute();
-                if("electrified".equals(productAttribute)){
+                if("GeneralCargo".equals(productAttribute)){
                     delOutboundDetail.setElectrifiedMode("");
                     delOutboundDetail.setBatteryPackaging("");
                 }
