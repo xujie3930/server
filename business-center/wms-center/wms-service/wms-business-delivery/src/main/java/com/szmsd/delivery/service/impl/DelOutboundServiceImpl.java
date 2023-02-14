@@ -2548,8 +2548,7 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
 
             return true;
         }catch (Exception e){
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("取消承运商订单失败");
         }
     }
 
