@@ -9,6 +9,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -28,6 +29,12 @@ public class DelOutboundAgainTrackingNoDto implements Serializable {
     @NotBlank(message = "发货规则不能为空")
     @ApiModelProperty(value = "发货规则（也就是物流承运商，必须填写指定值，例如Fedex, USPS等，相同代表一起交货。）")
     private String shipmentRule;
+
+    @ApiModelProperty(value = "")
+    private String houseNo;
+
+    @ApiModelProperty(value = "")
+    private BigDecimal codAmount;
 
     @NotNull(message = "地址信息不能为空")
     @ApiModelProperty(value = "地址信息")

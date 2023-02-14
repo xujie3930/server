@@ -188,6 +188,8 @@ public class DelOutboundExceptionServiceImpl implements IDelOutboundExceptionSer
         lambdaUpdateWrapper.set(DelOutbound::getTrackingAcquireType, DelOutboundTrackingAcquireTypeEnum.WAREHOUSE_SUPPLIER.getCode());
         // 将状态设置成begin，重新执行核重之后的流程。
         lambdaUpdateWrapper.set(DelOutbound::getShipmentState, ShipmentEnum.BEGIN.name());
+        lambdaUpdateWrapper.set(DelOutbound::getHouseNo,dto.getHouseNo());
+        lambdaUpdateWrapper.set(DelOutbound::getCodAmount,dto.getCodAmount());
         lambdaUpdateWrapper.eq(DelOutbound::getId, delOutbound.getId());
         boolean update = delOutboundService.update(null, lambdaUpdateWrapper);
         Object[] params = new Object[]{delOutbound, productCode};
