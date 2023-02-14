@@ -396,10 +396,12 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
 
         Integer  thridPartStatus = delOutbound.getThridPartStatus();
 
+        logger.info("{},pricing,thridPartStatus:{}",delOutbound.getOrderNo(),thridPartStatus);
+
         if("1".equals(thridPartStatus)){
             delOutbound.setLength(1D);
-            delOutbound.setWeight(1D);
             delOutbound.setWidth(1D);
+            delOutbound.setHeight(1D);
         }
 
         // 包裹信息
