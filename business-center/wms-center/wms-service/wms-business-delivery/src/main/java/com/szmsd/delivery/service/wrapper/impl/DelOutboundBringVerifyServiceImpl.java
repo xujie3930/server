@@ -404,6 +404,8 @@ public class DelOutboundBringVerifyServiceImpl implements IDelOutboundBringVerif
             delOutbound.setHeight(1D);
         }
 
+        logger.info("{},修改规格后 :{}",delOutbound.getOrderNo(),delOutbound.getLength());
+
         // 包裹信息
         List<PackageInfo> packageInfos = new ArrayList<>();
 
