@@ -3200,7 +3200,13 @@ public class DelOutboundServiceImpl extends ServiceImpl<DelOutboundMapper, DelOu
                     for(DelDirectToken delDirectToken : delDirectTokens){
                         directExpressOrderApiDTOR = htpOutboundFeignService.findDirectExpressOrder(delOutbound.getOrderNo(),delDirectToken.getToken());
 
-                        if(directExpressOrderApiDTOR != null && directExpressOrderApiDTOR.getCode() == 200 && directExpressOrderApiDTOR.getData() != null){
+                        if(directExpressOrderApiDTOR == null || directExpressOrderApiDTOR.getCode() != 200){
+                            continue;
+                        }
+
+                        DirectExpressOrderApiDTO directExpressOrderApiDTO = directExpressOrderApiDTOR.getData();
+
+                        if(directExpressOrderApiDTO != null && directExpressOrderApiDTO.getPackingInit() != null){
                             break;
                         }
                     }
