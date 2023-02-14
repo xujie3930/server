@@ -218,29 +218,19 @@ public class BillGeneratorExcelTask implements Callable<AccountBillRecordTaskRes
 
         List<BillDirectDeliveryTotalVO> billDirectDeliveryTotalVOS = accountSerialBillMapper.selectDirectDelivery(queryVO);
 
-        List<FssConvertUnit> fssConvertUnits = fssConvertUnitMapper.selectList(Wrappers.<FssConvertUnit>query().lambda());
-        Map<String,FssConvertUnit> convertUnitMap = fssConvertUnits.stream().collect(Collectors.toMap(FssConvertUnit::getCalcUnit, v->v));
+//        List<FssConvertUnit> fssConvertUnits = fssConvertUnitMapper.selectList(Wrappers.<FssConvertUnit>query().lambda());
+//        Map<String,FssConvertUnit> convertUnitMap = fssConvertUnits.stream().collect(Collectors.toMap(FssConvertUnit::getCalcUnit, v->v));
 
         for(BillDirectDeliveryTotalVO billDirectDeliveryTotalVO : billDirectDeliveryTotalVOS){
 
             String resultCalaWeight = "";
             String resultWeight = "";
             String resultforecastWeight = "";
-//            if(billDirectDeliveryTotalVO.getCalcWeight() != null && billDirectDeliveryTotalVO.getCalcWeightUnit() != null){
-//                resultCalaWeight = billDirectDeliveryTotalVO.getCalcWeight() + billDirectDeliveryTotalVO.getCalcWeightUnit();
-//            }
 
-            String calcWeightUnit = billDirectDeliveryTotalVO.getCalcWeightUnit();
             BigDecimal calcWeight = billDirectDeliveryTotalVO.getCalcWeight();
 
-            if(StringUtils.isNotEmpty(calcWeightUnit) && convertUnitMap != null){
-                FssConvertUnit fssConvertUnit = convertUnitMap.get(calcWeightUnit);
-
-                if(fssConvertUnit != null){
-                    BigDecimal convertValue =  fssConvertUnit.getConvertValue();
-                    BigDecimal result = BigDecimalUtil.setScale(calcWeight.multiply(convertValue),3);
-                    resultCalaWeight = result.toString();
-                }
+            if(calcWeight != null){
+                resultCalaWeight = calcWeight.toString();
             }
 
             if(billDirectDeliveryTotalVO.getWeight() != null){
