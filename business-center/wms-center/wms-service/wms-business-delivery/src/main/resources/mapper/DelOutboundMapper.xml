@@ -148,7 +148,7 @@
         SELECT
             o.state,
             o.order_no,
-            o.tracking_no,
+            b.bind_code as tracking_no,
             o.seller_code,
             o.warehouse_code,
             o.ref_no,
@@ -181,6 +181,7 @@
             o.amazon_logistics_route_id
         FROM del_outbound o
         LEFT JOIN del_outbound_address a ON a.order_no = o.order_no
+        left join del_outbound_detail as b on o.order_no = b.order_no
         ${ew.customSqlSegment}
     </select>
 
