@@ -47,7 +47,7 @@ public class TrackApiController {
         return delTrackService.checkTrackDoc(orderNo,trackStayDays);
     }
 
-    @PostMapping("/pushTY")
+    @PostMapping("/saveBatch")
     public void saveBatch(@RequestBody List<Track> delTrackList) {
         delTrackService.saveBatch(delTrackList);
     }
